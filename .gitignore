@@ -1,0 +1,8 @@
+log
+venv
+__pycache__
+.idea
+.env
+web.config
+saved_layouts.json
+saved_dashboards.json

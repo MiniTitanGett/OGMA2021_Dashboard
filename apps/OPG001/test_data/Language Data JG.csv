@@ -1,0 +1,313 @@
+﻿Key,Language,Displayed Text
+Parameters,en,Parameters
+Parameters,fr,Paramètres
+Graph,en,Graph
+Graph,fr,Graphique
+Graphing App,en,Graphing App
+Graphing App,fr,Application Graphique
+Hierarchy,en,Hierarchy
+Hierarchy,fr,Hiérarchie
+Level Filter,en,Level Filter
+Level Filter,fr,Filtre de Niveau
+Specific Item,en,Specific Item
+Specific Item,fr,Article Spécifique
+Select,en,Select
+Select,fr,Sélectionner
+Timeframe,en,Timeframe
+Timeframe,fr,Plage de Temps
+Year,en,Year
+Year,fr,Année
+Fiscal Year,en,Fiscal Year
+Fiscal Year,fr,Exercice fiscal
+Month,en,Month
+Month,fr,Mois
+Quarter,en,Quarter
+Quarter,fr,Trimestre
+Graph Type,en,Graph Type
+Graph Type,fr,Type de Graphique
+X-Axis,en,X-Axis
+X-Axis,fr,Axe X
+Y-Axis,en,Y-Axis
+Y-Axis,fr,Axe Y
+Line,en,Line
+Line,fr,Linéaire
+Bar,en,Bar
+Bar,fr,Barres
+Scatter,en,Scatter
+Scatter,fr,Dispersion
+Partial Period,en,Partial Period
+Partial Period,fr,Période Partielle
+Graph Options,en,Graph Options
+Graph Options,fr,Options de Graphique
+Revert,en,Revert
+Revert,fr,Revenir
+To Top,en,To Top
+To Top,fr,Au Début
+Graph All in Dropdown,en,Graph All in Dropdown
+Graph All in Dropdown,fr,Graphique Tout dans la Liste Déroulante
+Time,en,Time
+Time,fr,Temps
+Variable Names,en,Variable Names
+Variable Names,fr,Noms de Variables
+Children,en,Children
+Children,fr,Enfants
+H1,fr,Niveau d'Organisation 1 (Haut)
+H1,en,Organization Level 1 (Top)
+H2,en,Organization Level 2
+H2,fr,Niveau d'Organisation 2
+H3,en,Organization Level 3
+H3,fr,Niveau d'Organisation 3
+H4,en,Organization Level 4
+H4,fr,Niveau d'Organisation 4
+H5,en,Organization Level 5
+H5,fr,Niveau d'Organisation 5
+H6,en,Organization
+H6,fr,Organisation
+TRUE,en,TRUE
+TRUE,fr,Vrai
+FALSE,en,FALSE
+FALSE,fr,Faux
+New,en,New
+New,fr,Nouveau
+View,en,View
+View,fr,Vue
+Data,en,Data
+Data,fr,Données
+Customize,en,Customize
+Customize,fr,Personnaliser
+Enter Graph Title,en,Enter Graph Title
+Enter Graph Title,fr,Entrez le Titre du Graphique
+Hierarchy Selection's Children,en,Hierarchy Selection's Children
+Hierarchy Selection's Children,fr,Enfants de la Sélection de Hiérarchie
+Table,en,Table
+Table,fr,Tableau
+OPG 001 Time Series Measures,en,OPG 001 Time Series Measures
+OPG 001 Time Series Measures,fr,OPG 001 Mesures de Séries Chronologiques
+Hierarchy One Name,en,Hierarchy One Name
+Hierarchy One Name,fr,Hiérarchie un Nom
+Variable Name,en,Document Type
+Variable Name,fr,Nom de Variable
+Variable Name Qualifier,en,Document Type Qualifier
+Variable Name Qualifier,fr,Qualificateur de Nom de Variable
+Variable Name Sub Qualifier,en,Document Type Sub Qualifier
+Variable Name Sub Qualifier,fr,Sous-Qualificateur de Nom de Variable
+Date of Event,en,Date of Event
+Date of Event,fr,Date de l'évènement
+Calendar Entry Type,en,Calendar Entry Type
+Calendar Entry Type,fr,Type d'Entrée d'Agenda
+Year of Event,en,Year of Event
+Year of Event,fr,Année de l'événement
+Month of Event,en,Month of Event
+Month of Event,fr,Mois de l'événement
+Week of Event,en,Week of Event
+Week of Event,fr,Semaine d'événement
+Fiscal Year of Event,en,Fiscal Year of Event
+Fiscal Year of Event,fr,Année Financière de l'événement
+Fiscal Quarter,en,Fiscal Quarter
+Fiscal Quarter,fr,Trimestre Fiscal
+Fiscal Month of Event,en,Fiscal Month of Event
+Fiscal Month of Event,fr,Mois Fiscal de l'événement
+Fiscal Week of Event,en,Fiscal Week of Event
+Fiscal Week of Event,fr,Semaine Fiscale de l'événement
+Julian Day,en,Julian Day
+Julian Day,fr,Julian Day
+Activity Event Id,en,Activity Event Id
+Activity Event Id,fr,ID d'événement d'Activité
+Measure Value,en,Measure Value
+Measure Value,fr,Mesurer la Valeur
+Measure Type,en,Measure Type
+Measure Type,fr,Type de Mesure
+Toggle Columns,en,Toggle Columns
+Toggle Columns,fr,Basculer les Colonnes
+Box Plot,en,Box Plot
+Box Plot,fr,Boîte à Moustaches
+Show Data Points,en,Show Data Points
+Show Data Points,fr,Afficher les Points de Données
+Horizontal,en,Horizontal
+Horizontal,fr,Horizontal
+Vertical,en,Vertical
+Vertical,fr,Vertical
+Graphed Variables,en,Graphed Variables
+Graphed Variables,fr,Variables Graphiques
+Median,en,Median
+Median,fr,Médiane
+Min,en,Min
+MIn,fr,Min
+Max,en,Max
+Max,fr,Max
+Distribution,en,Distribution
+Distribution,fr,Distribution
+Calendar Type,en,Calendar Type
+Calendar Type,fr,Type de Calendrier
+Gregorian,en,Gregorian
+Gregorian,fr,Grégorien
+Fiscal,en,Fiscal
+Fiscal,fr,Fiscal
+All-Time (Monthly),en,All-Time (Monthly)
+All-Time (Monthly),fr,Tous les Temps (Mensuel)
+Last,en,Last
+Last,fr,Dernière
+Select Range,en,Select Range
+Select Range,fr,Sélectionnez la Gamme
+Year(s),en,Year(s)
+Year(s),fr,Année(s)
+Month(s),en,Month(s)
+Month(s),fr,Mois
+Quarter(s),en,Quarter(s)
+Quarter(s),fr,Trimestre(s)
+Week(s),en,Week(s)
+Week(s),fr,Semaine(s)
+Available,en,Available
+Available,fr,Valide
+Week,en,Week
+Week,fr,Semaine
+Root's Children,en,Root's Children
+Root's Children,fr,Les enfants de Root
+Back,en,Back
+Back,fr,Arrière
+Top,en,Top
+Top,fr,Haut
+Axis Measure,en,Axis Measure
+Axis Measure,fr,Mesure d'Axe
+Graph Orientation,en,Graph Orientation
+Graph Orientation,fr,Orientation du Graphique
+# of Rows,en,# of Rows
+# of Rows,fr,# de Ros
+How to Filter the Table,en,How to Filter the Table
+How to Filter the Table,fr,Comment Filtrer le Tableau
+How to Hide Columns,en,How to Hide Columns
+How to Hide Columns,fr,Comment Masquer les Colonnes
+Date,en,Date
+Date,fr,Date
+Root,en,Root
+Root,fr,l' Origine
+Group By,en,Group By
+Group By,fr,Par Groupe
+Children of,en,Children of
+Children of,fr,Les Enfants de
+Tab,en,Tab
+Tab,fr,Onglet
+Graphs,en,Graphs
+Graphs,fr,Graphiques
+Save the graph,en,Save the graph:
+Save the graph,fr,Enregistrer le graphique:
+Select a saved graph,en,Select a saved graph:
+Select a saved graph,fr,Sélectionnez un graphique enregistré:
+Delete a saved graph,en,Delete a saved graph:
+Delete a saved graph,fr,Supprimer un graphique enregistré:
+Save Graph,en,Save Graph
+Save Graph,fr,Enregistrer le graphique
+Confirm Delete,en,Confirm Delete
+Confirm Delete,fr,Confirmation de la Suppression
+Enter Dashboard Title,en,Enter Dashboard Title
+Enter Dashboard Title,fr,Entrez le titre du tableau de bord
+Save Dashboard,en,Save Dashboard
+Save Dashboard,fr,Enregistrez le tableau de bord
+Delete a saved dashboard,en,Delete a saved dashboard
+Delete a saved dashboard,fr,Supprimer un tableau de bord enregistré
+Dashboards require a title to be saved,en,Dashboards require a title to be saved
+Dashboards require a title to be saved,fr,Les tableaux de bord nécessitent un titre pour être enregistrés
+Graph All Siblings,en,Graph All Siblings
+Graph All Siblings,fr,Graphique de Tous les Fratries
+No Data Found,en,No Data Found
+No Data Found,fr,Aucune Donnée Disponible
+No Data Specified,en,No Data Specified
+No Data Specified,fr,Aucune Donnée Spécifiée
+Data Accessed on,en,Data Accessed on
+Data Accessed on,fr,Données Consultées le 
+Data Set,en,Data Set
+Data Set,fr,Base de Données
+Graphs require a title to be saved,en,Graphs require a title to be saved
+Graphs require a title to be saved,fr,Les graphiques nécessitent un titre pour être enregistrés
+The graph has been saved,en,The graph has been saved
+The graph has been saved,fr,Le graphique a été enregistré
+A saved graph with this title already exists,en,A saved graph with this title already exists
+A saved graph with this title already exists,fr,Un graphique enregistré avec ce titre existe déjà
+The dashboard has been saved,en,The dashboard has been saved
+The dashboard has been saved,fr,Le tableau de bord a été enregistré
+Dashboard must not be empty,en,Dashboard must not be empty
+Dashboard must not be empty,fr,Le tableau de bord ne doit pas être vide
+A saved dashboard with this title already exists,en,A saved dashboard with this title already exists
+A saved dashboard with this title already exists,fr,Un tableau de bord enregistré avec ce titre existe déjà
+Saved graphs already exist for,en,Saved graphs already exist for
+Saved graphs already exist for,fr,Des graphiques enregistrés existent déjà pour
+Select a saved dashboard,en,Select a saved dashboard
+Select a saved dashboard,fr,Sélectionnez un tableau de bord enregistré
+Cancel save attempt,en,Cancel save attempt
+Cancel save attempt,fr,Annuler la tentative de sauvegarde
+Overwrite dashboard,en,Overwrite dashboard
+Overwrite dashboard,fr,Écraser le tableau de bord
+and the graph,en,and the graph
+and the graph,fr,et le graphique
+and the graphs,en,and the graphs
+and the graphs,fr,et les graphiques
+Overwrite graph,en,Overwrite graph
+Overwrite graph,fr,Écraser le graphique
+Overwrite graphs,en,Overwrite graphs
+Overwrite graphs,fr,Écraser les graphiques
+Reset dashboard - all unsaved changes will be lost,en,Reset dashboard - all unsaved changes will be lost
+Reset dashboard - all unsaved changes will be lost,fr,Réinitialiser le tableau de bord - toutes les modifications non enregistrées seront perdues
+Cancel reset attempt,en,Cancel reset attempt
+Cancel reset attempt,fr,Annuler la tentative de réinitialisation
+Sankey,en,Sankey
+Sankey,fr,Fr: Sankey
+In6,en,150+
+In5,en,121-150
+In4,en,91-120
+In3,en,61-90
+In2,en,31-60
+In1,en,LT 31
+End6,en,Cpltd 150+
+End5,en,Cpltd 121-150
+End4,en,Cpltd 91-120
+End3,en,Cpltd 61-90
+End2,en,Cpltd 31-60
+End1,en,Cpltd LT 31
+Out6,en,Cont 150+
+Out5,en,Cont 121-150
+Out4,en,Cont 91-120
+Out3,en,Cont 61-90
+Out2,en,Cont 31-60
+Out1,en,Cont LT 31
+In6_Long,en,Outstanding > 150 days
+In6_Long,fr,Fr: Outstanding > 150 days
+In5_Long,en,Outstanding 121 - 150 days
+In5_Long,fr,Fr: Outstanding 121 - 150 days
+In4_Long,en,Outstanding 91 - 120 days
+In4_Long,fr,Fr: Outstanding 91 - 120 days
+In3_Long,en,Outstanding 61 - 90 days
+In3_Long,fr,Fr: Outstanding 61 - 90 days
+In2_Long,en,Outstanding 31 - 60 days
+In2_Long,fr,Fr: Outstanding 31 - 60 days
+In1_Long,en,Outstanding < 31 days
+In1_Long,fr,Fr: Outstanding < 31 days
+End6_Long,en,Completed > 150 days
+End6_Long,fr,Fr: Completed > 150 days
+End5_Long,en,Completed 121 - 150 days
+End5_Long,fr,Fr: Completed 121 - 150 days
+End4_Long,en,Completed 91 - 120 days
+End4_Long,fr,Fr: Completed 91 - 120 days
+End3_Long,en,Completed 61 - 90 days
+End3_Long,fr,Fr: Completed 61 - 90 days
+End2_Long,en,Completed 31 - 60 days
+End2_Long,fr,Fr: Completed 31 - 60 days
+End1_Long,en,Completed < 31 days
+End1_Long,fr,Fr: Completed < 31 days
+New_Long,en,New in last 30 days
+New_Long,fr,Fr: New in last 30 days
+Out6_Long,en,Continued In-Process > 150 days
+Out6_Long,fr,Fr: Continued In-Process > 150 days
+Out5_Long,en,Continued In-Process 121 - 150 days
+Out5_Long,fr,Fr: Continued In-Process 121 - 150 days
+Out4_Long,en,Continued In-Process 91 - 120 days
+Out4_Long,fr,Fr: Continued In-Process 91 - 120 days
+Out3_Long,en,Continued In-Process 61 - 90 days
+Out3_Long,fr,Fr: Continued In-Process 61 - 90 days
+Out2_Long,en,Continued In-Process 31 - 60 days
+Out2_Long,fr,Fr: Continued In-Process 31 - 60 days
+Out1_Long,en,Continued In-Process < 31 days
+Out1_Long,fr,Fr: Continued In-Process < 31 days
+End,en,Cpltd
+End,fr,Fr: Cpltd
+End_Long,en,Completed
+End_Long,fr,Fr: Completed

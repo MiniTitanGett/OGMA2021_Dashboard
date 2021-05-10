@@ -1,0 +1,18 @@
+"""
+There are a few things to keep in mind when including assets automatically:
+
+1 - The following file types will automatically be included:
+    A - CSS files suffixed with .css
+    B - JavaScript files suffixed with .js
+    C - A single file named favicon.ico (the page tab's icon)
+
+2 - Dash will include the files in alphanumerical order by filename. So, we recommend prefixing your filenames with numbers if you need to ensure their order (e.g. 10_typography.css, 20_header.css)
+
+3 - You can ignore certain files in your assets folder with a regex filter using app = dash.Dash(assets_ignore='.*ignored.*'). This will prevent Dash from loading files which contain the above pattern.
+
+4 - If you want to include CSS from a remote URL: If you duplicate the file structure of your local assets folder to a folder hosted externally to your Dash app, you can use assets_external_path='http://your-external-assets-folder-url' in the Dash constructor to load the files from there instead of locally. Dash will index your local assets folder to find all of your assets, map their relative path onto assets_external_path and then request the resources from there. app.scripts.config.serve_locally = False must also be set in order for this to work.
+
+5 - Your custom CSS will be included after the Dash component CSS
+
+6 - It is recommended to add __name__ to the dash init to ensure the resources in the assets folder are loaded, eg: app = dash.Dash(__name__, meta_tags=[...]). When you run your application through some other command line (like the flask command or gunicorn/waitress), the __main__ module will no longer be located where app.py is. By explicitly setting __name__, Dash will be able to locate the relative assets folder correctly.
+"""

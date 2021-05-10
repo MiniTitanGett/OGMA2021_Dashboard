@@ -1,0 +1,59 @@
+/* Table of contents
+––––––––––––––––––––––––––––––––––––––––––––––––––
+- Forms
+- Master Nav
+- Tile Nav
+- Table
+*/
+
+
+
+/* Forms
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+
+.dashboard-title {
+    width: 200px;
+}
+
+
+.tile-title {
+    width: 170px;
+}
+
+
+/* Master Nav
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+
+.master-nav {
+    width: 87px;
+}
+
+
+/* Tile Nav
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+
+.tile-nav--view {
+    width: 44px;
+}
+
+.tile-nav--customize {
+    width: 118px;
+}
+
+.tile-nav--layout {
+    width: 97px;
+}
+
+.tile-nav--data {
+    width: 77px;
+}
+
+
+/* Table
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+
+.show-hide:before{
+  content:'BASCULER LES COLONNES';
+}
+
+

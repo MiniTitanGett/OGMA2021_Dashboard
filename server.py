@@ -8,6 +8,19 @@ import config
 ########################################################################################################################
 
 from logging.config import dictConfig
+from dotenv import load_dotenv
+import os
+
+# set up logger using logging_config.ini file in venv or .env, else default
+if os.path.exists(os.path.dirname(os.path.realpath(__file__))+'\\.env'):
+    load_dotenv()
+    LOG_PATH = os.getenv('LOG_PATH')+'mylog.log'
+else:
+    LOG_PATH = 'C:/Temp/mylog.log'
+    try:
+        os.mkdir('C:/Temp/')
+    except FileExistsError as exc:
+        print(exc)
 
 dictConfig({
     'version': 1,
@@ -22,7 +35,7 @@ dictConfig({
         'custom_handler': {
             'class': 'logging.FileHandler',
             'formatter': 'default',
-            'filename': r'C:\Temp\mylog.log'
+            'filename': r'{}'.format(LOG_PATH)
         }
     },
     'root': {
@@ -115,7 +128,7 @@ def before_request_func():
     session['sessionID'] = 0
     session['externalID'] = 0
 
-    return None
+    return None # TODO: Why do we return None and still have a ton of code underneath?
 
     conn = get_conn()
 

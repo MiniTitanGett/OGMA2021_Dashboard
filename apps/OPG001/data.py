@@ -544,10 +544,11 @@ LANGUAGE = 'en'
 # DATA_SETS = ['OPG010 Pruned.csv']
 # DATA_SETS = ['OPG010 Missing Node Test.xlsx']
 
-DATA_SETS = ['OPG001 Graph Data.xlsx', 'OPG010 Sankey Data.xlsx']
+# DATA_SETS = ['OPG001 Graph Data.xlsx', 'OPG010 Sankey Data.xlsx']
 # DATA_SETS = ['OPG010 Sankey Data.xlsx']
 # DATA_SETS = ['OPG001_2016-17_Week_v3.xlsx']
 # DATA_SETS = ['OPG001_2016-17_Week_v3.csv']
+DATA_SETS = ['OPG001_2016-17_Week_v3.csv', 'OPG010 Sankey Data.xlsx']
 
 LOADED_DFS = {}
 

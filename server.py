@@ -11,9 +11,9 @@ from logging.config import dictConfig
 from dotenv import load_dotenv
 import os
 
+load_dotenv()
 # set up logger using logging_config.ini file in venv or .env, else default
 if os.path.exists(os.path.dirname(os.path.realpath(__file__))+'\\.env'):
-    load_dotenv()
     LOG_PATH = os.getenv('LOG_PATH')+'mylog.log'
 else:
     LOG_PATH = 'C:/Temp/mylog.log'
@@ -39,7 +39,7 @@ dictConfig({
         }
     },
     'root': {
-        'level': 'INFO',
+        'level': os.getenv('LOG_LEVEL'),
         'handlers': ['wsgi', 'custom_handler']
     }
 })

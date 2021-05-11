@@ -1,3 +1,5 @@
+import logging
+
 from flask import Flask, request, session, g
 import flask
 import pyodbc
@@ -20,7 +22,7 @@ else:
     try:
         os.mkdir('C:/Temp/')
     except FileExistsError as exc:
-        print(exc)
+        pass
 
 dictConfig({
     'version': 1,
@@ -30,16 +32,18 @@ dictConfig({
     'handlers': {
         'wsgi': {
             'class': 'logging.StreamHandler',
-            'formatter': 'default'
+            'formatter': 'default',
+            'level': os.getenv('LOG_LEVEL') if os.path.exists(os.path.dirname(os.path.realpath(__file__))+'\\.env') else 'DEBUG'
         },
         'custom_handler': {
             'class': 'logging.FileHandler',
             'formatter': 'default',
-            'filename': r'{}'.format(LOG_PATH)
+            'filename': r'{}'.format(LOG_PATH),
+            'level': os.getenv('LOG_LEVEL') if os.path.exists(os.path.dirname(os.path.realpath(__file__))+'\\.env') else 'DEBUG'
         }
     },
     'root': {
-        'level': os.getenv('LOG_LEVEL'),
+        'level': os.getenv('LOG_LEVEL') if os.path.exists(os.path.dirname(os.path.realpath(__file__))+'\\.env') else 'DEBUG',
         'handlers': ['wsgi', 'custom_handler']
     }
 })

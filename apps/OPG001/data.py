@@ -548,7 +548,19 @@ LANGUAGE = 'en'
 # DATA_SETS = ['OPG010 Sankey Data.xlsx']
 # DATA_SETS = ['OPG001_2016-17_Week_v3.xlsx']
 # DATA_SETS = ['OPG001_2016-17_Week_v3.csv']
-DATA_SETS = ['OPG001_2016-17_Week_v3.csv', 'OPG010 Sankey Data.xlsx']
+
+from dotenv import load_dotenv, find_dotenv
+import os
+import json
+
+# load data sets from environment variables if .env created or load default data sets
+# example of environment variable: DATA_SETS = '["OPG001_2016-17_Week_v3.csv", "OPG010 Sankey Data.xlsx"]'
+if load_dotenv(find_dotenv()):
+    load_dotenv()
+    DATA_SETS = json.loads(os.environ['DATA_SETS'])
+else:
+    print("The .env file. was not found, loading default data sets")
+    DATA_SETS = ['OPG001_2016-17_Week_v3.csv', 'OPG010 Sankey Data.xlsx']
 
 LOADED_DFS = {}
 

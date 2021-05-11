@@ -796,7 +796,7 @@ def get_sankey_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
             x=x_numpy,
             y=y_numpy,
             customdata=custom_numpy,
-            hovertemplate='Node %{customdata} has total value %{value}',
+            hovertemplate=get_label('Node ') + ' %{customdata} ' + get_label('has total value ') + ' %{value}',
             color=node_colour_numpy
         ),
         link=dict(
@@ -804,9 +804,9 @@ def get_sankey_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
             target=target_numpy,  # target=[2, 3, 3, 4, 4, 5],
             value=value_numpy,  # value=[8, 4, 2, 8, 4, 2]
             # customdata
-            hovertemplate='Link from node %{source.customdata}<br />' +
-                          'to node %{target.customdata}<br />' +
-                          'has value %{value}',
+            hovertemplate=get_label('Link from node') + ' %{source.customdata}<br />' +
+                          get_label('to node') + ' %{target.customdata}<br />' +
+                          get_label('has value') + ' %{value}',
             color=link_colour_numpy
             # label
         )
@@ -816,7 +816,9 @@ def get_sankey_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
         # hovermode
         # plot_bgcolor
         # paper_bgcolor
-        title_text=title)  # ,
+        title_text=title,
+        plot_bgcolor='rgba(0, 0, 0, 0)',
+        paper_bgcolor='rgba(0, 0, 0, 0)')  # ,
     # font=dict(size=19, color='white'),
     # font_size=10)
 

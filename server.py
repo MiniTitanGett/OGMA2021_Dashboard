@@ -132,7 +132,7 @@ def before_request_func():
     session['sessionID'] = 0
     session['externalID'] = 0
 
-    return None # TODO: Why do we return None and still have a ton of code underneath?
+    return None # TODO: The below is set up for a database connection, use when ready
 
     conn = get_conn()
 

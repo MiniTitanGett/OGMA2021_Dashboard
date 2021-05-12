@@ -132,7 +132,7 @@ def before_request_func():
     session['sessionID'] = 0
     session['externalID'] = 0
 
-    return None # TODO: The below is set up for a database connection, use when ready
+    # return None # TODO: The below is set up for a database connection, use when ready
 
     conn = get_conn()
 
@@ -140,7 +140,7 @@ def before_request_func():
     # otherwiese validate the sessionid/tokenid out of the cookie
 
     sessionid = request.args.get('sessionID', type=int)
-
+    return None
     if sessionid and (sessionid != session.get('sessionID')):
         nonce_key = request.args.get('a')
         nonce_value = request.args.get('b')

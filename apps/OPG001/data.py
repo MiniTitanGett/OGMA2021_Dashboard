@@ -10,6 +10,9 @@ contains arbitrary constants, data constants, and data manipulation functions
 import pandas as pd
 import numpy as np
 import math
+
+import pyodbc
+
 import config
 from treelib import Tree
 from datetime import datetime, timedelta
@@ -49,6 +52,7 @@ from dateutil.relativedelta import relativedelta
 
 
 # ***********************************************ARBITRARY CONSTANTS*************************************************
+from server import get_conn
 
 GRAPH_OPTIONS = ['Line', 'Bar', 'Scatter', 'Box Plot', 'Table', 'Sankey']
 
@@ -124,6 +128,35 @@ class DataSet:
             df = pd.read_json('apps/OPG001/test_data/{}'.format(df_name),
                               orient='records',
                               lines=True)
+        elif df_name.find('.sql') > -1:
+            conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
+            sql_query = pd.read_sql_query(
+                '''
+            SELECT * FROM [OGMA_Test].[dbo].[OPG001] 
+            ''', conn)
+            df = pd.DataFrame(sql_query)
+            df[['Year of Event'
+                , 'Quarter'
+                , 'Month of Event'
+                , 'Week of Event'
+                , 'Fiscal Year of Event'
+                , 'Fiscal Quarter'
+                , 'Fiscal Month of Event'
+                , 'Fiscal Week of Event'
+                , 'Julian Day'
+                , 'Activity Event Id'
+                , 'Measure Value']] = df[['Year of Event'
+                , 'Quarter'
+                , 'Month of Event'
+                , 'Week of Event'
+                , 'Fiscal Year of Event'
+                , 'Fiscal Quarter'
+                , 'Fiscal Month of Event'
+                , 'Fiscal Week of Event'
+                , 'Julian Day'
+                , 'Activity Event Id'
+                , 'Measure Value']].apply(pd.to_numeric)
+            print(df.dtypes)
         else:
             raise Exception('Unknown file type: ', df_name)
 

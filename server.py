@@ -10,19 +10,19 @@ import config
 ########################################################################################################################
 
 from logging.config import dictConfig
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import os
 
-load_dotenv()
+# load_dotenv()
 # set up logger using logging_config.ini file in venv or .env, else default
-if os.path.exists(os.path.dirname(os.path.realpath(__file__))+'\\.env'):
-    LOG_PATH = os.getenv('LOG_PATH')+'mylog.log'
-else:
-    LOG_PATH = 'C:/Temp/mylog.log'
-    try:
-        os.mkdir('C:/Temp/')
-    except FileExistsError as exc:
-        pass
+# if os.path.exists(os.path.dirname(os.path.realpath(__file__))+'\\.env'):
+#     LOG_PATH = os.getenv('LOG_PATH')+'mylog.log'
+# else:
+#     LOG_PATH = 'C:/Temp/mylog.log'
+#     try:
+#         os.mkdir('C:/Temp/')
+#     except FileExistsError as exc:
+#         pass
 
 dictConfig({
     'version': 1,
@@ -33,17 +33,17 @@ dictConfig({
         'wsgi': {
             'class': 'logging.StreamHandler',
             'formatter': 'default',
-            'level': os.getenv('LOG_LEVEL') if os.path.exists(os.path.dirname(os.path.realpath(__file__))+'\\.env') else 'DEBUG'
+            'level': config.LOG_LEVEL
         },
         'custom_handler': {
             'class': 'logging.FileHandler',
             'formatter': 'default',
-            'filename': r'{}'.format(LOG_PATH),
-            'level': os.getenv('LOG_LEVEL') if os.path.exists(os.path.dirname(os.path.realpath(__file__))+'\\.env') else 'DEBUG'
+            'filename': r'{}'.format(config.LOG_FILE),
+            'level': config.LOG_LEVEL
         }
     },
     'root': {
-        'level': os.getenv('LOG_LEVEL') if os.path.exists(os.path.dirname(os.path.realpath(__file__))+'\\.env') else 'DEBUG',
+        'level': config.LOG_LEVEL,
         'handlers': ['wsgi', 'custom_handler']
     }
 })

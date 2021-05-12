@@ -10,6 +10,7 @@ contains arbitrary constants, data constants, and data manipulation functions
 import pandas as pd
 import numpy as np
 import math
+import config
 from treelib import Tree
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -549,18 +550,20 @@ LANGUAGE = 'en'
 # DATA_SETS = ['OPG001_2016-17_Week_v3.xlsx']
 # DATA_SETS = ['OPG001_2016-17_Week_v3.csv']
 
-from dotenv import load_dotenv, find_dotenv
-import os
-import json
+# from dotenv import load_dotenv, find_dotenv
+# import os
+# import json
 
-# load data sets from environment variables if .env created or load default data sets
-# example of environment variable: DATA_SETS = '["OPG001_2016-17_Week_v3.csv", "OPG010 Sankey Data.xlsx"]'
-if load_dotenv(find_dotenv()):
-    load_dotenv()
-    DATA_SETS = json.loads(os.environ['DATA_SETS'])
-else:
-    print("The .env file. was not found, loading default data sets")
-    DATA_SETS = ['OPG001_2016-17_Week_v3.csv', 'OPG010 Sankey Data.xlsx']
+# # load data sets from environment variables if .env created or load default data sets
+# # example of environment variable: DATA_SETS = '["OPG001_2016-17_Week_v3.csv", "OPG010 Sankey Data.xlsx"]'
+# if load_dotenv(find_dotenv()):
+#     load_dotenv()
+#     DATA_SETS = json.loads(os.environ['DATA_SETS'])
+# else:
+#     print("The .env file. was not found, loading default data sets")
+#     DATA_SETS = ['OPG001_2016-17_Week_v3.csv', 'OPG010 Sankey Data.xlsx']
+
+DATA_SETS = config.DATA_SETS
 
 LOADED_DFS = {}
 

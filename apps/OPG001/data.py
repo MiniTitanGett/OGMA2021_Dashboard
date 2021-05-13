@@ -131,9 +131,9 @@ class DataSet:
         elif df_name.find('.sql') > -1:
             conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
             sql_query = pd.read_sql_query(
-                '''
-            SELECT * FROM [OGMA_Test].[dbo].[OPG001] 
-            ''', conn)
+            '''
+            SELECT * FROM [OGMA_Test].[dbo].[{}] 
+            '''.format(df_name.split('.')[0]), conn)
             df = pd.DataFrame(sql_query)
             df[['Year of Event'
                 , 'Quarter'
@@ -156,7 +156,6 @@ class DataSet:
                 , 'Julian Day'
                 , 'Activity Event Id'
                 , 'Measure Value']].apply(pd.to_numeric)
-            print(df.dtypes)
         else:
             raise Exception('Unknown file type: ', df_name)
 

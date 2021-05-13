@@ -137,9 +137,6 @@ class DataSet:
                 + df['Variable Name Qualifier'][df['Variable Name Qualifier'].notna()]))
         df['Variable Name'] = col
 
-        # replaces all strings that are just spaces with NaN
-        df.replace(to_replace=r'^\s*$', value=np.NaN, regex=True, inplace=True)
-
         # Can be redone to exclude hierarchy one name and to include more levels
         df = df.rename(columns={'Hierarchy One Top': 'H1',
                                 'Hierarchy One -1': 'H2',
@@ -149,6 +146,12 @@ class DataSet:
                                 'Hierarchy One Leaf': 'H6'})
 
         self.HIERARCHY_LEVELS = ['H{}'.format(i + 1) for i in range(6)]
+
+        # Shrinks Data Size
+        df = create_categories(df, self.HIERARCHY_LEVELS)
+
+        # replaces all strings that are just spaces with NaN
+        df.replace(to_replace=r'^\s*$', value=np.NaN, regex=True, inplace=True)
 
         # If we are dealing with links in the future we must format them as follows and edit the table drawer
         # dataframe_table.Link = list(map(lambda x: '[Link]({})'.format(x), dataframe_table.Link))
@@ -239,10 +242,7 @@ class DataSet:
         # df['Date of Event'] = df['Date of Event'].transform(
         #     lambda x: pd.to_datetime(x, format='%Y%m%d', errors='ignore'))
 
-        # Shrinks Data Size
-        df = create_categories(df, self.HIERARCHY_LEVELS)
-
-        self.DF = df
+        self.DF = create_categories(df, self.HIERARCHY_LEVELS)
 
         self.TREE = None
         self.VARIABLE_OPTIONS = None
@@ -502,7 +502,7 @@ def customize_menu_filter(dff, df_name, measure_type, variable_names):
 
 # This uses pandas categories to shrink the data
 def create_categories(dff, hierarchy_columns):
-    to_category = ['Calendar Entry Type', 'Measure Type', 'OPG Data Set']
+    to_category = ['Calendar Entry Type', 'Measure Type', 'OPG Data Set', 'Hierarchy One Name', 'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier', 'Partial Period']
     to_category = hierarchy_columns + to_category
     for i in to_category:
         dff[i] = pd.Categorical(dff[i])

@@ -683,13 +683,13 @@ for x in range(4):
          State({'type': 'data-tile', 'index': 4}, 'style'),
          State({'type': 'tile-link', 'index': x}, 'className')]
     )
-    def _highlight_slaved_tiles(sidebar_styles, sidebar_style, master_sidebar_style, link_state):
+    def _highlight_child_tiles(sidebar_styles, sidebar_style, master_sidebar_style, link_state):
         """
         :param _sidebar_styles: Detects hiding/showing of data side-menus
         :param sidebar_style: State of the style of the data side-menu
-        :param master_sidebar_style: State of the style of the master data side-menu
+        :param master_sidebar_style: State of the style of the parent data side-menu
         :param link_state: State of the link/unlink icon
-        :return: Highlights tiles slaved to the displayed date side-menu
+        :return: Highlights tiles child to the displayed date side-menu
         """
         if sidebar_style == DATA_CONTENT_SHOW or (
                 master_sidebar_style == DATA_CONTENT_SHOW and link_state == 'fa fa-link'):

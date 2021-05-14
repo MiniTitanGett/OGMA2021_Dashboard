@@ -9,6 +9,7 @@ contains helper functions for, and layout of, the hierarchy filter
 # External Packages
 import dash_core_components as dcc
 import dash_html_components as html
+import pandas as pd
 
 # Internal Modules
 from apps.OPG001.data import get_label, LOADED_DFS, CLR
@@ -24,8 +25,13 @@ from apps.OPG001.data import get_label, LOADED_DFS, CLR
 # ***********************************************HELPER FUNCTIONS****************************************************
 
 # helper function to generate hierarchy dropdown
-def generate_dropdown(tile, df_name, nid_path):
+def generate_dropdown(tile, df_name, nid_path, state_of_display = []):
     # tree navigation logic
+    df = pd.DataFrame(columns=LOADED_DFS[df_name].HIERARCHY_LEVELS)
+    options = df
+    print(nid_path)
+    print(state_of_display)
+    print(len(state_of_display))
     options = LOADED_DFS[df_name].TREE.get_node(nid_path).data
     return dcc.Dropdown(
         id={'type': 'hierarchy_specific_dropdown', 'index': tile},

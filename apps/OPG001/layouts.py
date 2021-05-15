@@ -17,6 +17,7 @@ import json
 # Internal Modules
 import config
 from server import get_conn
+from apps.OPG001.data import generate_tree_cache
 from apps.OPG001.app import app
 from apps.OPG001.data import GRAPH_OPTIONS, CLR, DATA_CONTENT_HIDE, VIEW_CONTENT_SHOW, BAR_X_AXIS_OPTIONS, \
     CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LANGUAGE, LAYOUT_CONTENT_HIDE, LOADED_DFS, DATA_SETS, \
@@ -545,7 +546,12 @@ def get_layout_dashboard():
         dcc.Store(
             id='tab-storage',
             storage_type='memory',
-            data=[{'content': get_default_tab_content(), 'title': ''}])
+            data=[{'content': get_default_tab_content(), 'title': ''}]),
+        # memory locations for 'cached' tree data
+        dcc.Store(
+            id='tree-storage',
+            storage_type='memory',
+            data=generate_tree_cache())
     ], style={'background-color': CLR['lightpink']})
 
 

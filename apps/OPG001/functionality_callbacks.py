@@ -213,12 +213,12 @@ for x in range(5):
             state_of_display.pop()
             display_button = state_of_display
             nid_path = get_nid_path(state_of_display=state_of_display)
-            dropdown = generate_dropdown(changed_index, df_name, nid_path, state_of_display)
+            dropdown = generate_dropdown(changed_index, df_name, nid_path)
 
         elif 'hierarchy_to_top' in changed_id or 'data-set' in changed_id:
             display_button = []
             nid_path = get_nid_path()
-            dropdown = generate_dropdown(changed_index, df_name, nid_path, state_of_display)
+            dropdown = generate_dropdown(changed_index, df_name, nid_path)
 
         elif 'hierarchy_specific_dropdown' in changed_id:
             # If dropdown has been remade, do not modify the history
@@ -229,13 +229,13 @@ for x in range(5):
             elif not state_of_display:
                 display_button = generate_history_button(dropdown_val, 0, changed_index)
                 nid_path = get_nid_path(dropdown_value=dropdown_val)
-                dropdown = generate_dropdown(changed_index, df_name, nid_path, state_of_display)
+                dropdown = generate_dropdown(changed_index, df_name, nid_path)
             # If something is in the history preserve it and add value to it
             else:
                 display_button = state_of_display + [
                     (generate_history_button(dropdown_val, len(state_of_display), changed_index))]
                 nid_path = get_nid_path(state_of_display=state_of_display, dropdown_value=dropdown_val)
-                dropdown = generate_dropdown(changed_index, df_name, nid_path, state_of_display)
+                dropdown = generate_dropdown(changed_index, df_name, nid_path)
 
         # If update triggered due to creation of a button do not update anything
         elif all(i == 0 for i in n_clicks_click_history):
@@ -249,7 +249,7 @@ for x in range(5):
             history[index]['props']['n_clicks'] = 0
             display_button = history
             nid_path = get_nid_path(state_of_display=history)
-            dropdown = generate_dropdown(changed_index, df_name, nid_path, state_of_display)
+            dropdown = generate_dropdown(changed_index, df_name, nid_path)
 
         # check if leaf node, if so say graph all siblings instead of graph all in dropdown
         if 'options=[]' not in str(dropdown):

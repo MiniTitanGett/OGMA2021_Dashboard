@@ -7,6 +7,9 @@ contains arbitrary constants, data constants, and data manipulation functions
 ######################################################################################################################
 
 # External Packages
+import json
+from collections import Hashable
+
 import pandas as pd
 import numpy as np
 import math
@@ -131,7 +134,7 @@ class DataSet:
         elif df_name.find('.sql') > -1:
             conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
             sql_query = pd.read_sql_query(
-            '''
+                '''
             SELECT * FROM [OGMA_Test].[dbo].[{}] 
             '''.format(df_name.split('.')[0]), conn)
             df = pd.DataFrame(sql_query)
@@ -359,6 +362,38 @@ class DataSet:
                 {'label': "  " * unique_var.count("|") + str(unique_var).replace('|', ', '), 'value': unique_var})
 
         self.VARIABLE_OPTIONS = options
+
+
+def generate_tree_cache():
+    dic = {}
+    for x in DATA_SETS:
+        dic[x] = {}
+    return dic
+
+
+# https://github.com/caesar0301/treelib/issues/48
+# takes in a jsonified tree and returns the correct tree structure (edited)
+def unjsonify(json_tree):
+    def giveKey(d):
+        return list(d.keys())[0]
+
+    def unjsonify_helper(node, subtree):
+        for child_struct in subtree[node]['children']:  # child_struct is immutable element if base case, else dict
+            if type(child_struct) == list:
+                child_struct = tuple(child_struct)  # tuples in original tree
+            if isinstance(child_struct, Hashable):  # base case
+                new_tree.create_node(child_struct, child_struct, parent=node)
+            else:
+                child_node = giveKey(child_struct)
+                new_tree.create_node(child_node, child_node, parent=node)
+                unjsonify_helper(child_node, child_struct)
+
+    json_tree = json.loads(json_tree)
+    root = giveKey(json_tree)
+    new_tree = Tree()
+    new_tree.create_node(root, root)
+    unjsonify_helper(root, json_tree)
+    return new_tree
 
 
 # **********************************************DATA MANIPULATION FUNCTIONS*******************************************

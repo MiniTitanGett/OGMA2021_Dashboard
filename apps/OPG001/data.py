@@ -7,17 +7,12 @@ contains arbitrary constants, data constants, and data manipulation functions
 ######################################################################################################################
 
 # External Packages
-import json
-from collections import Hashable
-
 import pandas as pd
 import numpy as np
-import math
 
 import pyodbc
 
 import config
-from treelib import Tree
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
@@ -279,7 +274,6 @@ class DataSet:
 
         self.DF = df
 
-        self.TREE = None
         self.VARIABLE_OPTIONS = None
 
     # Helper function for the tree generator
@@ -289,65 +283,6 @@ class DataSet:
         for i in range(len(hierarchy_path)):
             filtered_df = filtered_df[filtered_df[self.HIERARCHY_LEVELS[i]] == hierarchy_path[i]]
         return filtered_df
-
-    # Takes in a dataframe with the hierarchy structure and returns a tree
-    def generate_tree(self, hierarchy_levels_tree, first_col_index):
-        # Holds the headers of each of the hierarchy levels
-        hierarchy_names = list(self.DF)[first_col_index:(hierarchy_levels_tree + first_col_index)]
-
-        generated_tree = Tree()
-
-        # Creates root node and its children
-        first_level = self.DF[hierarchy_names[0]].unique()
-        first_level_data = [{'label': i, 'value': i} for i in first_level]
-        generated_tree.create_node('ROOT', 'root', data=first_level_data)
-
-        # Stores full ids for each level
-        all_level_ids = [['root']]
-
-        # Iterate through each hierarchy column
-        for i in range(1, hierarchy_levels_tree):
-            # List of ids for new level
-            next_level_ids = []
-            for parent_id in all_level_ids[i - 1]:
-                # Grabs node and its children
-                parent_node = generated_tree.get_node(parent_id)
-                members = parent_node.data
-                if members is not None:
-                    for this_member in members:
-                        # Uses parent id to make id
-                        new_node = this_member['value']
-                        # new_id = '{}, {}'.format(parent_id, new_node)
-                        new_id = '{}^||^{}'.format(parent_id, new_node)
-                        next_level_ids.append(new_id)
-                        if i != len(hierarchy_names):
-                            if i != 1:
-                                # Turns hierarchy path into list, uses that to get children
-                                # hierarchy_path = new_id.split(", ")
-                                hierarchy_path = new_id.split("^||^")
-                                hierarchy_path.remove('root')
-                                filtered_df = self.filter_list(hierarchy_path)
-                                children = filtered_df[hierarchy_names[i]].dropna().unique()
-                            else:
-                                # For the first level no filtering is required
-                                children = self.DF[hierarchy_names[i]].dropna().unique()
-                            children_data = [{'label': j, 'value': j} for j in children]
-                            generated_tree.create_node(
-                                tag=new_node,
-                                identifier=new_id,
-                                parent=parent_id,
-                                data=children_data)
-                        else:
-                            # If leaf level, no children exist
-                            generated_tree.create_node(
-                                tag=new_node,
-                                identifier=new_id,
-                                parent=parent_id)
-            all_level_ids.append(next_level_ids)
-        for x in generated_tree.all_nodes_itr():
-            options = [{'label': i.tag, 'value': i.tag} for i in generated_tree.children(x.identifier)]
-            x.data = options
-        return generated_tree
 
     def get_visual_hierarchy(self):
 
@@ -362,38 +297,6 @@ class DataSet:
                 {'label': "  " * unique_var.count("|") + str(unique_var).replace('|', ', '), 'value': unique_var})
 
         self.VARIABLE_OPTIONS = options
-
-
-def generate_tree_cache():
-    dic = {}
-    for x in DATA_SETS:
-        dic[x] = {}
-    return dic
-
-
-# https://github.com/caesar0301/treelib/issues/48
-# takes in a jsonified tree and returns the correct tree structure (edited)
-def unjsonify(json_tree):
-    def giveKey(d):
-        return list(d.keys())[0]
-
-    def unjsonify_helper(node, subtree):
-        for child_struct in subtree[node]['children']:  # child_struct is immutable element if base case, else dict
-            if type(child_struct) == list:
-                child_struct = tuple(child_struct)  # tuples in original tree
-            if isinstance(child_struct, Hashable):  # base case
-                new_tree.create_node(child_struct, child_struct, parent=node)
-            else:
-                child_node = giveKey(child_struct)
-                new_tree.create_node(child_node, child_node, parent=node)
-                unjsonify_helper(child_node, child_struct)
-
-    json_tree = json.loads(json_tree)
-    root = giveKey(json_tree)
-    new_tree = Tree()
-    new_tree.create_node(root, root)
-    unjsonify_helper(root, json_tree)
-    return new_tree
 
 
 # **********************************************DATA MANIPULATION FUNCTIONS*******************************************
@@ -637,7 +540,5 @@ LOADED_DFS = {}
 for i in DATA_SETS:
     # Load data frame and extract data
     LOADED_DFS[i] = DataSet(i)
-    # Build hierarchy tree
-    LOADED_DFS[i].TREE = LOADED_DFS[i].generate_tree(len(LOADED_DFS[i].HIERARCHY_LEVELS), 2)
     # Build variable tree
     LOADED_DFS[i].get_visual_hierarchy()

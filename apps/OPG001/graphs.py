@@ -831,9 +831,8 @@ def get_sankey_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
 
 
 # update graph internal - can be called from callbacks or programatically
-def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
-                   period_type,
-                   hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children,
+def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods, period_type,
+                   hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options,
                    state_of_display, secondary_type, timeframe,
                    fiscal_toggle, start_year, end_year, start_secondary, end_secondary):
     # Creates a hierarchy trail from the display
@@ -849,9 +848,8 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
         nid_path = "root"
         for x in list_of_names:
             nid_path += ('^||^{}'.format(x))
-        # tree navigation logic
-        if not LOADED_DFS[df_name].TREE.get_node(nid_path).data:
-            list_of_names = list_of_names[0:-1]
+        if not hierarchy_options:
+            list_of_names.pop()
 
     # hierarchy specific dropdown selection is last item in list_of_names, otherwise None
     hierarchy_specific_dropdown = list_of_names[-1] if len(list_of_names) > 0 else None

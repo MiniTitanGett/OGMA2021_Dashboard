@@ -30,17 +30,17 @@ from apps.OPG001.data import get_label, LOADED_DFS, CLR
 # helper function to generate hierarchy dropdown
 def generate_dropdown(tile, df_name, nid_path):
     # tree navigation logic, independent of a tree
-
     df = LOADED_DFS[df_name].DF[['H1', 'H2', 'H3', 'H4', 'H5', 'H6']]
     hierarchy_nid_list = list(nid_path.split("^||^"))[1:]
     l = len(hierarchy_nid_list)
-    if l != 0:
+    if l == 6:
+        option_list = []
+    elif l != 0:
         df = df.set_index(['H{}'.format(i + 1) for i in range(l)])
-        option_list = df.loc[tuple(hierarchy_nid_list)]['H{}'.format(l+1)].dropna().unique()
+        option_list = df.loc[tuple(hierarchy_nid_list)]['H{}'.format(l + 1)].dropna().unique()
     else:
         option_list = df['H1'].unique()
     options = [{'label': i, 'value': i} for i in option_list]
-
 
     # options = LOADED_DFS[df_name].TREE.get_node(nid_path).data
     return dcc.Dropdown(
@@ -71,10 +71,6 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
             continue
         button = generate_history_button(nid, len(hierarchy_button_path), tile)
         hierarchy_button_path.append(button)
-    if LOADED_DFS[df_name].TREE.get_node(nid_path).is_leaf():
-        graph_children = False
-    else:
-        graph_children = True
     return [
         html.H6(
             "{}:".format('Hierarchy'),
@@ -107,7 +103,7 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
                        'height': '60px'}),
             dcc.Checklist(
                 id={'type': 'graph_children_toggle', 'index': tile},
-                options=[{'label': get_label('Graph All in Dropdown' if graph_children else 'Graph All Siblings'),
+                options=[{'label': get_label('Graph All in Dropdown'),
                           'value': 'graph_children'}],
                 value=graph_all_toggle if graph_all_toggle else [],
                 style={'color': 'black', 'width': '100%', 'display': 'inline-block', 'text-align': 'center'}),

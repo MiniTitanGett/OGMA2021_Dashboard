@@ -1,17 +1,29 @@
 import logging
-
 from flask import Flask, request, session, g
 import flask
 import pyodbc
+import regex
 from werkzeug.utils import redirect
-
 import config
-
-########################################################################################################################
-
 from logging.config import dictConfig
+from logging import FileHandler
+
+LOG_FORMAT = "[%(asctime)s] %(levelname)s in %(filename)s (fn:%(funcName)s ln:%(lineno)d): %(message)s"
+
+
+class CustomFileHandler(FileHandler):
+
+    def __init__(self, filename):
+        FileHandler.__init__(self, filename)
+
+    def emit(self, record):
+        # https://stackoverflow.com/questions/4324790/removing-control-characters-from-a-string-in-python
+        record.msg = regex.sub(r'\p{C}\[[0-9;]*m', '', record.msg)  # [37m
+        FileHandler.emit(self, record)
+
+
 # from dotenv import load_dotenv
-import os
+# import os
 
 # load_dotenv()
 # set up logger using logging_config.ini file in venv or .env, else default
@@ -27,28 +39,31 @@ import os
 dictConfig({
     'version': 1,
     'formatters': {'default': {
-        'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+        'format': LOG_FORMAT  # '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
     }},
     'handlers': {
         'wsgi': {
             'class': 'logging.StreamHandler',
             'formatter': 'default',
             'level': config.LOG_LEVEL
-        },
-        'custom_handler': {
-            'class': 'logging.FileHandler',
-            'formatter': 'default',
-            'filename': r'{}'.format(config.LOG_FILE),
-            'level': config.LOG_LEVEL
-        }
+        }  # ,
+        # 'custom_handler': {
+        #     'class': CustomFileHandler,  # 'logging.FileHandler',
+        #     'formatter': 'default',
+        #     'filename': r'{}'.format(config.LOG_FILE),
+        #     'level': config.LOG_LEVEL
+        # }
     },
     'root': {
         'level': config.LOG_LEVEL,
-        'handlers': ['wsgi', 'custom_handler']
+        'handlers': ['wsgi']  # ['wsgi', 'custom_handler']
     }
 })
 
-########################################################################################################################
+cfh = CustomFileHandler(r'{}'.format(config.LOG_FILE))
+cfh.setFormatter(logging.Formatter(LOG_FORMAT))  # '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'))
+cfh.setLevel(config.LOG_LEVEL)
+logging.getLogger("root").addHandler(cfh)
 
 # https://stackoverflow.com/questions/18967441/add-a-prefix-to-all-flask-routes/36033627#36033627
 # https://docs.microsoft.com/en-us/visualstudio/python/configure-web-apps-for-iis-windows?view=vs-2019
@@ -84,7 +99,6 @@ server.wsgi_app = PrefixMiddleware(server.wsgi_app)  # , prefix=config.APPLICATI
 
 
 def get_conn():
-
     if 'conn' not in g:
         g.conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
 
@@ -118,7 +132,7 @@ def close_conn():
 # WebModuleCreate?
 # @server.before_first_request
 # def before_first_request_func():
-    # print('before first request')
+# print('before first request')
 
 
 # WebModuleBeforeDispatch
@@ -132,7 +146,7 @@ def before_request_func():
     session['sessionID'] = 0
     session['externalID'] = 0
 
-    # return None # TODO: The below is set up for a database connection, use when ready
+    return None  # TODO: The below is set up for a database connection, use when ready
 
     conn = get_conn()
 
@@ -140,7 +154,7 @@ def before_request_func():
     # otherwiese validate the sessionid/tokenid out of the cookie
 
     sessionid = request.args.get('sessionID', type=int)
-    return None
+
     if sessionid and (sessionid != session.get('sessionID')):
         nonce_key = request.args.get('a')
         nonce_value = request.args.get('b')

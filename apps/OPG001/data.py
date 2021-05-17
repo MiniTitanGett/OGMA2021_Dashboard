@@ -276,14 +276,6 @@ class DataSet:
 
         self.VARIABLE_OPTIONS = None
 
-    # Helper function for the tree generator
-    def filter_list(self, hierarchy_path):
-        # Filters out all rows that don't include path member at specific level
-        filtered_df = self.DF
-        for i in range(len(hierarchy_path)):
-            filtered_df = filtered_df[filtered_df[self.HIERARCHY_LEVELS[i]] == hierarchy_path[i]]
-        return filtered_df
-
     def get_visual_hierarchy(self):
 
         options = []

@@ -186,7 +186,7 @@ for x in range(5):
         if changed_id == '.':
             raise PreventUpdate
 
-        # create a comma delimited string for tree navigation
+        # create a comma delimited string for hierarchy (node id) navigation
         def get_nid_path(sod=[], dropdown_value=None):
             path = "root"
             for i in sod:

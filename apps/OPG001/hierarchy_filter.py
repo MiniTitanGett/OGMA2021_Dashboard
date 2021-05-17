@@ -29,7 +29,7 @@ from apps.OPG001.data import get_label, LOADED_DFS, CLR
 
 # helper function to generate hierarchy dropdown
 def generate_dropdown(tile, df_name, nid_path):
-    # tree navigation logic, independent of a tree
+    # using a subset of our dataframe, turn it into a multiindex df, and access unique values for option
     df = LOADED_DFS[df_name].DF[['H1', 'H2', 'H3', 'H4', 'H5', 'H6']]
     hierarchy_nid_list = list(nid_path.split("^||^"))[1:]
     l = len(hierarchy_nid_list)
@@ -42,7 +42,6 @@ def generate_dropdown(tile, df_name, nid_path):
         option_list = df['H1'].unique()
     options = [{'label': i, 'value': i} for i in option_list]
 
-    # options = LOADED_DFS[df_name].TREE.get_node(nid_path).data
     return dcc.Dropdown(
         id={'type': 'hierarchy_specific_dropdown', 'index': tile},
         options=options,

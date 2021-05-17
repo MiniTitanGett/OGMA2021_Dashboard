@@ -126,7 +126,7 @@ class DataSet:
             df = pd.read_json('apps/OPG001/test_data/{}'.format(df_name),
                               orient='records',
                               lines=True)
-        elif df_name.find('.sql') > -1:
+        elif df_name.find('.sql') > -1: # TODO: This is testing code for connecting to a personal database
             conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
             sql_query = pd.read_sql_query(
                 '''

@@ -354,7 +354,9 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
     # (args-value: {})[5] = size measure
 
     # Specialty filtering
-    filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[2])
+    filtered_df = dff.copy().query(
+        "(`Variable Name` == @arg_value[0] and `Measure Type` == @arg_value[1]) or (`Variable Name` == @arg_value[2] and `Measure Type` == @arg_value[3]) or (`Variable Name` == @arg_value[4] and `Measure Type` == @arg_value[5])")
+    filtered_df = filtered_df.set_index(['Date of Event', 'Variable Name'])
 
     # if hierarchy type is "Level Filter", or "Specific Item" while "Graph all in Dropdown" is selected
     if hierarchy_type == 'Level Filter' or (hierarchy_type == 'Specific Item' and

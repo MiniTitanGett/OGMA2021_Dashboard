@@ -352,6 +352,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
     # (args-value: {})[3] = y-axis measure
     # (args-value: {})[4] = size
     # (args-value: {})[5] = size measure
+
     # Specialty filtering
     filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[2])
 
@@ -401,9 +402,12 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                                                 hierarchy_graph_children == ['graph_children']):
             color = hierarchy_level_dropdown if hierarchy_type == 'Level Filter' else \
                 LOADED_DFS[df_name].HIERARCHY_LEVELS[len(hierarchy_path)]
+
             legend_title_text = get_label(hierarchy_level_dropdown) if hierarchy_type == 'Level Filter' else \
                 get_label(LOADED_DFS[df_name].HIERARCHY_LEVELS[len(hierarchy_path)])
+
             filtered_df.rename(columns={color: get_label(color)}, inplace=True)
+
         # else, hierarchy type is specific item while "Graph all in Dropdown" is unselected
         else:
             color = 'Variable Name'

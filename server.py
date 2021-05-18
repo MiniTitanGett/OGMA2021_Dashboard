@@ -3,7 +3,7 @@ from flask import Flask, request, session, g
 import flask
 import pyodbc
 import regex
-from werkzeug.utils import redirect
+# from werkzeug.utils import redirect
 import config
 from logging.config import dictConfig
 from logging import FileHandler
@@ -22,24 +22,10 @@ class CustomFileHandler(FileHandler):
         FileHandler.emit(self, record)
 
 
-# from dotenv import load_dotenv
-# import os
-
-# load_dotenv()
-# set up logger using logging_config.ini file in venv or .env, else default
-# if os.path.exists(os.path.dirname(os.path.realpath(__file__))+'\\.env'):
-#     LOG_PATH = os.getenv('LOG_PATH')+'mylog.log'
-# else:
-#     LOG_PATH = 'C:/Temp/mylog.log'
-#     try:
-#         os.mkdir('C:/Temp/')
-#     except FileExistsError as exc:
-#         pass
-
 dictConfig({
     'version': 1,
     'formatters': {'default': {
-        'format': LOG_FORMAT  # '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+        'format': LOG_FORMAT
     }},
     'handlers': {
         'wsgi': {
@@ -61,9 +47,10 @@ dictConfig({
 })
 
 cfh = CustomFileHandler(r'{}'.format(config.LOG_FILE))
-cfh.setFormatter(logging.Formatter(LOG_FORMAT))  # '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'))
+cfh.setFormatter(logging.Formatter(LOG_FORMAT))
 cfh.setLevel(config.LOG_LEVEL)
 logging.getLogger("root").addHandler(cfh)
+
 
 # https://stackoverflow.com/questions/18967441/add-a-prefix-to-all-flask-routes/36033627#36033627
 # https://docs.microsoft.com/en-us/visualstudio/python/configure-web-apps-for-iis-windows?view=vs-2019
@@ -98,6 +85,23 @@ server.debug = config.DEBUG
 server.wsgi_app = PrefixMiddleware(server.wsgi_app)  # , prefix=config.APPLICATION_ROOT)
 
 
+def dict_to_string(d):
+
+    if d is None:
+        return "None"
+
+    s = ""
+
+    for key in d:
+
+        if s != "":
+            s += ", "
+
+        s += "('" + key + "', '" + str(d[key]) + "')"
+
+    return "[" + s + "]"
+
+
 def get_conn():
     if 'conn' not in g:
         g.conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
@@ -130,21 +134,23 @@ def close_conn():
 
 
 # WebModuleCreate?
-# @server.before_first_request
-# def before_first_request_func():
-# print('before first request')
+@server.before_first_request
+def before_first_request_func():
+    logging.debug("before first request: request=" + dict_to_string(request.values))
+    logging.debug("before first request: session=" + dict_to_string(session))
 
 
 # WebModuleBeforeDispatch
 @server.before_request
 def before_request_func():
-    # print('before request')
+    logging.debug("before request: request=" + dict_to_string(request.values))
+    logging.debug("before request: session=" + dict_to_string(session))
 
     if config.CONNECTION_STRING is None:
         return None
 
-    session['sessionID'] = 0
-    session['externalID'] = 0
+    session["sessionID"] = "0"
+    session["externalID"] = "0"
 
     return None  # TODO: The below is set up for a database connection, use when ready
 
@@ -153,11 +159,11 @@ def before_request_func():
     # if the sessionid exists in the request, validate the nonce
     # otherwiese validate the sessionid/tokenid out of the cookie
 
-    sessionid = request.args.get('sessionID', type=int)
+    sessionid = request.args.get("sessionID", type=int)
 
-    if sessionid and (sessionid != session.get('sessionID')):
-        nonce_key = request.args.get('a')
-        nonce_value = request.args.get('b')
+    if sessionid and (sessionid != session.get("sessionID")):
+        nonce_key = request.args.get("a")
+        nonce_value = request.args.get("b")
 
         query = """\
         declare @p_external_id int
@@ -171,27 +177,36 @@ def before_request_func():
 
         results = cursor.fetchone()
 
-        if results.result_status != 'OK':
+        if results.result_status != "OK":
             cursor.close()
             del cursor
-            print(results.result_status)
+            logging.error(results.result_status)
             flask.abort(404)
 
-        session['sessionID'] = sessionid
-        session['externalID'] = results.external_id
+        session["sessionID"] = sessionid
+        session["externalID"] = results.external_id
 
         cursor.close()
         del cursor
 
         # redirect without the query params to prevent errors on refresh
-        if request.args.get('reportName'):
-            return redirect(request.path + '?reportName=' + request.args.get('reportName'))
-        else:
-            return redirect(request.path)
+        # if request.args.get('reportName'):
+        #     return redirect(request.path + '?reportName=' + request.args.get('reportName'))
+            # response = redirect(request.path + '?reportName=' + request.args.get('reportName'))
+            # response.set_cookie("sessionID", session['sessionID'])
+            # response.set_cookie("externalID", session['externalID'])
+            # return response
+
+        # else:
+        #     return redirect(request.path)
+            # response = redirect(request.path)
+            # response.set_cookie("sessionID", session['sessionID'])
+            # response.set_cookie("externalID", session['externalID'])
+            # return response
 
     # validate session
-    sessionid = session['sessionID']
-    externalid = session['externalID']
+    sessionid = session["sessionID"]
+    externalid = session["externalID"]
 
     query = """\
     declare @p_external_id int
@@ -208,15 +223,15 @@ def before_request_func():
 
     results = cursor.fetchone()
 
-    if results.result_status != 'OK' or results.external_id != externalid or results.session_status != 'OK':
+    if results.result_status != "OK" or results.external_id != externalid or results.session_status != 'OK':
         cursor.close()
         del cursor
-        if results.result_status != 'OK':
-            print(results.result_status)
-        elif results.session_status != 'OK':
-            print(results.session_status)
+        if results.result_status != "OK":
+            logging.error(results.result_status)
+        elif results.session_status != "OK":
+            logging.error(results.session_status)
         else:
-            print('Invalid external_id: {}'.format(externalid))
+            logging.error("Invalid external_id: {}".format(externalid))
         flask.abort(404)
 
     cursor.close()
@@ -226,29 +241,28 @@ def before_request_func():
 # WebModuleAfterDispatch
 @server.after_request
 def after_request_func(response):
-    # print('after request')
+    logging.debug("after request: request=" + dict_to_string(request.values))
+    logging.debug("after request: session=" + dict_to_string(session))
     return response
 
 
 # WebModuleException?
 @server.teardown_request
 def teardown_request_func(error=None):
-    # print('teardown request')
+    logging.debug("teardown request: request=" + dict_to_string(request.values))
+    logging.debug("teardown request: session=" + dict_to_string(session))
 
     if error:
-        # log the error
-        print(str(error))
+        logging.error(str(error))
 
 
 # WebModuleDestroy?
 @server.teardown_appcontext
 def teardown_appcontext_func(error=None):
-    # print('teardown appcontext')
     close_conn()
 
     if error:
-        # log the error
-        print(str(error))
+        logging.error(str(error))
 
 
 @server.route('/')

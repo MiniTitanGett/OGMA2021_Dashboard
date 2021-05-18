@@ -22,7 +22,6 @@ from apps.OPG001.app import app
 from apps.OPG001.data import LOADED_DFS, data_filter, CLR, get_label
 from apps.OPG001.datepicker import get_date_box, update_date_columns, get_secondary_data
 
-
 # Contents:
 #   GRAPH
 #       - _update_graph()
@@ -97,7 +96,7 @@ for x in range(4):
          State({'type': 'hierarchy_specific_dropdown', 'index': 4}, 'options')
          ]
     )
-    def _update_graph(df_trigger, view_state, tile_title, _datepicker_trigger,
+    def _update_graph(_df_trigger, view_state, tile_title, _datepicker_trigger,
                       num_periods, period_type, _master_datepicker_trigger, master_num_periods,
                       master_period_type, hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children,
                       state_of_display, master_state_of_display, master_hierarchy_toggle,
@@ -148,13 +147,10 @@ for x in range(4):
                 (not num_periods and timeframe == 'to-current') or df_name is None:
             raise PreventUpdate
 
-        graph = __update_graph(df_name, arg_value, graph_type, tile_title,
-                               num_periods,
-                               period_type,
-                               hierarchy_toggle, hierarchy_level_dropdown,
-                               hierarchy_graph_children, hierarchy_options,
-                               state_of_display, secondary_type, timeframe,
-                               fiscal_toggle, start_year, end_year, start_secondary, end_secondary)
+        graph = __update_graph(df_name, arg_value, graph_type, tile_title, num_periods, period_type, hierarchy_toggle,
+                               hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options, state_of_display,
+                               secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
+                               end_secondary)
 
         if graph is None:
             raise PreventUpdate
@@ -174,11 +170,11 @@ for x in range(5):
          Input({'type': 'hierarchy_to_top', 'index': x}, 'n_clicks'),
          Input({'type': 'button: {}'.replace("{}", str(x)), 'index': ALL}, 'n_clicks')],
         [State({'type': 'hierarchy_display_button', 'index': x}, 'children'),
-         State({'type': 'hierarchy_specific_dropdown', 'index': x}, 'options'),
          State({'type': 'data-set', 'index': x}, 'value')]
     )
     def _print_choice_to_display_and_modify_dropdown(dropdown_val, _n_clicks_r, _n_clicks_tt,
-                                                     n_clicks_click_history, state_of_display, dropdown_options, df_name):
+                                                     n_clicks_click_history, state_of_display,
+                                                     df_name):
 
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
 
@@ -298,9 +294,8 @@ def _show_filter_based_on_hierarchy_toggle(hierarchy_toggle):
      State({'type': 'data-set', 'index': MATCH}, 'value')]
 )
 def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quarter_button_clicks,
-                       _month_button_clicks, _week_button_clicks, start_year_selection, end_year_selection,
-                       start_secondary_selection, end_secondary_selection, tab, df_name):
-
+                        _month_button_clicks, _week_button_clicks, start_year_selection, end_year_selection,
+                        start_secondary_selection, end_secondary_selection, tab, df_name):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':
@@ -369,8 +364,8 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
         elif 'n_clicks' in changed_id:
             conditions = ['date-picker-quarter-button' in changed_id, 'date-picker-month-button' in changed_id]
             quarter_className, quarter_disabled, month_className, month_disabled, week_className, week_disabled, \
-                fringe_min, fringe_max, default_max, max_year, \
-                new_tab = get_secondary_data(conditions, fiscal_toggle, df_name)
+            fringe_min, fringe_max, default_max, max_year, \
+            new_tab = get_secondary_data(conditions, fiscal_toggle, df_name)
             # set min_year according to user selected fiscal/gregorian time type
             if fiscal_toggle == 'Gregorian':
                 min_year = LOADED_DFS[df_name].GREGORIAN_MIN_YEAR
@@ -426,8 +421,8 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                 selected_secondary_max = end_secondary_selection
                 conditions = [tab == 'Quarter', tab == 'Month']
                 quarter_className, quarter_disabled, month_className, month_disabled, week_className, week_disabled, \
-                    fringe_min, fringe_max, default_max, max_year, \
-                    new_tab = get_secondary_data(conditions, fiscal_toggle, df_name)
+                fringe_min, fringe_max, default_max, max_year, \
+                new_tab = get_secondary_data(conditions, fiscal_toggle, df_name)
             # set min_year according to user selected time type (gregorian/fiscal)
             if fiscal_toggle == 'Gregorian':
                 min_year = LOADED_DFS[df_name].GREGORIAN_MIN_YEAR
@@ -597,10 +592,12 @@ for x in range(4):
     def _update_table(page_current, page_size, sort_by, filter, graph_trigger, table_trigger, link_state, df_name,
                       secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary, end_secondary,
                       num_periods, period_type, hierarchy_toggle, hierarchy_level_dropdown, state_of_display,
-                      hierarchy_graph_children, hierarchy_options, master_secondary_type, master_timeframe, master_fiscal_toggle,
+                      hierarchy_graph_children, hierarchy_options, master_secondary_type, master_timeframe,
+                      master_fiscal_toggle,
                       master_start_year, master_end_year, master_start_secondary, master_end_secondary,
                       master_num_periods, master_period_type, master_hierarchy_toggle, master_hierarchy_level_dropdown,
-                      master_state_of_display, master_hierarchy_graph_children, master_hierarchy_options, master_df_name):
+                      master_state_of_display, master_hierarchy_graph_children, master_hierarchy_options,
+                      master_df_name):
 
         if link_state == 'fa fa-link':
             secondary_type = master_secondary_type
@@ -678,5 +675,5 @@ for x in range(4):
                 ],
                 inplace=False)
 
-        return dff.iloc[page_current * page_size: (page_current + 1) * page_size].to_dict('records'),\
+        return dff.iloc[page_current * page_size: (page_current + 1) * page_size].to_dict('records'), \
                math.ceil(dff.iloc[:, 0].size / page_size)

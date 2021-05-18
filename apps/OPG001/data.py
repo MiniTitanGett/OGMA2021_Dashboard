@@ -52,7 +52,7 @@ from dateutil.relativedelta import relativedelta
 # ***********************************************ARBITRARY CONSTANTS*************************************************
 from server import get_conn
 
-GRAPH_OPTIONS = ['Line', 'Bar', 'Scatter', 'Box Plot', 'Table', 'Sankey']
+GRAPH_OPTIONS = ['Line', 'Bar', 'Scatter', 'Bubble', 'Box Plot', 'Table', 'Sankey']
 
 X_AXIS_OPTIONS = ['Time']
 
@@ -126,7 +126,7 @@ class DataSet:
             df = pd.read_json('apps/OPG001/test_data/{}'.format(df_name),
                               orient='records',
                               lines=True)
-        elif df_name.find('.sql') > -1: # TODO: This is testing code for connecting to a personal database
+        elif df_name.find('.sql') > -1:  # TODO: This is testing code for connecting to a personal database
             conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
             sql_query = pd.read_sql_query(
                 '''
@@ -464,7 +464,8 @@ def customize_menu_filter(dff, df_name, measure_type, variable_names):
 
 # This uses pandas categories to shrink the data
 def create_categories(dff, hierarchy_columns):
-    to_category = ['Calendar Entry Type', 'Measure Type', 'OPG Data Set', 'Hierarchy One Name', 'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier', 'Partial Period']
+    to_category = ['Calendar Entry Type', 'Measure Type', 'OPG Data Set', 'Hierarchy One Name', 'Variable Name',
+                   'Variable Name Qualifier', 'Variable Name Sub Qualifier', 'Partial Period']
     to_category = hierarchy_columns + to_category
     for i in to_category:
         dff[i] = pd.Categorical(dff[i])

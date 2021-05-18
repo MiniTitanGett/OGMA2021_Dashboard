@@ -86,7 +86,6 @@ def change_index(document, new_index):
 
 
 def recursive_to_plotly_json(document):
-
     document = document.to_plotly_json()
     inspect.getmembers(html, inspect.isclass)
     html_classes = tuple(x[1] for x in inspect.getmembers(html, inspect.isclass))
@@ -257,7 +256,8 @@ def get_layout_graph(report_name):
         state_of_display += '"{}"'.format(x)  # "'{}'".format(x)
 
     if state_of_display:
-        state_of_display = '{{"props": {{"children": {}}}}}'.format(state_of_display)  # "{{'props': {{'children': {}}}}}".format(state_of_display)
+        state_of_display = '{{"props": {{"children": {}}}}}'.format(
+            state_of_display)  # "{{'props': {{'children': {}}}}}".format(state_of_display)
 
     graph = __update_graph(j['Data Set'],
                            j['Args List'],
@@ -1033,6 +1033,113 @@ def get_scatter_graph_menu(tile, x, y, measure_type, df_name):
                         clearable=False,
                         style={'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})])
+        ], style={'margin-left': '15px'})]
+
+
+# bubble graph menu layout
+def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, df_name):
+    # (args-value: {})[0] = x-axis
+    # (args-value: {})[1] = x-axis measure
+    # (args-value: {})[2] = y-axis
+    # (args-value: {})[3] = y-axis measure
+    # (args-value: {})[4] = size
+    # (args-value: {})[5] = size measure
+
+    return [
+        html.P(
+            "{}:".format(get_label('Graph Options')),
+            style={'margin-top': '10px', 'color': CLR['text1'], 'font-size': '15px'}),
+        html.Div([
+            html.Div([
+                html.Div([
+                    html.P(
+                        "{}:".format(get_label('X-Axis')),
+                        style={'color': CLR['text1'], 'font-size': '13px'})],
+                    style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
+                           'margin-right': '5px'}),
+                html.Div([
+                    dcc.Dropdown(
+                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
+                        options=LOADED_DFS[df_name].VARIABLE_OPTIONS,
+                        value=x,
+                        clearable=False,
+                        style={'font-size': '13px'})],
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+            html.Div([
+                html.Div([
+                    html.P(
+                        "{}:".format(get_label('X-Axis Measure')),
+                        style={'color': CLR['text1'], 'font-size': '13px'})],
+                    style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
+                           'margin-right': '5px'}),
+                html.Div([
+                    dcc.Dropdown(
+                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
+                        options=[{'label': i, 'value': i} for i in LOADED_DFS[df_name].MEASURE_TYPE_OPTIONS],
+                        value=x_measure,
+                        clearable=False,
+                        style={'font-size': '13px'})],
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+            html.Div([
+                html.Div([
+                    html.P(
+                        "{}:".format(get_label('Y-Axis')),
+                        style={'color': CLR['text1'], 'font-size': '13px'})],
+                    style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
+                           'margin-right': '5px'}),
+                html.Div([
+                    dcc.Dropdown(
+                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
+                        options=LOADED_DFS[df_name].VARIABLE_OPTIONS,
+                        value=y,
+                        clearable=False,
+                        style={'font-size': '13px'})],
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+            html.Div([
+                html.Div([
+                    html.P(
+                        "{}:".format(get_label('Y-Axis Measure')),
+                        style={'color': CLR['text1'], 'font-size': '13px'})],
+                    style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
+                           'margin-right': '5px'}),
+                html.Div([
+                    dcc.Dropdown(
+                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
+                        options=[{'label': i, 'value': i} for i in LOADED_DFS[df_name].MEASURE_TYPE_OPTIONS],
+                        value=y_measure,
+                        clearable=False,
+                        style={'font-size': '13px'})],
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+            html.Div([
+                html.Div([
+                    html.P(
+                        "{}:".format(get_label('Size')),
+                        style={'color': CLR['text1'], 'font-size': '13px'})],
+                    style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
+                           'margin-right': '5px'}),
+                html.Div([
+                    dcc.Dropdown(
+                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
+                        options=LOADED_DFS[df_name].VARIABLE_OPTIONS,
+                        value=size,
+                        clearable=False,
+                        style={'font-size': '13px'})],
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+            html.Div([
+                html.Div([
+                    html.P(
+                        "{}:".format(get_label('Size Measure')),
+                        style={'color': CLR['text1'], 'font-size': '13px'})],
+                    style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
+                           'margin-right': '5px'}),
+                html.Div([
+                    dcc.Dropdown(
+                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
+                        options=[{'label': i, 'value': i} for i in LOADED_DFS[df_name].MEASURE_TYPE_OPTIONS],
+                        value=size_measure,
+                        clearable=False,
+                        style={'font-size': '13px'})],
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
         ], style={'margin-left': '15px'})]
 
 

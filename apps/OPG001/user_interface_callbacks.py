@@ -18,11 +18,11 @@ from urllib.parse import parse_qsl
 
 # Internal Packages
 from apps.OPG001.layouts import get_line_graph_menu, get_bar_graph_menu, get_scatter_graph_menu, get_table_graph_menu, \
-    get_tile_layout, change_index, get_box_plot_menu, get_default_tab_content, get_layout_dashboard, get_layout_graph,\
-    get_data_menu, get_sankey_menu, get_dashboard_title_input
+    get_tile_layout, change_index, get_box_plot_menu, get_default_tab_content, get_layout_dashboard, get_layout_graph, \
+    get_data_menu, get_sankey_menu, get_dashboard_title_input, get_bubble_graph_menu
 from apps.OPG001.app import app
 from apps.OPG001.data import VIEW_CONTENT_HIDE, VIEW_CONTENT_SHOW, CUSTOMIZE_CONTENT_HIDE, CUSTOMIZE_CONTENT_SHOW, \
-    DATA_CONTENT_HIDE, DATA_CONTENT_SHOW, get_label, LAYOUT_CONTENT_SHOW, LAYOUT_CONTENT_HIDE, X_AXIS_OPTIONS,\
+    DATA_CONTENT_HIDE, DATA_CONTENT_SHOW, get_label, LAYOUT_CONTENT_SHOW, LAYOUT_CONTENT_HIDE, X_AXIS_OPTIONS, \
     LOADED_DFS, BAR_X_AXIS_OPTIONS
 
 
@@ -186,7 +186,6 @@ def _unlock_new_button(graph_options, disabled):
 )
 def _change_tab(tab_clicks, tab_close_clicks, _tab_add_nclicks,
                 tab_content, active_tab, data, tab_toggle_children, new_disabled, dashboard_title):
-
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     # if page loaded (changed_id == '.') or new button is disabled, prevent update
@@ -284,7 +283,6 @@ def _change_tab(tab_clicks, tab_close_clicks, _tab_add_nclicks,
      Input('num-tiles-4', 'data-num-tiles')]
 )
 def _update_num_tiles(input1, input2, input3):
-
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':
@@ -401,7 +399,6 @@ for x in range(0, 4):
         return view_content_style, customize_content_style, layouts_content_style, view_className, layouts_className, \
                customize_className
 
-
 # ************************************************CUSTOMIZE TAB*******************************************************
 
 # update graph menu to match selected graph type
@@ -449,16 +446,26 @@ for x in range(4):
 
         # apply graph selection and generate menu
         if selected_graph_type == 'Line':
-            menu = get_line_graph_menu(tile=tile, x=X_AXIS_OPTIONS[0], y=LOADED_DFS[df_name].VARIABLE_OPTIONS[0]['value'],
+            menu = get_line_graph_menu(tile=tile, x=X_AXIS_OPTIONS[0],
+                                       y=LOADED_DFS[df_name].VARIABLE_OPTIONS[0]['value'],
                                        measure_type=LOADED_DFS[df_name].MEASURE_TYPE_OPTIONS[0], df_name=df_name)
 
         elif selected_graph_type == 'Bar':
-            menu = get_bar_graph_menu(tile=tile, x=BAR_X_AXIS_OPTIONS[0], y=LOADED_DFS[df_name].VARIABLE_OPTIONS[0]['value'],
+            menu = get_bar_graph_menu(tile=tile, x=BAR_X_AXIS_OPTIONS[0],
+                                      y=LOADED_DFS[df_name].VARIABLE_OPTIONS[0]['value'],
                                       measure_type=LOADED_DFS[df_name].MEASURE_TYPE_OPTIONS[0], df_name=df_name)
 
         elif selected_graph_type == 'Scatter':
-            menu = get_scatter_graph_menu(tile=tile, x=X_AXIS_OPTIONS[0], y=LOADED_DFS[df_name].VARIABLE_OPTIONS[0]['value'],
+            menu = get_scatter_graph_menu(tile=tile, x=X_AXIS_OPTIONS[0],
+                                          y=LOADED_DFS[df_name].VARIABLE_OPTIONS[0]['value'],
                                           measure_type=LOADED_DFS[df_name].MEASURE_TYPE_OPTIONS[0], df_name=df_name)
+
+        elif selected_graph_type == 'Bubble':
+            menu = get_bubble_graph_menu(tile=tile, x=X_AXIS_OPTIONS[0],
+                                         x_measure=LOADED_DFS[df_name].MEASURE_TYPE_OPTIONS[0],
+                                         y=X_AXIS_OPTIONS[0], y_measure=LOADED_DFS[df_name].MEASURE_TYPE_OPTIONS[0],
+                                         size=X_AXIS_OPTIONS[0],
+                                         size_measure=LOADED_DFS[df_name].MEASURE_TYPE_OPTIONS[0], df_name=df_name)
 
         elif selected_graph_type == 'Table':
             menu = get_table_graph_menu(tile=tile, number_of_columns=15)

@@ -19,7 +19,7 @@ import dash_html_components as html
 from apps.OPG001.layouts import get_data_menu, get_customize_content, get_div_body
 from apps.OPG001.app import app
 from apps.OPG001.data import get_label, saved_layouts, saved_dashboards, CLR
-from apps.OPG001.saving_functions import delete_layout, save_layout_state, save_layout_to_file, save_layout_to_db,\
+from apps.OPG001.saving_functions import delete_layout, save_layout_state, save_layout_to_file, save_layout_to_db, \
     save_dashboard_state, save_dashboard_to_file, delete_dashboard, load_graph_menu
 
 
@@ -41,7 +41,6 @@ from apps.OPG001.saving_functions import delete_layout, save_layout_state, save_
      Input({'type': 'set-tile-title-trigger', 'index': MATCH}, 'data-dashboard_load_title')]
 )
 def _load_tile_title(tile_load_title, dashboard_load_title):
-
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':
@@ -66,7 +65,6 @@ def _load_tile_title(tile_load_title, dashboard_load_title):
     [State({'type': 'tile-link', 'index': ALL}, 'className')]
 )
 def _update_tile_loading_dropdown_options(tile_saving_trigger, dashboard_saving_trigger, links):
-
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':
@@ -87,7 +85,6 @@ def _update_tile_loading_dropdown_options(tile_saving_trigger, dashboard_saving_
      Input({'type': 'cancel-tile-overwrite', 'index': ALL}, 'n_clicks')]
 )
 def _manage_tile_saves_trigger(save_clicks, delete_clicks, confirm_tile_overwrite, cancel_tile_overwrite):
-
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':
@@ -441,7 +438,6 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
                    num_periods_0, num_periods_1, num_periods_2, num_periods_3, num_periods_4,
                    period_type_0, period_type_1, period_type_2, period_type_3, period_type_4,
                    date_tab_0, date_tab_1, date_tab_2, date_tab_3, date_tab_4):
-
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':
@@ -694,7 +690,7 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
 
         save_status_symbols = []
 
-    return save_status_symbols, options, options, delete_dropdown_val, update_graph_options_trigger,\
+    return save_status_symbols, options, options, delete_dropdown_val, update_graph_options_trigger, \
            tile_title_returns[0], tile_title_returns[1], tile_title_returns[2], tile_title_returns[3]
 
 
@@ -721,7 +717,6 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
 def _load_select_range_inputs(tile_tab, dashboard_tab, tile_start_year, tile_end_year, tile_start_secondary,
                               tile_end_secondary, dashboard_start_year, dashboard_end_year, dashboard_start_secondary,
                               dashboard_end_secondary):
-
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':
@@ -762,7 +757,6 @@ def _load_select_range_inputs(tile_tab, dashboard_tab, tile_start_year, tile_end
     [Input({'type': 'select-layout-dropdown', 'index': MATCH}, 'value')]
 )
 def _load_tile_layout(selected_layout):
-
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.' or selected_layout == '' or selected_layout is None:
@@ -825,7 +819,6 @@ def _load_tile_layout(selected_layout):
     [Input({'type': 'reset-selected-layout', 'index': MATCH}, 'data-')]
 )
 def _reset_selected_layout(trigger):
-
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':
@@ -882,7 +875,6 @@ def _reset_selected_layout(trigger):
     [Input('select-dashboard-dropdown', 'value')]
 )
 def _load_dashboard_layout(selected_dashboard):
-
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':
@@ -994,7 +986,6 @@ def _load_dashboard_layout(selected_dashboard):
     [Input({'type': 'select-range-trigger', 'index': ALL}, 'data-dashboard-tab')]
 )
 def _reset_selected_dashboard(trigger):
-
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':

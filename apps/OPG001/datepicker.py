@@ -13,6 +13,7 @@ import dash_html_components as html
 # Internal Modules
 from apps.OPG001.data import CLR, get_label, LANGUAGE, LOADED_DFS
 
+
 # Contents:
 #   DATE-PICKER LAYOUT
 #       - get_date_picker()
@@ -29,7 +30,7 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
     children = [
         html.H6(
             '{}:'.format(get_label("Calendar Type")),
-            style={'margin-top': '20px', 'color': CLR['text1']}if LOADED_DFS[df_name].FISCAL_AVAILABLE
+            style={'margin-top': '20px', 'color': CLR['text1']} if LOADED_DFS[df_name].FISCAL_AVAILABLE
             else {'display': 'None'}),
         dcc.Tabs([
             dcc.Tab(label="{}".format(get_label("Gregorian")), value='Gregorian'),
@@ -37,7 +38,7 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
             id={'type': 'fiscal-year-toggle', 'index': tile},
             className='toggle-tabs-wrapper',
             value=fiscal_toggle,
-            style={'display': 'block', 'text-align': 'center'}if LOADED_DFS[df_name].FISCAL_AVAILABLE
+            style={'display': 'block', 'text-align': 'center'} if LOADED_DFS[df_name].FISCAL_AVAILABLE
             else {'display': 'none'}),
         html.H6(
             '{}:'.format(get_label("Timeframe")),
@@ -141,11 +142,11 @@ def get_secondary_data(conditions, fiscal_toggle, df_name):
     # all tabs are enabled initially but the button for the tab the user is inside is disabled later
     quarter_disabled = month_disabled = week_disabled = False
     # all tabs are initially unselected
-    quarter_className = month_className = week_className = 'date-picker-nav'
+    quarter_class_name = month_class_name = week_class_name = 'date-picker-nav'
     # if inside quarter tab
     if conditions[0]:
         new_tab = 'Quarter'
-        quarter_className = 'date-picker-nav-selected'
+        quarter_class_name = 'date-picker-nav-selected'
         quarter_disabled = True
         default_max = 4
         if fiscal_toggle == 'Gregorian':
@@ -164,7 +165,7 @@ def get_secondary_data(conditions, fiscal_toggle, df_name):
     # if inside month tab
     elif conditions[1]:
         new_tab = 'Month'
-        month_className = 'date-picker-nav-selected'
+        month_class_name = 'date-picker-nav-selected'
         month_disabled = True
         default_max = 12
         if fiscal_toggle == 'Gregorian':
@@ -183,7 +184,7 @@ def get_secondary_data(conditions, fiscal_toggle, df_name):
     # if inside week tab
     else:
         new_tab = 'Week'
-        week_className = 'date-picker-nav-selected'
+        week_class_name = 'date-picker-nav-selected'
         week_disabled = True
         default_max = 52
         if fiscal_toggle == 'Gregorian':
@@ -199,7 +200,7 @@ def get_secondary_data(conditions, fiscal_toggle, df_name):
             fringe_max = 1
         else:
             fringe_max += 1
-    return quarter_className, quarter_disabled, month_className, month_disabled, week_className, week_disabled, \
+    return quarter_class_name, quarter_disabled, month_class_name, month_disabled, week_class_name, week_disabled, \
            fringe_min, fringe_max, default_max, max_year, new_tab
 
 

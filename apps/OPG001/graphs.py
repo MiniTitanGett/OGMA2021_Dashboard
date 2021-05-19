@@ -355,8 +355,24 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
 
     # Specialty filtering
     filtered_df = dff.copy().query(
-        "(`Variable Name` == @arg_value[0] and `Measure Type` == @arg_value[1]) or (`Variable Name` == @arg_value[2] and `Measure Type` == @arg_value[3]) or (`Variable Name` == @arg_value[4] and `Measure Type` == @arg_value[5])")
-    filtered_df = filtered_df.set_index(['Date of Event', 'Variable Name'])
+        "(`Variable Name` == @arg_value[0] and `Measure Type` == @arg_value[1]) or (`Variable Name` == @arg_value[2] "
+        "and `Measure Type` == @arg_value[3]) or (`Variable Name` == @arg_value[4] and `Measure Type` == @arg_value["
+        "5])")
+
+    if hierarchy_type == 'Level Filter':
+        color = hierarchy_level_dropdown
+    elif hierarchy_type == 'Specific Item' and hierarchy_graph_children == ['graph_children']:
+        color = LOADED_DFS[df_name].HIERARCHY_LEVELS[len(hierarchy_path)]
+    else:
+        color = LOADED_DFS[df_name].HIERARCHY_LEVELS[len(hierarchy_path) - 1]
+    filtered_df[['Date of Event', 'Measure Type', 'Variable Name',
+                 'Partial Period', color]] = filtered_df[
+        ['Date of Event', 'Measure Type', 'Variable Name',
+         'Partial Period', color]].astype(str)
+    filtered_df.reset_index(level=0, inplace=True)
+    filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color], columns='Variable Name',
+                                          values='Measure Value').reset_index()
+    filtered_df = filtered_df.dropna()
 
     # if hierarchy type is "Level Filter", or "Specific Item" while "Graph all in Dropdown" is selected
     if hierarchy_type == 'Level Filter' or (hierarchy_type == 'Specific Item' and
@@ -399,27 +415,16 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
 
         title += '<br><sub>{} {} </sub>'.format(get_label('Data Accessed on'), datetime.date(datetime.now()))
 
-        # if hierarchy type is "Level Filter", or "Specific Item" while "Graph all in Dropdown" is selected
-        if hierarchy_type == 'Level Filter' or (hierarchy_type == 'Specific Item' and
-                                                hierarchy_graph_children == ['graph_children']):
-            color = hierarchy_level_dropdown if hierarchy_type == 'Level Filter' else \
-                LOADED_DFS[df_name].HIERARCHY_LEVELS[len(hierarchy_path)]
+        legend_title_text = get_label(hierarchy_level_dropdown) if hierarchy_type == 'Level Filter' else \
+            get_label(LOADED_DFS[df_name].HIERARCHY_LEVELS[len(hierarchy_path)])
 
-            legend_title_text = get_label(hierarchy_level_dropdown) if hierarchy_type == 'Level Filter' else \
-                get_label(LOADED_DFS[df_name].HIERARCHY_LEVELS[len(hierarchy_path)])
-
-            filtered_df.rename(columns={color: get_label(color)}, inplace=True)
-
-        # else, hierarchy type is specific item while "Graph all in Dropdown" is unselected
-        else:
-            color = 'Variable Name'
-            legend_title_text = get_label('Variable Names')
+        filtered_df.rename(columns={color: get_label(color)}, inplace=True)
 
         filtered_df['Partial Period'] = filtered_df['Partial Period'].transform(
             lambda j: get_label('TRUE') if j else get_label('FALSE'))
 
         filtered_df.rename(columns={i: get_label(i) for i in
-                                    ['Date of Event', 'Measure Value', 'Variable Name', 'Partial Period']},
+                                    ['Date of Event', 'Variable Name', 'Partial Period']},
                            inplace=True)
         hover_data = [get_label('Variable Name'), get_label('Partial Period')]
 
@@ -427,17 +432,18 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
         fig = px.scatter(
             title=title,
             data_frame=filtered_df,
-            x=get_label('Date of Event'),
-            y=get_label('Measure Value'),
+            x=arg_value[0],
+            y=arg_value[2],
+            size=arg_value[4],
+            animation_frame='Date of Event',
             color=get_label(color),
-            hover_data=hover_data)
+            range_x=[0, int(filtered_df[arg_value[0]].max())],
+            range_y=[0, int(filtered_df[arg_value[2]].max())])
         fig.update_layout(
-            yaxis={'title': arg_value[1]},
             legend_title_text=legend_title_text,
             overwrite=True,
             plot_bgcolor='rgba(0, 0, 0, 0)',
             paper_bgcolor='rgba(0, 0, 0, 0)')
-        fig = set_partial_periods(fig, filtered_df, 'Scatter')
     # else, filtered is empty, create default empty graph
     else:
         fig = get_blank_figure(tile_title, title, hierarchy_type, hierarchy_level_dropdown,

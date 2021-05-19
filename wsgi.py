@@ -6,7 +6,7 @@ from apps.OPG001.app import app as opg001
 # from apps.app0001 import app as app0001
 # from apps.app0002 import app as app0002
 # from apps.app0004 import app as app0004
-# from apps.app0005 import app as app0005 IGNORE CHANGE
+# from apps.app0005 import app as app0005
 
 
 # https://dash.plotly.com/integrating-dash

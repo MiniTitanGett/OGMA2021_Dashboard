@@ -46,4 +46,5 @@ if LOG_LEVEL is None:
 
 DEBUG = (LOG_LEVEL == "DEBUG")
 
-
+SESSIONLESS = os.getenv("SESSIONLESS")
+SESSIONLESS = (SESSIONLESS is None) or (SESSIONLESS == 'true')

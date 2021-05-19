@@ -212,7 +212,8 @@ def get_layout():
 
 
 def get_layout_graph(report_name):
-    if config.CONNECTION_STRING is None:
+
+    if config.SESSIONLESS:
         return PreventUpdate
 
     conn = get_conn()

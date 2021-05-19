@@ -100,7 +100,8 @@ def save_layout_to_file(layouts):
 
 
 def save_layout_to_db(graph_title):
-    if config.CONNECTION_STRING is None:
+
+    if config.SESSIONLESS:
         return
 
     conn = get_conn()

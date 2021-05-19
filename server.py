@@ -3,7 +3,7 @@ from flask import Flask, request, session, g
 import flask
 import pyodbc
 import regex
-# from werkzeug.utils import redirect
+from werkzeug.utils import redirect
 import config
 from logging.config import dictConfig
 from logging import FileHandler
@@ -136,23 +136,24 @@ def close_conn():
 # WebModuleCreate?
 @server.before_first_request
 def before_first_request_func():
-    logging.debug("before first request: request=" + dict_to_string(request.values))
-    logging.debug("before first request: session=" + dict_to_string(session))
+    logging.debug(request.method + " " + request.url)
+    logging.debug("request=" + dict_to_string(request.values))
+    logging.debug("cookies=" + dict_to_string(request.cookies))
+    logging.debug("session=" + dict_to_string(session))
 
 
 # WebModuleBeforeDispatch
 @server.before_request
 def before_request_func():
-    logging.debug("before request: request=" + dict_to_string(request.values))
-    logging.debug("before request: session=" + dict_to_string(session))
+    logging.debug(request.method + " " + request.url)
+    logging.debug("request=" + dict_to_string(request.values))
+    logging.debug("cookies=" + dict_to_string(request.cookies))
+    logging.debug("session=" + dict_to_string(session))
 
-    if config.CONNECTION_STRING is None:
+    if config.SESSIONLESS:
+        session["sessionID"] = "0"
+        session["externalID"] = "0"
         return None
-
-    session["sessionID"] = "0"
-    session["externalID"] = "0"
-
-    return None  # TODO: The below is set up for a database connection, use when ready
 
     conn = get_conn()
 
@@ -161,7 +162,10 @@ def before_request_func():
 
     sessionid = request.args.get("sessionID", type=int)
 
-    if sessionid and (sessionid != session.get("sessionID")):
+    if sessionid:  # and (sessionid != session.get("sessionID")):
+        session["sessionID"] = "0"
+        session["externalID"] = "0"
+
         nonce_key = request.args.get("a")
         nonce_value = request.args.get("b")
 
@@ -171,6 +175,8 @@ def before_request_func():
         exec dbo.opp_validate_nonce {}, \'{}\', \'{}\', @p_external_id output, @p_result_status output
         select @p_external_id as external_id, @p_result_status as result_status
         """.format(sessionid, nonce_key, nonce_value)
+
+        # logging.debug("\n" + query)
 
         cursor = conn.cursor()
         cursor.execute(query)
@@ -190,19 +196,10 @@ def before_request_func():
         del cursor
 
         # redirect without the query params to prevent errors on refresh
-        # if request.args.get('reportName'):
-        #     return redirect(request.path + '?reportName=' + request.args.get('reportName'))
-            # response = redirect(request.path + '?reportName=' + request.args.get('reportName'))
-            # response.set_cookie("sessionID", session['sessionID'])
-            # response.set_cookie("externalID", session['externalID'])
-            # return response
-
-        # else:
-        #     return redirect(request.path)
-            # response = redirect(request.path)
-            # response.set_cookie("sessionID", session['sessionID'])
-            # response.set_cookie("externalID", session['externalID'])
-            # return response
+        if request.args.get('reportName'):
+            return redirect(request.path + '?reportName=' + request.args.get('reportName'))
+        else:
+            return redirect(request.path)
 
     # validate session
     sessionid = session["sessionID"]
@@ -217,6 +214,8 @@ def before_request_func():
     @p_result_status output
     select @p_external_id as external_id, @p_session_status as session_status, @p_result_status as result_status
     """.format(sessionid, sessionid, 1)
+
+    # logging.debug("\n" + query)
 
     cursor = conn.cursor()
     cursor.execute(query)
@@ -241,16 +240,16 @@ def before_request_func():
 # WebModuleAfterDispatch
 @server.after_request
 def after_request_func(response):
-    logging.debug("after request: request=" + dict_to_string(request.values))
-    logging.debug("after request: session=" + dict_to_string(session))
+    logging.debug("request=" + dict_to_string(request.values))
+    logging.debug("session=" + dict_to_string(session))
     return response
 
 
 # WebModuleException?
 @server.teardown_request
 def teardown_request_func(error=None):
-    logging.debug("teardown request: request=" + dict_to_string(request.values))
-    logging.debug("teardown request: session=" + dict_to_string(session))
+    logging.debug("request=" + dict_to_string(request.values))
+    logging.debug("session=" + dict_to_string(session))
 
     if error:
         logging.error(str(error))

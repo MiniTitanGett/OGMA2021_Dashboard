@@ -462,6 +462,8 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
     # arg_value[0] = group by (x axis)
     # arg_value[1] = measure type selector
     # arg_value[2] = variable names selector
+    # arg_value[3] = orientation
+    # arg_value[4] = animation bool
 
     # Specialty filtering
     filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[2])
@@ -573,13 +575,14 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         fig = px.bar(
             title=title,
             data_frame=filtered_df,
-            x=get_label(x),
-            y=get_label('Measure Value'),
+            x=get_label(x) if arg_value[3] == 'Vertical' else get_label('Measure Value'),
+            y=get_label('Measure Value') if arg_value[3] == 'Vertical' else get_label(x),
             color=get_label(color),
             barmode='group',
             hover_data=hover_data)
         fig.update_layout(
-            yaxis={'title': arg_value[1]},
+            yaxis={'title': arg_value[1]} if arg_value[3] == 'Vertical' else {},
+            xaxis={} if arg_value[3] == 'Vertical' else {'title': arg_value[1]},
             legend_title_text=legend_title_text,
             overwrite=True,
             plot_bgcolor='rgba(0, 0, 0, 0)',
@@ -600,17 +603,17 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
     return graph
 
 
-# bar graph layout
+# bar graph layout TODO: SHIFTING BARS (0 out if not data found) and VERTICAL TICKS OVERLAPPING WITH THE ANIMATION SLIDER
 def get_animated_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
                    hierarchy_type, hierarchy_graph_children, tile_title, df_name):
     # arg_value[0] = group by (x axis)
     # arg_value[1] = measure type selector
     # arg_value[2] = variable names selector
-    # arg_value[3] = animate graph
+    # arg_value[3] = orientation
+    # arg_value[4] = animate bool
 
     # Specialty filtering
     filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[2])
-
     # if hierarchy type is "Level Filter", or "Specific Item" while "Graph all in Dropdown" is selected
     if hierarchy_type == 'Level Filter' or (hierarchy_type == 'Specific Item' and
                                             hierarchy_graph_children == ['graph_children']):
@@ -700,7 +703,7 @@ def get_animated_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
         # else, hierarchy type is specific item while "Graph all in Dropdown" is unselected
         else:
             color = 'Variable Name' if group_by_item else 'Partial Period'
-            x = 'Date of Event' if group_by_item else 'Variable Name'
+            x = 'Variable Name'
             legend_title_text = get_label('Variable Name') if group_by_item else get_label('Partial Period')
             if not group_by_item:
                 filtered_df['Date of Event'] = \
@@ -713,20 +716,21 @@ def get_animated_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
         filtered_df.rename(columns={i: get_label(i) for i in
                                     ['Date of Event', 'Measure Value', 'Variable Name', 'Partial Period']},
                            inplace=True)
+        filtered_df['Date of Event'] = filtered_df['Date of Event'].astype(str)
 
         # generate graph
         fig = px.bar(
             title=title,
             data_frame=filtered_df,
-            x=get_label(x),
-            y=get_label('Measure Value'),
+            x=get_label(x) if arg_value[3] == 'Vertical' else get_label('Measure Value'),
+            y=get_label('Measure Value') if arg_value[3] == 'Vertical' else get_label(x),
             color=get_label(color),
             barmode='group',
             hover_data=hover_data,
             animation_frame=get_label('Date of Event'))
         fig.update_layout(
-            yaxis={'title': arg_value[1], 'range': [0, filtered_df['Measure Value'].max()]},
-            xaxis={'visible': False},
+            yaxis={'title': arg_value[1], 'range': [0, filtered_df['Measure Value'].max()]} if arg_value[3] == 'Vertical' else {},
+            xaxis={'visible': False} if arg_value[3] == 'Vertical' else {'title': arg_value[1], 'range': [0, filtered_df['Measure Value'].max()]},
             legend_title_text=legend_title_text,
             overwrite=True,
             plot_bgcolor='rgba(0, 0, 0, 0)',
@@ -1144,7 +1148,7 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
 
     # bar graph creation
     elif graph_type == 'Bar':
-        if graph_options[3]:
+        if graph_options[4]:
             return get_animated_bar_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
                               list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name)
         else:

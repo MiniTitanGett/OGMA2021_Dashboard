@@ -913,7 +913,8 @@ def get_bar_graph_menu(tile, x, y, measure_type, df_name):
     # (args-value: {})[0] = x-axis
     # (args-value: {})[1] = y-axis (measure type)
     # (args-value: {})[2] = graphed variables
-    # (args-value: {})[3] = animate graph
+    # (args-value: {})[3] = orientation
+    # (args-value: {})[4] = animate graph
 
     return [
         html.P(
@@ -966,8 +967,22 @@ def get_bar_graph_menu(tile, x, y, measure_type, df_name):
                         clearable=False,
                         style={'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})]),
+            html.Div([
+                html.Div([
+                    html.P(
+                        "{}:".format(get_label('Graph Orientation')),
+                        style={'color': CLR['text1'], 'font-size': '13px'})],
+                    style={'display': 'inline-block', 'width': '70px', 'position': 'relative', 'top': '-3px',
+                           'margin-right': '15px'}),
+                html.Div([
+                    dcc.RadioItems(
+                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
+                        options=[{'label': get_label(i), 'value': i} for i in ['Vertical', 'Horizontal']],
+                        value='Vertical',
+                        style={'font-size': '13px'})],
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
             dcc.Checklist(
-                id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
+                id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
                 options=[{'label': get_label('Animate Over Time'),
                           'value': 'animate'}],
                 value=[],

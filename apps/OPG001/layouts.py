@@ -913,6 +913,7 @@ def get_bar_graph_menu(tile, x, y, measure_type, df_name):
     # (args-value: {})[0] = x-axis
     # (args-value: {})[1] = y-axis (measure type)
     # (args-value: {})[2] = graphed variables
+    # (args-value: {})[3] = animate graph
 
     return [
         html.P(
@@ -964,7 +965,14 @@ def get_bar_graph_menu(tile, x, y, measure_type, df_name):
                         multi=True,
                         clearable=False,
                         style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})])
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})]),
+            dcc.Checklist(
+                id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
+                options=[{'label': get_label('Animate Over Time'),
+                          'value': 'animate'}],
+                value=[],
+                style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
+
         ], style={'margin-left': '15px'})]
 
 

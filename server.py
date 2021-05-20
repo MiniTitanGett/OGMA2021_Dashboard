@@ -1,56 +1,9 @@
-import logging
 from flask import Flask, request, session, g
 import flask
 import pyodbc
-import regex
 from werkzeug.utils import redirect
 import config
-from logging.config import dictConfig
-from logging import FileHandler
-
-LOG_FORMAT = "[%(asctime)s] %(levelname)s in %(filename)s (fn:%(funcName)s ln:%(lineno)d): %(message)s"
-
-
-class CustomFileHandler(FileHandler):
-
-    def __init__(self, filename):
-        FileHandler.__init__(self, filename)
-
-    def emit(self, record):
-        # https://stackoverflow.com/questions/4324790/removing-control-characters-from-a-string-in-python
-        record.msg = regex.sub(r'\p{C}\[[0-9;]*m', '', record.msg)  # [37m
-        FileHandler.emit(self, record)
-
-
-dictConfig({
-    'version': 1,
-    'formatters': {'default': {
-        'format': LOG_FORMAT
-    }},
-    'handlers': {
-        'wsgi': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'default',
-            'level': config.LOG_LEVEL
-        }  # ,
-        # 'custom_handler': {
-        #     'class': CustomFileHandler,  # 'logging.FileHandler',
-        #     'formatter': 'default',
-        #     'filename': r'{}'.format(config.LOG_FILE),
-        #     'level': config.LOG_LEVEL
-        # }
-    },
-    'root': {
-        'level': config.LOG_LEVEL,
-        'handlers': ['wsgi']  # ['wsgi', 'custom_handler']
-    }
-})
-
-cfh = CustomFileHandler(r'{}'.format(config.LOG_FILE))
-cfh.setFormatter(logging.Formatter(LOG_FORMAT))
-cfh.setLevel(config.LOG_LEVEL)
-logging.getLogger("root").addHandler(cfh)
-
+import logging
 
 # https://stackoverflow.com/questions/18967441/add-a-prefix-to-all-flask-routes/36033627#36033627
 # https://docs.microsoft.com/en-us/visualstudio/python/configure-web-apps-for-iis-windows?view=vs-2019

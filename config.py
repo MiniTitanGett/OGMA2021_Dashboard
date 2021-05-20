@@ -117,3 +117,8 @@ sys.stdout = StreamToLogger(log, logging.INFO)
 sys.stderr = StreamToLogger(log, logging.ERROR)
 
 logging.debug("Configuration complete.")
+
+POINTER_PREFIX = os.getenv("POINTER_PREFIX")
+
+if POINTER_PREFIX is None:
+    POINTER_PREFIX = "Report_Ext_"

@@ -379,7 +379,7 @@ def get_layout_dashboard():
                     id='confirm-delete-dashboard'),
                 dcc.Dropdown(
                     id='delete-dashboard',
-                    options=[{'label': key, 'value': key} for key in saved_dashboards],
+                    options=[{'label': saved_dashboards[key]['Dashboard Title'], 'value': key} for key in saved_dashboards],
                     clearable=False,
                     style={'width': '250px', 'font-size': '13px', 'box-sizing': 'border-box', 'height': '35px',
                            'display': 'inline-block', 'vertical-align': 'bottom', 'float': 'right',
@@ -388,7 +388,7 @@ def get_layout_dashboard():
                     placeholder=get_label('Delete a saved dashboard')),
                 dcc.Dropdown(
                     id='select-dashboard-dropdown',
-                    options=[{'label': key, 'value': key} for key in saved_dashboards],
+                    options=[{'label': saved_dashboards[key]['Dashboard Title'], 'value': key} for key in saved_dashboards],
                     clearable=False,
                     style={'width': '250px', 'font-size': '13px', 'box-sizing': 'border-box', 'height': '35px',
                            'display': 'inline-block', 'vertical-align': 'bottom', 'float': 'right',
@@ -654,7 +654,7 @@ def get_tile(tile, tile_keys=None):
                     id={'type': 'select-layout-dropdown-div', 'index': tile},
                     children=[
                         dcc.Dropdown(id={'type': 'select-layout-dropdown', 'index': tile},
-                                     options=[{'label': key, 'value': key} for key in saved_layouts],
+                                     options=[{'label': saved_layouts[key]['Title'], 'value': key} for key in saved_layouts],
                                      style={'width': '400px', 'font-size': '13px'},
                                      clearable=True,
                                      value='',
@@ -667,7 +667,7 @@ def get_tile(tile, tile_keys=None):
                         id={'type': 'delete-layout-dropdown-div', 'index': tile},
                         children=[
                             dcc.Dropdown(id={'type': 'delete-layout-dropdown', 'index': tile},
-                                         options=[{'label': key, 'value': key} for key in saved_layouts],
+                                         options=[{'label': saved_layouts[key]['Title'], 'value': key} for key in saved_layouts],
                                          style={'width': '400px', 'font-size': '13px'},
                                          value='',
                                          placeholder='{}...'.format(get_label('Select')))

@@ -488,8 +488,6 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
         used_dashboard_titles = []
 
         for dashboard_layout in saved_dashboards:
-            print("used dashboard titles")
-            print(saved_dashboards[dashboard_layout]['Dashboard Title'])
             used_dashboard_titles.append(saved_dashboards[dashboard_layout]['Dashboard Title'])
 
         # get non-overwriting status symbol display (check-mark or ban symbol)
@@ -505,15 +503,12 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
 
         # auto name blank tile titles
         for idx, tile_title in enumerate(tile_titles):
-            print('Tile Titles')
             if tile_title == '':
                 auto_named_titles[idx] = tile_titles[idx] = dashboard_title + '-' + str(idx + 1)
 
         used_titles = []
 
         for key in saved_layouts:
-            print("USED titles")
-            print(saved_layouts[key]["Title"])
             used_titles.append(saved_layouts[key]["Title"])
 
         # check if the dashboard title is blank
@@ -534,7 +529,6 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
 
             # dashboard-overwrite index 0 = confirm overwrite
             # dashboard-overwrite index 1 = cancel overwrite
-
             # if conflicting graph titles
 
             if any(x in used_titles for x in tile_titles):
@@ -545,7 +539,7 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
                     if idx != (len(conflicting_graphs_list) - 1):
                         conflicting_graphs += ', '
                 # if conflicting graph titles and dashboard title
-                if dashboard_title in used_dashboard_titles: # was saved_dashboards
+                if dashboard_title in used_dashboard_titles:  # was saved_dashboards
                     overwrite_tooltip = "{} \'{}\', {} {}".format(
                         get_label('Overwrite dashboard'),
                         dashboard_title,
@@ -663,8 +657,14 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
 
                 intermediate_pointer = POINTER_PREFIX + regex.sub('[^A-Za-z0-9]+', '', tile_titles[i])
 
+                used_titles = []
+
+                for key in saved_layouts:
+                    used_titles.append(saved_layouts[key]["Title"])
+
                 while True:
-                    if intermediate_pointer in saved_layouts:
+                    if intermediate_pointer in saved_layouts \
+                            and saved_layouts[intermediate_pointer]["Title"] not in used_titles:
                         tile_pointer = intermediate_pointer + "_"
                         intermediate_pointer = tile_pointer
                     else:
@@ -723,7 +723,7 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
 
                 # save tile to file
                 save_layout_state(tile_pointer, {'Graph Type': graph_types[i], 'Args List': args_list, **tile_data,
-                                                  'Title': tile_titles[i]})
+                                                 'Title': tile_titles[i]})
                 save_layout_to_file(saved_layouts)
                 save_layout_to_db(tile_pointer)
 
@@ -971,11 +971,26 @@ def _load_dashboard_layout(selected_dashboard):
 
             # Change key to Tile Pointer instead of Tile Title
             tile_pointer = dict_value['Tile Pointer']
-            tile_title = saved_layouts[tile_pointer]["Title"]
             link_state = dict_value['Link']
 
-            # TODO: Error here if the saved layout the dashboard is referencing has been deleted
-            tile_data = saved_layouts[tile_pointer].copy()
+            if tile_pointer in saved_layouts:
+                tile_data = saved_layouts[tile_pointer].copy()
+                tile_title = saved_layouts[tile_pointer]["Title"]
+            else:
+                tile_title = "This Graph has been deleted"
+                tile_data = {
+                    "Args List": ["", "", ""],
+                    "Data Set": "OPG001_2016-17_Week_v3.csv",
+                    "Fiscal Toggle": "Gregorian",
+                    "Graph All Toggle": [],
+                    "Graph Type": "Line",
+                    "Hierarchy Toggle": "Level Filter",
+                    "Level Value": None,
+                    "NID Path": "root",
+                    "Num Periods": "5",
+                    "Period Type": "last-years",
+                    "Timeframe": "all-time",
+                    "Title": "This Graph has been deleted"}
 
             # pop graph_type/args_list to compare the dashboard master data menu to the saved tile data menu
             graph_type = tile_data.pop('Graph Type')

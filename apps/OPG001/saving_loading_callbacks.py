@@ -895,6 +895,8 @@ def _reset_selected_layout(trigger):
 
 # *********************************************DASHBOARD LOADING*****************************************************
 
+# TODO: check if dataset exists and if the dataset being called by the load function no longer exists display a message
+#  to the user
 # load dashboard layout
 @app.callback(
     # dashboard title
@@ -976,6 +978,8 @@ def _load_dashboard_layout(selected_dashboard):
             if tile_pointer in saved_layouts:
                 tile_data = saved_layouts[tile_pointer].copy()
                 tile_title = saved_layouts[tile_pointer]["Title"]
+            # TODO: In 'prod' we will check for pointers and only do a 'virtual' delete for
+            #  the single user
             else:
                 tile_title = "This Graph has been deleted"
                 tile_data = {

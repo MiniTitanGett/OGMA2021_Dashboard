@@ -877,7 +877,7 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
         return get_bar_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
                               list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name)
     # box plot creation
-    elif graph_type == 'Box Plot':
+    elif graph_type == 'Box_Plot':
         return get_box_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
                               list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name)
     # table creation

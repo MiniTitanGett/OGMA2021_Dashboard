@@ -52,7 +52,7 @@ from dateutil.relativedelta import relativedelta
 # ***********************************************ARBITRARY CONSTANTS*************************************************
 from server import get_conn
 
-GRAPH_OPTIONS = ['Line', 'Bar', 'Scatter', 'Box Plot', 'Table', 'Sankey']
+GRAPH_OPTIONS = ['Line', 'Bar', 'Scatter', 'Box_Plot', 'Table', 'Sankey']
 
 X_AXIS_OPTIONS = ['Time']
 

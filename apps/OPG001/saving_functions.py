@@ -188,7 +188,7 @@ def load_graph_menu(graph_type, tile, df_name, args_list):
     elif graph_type == 'Table':
         number_of_columns = args_list[1]
         graph_menu = get_table_graph_menu(tile=tile, number_of_columns=number_of_columns)
-    elif graph_type == 'Box Plot':
+    elif graph_type == 'Box_Plot':
         axis_measure = args_list[0]
         graphed_variables = args_list[1]
         graph_orientation = args_list[2]

@@ -463,7 +463,7 @@ for x in range(4):
         elif selected_graph_type == 'Table':
             menu = get_table_graph_menu(tile=tile, number_of_columns=15)
 
-        elif selected_graph_type == 'Box Plot':
+        elif selected_graph_type == 'Box_Plot':
             menu = get_box_plot_menu(tile=tile, axis_measure=LOADED_DFS[df_name].MEASURE_TYPE_OPTIONS[0],
                                      graphed_variables=LOADED_DFS[df_name].VARIABLE_OPTIONS[0]['value'],
                                      graph_orientation='Horizontal', df_name=df_name, show_data_points=[])

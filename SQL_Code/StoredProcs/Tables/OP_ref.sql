@@ -23,13 +23,24 @@ MAXERRORS = 100,
 FIELDTERMINATOR = ',',  
 ROWTERMINATOR = '\n'  
 );
+go
 
 UPDATE [dbo].['OP_ref'] 
 SET    ref_value = REPLACE(ref_value, ' ', '_')
 WHERE  ref_value LIKE '%[ ]%'
+go
+
+Create Proc dbo.spreftable
+
+as
 
 Select  [dbo].['OP Ref table'].ref_id, [dbo].['OP_ref'].ref_table,[dbo].['OP_ref'].ref_value, [dbo].['OP_ref'].language, [dbo].['OP_ref'].ref_desc
 FROM [dbo].['OP_ref'] LEFT JOIN [dbo].['OP Ref table'] ON 
 ([dbo].['OP_ref'].ref_table=[dbo].['OP Ref table'].ref_table AND [dbo].['OP_ref'].ref_value=[dbo].['OP Ref table'].ref_value AND [dbo].['OP_ref'].language=[dbo].['OP Ref table'].language AND[dbo].['OP_ref'].ref_desc=[dbo].['OP Ref table'].ref_desc)
 
-SELECT * FROM [dbo].['OP_ref'] ;
+
+go
+
+/*
+exec dbo.spreftable
+go*/

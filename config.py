@@ -118,7 +118,12 @@ sys.stderr = StreamToLogger(log, logging.ERROR)
 
 logging.debug("Configuration complete.")
 
-POINTER_PREFIX = os.getenv("POINTER_PREFIX")
+REPORT_POINTER_PREFIX = os.getenv("REPORT_POINTER_PREFIX")
 
-if POINTER_PREFIX is None:
-    POINTER_PREFIX = "Report_Ext_"
+if REPORT_POINTER_PREFIX is None:
+    REPORT_POINTER_PREFIX = "Report_Ext_"
+
+DASHBOARD_POINTER_PREFIX = os.getenv("DASHBOARD_POINTER_PREFIX")
+
+if DASHBOARD_POINTER_PREFIX is None:
+    DASHBOARD_POINTER_PREFIX = "Dashboard_Ext_"

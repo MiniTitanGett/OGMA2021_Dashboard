@@ -22,7 +22,7 @@ from apps.OPG001.app import app
 from apps.OPG001.data import get_label, saved_layouts, saved_dashboards, CLR
 from apps.OPG001.saving_functions import delete_layout, save_layout_state, save_layout_to_file, save_layout_to_db, \
     save_dashboard_state, save_dashboard_to_file, delete_dashboard, load_graph_menu
-from config import POINTER_PREFIX
+from config import REPORT_POINTER_PREFIX, DASHBOARD_POINTER_PREFIX
 
 
 #   SAVING
@@ -207,7 +207,7 @@ for y in range(0, 4):
 
             tile = int(dash.callback_context.inputs_list[0]['id']['index'])
 
-            intermediate_pointer = POINTER_PREFIX + regex.sub('[^A-Za-z0-9]+', '', graph_title)
+            intermediate_pointer = REPORT_POINTER_PREFIX + regex.sub('[^A-Za-z0-9]+', '', graph_title)
 
             graph_titles = []
 
@@ -475,7 +475,7 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
     # if save requested or the overwrite was confirmed, check for exceptions and save
     if 'button-save-dashboard' in changed_id or '{"index":0,"type":"dashboard-overwrite"}.n_clicks' == changed_id:
 
-        intermediate_dashboard_pointer = POINTER_PREFIX + regex.sub('[^A-Za-z0-9]+', '', dashboard_title)
+        intermediate_dashboard_pointer = DASHBOARD_POINTER_PREFIX + regex.sub('[^A-Za-z0-9]+', '', dashboard_title)
 
         while True:
             if intermediate_dashboard_pointer in saved_layouts:
@@ -655,7 +655,7 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
 
             for i in range(len(links)):
 
-                intermediate_pointer = POINTER_PREFIX + regex.sub('[^A-Za-z0-9]+', '', tile_titles[i])
+                intermediate_pointer = REPORT_POINTER_PREFIX + regex.sub('[^A-Za-z0-9]+', '', tile_titles[i])
 
                 used_titles = []
 

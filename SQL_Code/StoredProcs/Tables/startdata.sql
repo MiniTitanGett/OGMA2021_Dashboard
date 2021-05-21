@@ -4,9 +4,9 @@ GO
 /****** Object:  Table [dbo].['start_data']    Script Date: 2021-05-19 12:03:31 PM ******/
 
 CREATE TABLE [dbo].['start_data'](
-	ref_value varchar(max) ,
-	language varchar(2),
-	ref_desc varchar(max),
+	ref_value varchar(max) NOT NULL,
+	language varchar(2) NOT NULL,
+	ref_desc varchar(max) NOT NULL,
 	
 
 ) ON [PRIMARY]

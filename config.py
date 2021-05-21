@@ -122,8 +122,3 @@ POINTER_PREFIX = os.getenv("POINTER_PREFIX")
 
 if POINTER_PREFIX is None:
     POINTER_PREFIX = "Report_Ext_"
-
-POINTER_PREFIX = os.getenv("POINTER_PREFIX")
-
-if POINTER_PREFIX is None:
-    POINTER_PREFIX = "Report_Ext_"

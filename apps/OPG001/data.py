@@ -52,7 +52,7 @@ from dateutil.relativedelta import relativedelta
 # ***********************************************ARBITRARY CONSTANTS*************************************************
 from server import get_conn
 
-GRAPH_OPTIONS = ['Line', 'Bar', 'Scatter', 'Bubble', 'Box Plot', 'Table', 'Sankey']
+GRAPH_OPTIONS = ['Line', 'Bar', 'Scatter', 'Bubble', 'Box_Plot', 'Table', 'Sankey']
 
 X_AXIS_OPTIONS = ['Time']
 
@@ -126,7 +126,7 @@ class DataSet:
             df = pd.read_json('apps/OPG001/test_data/{}'.format(df_name),
                               orient='records',
                               lines=True)
-        elif df_name.find('.sql') > -1:  # TODO: This is testing code for connecting to a personal database
+        elif df_name.find('.sql') > -1: # TODO: This is testing code for connecting to a personal database
             conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
             sql_query = pd.read_sql_query(
                 '''

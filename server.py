@@ -1,69 +1,9 @@
-import logging
 from flask import Flask, request, session, g
 import flask
 import pyodbc
-import regex
 from werkzeug.utils import redirect
 import config
-from logging.config import dictConfig
-from logging import FileHandler
-
-LOG_FORMAT = "[%(asctime)s] %(levelname)s in %(filename)s (fn:%(funcName)s ln:%(lineno)d): %(message)s"
-
-
-class CustomFileHandler(FileHandler):
-
-    def __init__(self, filename):
-        FileHandler.__init__(self, filename)
-
-    def emit(self, record):
-        # https://stackoverflow.com/questions/4324790/removing-control-characters-from-a-string-in-python
-        record.msg = regex.sub(r'\p{C}\[[0-9;]*m', '', record.msg)  # [37m
-        FileHandler.emit(self, record)
-
-
-# from dotenv import load_dotenv
-# import os
-
-# load_dotenv()
-# set up logger using logging_config.ini file in venv or .env, else default
-# if os.path.exists(os.path.dirname(os.path.realpath(__file__))+'\\.env'):
-#     LOG_PATH = os.getenv('LOG_PATH')+'mylog.log'
-# else:
-#     LOG_PATH = 'C:/Temp/mylog.log'
-#     try:
-#         os.mkdir('C:/Temp/')
-#     except FileExistsError as exc:
-#         pass
-
-dictConfig({
-    'version': 1,
-    'formatters': {'default': {
-        'format': LOG_FORMAT  # '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
-    }},
-    'handlers': {
-        'wsgi': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'default',
-            'level': config.LOG_LEVEL
-        }  # ,
-        # 'custom_handler': {
-        #     'class': CustomFileHandler,  # 'logging.FileHandler',
-        #     'formatter': 'default',
-        #     'filename': r'{}'.format(config.LOG_FILE),
-        #     'level': config.LOG_LEVEL
-        # }
-    },
-    'root': {
-        'level': config.LOG_LEVEL,
-        'handlers': ['wsgi']  # ['wsgi', 'custom_handler']
-    }
-})
-
-cfh = CustomFileHandler(r'{}'.format(config.LOG_FILE))
-cfh.setFormatter(logging.Formatter(LOG_FORMAT))  # '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'))
-cfh.setLevel(config.LOG_LEVEL)
-logging.getLogger("root").addHandler(cfh)
+import logging
 
 # https://stackoverflow.com/questions/18967441/add-a-prefix-to-all-flask-routes/36033627#36033627
 # https://docs.microsoft.com/en-us/visualstudio/python/configure-web-apps-for-iis-windows?view=vs-2019
@@ -98,6 +38,23 @@ server.debug = config.DEBUG
 server.wsgi_app = PrefixMiddleware(server.wsgi_app)  # , prefix=config.APPLICATION_ROOT)
 
 
+def dict_to_string(d):
+
+    if d is None:
+        return "None"
+
+    s = ""
+
+    for key in d:
+
+        if s != "":
+            s += ", "
+
+        s += "('" + key + "', '" + str(d[key]) + "')"
+
+    return "[" + s + "]"
+
+
 def get_conn():
     if 'conn' not in g:
         g.conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
@@ -130,34 +87,40 @@ def close_conn():
 
 
 # WebModuleCreate?
-# @server.before_first_request
-# def before_first_request_func():
-# print('before first request')
+@server.before_first_request
+def before_first_request_func():
+    logging.debug(request.method + " " + request.url)
+    logging.debug("request=" + dict_to_string(request.values))
+    logging.debug("cookies=" + dict_to_string(request.cookies))
+    logging.debug("session=" + dict_to_string(session))
 
 
 # WebModuleBeforeDispatch
 @server.before_request
 def before_request_func():
-    # print('before request')
+    logging.debug(request.method + " " + request.url)
+    logging.debug("request=" + dict_to_string(request.values))
+    logging.debug("cookies=" + dict_to_string(request.cookies))
+    logging.debug("session=" + dict_to_string(session))
 
-    if config.CONNECTION_STRING is None:
+    if config.SESSIONLESS:
+        session["sessionID"] = "0"
+        session["externalID"] = "0"
         return None
-
-    session['sessionID'] = 0
-    session['externalID'] = 0
-
-    return None  # TODO: The below is set up for a database connection, use when ready
 
     conn = get_conn()
 
     # if the sessionid exists in the request, validate the nonce
     # otherwiese validate the sessionid/tokenid out of the cookie
 
-    sessionid = request.args.get('sessionID', type=int)
+    sessionid = request.args.get("sessionID", type=int)
 
-    if sessionid and (sessionid != session.get('sessionID')):
-        nonce_key = request.args.get('a')
-        nonce_value = request.args.get('b')
+    if sessionid:  # and (sessionid != session.get("sessionID")):
+        session["sessionID"] = "0"
+        session["externalID"] = "0"
+
+        nonce_key = request.args.get("a")
+        nonce_value = request.args.get("b")
 
         query = """\
         declare @p_external_id int
@@ -166,19 +129,21 @@ def before_request_func():
         select @p_external_id as external_id, @p_result_status as result_status
         """.format(sessionid, nonce_key, nonce_value)
 
+        # logging.debug("\n" + query)
+
         cursor = conn.cursor()
         cursor.execute(query)
 
         results = cursor.fetchone()
 
-        if results.result_status != 'OK':
+        if results.result_status != "OK":
             cursor.close()
             del cursor
-            print(results.result_status)
+            logging.error(results.result_status)
             flask.abort(404)
 
-        session['sessionID'] = sessionid
-        session['externalID'] = results.external_id
+        session["sessionID"] = sessionid
+        session["externalID"] = results.external_id
 
         cursor.close()
         del cursor
@@ -190,8 +155,8 @@ def before_request_func():
             return redirect(request.path)
 
     # validate session
-    sessionid = session['sessionID']
-    externalid = session['externalID']
+    sessionid = session["sessionID"]
+    externalid = session["externalID"]
 
     query = """\
     declare @p_external_id int
@@ -203,20 +168,22 @@ def before_request_func():
     select @p_external_id as external_id, @p_session_status as session_status, @p_result_status as result_status
     """.format(sessionid, sessionid, 1)
 
+    # logging.debug("\n" + query)
+
     cursor = conn.cursor()
     cursor.execute(query)
 
     results = cursor.fetchone()
 
-    if results.result_status != 'OK' or results.external_id != externalid or results.session_status != 'OK':
+    if results.result_status != "OK" or results.external_id != externalid or results.session_status != 'OK':
         cursor.close()
         del cursor
-        if results.result_status != 'OK':
-            print(results.result_status)
-        elif results.session_status != 'OK':
-            print(results.session_status)
+        if results.result_status != "OK":
+            logging.error(results.result_status)
+        elif results.session_status != "OK":
+            logging.error(results.session_status)
         else:
-            print('Invalid external_id: {}'.format(externalid))
+            logging.error("Invalid external_id: {}".format(externalid))
         flask.abort(404)
 
     cursor.close()
@@ -226,29 +193,28 @@ def before_request_func():
 # WebModuleAfterDispatch
 @server.after_request
 def after_request_func(response):
-    # print('after request')
+    logging.debug("request=" + dict_to_string(request.values))
+    logging.debug("session=" + dict_to_string(session))
     return response
 
 
 # WebModuleException?
 @server.teardown_request
 def teardown_request_func(error=None):
-    # print('teardown request')
+    logging.debug("request=" + dict_to_string(request.values))
+    logging.debug("session=" + dict_to_string(session))
 
     if error:
-        # log the error
-        print(str(error))
+        logging.error(str(error))
 
 
 # WebModuleDestroy?
 @server.teardown_appcontext
 def teardown_appcontext_func(error=None):
-    # print('teardown appcontext')
     close_conn()
 
     if error:
-        # log the error
-        print(str(error))
+        logging.error(str(error))
 
 
 @server.route('/')

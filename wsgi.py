@@ -1,3 +1,4 @@
+import config  # MUST BE THE FIRST IMPORT!!!
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from werkzeug.serving import run_simple
 from server import server
@@ -6,7 +7,7 @@ from apps.OPG001.app import app as opg001
 # from apps.app0002 import app as app0002
 # from apps.app0004 import app as app0004
 # from apps.app0005 import app as app0005
-import config
+
 
 # https://dash.plotly.com/integrating-dash
 # https://stackoverflow.com/questions/59627976/integrating-dash-apps-into-flask-minimal-example

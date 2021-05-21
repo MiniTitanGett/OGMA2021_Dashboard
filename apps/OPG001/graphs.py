@@ -8,6 +8,8 @@ contains functions to generate graphs
 
 # External Packages
 from _datetime import datetime
+
+import numpy as np
 import plotly.express as px
 import dash_core_components as dcc
 import dash_table
@@ -437,7 +439,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
         fig.update_layout(
             xaxis_title='{} ({})'.format(arg_value[0], arg_value[1]),
             yaxis_title='{} ({})'.format(arg_value[2], arg_value[3]),
-            legend_title_text='Size: <br> &#9; {} ({})<br> <br>{}'.format(arg_value[4], arg_value[5], legend_title_text),
+            legend_title_text='Size: <br> &#9; {} ({})<br> <br>{}'.format(arg_value[4], arg_value[5],
+                                                                          legend_title_text),
             overwrite=True,
             plot_bgcolor='rgba(0, 0, 0, 0)',
             paper_bgcolor='rgba(0, 0, 0, 0)')
@@ -605,7 +608,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
 
 # bar graph layout TODO: SHIFTING BARS (0 out if not data found) and VERTICAL TICKS OVERLAPPING WITH THE ANIMATION SLIDER
 def get_animated_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
-                   hierarchy_type, hierarchy_graph_children, tile_title, df_name):
+                            hierarchy_type, hierarchy_graph_children, tile_title, df_name):
     # arg_value[0] = group by (x axis)
     # arg_value[1] = measure type selector
     # arg_value[2] = variable names selector
@@ -716,30 +719,42 @@ def get_animated_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
         filtered_df.rename(columns={i: get_label(i) for i in
                                     ['Date of Event', 'Measure Value', 'Variable Name', 'Partial Period']},
                            inplace=True)
+
         filtered_df['Date of Event'] = filtered_df['Date of Event'].astype(str)
 
-
         # TODO: Remove in production when there is a full dataset
-        for i in filtered_df['Date of Event'].unique():
-            for j in filtered_df[get_label(x)].unique():
-                for k in filtered_df[get_label(color)].unique():
-                    if filtered_df.query("`Date of Event` == @i and `{}` == @j and `{}` == @k".format(get_label(x), get_label(color))).empty:
-                        filtered_df = filtered_df.append({'Date of Event': i, get_label(x): j, get_label(color): k, 'Measure Value': 0}, ignore_index=True)
+        if hierarchy_type == 'Level Filter' or (hierarchy_type == 'Specific Item' and
+                                                hierarchy_graph_children == ['graph_children']):
+            for i in filtered_df['Date of Event'].unique():
+                for j in filtered_df[get_label(x)].unique():
+                    for k in filtered_df[get_label(color)].unique():
+                        if filtered_df.query("`Date of Event` == @i and `{}` == @j and `{}` == @k".format(get_label(x),
+                                                                                                          get_label(
+                                                                                                                  color))).empty:
+                            filtered_df = filtered_df.append(
+                                {'Date of Event': i, get_label(x): j, get_label(color): k, 'Measure Value': 0},
+                                ignore_index=True)
         # fixes shifting indices
-        filtered_df = filtered_df.sort_values(by = [get_label(x)])
+        filtered_df = filtered_df.sort_values(by=[get_label(x)])
         # generate graph
         fig = px.bar(
             title=title,
             data_frame=filtered_df,
             x=get_label(x) if arg_value[3] == 'Vertical' else get_label('Measure Value'),
             y=get_label('Measure Value') if arg_value[3] == 'Vertical' else get_label(x),
-            color=get_label(color),
+            color=get_label(color) if hierarchy_type == 'Level Filter' or (hierarchy_type == 'Specific Item' and
+                                                                           hierarchy_graph_children == [
+                                                                               'graph_children']) else None,
             barmode='group',
             hover_data=hover_data,
             animation_frame=get_label('Date of Event'))
         fig.update_layout(
-            yaxis={'title': arg_value[1], 'range': [0, filtered_df['Measure Value'].max()]} if arg_value[3] == 'Vertical' else {'type': 'category'},
-            xaxis={'visible': False, 'type': 'category'} if arg_value[3] == 'Vertical' else {'title': arg_value[1], 'range': [0, filtered_df['Measure Value'].max()]},
+            yaxis={'title': arg_value[1], 'range': [0, filtered_df['Measure Value'].max()]} if arg_value[
+                                                                                                   3] == 'Vertical' else {
+                'type': 'category'},
+            xaxis={'visible': False, 'type': 'category'} if arg_value[3] == 'Vertical' else {'title': arg_value[1],
+                                                                                             'range': [0, filtered_df[
+                                                                                                 'Measure Value'].max()]},
             legend_title_text=legend_title_text,
             overwrite=True,
             plot_bgcolor='rgba(0, 0, 0, 0)',
@@ -1158,11 +1173,13 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
     # bar graph creation
     elif graph_type == 'Bar':
         if graph_options[4]:
-            return get_animated_bar_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
-                              list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name)
+            return get_animated_bar_figure(graph_options, filtered_df, hierarchy_specific_dropdown,
+                                           hierarchy_level_dropdown,
+                                           list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title,
+                                           df_name)
         else:
             return get_bar_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
-                              list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name)
+                                  list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name)
     # box plot creation
     elif graph_type == 'Box Plot':
         return get_box_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,

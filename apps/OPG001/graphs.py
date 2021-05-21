@@ -718,6 +718,15 @@ def get_animated_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                            inplace=True)
         filtered_df['Date of Event'] = filtered_df['Date of Event'].astype(str)
 
+
+        # TODO: Remove in production when there is a full dataset
+        for i in filtered_df['Date of Event'].unique():
+            for j in filtered_df[get_label(x)].unique():
+                for k in filtered_df[get_label(color)].unique():
+                    if filtered_df.query("`Date of Event` == @i and `{}` == @j and `{}` == @k".format(get_label(x), get_label(color))).empty:
+                        filtered_df = filtered_df.append({'Date of Event': i, get_label(x): j, get_label(color): k, 'Measure Value': 0}, ignore_index=True)
+        # fixes shifting indices
+        filtered_df = filtered_df.sort_values(by = [get_label(x)])
         # generate graph
         fig = px.bar(
             title=title,
@@ -729,8 +738,8 @@ def get_animated_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
             hover_data=hover_data,
             animation_frame=get_label('Date of Event'))
         fig.update_layout(
-            yaxis={'title': arg_value[1], 'range': [0, filtered_df['Measure Value'].max()]} if arg_value[3] == 'Vertical' else {},
-            xaxis={'visible': False} if arg_value[3] == 'Vertical' else {'title': arg_value[1], 'range': [0, filtered_df['Measure Value'].max()]},
+            yaxis={'title': arg_value[1], 'range': [0, filtered_df['Measure Value'].max()]} if arg_value[3] == 'Vertical' else {'type': 'category'},
+            xaxis={'visible': False, 'type': 'category'} if arg_value[3] == 'Vertical' else {'title': arg_value[1], 'range': [0, filtered_df['Measure Value'].max()]},
             legend_title_text=legend_title_text,
             overwrite=True,
             plot_bgcolor='rgba(0, 0, 0, 0)',

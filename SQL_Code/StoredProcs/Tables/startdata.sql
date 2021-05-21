@@ -27,5 +27,6 @@ MAXERRORS = 100,
 FIELDTERMINATOR = ',',  
 ROWTERMINATOR = '\n'  
 );
+GO
 
 SELECT * FROM [dbo].['start_data'] ;

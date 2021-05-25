@@ -8,8 +8,8 @@ Create PROCEDURE dbo.spOPref_getOPrefdata
 AS
 
 	SELECT ref_value, ref_desc
-	From [dbo].['OP_ref'] 
-	Where [dbo].['OP_ref'].ref_table= @Table AND [dbo].['OP_ref'].language= @lang;
+	From [dbo].[OP_Ref] 
+	Where [dbo].[OP_Ref].ref_table= @Table AND [dbo].[OP_Ref].[language] = @lang;
 
 GO
 

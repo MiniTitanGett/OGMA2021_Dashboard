@@ -1,8 +1,8 @@
 USE [OGMA_Test]
 GO
-DROP TABLE [dbo].['OP_ref']
-/****** Object:  Table [dbo].['Ref ']    Script Date: 2021-05-19 12:03:31 PM ******/
-CREATE TABLE [dbo].['OP_ref'](
+DROP TABLE [dbo].[OP_ref_insert]
+/****** Object:  Table [dbo].[OP_ref_insert]    Script Date: 2021-05-19 12:03:31 PM ******/
+CREATE TABLE [dbo].[OP_ref_insert](
 	
 	ref_table varchar(max) NOT NULL ,
 	ref_value varchar(max) NOT NULL ,
@@ -13,7 +13,7 @@ CREATE TABLE [dbo].['OP_ref'](
 ) ON [PRIMARY]
 GO
 
-BULK INSERT [dbo].['OP_ref']  
+BULK INSERT [dbo].[OP_ref_insert]
 FROM 'C:\Users\derek\OGMA2021_Dashboard\apps\OPG001\test_data\Modified Language Data JG.csv'
 WITH  
 (  
@@ -25,7 +25,7 @@ ROWTERMINATOR = '\n'
 );
 go
 
-UPDATE [dbo].['OP_ref'] 
+UPDATE [dbo].[OP_ref_insert]
 SET    ref_value = REPLACE(ref_value, ' ', '_')
 WHERE  ref_value LIKE '%[ ]%'
 go
@@ -34,9 +34,9 @@ Create Proc dbo.spreftable
 
 as
 
-Select  [dbo].['OP Ref table'].ref_id, [dbo].['OP_ref'].ref_table,[dbo].['OP_ref'].ref_value, [dbo].['OP_ref'].language, [dbo].['OP_ref'].ref_desc
-FROM [dbo].['OP_ref'] LEFT JOIN [dbo].['OP Ref table'] ON 
-([dbo].['OP_ref'].ref_table=[dbo].['OP Ref table'].ref_table AND [dbo].['OP_ref'].ref_value=[dbo].['OP Ref table'].ref_value AND [dbo].['OP_ref'].language=[dbo].['OP Ref table'].language AND[dbo].['OP_ref'].ref_desc=[dbo].['OP Ref table'].ref_desc)
+Select  [dbo].[OP_Ref].ref_id, [dbo].[OP_ref_insert].ref_table,[dbo].[OP_ref_insert].ref_value, [dbo].[OP_ref_insert].language, [dbo].[OP_ref_insert].ref_desc
+FROM [dbo].[OP_ref_insert] LEFT JOIN [dbo].[OP_Ref] ON
+([dbo].[OP_ref_insert].ref_table=[dbo].[OP_Ref].ref_table AND [dbo].[OP_ref_insert].ref_value=[dbo].[OP_Ref].ref_value AND [dbo].[OP_ref_insert].language=[dbo].[OP_Ref].language AND[dbo].[OP_ref_insert].ref_desc=[dbo].[OP_Ref].ref_desc)
 
 
 go

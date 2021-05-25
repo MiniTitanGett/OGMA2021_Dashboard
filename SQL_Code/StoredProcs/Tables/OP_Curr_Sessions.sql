@@ -1,7 +1,7 @@
 USE [OGMA_Test];
 GO
 
-/****** Object:  Table [dbo].['OP_Curr_Sessions']    Script Date: 2021-05-21 1:15:51 PM ******/
+/****** Object:  Table [dbo].[OP_Curr_Sessions]    Script Date: 2021-05-21 1:15:51 PM ******/
 
 CREATE TABLE [dbo].[OP_Curr_Sessions](
 	session_id int NOT NULL,
@@ -27,4 +27,4 @@ END;
 GO
 
 -- Test
-SELECT * FROM [dbo].[OP_Curr_Sessions] ;
+SELECT * FROM [dbo].[OP_Curr_Sessions];

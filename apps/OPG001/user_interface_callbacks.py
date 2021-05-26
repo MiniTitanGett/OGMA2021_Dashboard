@@ -23,7 +23,7 @@ from apps.OPG001.layouts import get_line_graph_menu, get_bar_graph_menu, get_sca
 from apps.OPG001.app import app
 from apps.OPG001.data import VIEW_CONTENT_HIDE, VIEW_CONTENT_SHOW, CUSTOMIZE_CONTENT_HIDE, CUSTOMIZE_CONTENT_SHOW, \
     DATA_CONTENT_HIDE, DATA_CONTENT_SHOW, get_label, LAYOUT_CONTENT_SHOW, LAYOUT_CONTENT_HIDE, X_AXIS_OPTIONS, \
-    LOADED_DFS, BAR_X_AXIS_OPTIONS
+    session, BAR_X_AXIS_OPTIONS
 
 
 # Contents:
@@ -447,36 +447,36 @@ for x in range(4):
         # apply graph selection and generate menu
         if selected_graph_type == 'Line':
             menu = get_line_graph_menu(tile=tile, x=X_AXIS_OPTIONS[0],
-                                       y=LOADED_DFS[df_name].VARIABLE_OPTIONS[0]['value'],
-                                       measure_type=LOADED_DFS[df_name].MEASURE_TYPE_OPTIONS[0], df_name=df_name)
+                                       y=session[df_name].VARIABLE_OPTIONS[0]['value'],
+                                       measure_type=session[df_name].MEASURE_TYPE_OPTIONS[0], df_name=df_name)
 
         elif selected_graph_type == 'Bar':
             menu = get_bar_graph_menu(tile=tile, x=BAR_X_AXIS_OPTIONS[0],
-                                      y=LOADED_DFS[df_name].VARIABLE_OPTIONS[0]['value'],
-                                      measure_type=LOADED_DFS[df_name].MEASURE_TYPE_OPTIONS[0], df_name=df_name)
+                                      y=session[df_name].VARIABLE_OPTIONS[0]['value'],
+                                      measure_type=session[df_name].MEASURE_TYPE_OPTIONS[0], df_name=df_name)
 
         elif selected_graph_type == 'Scatter':
             menu = get_scatter_graph_menu(tile=tile, x=X_AXIS_OPTIONS[0],
-                                          y=LOADED_DFS[df_name].VARIABLE_OPTIONS[0]['value'],
-                                          measure_type=LOADED_DFS[df_name].MEASURE_TYPE_OPTIONS[0], df_name=df_name)
+                                          y=session[df_name].VARIABLE_OPTIONS[0]['value'],
+                                          measure_type=session[df_name].MEASURE_TYPE_OPTIONS[0], df_name=df_name)
 
         elif selected_graph_type == 'Bubble':
             menu = get_bubble_graph_menu(tile=tile, x=X_AXIS_OPTIONS[0],
-                                         x_measure=LOADED_DFS[df_name].MEASURE_TYPE_OPTIONS[0],
-                                         y=X_AXIS_OPTIONS[0], y_measure=LOADED_DFS[df_name].MEASURE_TYPE_OPTIONS[0],
+                                         x_measure=session[df_name].MEASURE_TYPE_OPTIONS[0],
+                                         y=X_AXIS_OPTIONS[0], y_measure=session[df_name].MEASURE_TYPE_OPTIONS[0],
                                          size=X_AXIS_OPTIONS[0],
-                                         size_measure=LOADED_DFS[df_name].MEASURE_TYPE_OPTIONS[0], df_name=df_name)
+                                         size_measure=session[df_name].MEASURE_TYPE_OPTIONS[0], df_name=df_name)
 
         elif selected_graph_type == 'Table':
             menu = get_table_graph_menu(tile=tile, number_of_columns=15)
 
         elif selected_graph_type == 'Box_Plot':
-            menu = get_box_plot_menu(tile=tile, axis_measure=LOADED_DFS[df_name].MEASURE_TYPE_OPTIONS[0],
-                                     graphed_variables=LOADED_DFS[df_name].VARIABLE_OPTIONS[0]['value'],
+            menu = get_box_plot_menu(tile=tile, axis_measure=session[df_name].MEASURE_TYPE_OPTIONS[0],
+                                     graphed_variables=session[df_name].VARIABLE_OPTIONS[0]['value'],
                                      graph_orientation='Horizontal', df_name=df_name, show_data_points=[])
 
         elif selected_graph_type == 'Sankey':
-            menu = get_sankey_menu(tile=tile, graphed_options=LOADED_DFS[df_name].VARIABLE_OPTIONS[0]['value'],
+            menu = get_sankey_menu(tile=tile, graphed_options=session[df_name].VARIABLE_OPTIONS[0]['value'],
                                    df_name=df_name)
 
         else:

@@ -6,15 +6,16 @@ contains arbitrary constants, data constants, and data manipulation functions
 """
 ######################################################################################################################
 
+from datetime import datetime, timedelta
+
+import numpy as np
 # External Packages
 import pandas as pd
-import numpy as np
-
 import pyodbc
+from dateutil.relativedelta import relativedelta
+from flask import session
 
 import config
-from datetime import datetime, timedelta
-from dateutil.relativedelta import relativedelta
 
 # Contents:
 #   ARBITRARY CONSTANTS
@@ -50,7 +51,6 @@ from dateutil.relativedelta import relativedelta
 
 
 # ***********************************************ARBITRARY CONSTANTS*************************************************
-from server import get_conn
 
 GRAPH_OPTIONS = ['Line', 'Bar', 'Scatter', 'Bubble', 'Box_Plot', 'Table', 'Sankey']
 
@@ -126,7 +126,7 @@ class DataSet:
             df = pd.read_json('apps/OPG001/test_data/{}'.format(df_name),
                               orient='records',
                               lines=True)
-        elif df_name.find('.sql') > -1: # TODO: This is testing code for connecting to a personal database
+        elif df_name.find('.sql') > -1:  # TODO: This is testing code for connecting to a personal database
             conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
             sql_query = pd.read_sql_query(
                 '''
@@ -300,16 +300,16 @@ def data_filter(hierarchy_path, secondary_type, end_secondary, end_year, start_s
 
     if hierarchy_toggle == 'Level Filter' or (
             (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == ['graph_children'])):
-        filtered_df = LOADED_DFS[df_name].DF.copy()
+        filtered_df = session[df_name].DF.copy()
 
         if hierarchy_toggle == 'Level Filter':
             # If anything is in the drop down
             if hierarchy_level_dropdown:
                 # Filter based on hierarchy level
                 filtered_df.dropna(subset=[hierarchy_level_dropdown], inplace=True)
-                for i in range(len(LOADED_DFS[df_name].HIERARCHY_LEVELS) - int(hierarchy_level_dropdown[1])):
-                    bool_series = pd.isnull(filtered_df[LOADED_DFS[df_name].HIERARCHY_LEVELS[
-                        len(LOADED_DFS[df_name].HIERARCHY_LEVELS) - 1 - i]])
+                for i in range(len(session[df_name].HIERARCHY_LEVELS) - int(hierarchy_level_dropdown[1])):
+                    bool_series = pd.isnull(filtered_df[session[df_name].HIERARCHY_LEVELS[
+                        len(session[df_name].HIERARCHY_LEVELS) - 1 - i]])
                     filtered_df = filtered_df[bool_series]
             else:
                 # Returns empty data frame with column names
@@ -317,22 +317,22 @@ def data_filter(hierarchy_path, secondary_type, end_secondary, end_year, start_s
         else:
             # Filters out all rows that are less specific than given path length
             for i in range(len(hierarchy_path)):
-                filtered_df = filtered_df[filtered_df[LOADED_DFS[df_name].HIERARCHY_LEVELS[i]] == hierarchy_path[i]]
+                filtered_df = filtered_df[filtered_df[session[df_name].HIERARCHY_LEVELS[i]] == hierarchy_path[i]]
             # Filters out all rows that are more specific than given path length plus one to preserve the child column
-            for i in range(len(LOADED_DFS[df_name].HIERARCHY_LEVELS) - (len(hierarchy_path) + 1)):
-                bool_series = pd.isnull(filtered_df[LOADED_DFS[df_name].HIERARCHY_LEVELS[
-                    len(LOADED_DFS[df_name].HIERARCHY_LEVELS) - 1 - i]])
+            for i in range(len(session[df_name].HIERARCHY_LEVELS) - (len(hierarchy_path) + 1)):
+                bool_series = pd.isnull(filtered_df[session[df_name].HIERARCHY_LEVELS[
+                    len(session[df_name].HIERARCHY_LEVELS) - 1 - i]])
                 filtered_df = filtered_df[bool_series]
-            filtered_df.dropna(subset=[LOADED_DFS[df_name].HIERARCHY_LEVELS[len(hierarchy_path)]], inplace=True)
+            filtered_df.dropna(subset=[session[df_name].HIERARCHY_LEVELS[len(hierarchy_path)]], inplace=True)
     else:
-        filtered_df = LOADED_DFS[df_name].DF
+        filtered_df = session[df_name].DF
         # Filters out all rows that don't include path member at specific level
         for i in range(len(hierarchy_path)):
-            filtered_df = filtered_df[filtered_df[LOADED_DFS[df_name].HIERARCHY_LEVELS[i]] == hierarchy_path[i]]
+            filtered_df = filtered_df[filtered_df[session[df_name].HIERARCHY_LEVELS[i]] == hierarchy_path[i]]
         # Filters out all rows that are more specific than given path
-        for i in range(len(LOADED_DFS[df_name].HIERARCHY_LEVELS) - len(hierarchy_path)):
-            bool_series = pd.isnull(filtered_df[LOADED_DFS[df_name].HIERARCHY_LEVELS[
-                len(LOADED_DFS[df_name].HIERARCHY_LEVELS) - 1 - i]])
+        for i in range(len(session[df_name].HIERARCHY_LEVELS) - len(hierarchy_path)):
+            bool_series = pd.isnull(filtered_df[session[df_name].HIERARCHY_LEVELS[
+                len(session[df_name].HIERARCHY_LEVELS) - 1 - i]])
             filtered_df = filtered_df[bool_series]
 
     # account for date type (Gregorian vs Fiscal)
@@ -345,15 +345,15 @@ def data_filter(hierarchy_path, secondary_type, end_secondary, end_year, start_s
     if timeframe == 'all-time':
         secondary_type = 'Month'
         if fiscal_toggle == 'Fiscal':
-            start_year = LOADED_DFS[df_name].FISCAL_MIN_YEAR
-            end_year = LOADED_DFS[df_name].FISCAL_MONTH_MAX_YEAR
-            start_secondary = LOADED_DFS[df_name].FISCAL_MONTH_FRINGE_MIN
-            end_secondary = LOADED_DFS[df_name].FISCAL_MONTH_FRINGE_MAX + 1
+            start_year = session[df_name].FISCAL_MIN_YEAR
+            end_year = session[df_name].FISCAL_MONTH_MAX_YEAR
+            start_secondary = session[df_name].FISCAL_MONTH_FRINGE_MIN
+            end_secondary = session[df_name].FISCAL_MONTH_FRINGE_MAX + 1
         else:  # year_type == 'Gregorian'
-            start_year = LOADED_DFS[df_name].GREGORIAN_MIN_YEAR
-            end_year = LOADED_DFS[df_name].GREGORIAN_MONTH_MAX_YEAR
-            start_secondary = LOADED_DFS[df_name].GREGORIAN_MONTH_FRINGE_MIN
-            end_secondary = LOADED_DFS[df_name].GREGORIAN_MONTH_FRINGE_MAX + 1
+            start_year = session[df_name].GREGORIAN_MIN_YEAR
+            end_year = session[df_name].GREGORIAN_MONTH_MAX_YEAR
+            start_secondary = session[df_name].GREGORIAN_MONTH_FRINGE_MIN
+            end_secondary = session[df_name].GREGORIAN_MONTH_FRINGE_MAX + 1
 
     # account for special timeframe case 'to-current'
     if timeframe == 'to-current':
@@ -455,7 +455,7 @@ def customize_menu_filter(dff, df_name, measure_type, variable_names):
         for variable_name in variable_names:
             # Filters based on rows that match the variable name path
             aggregate_df = aggregate_df.append(
-                filtered_df[filtered_df[LOADED_DFS[df_name].VARIABLE_LEVEL] == variable_name])
+                filtered_df[filtered_df[session[df_name].VARIABLE_LEVEL] == variable_name])
 
         filtered_df = aggregate_df
 
@@ -526,12 +526,14 @@ LANGUAGE = 'en'
 #     print("The .env file. was not found, loading default data sets")
 #     DATA_SETS = ['OPG001_2016-17_Week_v3.csv', 'OPG010 Sankey Data.xlsx']
 
-DATA_SETS = config.DATA_SETS
+DATA_SETS = config.DATA_SETS  # TODO: swap this with session keys or another similar idea
 
-LOADED_DFS = {}
 
-for i in DATA_SETS:
-    # Load data frame and extract data
-    LOADED_DFS[i] = DataSet(i)
-    # Build variable tree
-    LOADED_DFS[i].get_visual_hierarchy()
+def load_datasets(data_sets):
+    # data_sets = config.DATA_SETS
+
+    for i in data_sets:
+        # Load data frame and extract data
+        session[i] = DataSet(i)
+        # Build variable tree
+        session[i].get_visual_hierarchy()

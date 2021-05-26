@@ -19,7 +19,7 @@ from re import search
 from apps.OPG001.graphs import __update_graph
 from apps.OPG001.hierarchy_filter import generate_history_button, generate_dropdown
 from apps.OPG001.app import app
-from apps.OPG001.data import LOADED_DFS, data_filter, CLR, get_label
+from apps.OPG001.data import session, data_filter, CLR, get_label
 from apps.OPG001.datepicker import get_date_box, update_date_columns, get_secondary_data
 
 # Contents:
@@ -335,11 +335,11 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
             year_disabled = True
             # use the year scheme (gregorian/fiscal) selected by the user
             if fiscal_toggle == 'Gregorian':
-                min_year = LOADED_DFS[df_name].GREGORIAN_MIN_YEAR
-                max_year = LOADED_DFS[df_name].GREGORIAN_YEAR_MAX
+                min_year = session[df_name].GREGORIAN_MIN_YEAR
+                max_year = session[df_name].GREGORIAN_YEAR_MAX
             else:
-                min_year = LOADED_DFS[df_name].FISCAL_MIN_YEAR
-                max_year = LOADED_DFS[df_name].FISCAL_YEAR_MAX
+                min_year = session[df_name].FISCAL_MIN_YEAR
+                max_year = session[df_name].FISCAL_YEAR_MAX
             left_column = html.Div([
                 get_date_box(id={'type': 'start-year-input', 'index': tile},
                              value=min_year,
@@ -368,9 +368,9 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
             new_tab = get_secondary_data(conditions, fiscal_toggle, df_name)
             # set min_year according to user selected fiscal/gregorian time type
             if fiscal_toggle == 'Gregorian':
-                min_year = LOADED_DFS[df_name].GREGORIAN_MIN_YEAR
+                min_year = session[df_name].GREGORIAN_MIN_YEAR
             else:
-                min_year = LOADED_DFS[df_name].FISCAL_MIN_YEAR
+                min_year = session[df_name].FISCAL_MIN_YEAR
             # if data exists for only one year, use fringe extremes
             if min_year == max_year:
                 max_min = fringe_min + 1
@@ -412,9 +412,9 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                 year_className = 'date-picker-nav-selected'
                 year_disabled = True
                 if fiscal_toggle == 'Gregorian':
-                    max_year = LOADED_DFS[df_name].GREGORIAN_YEAR_MAX
+                    max_year = session[df_name].GREGORIAN_YEAR_MAX
                 else:
-                    max_year = LOADED_DFS[df_name].FISCAL_YEAR_MAX
+                    max_year = session[df_name].FISCAL_YEAR_MAX
             # if not inside of year tab, get secondary data
             else:
                 selected_secondary_min = start_secondary_selection
@@ -425,9 +425,9 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                 new_tab = get_secondary_data(conditions, fiscal_toggle, df_name)
             # set min_year according to user selected time type (gregorian/fiscal)
             if fiscal_toggle == 'Gregorian':
-                min_year = LOADED_DFS[df_name].GREGORIAN_MIN_YEAR
+                min_year = session[df_name].GREGORIAN_MIN_YEAR
             else:
-                min_year = LOADED_DFS[df_name].FISCAL_MIN_YEAR
+                min_year = session[df_name].FISCAL_MIN_YEAR
             # if not inside year tab, generate left and right columns with secondary input boxes
             if fringe_min and fringe_max:
                 left_column, right_column = update_date_columns(

@@ -1,9 +1,13 @@
+from datetime import timedelta
+
 from flask import Flask, request, session, g
 import flask
 import pyodbc
 from werkzeug.utils import redirect
 import config
 import logging
+
+from apps.OPG001.data import load_datasets
 from flask_session import Session
 
 # https://stackoverflow.com/questions/18967441/add-a-prefix-to-all-flask-routes/36033627#36033627
@@ -40,8 +44,10 @@ server.wsgi_app = PrefixMiddleware(server.wsgi_app)  # , prefix=config.APPLICATI
 
 
 server.config['SESSION_TYPE'] = 'filesystem'
-server.config['SESSION_PERMANENT'] = False
+server.config['SESSION_PERMANENT'] = True
 server.config['SESSION_USE_SIGNER'] = True
+server.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=2)
+server.config['SESSION_FILE_THRESHOLD'] = 100
 
 server_session = Session(server)
 
@@ -203,6 +209,15 @@ def before_request_func():
 def after_request_func(response):
     logging.debug("request=" + dict_to_string(request.values))
     logging.debug("session=" + dict_to_string(session))
+
+    if 'dataset_list' not in session:
+        if session['sessionID'] == 105: # TODO: shows how we can get data specific to a session id
+            load_datasets(['OPG001_2016-17_Week_v3.csv'])
+            session['dataset_list'] = ['OPG001_2016-17_Week_v3.csv']
+        else:
+            load_datasets(config.DATA_SETS)
+            session['dataset_list'] = config.DATA_SETS
+
     return response
 
 

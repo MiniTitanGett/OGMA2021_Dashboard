@@ -324,13 +324,17 @@ SET    ref_value = REPLACE(ref_value, ' ', '_')
 WHERE  ref_value LIKE '%[ ]%'
 go
 
-Create Proc dbo.spreftable
+IF OBJECT_ID('dbo.reftable') IS NOT NULL
+    PRINT   'REFTABLE Procedure Exists'
 
-as
+ELSE
+    Create Proc dbo.reftable
 
-Select  * From [dbo].[OP_Ref]
-go
+    as
+
+    Select  * From [dbo].[OP_Ref]
+    go
 
 /*
-exec dbo.spreftable
+exec dbo.reftable
 go*/

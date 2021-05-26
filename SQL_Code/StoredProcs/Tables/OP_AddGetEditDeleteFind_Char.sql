@@ -1,12 +1,16 @@
-CREATE PROCEDURE OP_AddGetEditDeleteFind_Char
+IF OBJECT_ID('OP_AddGetEditDeleteFind_Char') IS NOT NULL
+    PRINT 'OP_AddGetEditDeleteFind_Char Procedure Exists'
 
-	@person_id int,
-	@char_type varchar(20),
-	@char_type_qualifier varchar(30)
+ELSE
+    CREATE PROCEDURE OP_AddGetEditDeleteFind_Char
 
-	AS
+	    @person_id int,
+	    @char_type varchar(20),
+	    @char_type_qualifier varchar(30)
 
-	SELECT char_type, char_type_qualifier, char_value_text
-	FROM [dbo].[OP_Char]
-	where [dbo].[OP_Char].person_id=@person_id AND [dbo].[OP_Char].char_type=@char_type AND [dbo].[OP_Char].char_type_qualifier=@char_type_qualifier
-GO
+	    AS
+
+	    SELECT char_type, char_type_qualifier, char_value_text
+	    FROM [dbo].[OP_Char]
+	    where [dbo].[OP_Char].person_id=@person_id AND [dbo].[OP_Char].char_type=@char_type AND [dbo].[OP_Char].char_type_qualifier=@char_type_qualifier
+    GO

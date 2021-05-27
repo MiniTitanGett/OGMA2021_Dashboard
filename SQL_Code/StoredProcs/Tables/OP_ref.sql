@@ -328,11 +328,15 @@ IF OBJECT_ID('dbo.reftable') IS NOT NULL
     PRINT   'REFTABLE Procedure Exists'
 
 ELSE
+	BEGIN
+		EXEC('
     Create Proc dbo.reftable
 
     as
-
-    Select  * From [dbo].[OP_Ref]
+	BEGIN
+    Select * From [dbo].[OP_Ref]
+		END')
+	END
     go
 
 /*

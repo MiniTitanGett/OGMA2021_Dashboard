@@ -19,7 +19,7 @@ ELSE
     END
 GO
 
-INSERT into [dbo].[OP_Ref] (ref_value, language, ref_desc)
+INSERT into [dbo].[start_data] (ref_value, language, ref_desc)
 values
 ('OPG 001 Time Series Measures','En','OPG 001 Time Series Measures'),
 ('OPG 001 Time Series Measures','Fr','OPG 001 Mesures de Séries Chronologiques'),

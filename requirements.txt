@@ -25,3 +25,5 @@ six==1.15.0
 treelib==1.6.1
 Werkzeug==1.0.1
 xlrd==1.2.0
+pymssql~=2.2.1
+regex~=2021.4.4

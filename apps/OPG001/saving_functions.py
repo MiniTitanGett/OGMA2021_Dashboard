@@ -10,6 +10,8 @@ stores all functions used for saving graph meta data and dashboard meta data
 import os
 import json
 import pyodbc
+import logging
+import pymssql
 from flask import session
 from dash.exceptions import PreventUpdate
 
@@ -68,7 +70,54 @@ def load_saved_graphs():
         json_file.close()
 
 
-load_saved_graphs()
+def load_saved_graphs_from_db():
+    """
+    loads the saved layouts into the saved_layouts dictionary from the database
+    """
+    if config.SESSIONLESS:
+        return
+
+    conn = get_conn()
+    cursor = conn.cursor()
+    query = "dbo.opp_addgeteditdeletefind_extdashboardreports"
+    params = (session["sessionID"], "Find", "", "", "", "", "", pymssql.output("VARCHAR", 255))
+    params = cursor.callproc(query, params)
+
+    if params[7] != "OK":
+        result_status = params[7]
+        cursor.close()
+        del cursor
+        logging.error(result_status)
+        raise ValueError(result_status)
+
+    results = cursor.fetchall()
+
+    for row in results:
+        save_layout_state(row["ref_value"], row["clob_text"])
+
+#    query = """\
+#    declare @p_result_status varchar(255)
+#    exec dbo.opp_addgeteditdeletefind_extdashboardreports {}, \'{}\', null, null, null, null, null, @p_result_status output
+#    select @p_result_status as result_status
+#    """.format(session['sessionID'], 'Find')
+
+#    cursor = conn.cursor()
+#    cursor.execute(query)
+
+#    results = cursor.fetchone()
+
+#    if results.result_status != "OK":
+#        cursor.close()
+#        del cursor
+#        logging.error(results.result_status)
+#        raise ValueError(results.result_status)
+
+#    cursor.close()
+#    del cursor
+
+
+# load_saved_graphs()
+# load_saved_graphs_from_db()
 
 
 # loads the saved graphs into a dictionary

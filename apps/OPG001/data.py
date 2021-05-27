@@ -525,8 +525,7 @@ LANGUAGE = 'en'
 # else:
 #     print("The .env file. was not found, loading default data sets")
 #     DATA_SETS = ['OPG001_2016-17_Week_v3.csv', 'OPG010 Sankey Data.xlsx']
-
-DATA_SETS = config.DATA_SETS  # TODO: swap this with session keys or another similar idea
+# DATA_SETS = config.DATA_SETS
 
 
 def load_datasets(data_sets):

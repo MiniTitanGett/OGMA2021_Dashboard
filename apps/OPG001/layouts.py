@@ -19,7 +19,7 @@ import config
 from server import get_conn
 from apps.OPG001.app import app
 from apps.OPG001.data import GRAPH_OPTIONS, CLR, DATA_CONTENT_HIDE, VIEW_CONTENT_SHOW, BAR_X_AXIS_OPTIONS, \
-    CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LANGUAGE, LAYOUT_CONTENT_HIDE, session, DATA_SETS, \
+    CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LANGUAGE, LAYOUT_CONTENT_HIDE, \
     saved_layouts, saved_dashboards
 from apps.OPG001.hierarchy_filter import get_hierarchy_layout
 from apps.OPG001.datepicker import get_date_picker
@@ -131,15 +131,17 @@ def get_data_set_picker(tile, df_name):
             style={'color': CLR['text1'], 'margin-top': '25px', 'display': 'inline-block'}),
         dcc.Dropdown(
             id={'type': 'data-set', 'index': tile},
-            options=[{'label': i, 'value': i} for i in DATA_SETS],
+            options=[{'label': i, 'value': i} for i in session['dataset_list']],
             value=df_name,
             clearable=False)]
 
 
 # get DATA side-menu
-def get_data_menu(tile, df_name=DATA_SETS[0], mode='Default', hierarchy_toggle='Level Filter', level_value=None,
+def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Filter', level_value=None,
                   nid_path="root", graph_all_toggle=None, fiscal_toggle='Gregorian', input_method='all-time',
                   num_periods='5', period_type='last-years'):
+    if df_name is None:
+        df_name=session['dataset_list'][0]
     content = [
         html.A(
             className='boxclose',
@@ -454,19 +456,19 @@ def get_layout_dashboard():
         # graph-menu-trigger is triggered by manage_sidemenus and triggers update_graph_menu. Represents a change in df.
         html.Div(
             id={'type': 'graph-menu-trigger', 'index': 0},
-            **{'data-df_name': DATA_SETS[0]},
+            **{'data-df_name': session['dataset_list'][0]},
             style={'display': 'none'}),
         html.Div(
             id={'type': 'graph-menu-trigger', 'index': 1},
-            **{'data-df_name': DATA_SETS[0]},
+            **{'data-df_name': session['dataset_list'][0]},
             style={'display': 'none'}),
         html.Div(
             id={'type': 'graph-menu-trigger', 'index': 2},
-            **{'data-df_name': DATA_SETS[0]},
+            **{'data-df_name': session['dataset_list'][0]},
             style={'display': 'none'}),
         html.Div(
             id={'type': 'graph-menu-trigger', 'index': 3},
-            **{'data-df_name': DATA_SETS[0]},
+            **{'data-df_name': session['dataset_list'][0]},
             style={'display': 'none'}),
         # update-graph-trigger is triggered by update_graph_menu and triggers update_graph. Represents a change in df or
         # link state
@@ -629,7 +631,7 @@ def get_tile(tile, tile_keys=None):
                         # LOADED_DFS[DATA_SETS[0]].MEASURE_TYPE_OPTIONS[0], DATA_SETS[0])),
                         # for now, since options may not exist in the data, just pass in blanks
                         # this will be changed later to be more robust
-                        tile, '', '', '', DATA_SETS[0])),
+                        tile, '', '', '', session['dataset_list'][0])),
                 style=CUSTOMIZE_CONTENT_HIDE,
                 id={'type': 'tile-customize-content', 'index': tile},
                 className='customize-content'),

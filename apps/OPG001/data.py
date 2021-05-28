@@ -530,7 +530,13 @@ LANGUAGE = 'En'
 #     print("The .env file. was not found, loading default data sets")
 #     DATA_SETS = ['OPG001_2016-17_Week_v3.csv', 'OPG010 Sankey Data.xlsx']
 
-DATA_SETS = config.DATA_SETS
+# DATA_SETS = config.DATA_SETS
+
+cnxn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
+sql_query = pd.read_sql_query('''exec dbo.OPP_retrieve_datasets''', cnxn)
+DATA_SETS = pd.DataFrame(sql_query)['ref_value'].tolist()
+cnxn.close()
+
 
 LOADED_DFS = {}
 

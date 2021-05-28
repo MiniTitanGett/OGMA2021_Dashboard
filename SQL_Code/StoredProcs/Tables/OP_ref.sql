@@ -4,9 +4,10 @@ GO
 /****** Object:  Table [dbo].[OP_ref_insert]    Script Date: 2021-05-19 12:03:31 PM ******/
 
 INSERT into [dbo].[OP_Ref] (ref_table,ref_value, language, ref_desc)
-values ('Data_set','OPG 001.sql','En','OPG 001 Time Series Measures'), ('Data_set','OPG 001 Time Series Measures','Fr','OPG 001 Mesures de Séries Chronologiques'),
+values ('Data_set','OPG001.sql','En','OPG 001 Time Series Measures'),
+('Data_set','OPG001.sql','Fr','OPG 001 Mesures de Séries Chronologiques'),
 ('Data_set','OPG010.sql','En','OPG010 SanKey Series'),
-('Data_set','OPG010 SanKey Series','Fr','Série SanKey'),
+('Data_set','OPG010.sql','Fr','Série SanKey'),
 ('Labels','Parameter','En','Parameters'),
 ('Labels','Parameters','Fr','Paramètres'),
 ('Labels','Graph','En','Graph'),

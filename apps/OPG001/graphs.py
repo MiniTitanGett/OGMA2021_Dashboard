@@ -157,7 +157,7 @@ def get_line_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level
                 title = '{}: {} vs {}'.format(get_label(hierarchy_level_dropdown), arg_value[1], get_label('Time'))
             elif len(hierarchy_path) != 0:
                 # Item's children graph title
-                if LANGUAGE == 'en':
+                if LANGUAGE == 'En':
                     title = '{}\'s {}'.format(hierarchy_path[-1], get_label('Children'))
                 else:
                     title = '{} {}'.format(get_label('Children of'), hierarchy_path[-1])
@@ -262,7 +262,7 @@ def get_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_le
                 title = '{}: {} vs {}'.format(get_label(hierarchy_level_dropdown), arg_value[1], get_label('Time'))
             elif len(hierarchy_path) != 0:
                 # Specific item's children graph title
-                if LANGUAGE == 'en':
+                if LANGUAGE == 'En':
                     title = '{}\'s {}'.format(hierarchy_path[-1], get_label('Children'))
                 else:
                     title = '{} {}'.format(get_label('Children of'), hierarchy_path[-1])
@@ -385,7 +385,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 title = '{}: {} vs {}'.format(get_label(hierarchy_level_dropdown), arg_value[2], arg_value[4])
             elif len(hierarchy_path) != 0:
                 # Specific item's children graph title
-                if LANGUAGE == 'en':
+                if LANGUAGE == 'En':
                     title = '{}\'s {}'.format(hierarchy_path[-1], get_label('Children'))
                 else:
                     title = '{} {}'.format(get_label('Children of'), hierarchy_path[-1])
@@ -487,7 +487,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                     title = '{0}: {1} vs {0}'.format(get_label(hierarchy_level_dropdown), arg_value[1])
             elif len(hierarchy_path) != 0:
                 # Specific item's children graph title
-                if LANGUAGE == 'en':
+                if LANGUAGE == 'En':
                     title = '{}\'s {}'.format(hierarchy_path[-1], get_label('Children'))
                 else:
                     title = '{} {}'.format(get_label('Children of'), hierarchy_path[-1])
@@ -633,7 +633,7 @@ def get_animated_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                     title = '{0}: {1} vs {0}'.format(get_label(hierarchy_level_dropdown), arg_value[1])
             elif len(hierarchy_path) != 0:
                 # Specific item's children graph title
-                if LANGUAGE == 'en':
+                if LANGUAGE == 'En':
                     title = '{}\'s {}'.format(hierarchy_path[-1], get_label('Children'))
                 else:
                     title = '{} {}'.format(get_label('Children of'), hierarchy_path[-1])
@@ -797,7 +797,7 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                 title = '{}: {} {}'.format(get_label(hierarchy_level_dropdown), arg_value[0], get_label('Distribution'))
             elif len(hierarchy_path) != 0:
                 # Specific item's children graph title
-                if LANGUAGE == 'en':
+                if LANGUAGE == 'En':
                     title = '{}\'s {}'.format(hierarchy_path[-1], get_label('Children'))
                 else:
                     title = '{} {}'.format(get_label('Children of'), hierarchy_path[-1])
@@ -920,7 +920,7 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
             # if not roots children
             if len(hierarchy_path) != 0:
                 # Specific item's children graph title
-                if LANGUAGE == 'en':
+                if LANGUAGE == 'En':
                     title = '{}\'s {}'.format(hierarchy_path[-1], get_label('Children'))
                 else:
                     title = '{} {}'.format(get_label('Children of'), hierarchy_path[-1])

@@ -483,20 +483,24 @@ def get_table_columns(dff):
 # *********************************************LANGUAGE DATA***********************************************************
 
 def get_label(key):
-    key_row = LANGUAGE_DF[LANGUAGE_DF['Key'] == key]
-    key_row = key_row[key_row['Language'] == LANGUAGE]
+    key_row = LANGUAGE_DF[LANGUAGE_DF['ref_value'] == key]
+    key_row = key_row[key_row['language'] == LANGUAGE]
     if key is None:
         return None
     if len(key_row) != 1:
         return 'Key Error: {}'.format(key)
-    return key_row.iloc[0]['Displayed Text']
+    return key_row.iloc[0]['ref_desc']
 
+#loads labels from language data from database
+conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
+sql_query = pd.read_sql_query('''exec dbo.reftable''',conn)
+LANGUAGE_DF = pd.DataFrame(sql_query)
 
-LANGUAGE_DF = pd.read_csv('apps/OPG001/test_data/Language Data JG.csv')
+#LANGUAGE_DF = pd.read_csv('apps/OPG001/test_data/Language Data JG.csv')
 # Apparently will be passed in via the server
-# 'en' = English
-# 'fr' = French
-LANGUAGE = 'en'
+# 'En' = English
+# 'Fr' = French
+LANGUAGE = 'En'
 
 # *********************************************DATAFRAME OPERATIONS***************************************************
 

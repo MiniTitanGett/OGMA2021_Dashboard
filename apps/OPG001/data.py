@@ -51,7 +51,6 @@ import config
 
 
 # ***********************************************ARBITRARY CONSTANTS*************************************************
-from server import get_conn
 
 GRAPH_OPTIONS = ['Line', 'Bar', 'Scatter', 'Bubble', 'Box_Plot', 'Table', 'Sankey']
 
@@ -492,12 +491,13 @@ def get_label(key):
         return 'Key Error: {}'.format(key)
     return key_row.iloc[0]['ref_desc']
 
-#loads labels from language data from database
+
+# loads labels from language data from database
 conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
-sql_query = pd.read_sql_query('''exec dbo.reftable''',conn)
+sql_query = pd.read_sql_query('''exec dbo.reftable''', conn)
 LANGUAGE_DF = pd.DataFrame(sql_query)
 
-#LANGUAGE_DF = pd.read_csv('apps/OPG001/test_data/Language Data JG.csv')
+# LANGUAGE_DF = pd.read_csv('apps/OPG001/test_data/Language Data JG.csv')
 # Apparently will be passed in via the server
 # 'En' = English
 # 'Fr' = French

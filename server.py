@@ -1,7 +1,7 @@
 from datetime import timedelta
 
-from flask import Flask, request, session, g
 import flask
+from flask import Flask, request, session, g
 import pyodbc
 from werkzeug.utils import redirect
 import config
@@ -162,6 +162,13 @@ def before_request_func():
         cursor.close()
         del cursor
 
+        if session['sessionID'] == 105: # TODO: shows how we can get data specific to a session id
+            load_datasets(['OPG001_2016-17_Week_v3.csv'])
+            session['dataset_list'] = ['OPG001_2016-17_Week_v3.csv']
+        else:
+            load_datasets(config.DATA_SETS)
+            session['dataset_list'] = config.DATA_SETS
+
         # redirect without the query params to prevent errors on refresh
         if request.args.get('reportName'):
             return redirect(request.path + '?reportName=' + request.args.get('reportName'))
@@ -209,15 +216,6 @@ def before_request_func():
 def after_request_func(response):
     logging.debug("request=" + dict_to_string(request.values))
     logging.debug("session=" + dict_to_string(session))
-
-    if 'dataset_list' not in session:
-        if session['sessionID'] == 105: # TODO: shows how we can get data specific to a session id
-            load_datasets(['OPG001_2016-17_Week_v3.csv'])
-            session['dataset_list'] = ['OPG001_2016-17_Week_v3.csv']
-        else:
-            load_datasets(config.DATA_SETS)
-            session['dataset_list'] = config.DATA_SETS
-
     return response
 
 

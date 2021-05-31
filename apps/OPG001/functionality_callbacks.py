@@ -93,7 +93,9 @@ for x in range(4):
          State({'type': 'tile-link', 'index': x}, 'className'),
          # Hierarchy Options
          State({'type': 'hierarchy_specific_dropdown', 'index': x}, 'options'),
-         State({'type': 'hierarchy_specific_dropdown', 'index': 4}, 'options')
+         State({'type': 'hierarchy_specific_dropdown', 'index': 4}, 'options'),
+         # Constants
+         State('df-constants-store', 'data')
          ]
     )
     def _update_graph(_df_trigger, view_state, tile_title, _datepicker_trigger,
@@ -104,7 +106,7 @@ for x in range(4):
                       fiscal_toggle, start_year, end_year, start_secondary, end_secondary, master_secondary_type,
                       master_timeframe, master_fiscal_toggle, master_start_year, master_end_year,
                       master_start_secondary, master_end_secondary, graph_display, df_name, master_df_name,
-                      arg_value, graph_type, link_state, hierarchy_options, master_hierarchy_options):
+                      arg_value, graph_type, link_state, hierarchy_options, master_hierarchy_options, df_const):
 
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
 
@@ -150,7 +152,7 @@ for x in range(4):
         graph = __update_graph(df_name, arg_value, graph_type, tile_title, num_periods, period_type, hierarchy_toggle,
                                hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options, state_of_display,
                                secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
-                               end_secondary)
+                               end_secondary, df_const)
 
         if graph is None:
             raise PreventUpdate
@@ -291,11 +293,12 @@ def _show_filter_based_on_hierarchy_toggle(hierarchy_toggle):
      Input({'type': 'start-secondary-input', 'index': MATCH}, 'value'),
      Input({'type': 'end-secondary-input', 'index': MATCH}, 'value')],
     [State({'type': 'start-year-input', 'index': MATCH}, 'name'),
-     State({'type': 'data-set', 'index': MATCH}, 'value')]
+     State({'type': 'data-set', 'index': MATCH}, 'value'),
+     State('df-constants-storage', 'data')]
 )
 def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quarter_button_clicks,
                         _month_button_clicks, _week_button_clicks, start_year_selection, end_year_selection,
-                        start_secondary_selection, end_secondary_selection, tab, df_name):
+                        start_secondary_selection, end_secondary_selection, tab, df_name, df_const):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':
@@ -335,11 +338,11 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
             year_disabled = True
             # use the year scheme (gregorian/fiscal) selected by the user
             if fiscal_toggle == 'Gregorian':
-                min_year = session[df_name].GREGORIAN_MIN_YEAR
-                max_year = session[df_name].GREGORIAN_YEAR_MAX
+                min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
+                max_year = df_const[df_name]['GREGORIAN_YEAR_MAX']
             else:
-                min_year = session[df_name].FISCAL_MIN_YEAR
-                max_year = session[df_name].FISCAL_YEAR_MAX
+                min_year = df_const[df_name]['FISCAL_MIN_YEAR']
+                max_year = df_const[df_name]['FISCAL_YEAR_MAX']
             left_column = html.Div([
                 get_date_box(id={'type': 'start-year-input', 'index': tile},
                              value=min_year,
@@ -368,9 +371,9 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
             new_tab = get_secondary_data(conditions, fiscal_toggle, df_name)
             # set min_year according to user selected fiscal/gregorian time type
             if fiscal_toggle == 'Gregorian':
-                min_year = session[df_name].GREGORIAN_MIN_YEAR
+                min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
             else:
-                min_year = session[df_name].FISCAL_MIN_YEAR
+                min_year = df_const[df_name]['FISCAL_MIN_YEAR']
             # if data exists for only one year, use fringe extremes
             if min_year == max_year:
                 max_min = fringe_min + 1
@@ -412,9 +415,9 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                 year_className = 'date-picker-nav-selected'
                 year_disabled = True
                 if fiscal_toggle == 'Gregorian':
-                    max_year = session[df_name].GREGORIAN_YEAR_MAX
+                    max_year = df_const[df_name]['GREGORIAN_YEAR_MAX']
                 else:
-                    max_year = session[df_name].FISCAL_YEAR_MAX
+                    max_year = df_const[df_name]['FISCAL_YEAR_MAX']
             # if not inside of year tab, get secondary data
             else:
                 selected_secondary_min = start_secondary_selection
@@ -425,9 +428,9 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                 new_tab = get_secondary_data(conditions, fiscal_toggle, df_name)
             # set min_year according to user selected time type (gregorian/fiscal)
             if fiscal_toggle == 'Gregorian':
-                min_year = session[df_name].GREGORIAN_MIN_YEAR
+                min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
             else:
-                min_year = session[df_name].FISCAL_MIN_YEAR
+                min_year = df_const[df_name]['FISCAL_MIN_YEAR']
             # if not inside year tab, generate left and right columns with secondary input boxes
             if fringe_min and fringe_max:
                 left_column, right_column = update_date_columns(
@@ -587,7 +590,8 @@ for x in range(4):
          State({'type': 'graph_children_toggle', 'index': 4}, 'value'),
          State({'type': 'hierarchy_specific_dropdown', 'index': 4}, 'options'),
          # Master Data set
-         State({'type': 'data-set', 'index': 4}, 'value')]
+         State({'type': 'data-set', 'index': 4}, 'value'),
+         State('df-constants-storage', 'data')]
     )
     def _update_table(page_current, page_size, sort_by, filter, graph_trigger, table_trigger, link_state, df_name,
                       secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary, end_secondary,
@@ -597,7 +601,7 @@ for x in range(4):
                       master_start_year, master_end_year, master_start_secondary, master_end_secondary,
                       master_num_periods, master_period_type, master_hierarchy_toggle, master_hierarchy_level_dropdown,
                       master_state_of_display, master_hierarchy_graph_children, master_hierarchy_options,
-                      master_df_name):
+                      master_df_name, df_const):
 
         if link_state == 'fa fa-link':
             secondary_type = master_secondary_type
@@ -643,7 +647,7 @@ for x in range(4):
         else:
             dff = data_filter(list_of_names, secondary_type, end_secondary, end_year, start_secondary, start_year,
                               timeframe, fiscal_toggle, num_periods, period_type, hierarchy_toggle,
-                              hierarchy_level_dropdown, hierarchy_graph_children, df_name)
+                              hierarchy_level_dropdown, hierarchy_graph_children, df_name, df_const)
 
         # Reformat date column
         dff['Date of Event'] = dff['Date of Event'].transform(lambda x: x.strftime(format='%Y-%m-%d'))

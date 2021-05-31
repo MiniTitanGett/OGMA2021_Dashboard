@@ -7,6 +7,8 @@ stores all callbacks for the user interface
 ######################################################################################################################
 
 # External Packages
+from datetime import datetime
+
 import dash
 import dash_html_components as html
 import copy
@@ -23,7 +25,7 @@ from apps.OPG001.layouts import get_line_graph_menu, get_bar_graph_menu, get_sca
 from apps.OPG001.app import app
 from apps.OPG001.data import VIEW_CONTENT_HIDE, VIEW_CONTENT_SHOW, CUSTOMIZE_CONTENT_HIDE, CUSTOMIZE_CONTENT_SHOW, \
     DATA_CONTENT_HIDE, DATA_CONTENT_SHOW, get_label, LAYOUT_CONTENT_SHOW, LAYOUT_CONTENT_HIDE, X_AXIS_OPTIONS, \
-    session, BAR_X_AXIS_OPTIONS
+    session, BAR_X_AXIS_OPTIONS, create_categories, generate_constants
 
 
 # Contents:
@@ -54,7 +56,7 @@ from apps.OPG001.data import VIEW_CONTENT_HIDE, VIEW_CONTENT_SHOW, CUSTOMIZE_CON
               [State('url', 'pathname'), State('url', 'search')])
 def _generate_layout(href, pathname, query_string):
     # print('HREF:', href)
-    # print('PATHAME:', pathname)
+    # print('PATHNAME:', pathname)
     # print('SEARCH:', query_string)
 
     if not query_string:
@@ -65,7 +67,8 @@ def _generate_layout(href, pathname, query_string):
     if 'reportName' in query_params and query_params['reportName']:
         return [get_layout_graph(query_params['reportName'])]
     else:
-        return [get_layout_dashboard()]
+        df_const = generate_constants()
+        return [get_layout_dashboard(df_const)]
 
 
 # Handles Resizing of ContentWrapper, uses tab-content-wrapper n-clicks as a throw away output
@@ -94,9 +97,10 @@ app.clientside_callback(
      Input('confirm-dashboard-reset', 'n_clicks')],
     [State({'type': 'tile', 'index': ALL}, 'children'),
      State('num-tiles', 'data-num-tiles'),
-     State('button-new', 'disabled')]
+     State('button-new', 'disabled'),
+     State('df-constants-storage', 'data')]
 )
-def _new_and_delete(new_clicks, _close_clicks, dashboard_reset, input_tiles, num_tiles, new_disabled):
+def _new_and_delete(new_clicks, _close_clicks, dashboard_reset, input_tiles, num_tiles, new_disabled, df_const):
     """
     :param new_clicks: Detects user clicking 'NEW' button in master navigation bar and encodes the number of tiles to
     display
@@ -125,17 +129,17 @@ def _new_and_delete(new_clicks, _close_clicks, dashboard_reset, input_tiles, num
                 deleted_tile = str(i)
             elif flag:
                 input_tiles[i - 1] = change_index(input_tiles[i - 1], i - 1)
-        children = get_tile_layout(num_tiles, input_tiles)
+        children = get_tile_layout(num_tiles, input_tiles, df_const=df_const)
     # if NEW button pressed: adjust main layout and disable NEW button until it is unlocked at the end of callback chain
     elif 'button-new' in changed_id:
         if num_tiles == 4:
             raise PreventUpdate
         num_tiles += 1
-        children = get_tile_layout(num_tiles, input_tiles)
+        children = get_tile_layout(num_tiles, input_tiles, df_const=df_const)
     # if RESET dashboard requested, set dashboard to default appearance
     elif 'dashboard-reset' in changed_id:
         num_tiles = 1
-        children = get_tile_layout(num_tiles, [])
+        children = get_tile_layout(num_tiles, [], df_const=df_const)
         dashboard_reset_trigger = 'trigger'
     # else, a tab change was made, prevent update
     else:
@@ -412,9 +416,10 @@ for x in range(4):
          Input({'type': 'tile-link', 'index': x}, 'className')],
         [State({'type': 'div-graph-options', 'index': x}, 'children'),
          State({'type': 'data-set', 'index': x}, 'value'),
-         State({'type': 'data-set', 'index': 4}, 'value')]
+         State({'type': 'data-set', 'index': 4}, 'value'),
+         State('df-constants-storage', 'data')]
     )
-    def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_options_state, df_name, master_df_name):
+    def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_options_state, df_name, master_df_name, df_const):
         """
         :param selected_graph_type: Selected graph type, ie. 'bar', 'line', etc.
         :param graph_options_state: State of the current graph options div
@@ -447,37 +452,37 @@ for x in range(4):
         # apply graph selection and generate menu
         if selected_graph_type == 'Line':
             menu = get_line_graph_menu(tile=tile, x=X_AXIS_OPTIONS[0],
-                                       y=session[df_name].VARIABLE_OPTIONS[0]['value'],
-                                       measure_type=session[df_name].MEASURE_TYPE_OPTIONS[0], df_name=df_name)
+                                       y=df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
+                                       measure_type=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0], df_name=df_name, df_const=df_const)
 
         elif selected_graph_type == 'Bar':
             menu = get_bar_graph_menu(tile=tile, x=BAR_X_AXIS_OPTIONS[0],
-                                      y=session[df_name].VARIABLE_OPTIONS[0]['value'],
-                                      measure_type=session[df_name].MEASURE_TYPE_OPTIONS[0], df_name=df_name)
+                                      y=df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
+                                      measure_type=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0], df_name=df_name, df_const=df_const)
 
         elif selected_graph_type == 'Scatter':
             menu = get_scatter_graph_menu(tile=tile, x=X_AXIS_OPTIONS[0],
-                                          y=session[df_name].VARIABLE_OPTIONS[0]['value'],
-                                          measure_type=session[df_name].MEASURE_TYPE_OPTIONS[0], df_name=df_name)
+                                          y=df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
+                                          measure_type=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0], df_name=df_name, df_const=df_const)
 
         elif selected_graph_type == 'Bubble':
             menu = get_bubble_graph_menu(tile=tile, x=X_AXIS_OPTIONS[0],
-                                         x_measure=session[df_name].MEASURE_TYPE_OPTIONS[0],
-                                         y=X_AXIS_OPTIONS[0], y_measure=session[df_name].MEASURE_TYPE_OPTIONS[0],
+                                         x_measure=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
+                                         y=X_AXIS_OPTIONS[0], y_measure=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
                                          size=X_AXIS_OPTIONS[0],
-                                         size_measure=session[df_name].MEASURE_TYPE_OPTIONS[0], df_name=df_name)
+                                         size_measure=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0], df_name=df_name, df_const=df_const)
 
         elif selected_graph_type == 'Table':
             menu = get_table_graph_menu(tile=tile, number_of_columns=15)
 
         elif selected_graph_type == 'Box_Plot':
-            menu = get_box_plot_menu(tile=tile, axis_measure=session[df_name].MEASURE_TYPE_OPTIONS[0],
-                                     graphed_variables=session[df_name].VARIABLE_OPTIONS[0]['value'],
-                                     graph_orientation='Horizontal', df_name=df_name, show_data_points=[])
+            menu = get_box_plot_menu(tile=tile, axis_measure=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
+                                     graphed_variables=df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
+                                     graph_orientation='Horizontal', df_name=df_name, show_data_points=[], df_const=df_const)
 
         elif selected_graph_type == 'Sankey':
-            menu = get_sankey_menu(tile=tile, graphed_options=session[df_name].VARIABLE_OPTIONS[0]['value'],
-                                   df_name=df_name)
+            menu = get_sankey_menu(tile=tile, graphed_options=df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
+                                   df_name=df_name, df_const=df_const)
 
         else:
             raise PreventUpdate
@@ -553,11 +558,12 @@ def _change_link(selected_layout, _link_clicks, link_state):
      Input({'type': 'data-set', 'index': 3}, 'value'),
      Input({'type': 'data-set', 'index': 4}, 'value')],
     [State({'type': 'data-tile', 'index': ALL}, 'children'),
-     State({'type': 'data-tile', 'index': ALL}, 'style')]
+     State({'type': 'data-tile', 'index': ALL}, 'style'),
+     State('df-constants-storage', 'data')]
 )
 def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links_style, selected_layout, data_clicks,
                            data_close_clicks, df_name_0, df_name_1, df_name_2, df_name_3, df_name_4, data_states,
-                           sidemenu_style_states):
+                           sidemenu_style_states, df_const):
     """
     :param closed_tile: Detects when a tile has been deleted and encodes the index of the deleted tile
     param links_style: State of all link/unlink icons and detects user clicking a link icon
@@ -627,7 +633,7 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
         changed_index = int(search(r'\d+', changed_id).group())
         df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
         df_name = df_names[changed_index]
-        data[changed_index] = get_data_menu(changed_index, df_name)
+        data[changed_index] = get_data_menu(changed_index, df_name, df_const=df_const)
         sidemenu_styles[changed_index] = DATA_CONTENT_SHOW
         # trigger update for all tiles that are linked to the active data menu
         if changed_index == 4:
@@ -640,7 +646,7 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
     # elif 'RESET' dashboard requested, hide and reset all data tiles
     elif 'dashboard-reset-trigger' in changed_id:
         for i in range(len(data)):
-            data[i] = get_data_menu(i)
+            data[i] = get_data_menu(i, df_const=df_const)
 
     # else, 'data', 'tile-link', or 'select-layout' requested
     else:

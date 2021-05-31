@@ -26,11 +26,11 @@ from apps.OPG001.data import CLR, get_label, LANGUAGE, session
 
 
 # datepicker layout
-def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, period_type):
+def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, period_type, df_const):
     children = [
         html.H6(
             '{}:'.format(get_label("Calendar Type")),
-            style={'margin-top': '20px', 'color': CLR['text1']} if session[df_name].FISCAL_AVAILABLE
+            style={'margin-top': '20px', 'color': CLR['text1']} if df_const[df_name]['FISCAL_AVAILABLE']
             else {'display': 'None'}),
         dcc.Tabs([
             dcc.Tab(label="{}".format(get_label("Gregorian")), value='Gregorian'),
@@ -38,7 +38,7 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
             id={'type': 'fiscal-year-toggle', 'index': tile},
             className='toggle-tabs-wrapper',
             value=fiscal_toggle,
-            style={'display': 'block', 'text-align': 'center'} if session[df_name].FISCAL_AVAILABLE
+            style={'display': 'block', 'text-align': 'center'} if df_const[df_name]['FISCAL_AVAILABLE']
             else {'display': 'none'}),
         html.H6(
             '{}:'.format(get_label("Timeframe")),
@@ -88,8 +88,8 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
         ], style={'width': '0', 'height': '0', 'position': 'relative', 'bottom': '55px',
                   'left': '125px' if LANGUAGE == 'en' else '150px'}),
         html.P(
-            "{}: {} - {}".format(get_label('Available'), session[df_name].MIN_DATE_UNF.strftime('%m/%d/%Y'),
-                                 session[df_name].MAX_DATE_UNF.strftime('%m/%d/%Y')),
+            "{}: {} - {}".format(get_label('Available'), df_const[df_name]['MIN_DATE_UNF'].strftime('%m/%d/%Y'),
+                                 df_const[df_name]['MAX_DATE_UNF'].strftime('%m/%d/%Y')),
             style={'margin-top': '10px', 'text-align': 'center', 'font-size': '85%', 'color': CLR['text1']}),
         html.Div([
             # placeholders for datepicker inputs to avoid callback errors. Inputs are initialized to 1 so that they are
@@ -138,7 +138,7 @@ def get_date_box(id, value, min, max, name=None):
 
 
 # define variables necessary for having secondary input boxes
-def get_secondary_data(conditions, fiscal_toggle, df_name):
+def get_secondary_data(conditions, fiscal_toggle, df_name, df_const):
     # all tabs are enabled initially but the button for the tab the user is inside is disabled later
     quarter_disabled = month_disabled = week_disabled = False
     # all tabs are initially unselected
@@ -150,13 +150,13 @@ def get_secondary_data(conditions, fiscal_toggle, df_name):
         quarter_disabled = True
         default_max = 4
         if fiscal_toggle == 'Gregorian':
-            fringe_min = session[df_name].GREGORIAN_QUARTER_FRINGE_MIN
-            fringe_max = session[df_name].GREGORIAN_QUARTER_FRINGE_MAX
-            max_year = session[df_name].GREGORIAN_QUARTER_MAX_YEAR
+            fringe_min = df_const[df_name]['GREGORIAN_QUARTER_FRINGE_MIN']
+            fringe_max = df_const[df_name]['GREGORIAN_QUARTER_FRINGE_MAX']
+            max_year = df_const[df_name]['GREGORIAN_QUARTER_MAX_YEAR']
         else:
-            fringe_min = session[df_name].FISCAL_QUARTER_FRINGE_MIN
-            fringe_max = session[df_name].FISCAL_QUARTER_FRINGE_MAX
-            max_year = session[df_name].FISCAL_QUARTER_MAX_YEAR
+            fringe_min = df_const[df_name]['FISCAL_QUARTER_FRINGE_MIN']
+            fringe_max = df_const[df_name]['FISCAL_QUARTER_FRINGE_MAX']
+            max_year = df_const[df_name]['FISCAL_QUARTER_MAX_YEAR']
         if fringe_max == 4:
             max_year += 1
             fringe_max = 1
@@ -169,13 +169,13 @@ def get_secondary_data(conditions, fiscal_toggle, df_name):
         month_disabled = True
         default_max = 12
         if fiscal_toggle == 'Gregorian':
-            fringe_min = session[df_name].GREGORIAN_MONTH_FRINGE_MIN
-            fringe_max = session[df_name].GREGORIAN_MONTH_FRINGE_MAX
-            max_year = session[df_name].GREGORIAN_MONTH_MAX_YEAR
+            fringe_min = df_const[df_name]['GREGORIAN_MONTH_FRINGE_MIN']
+            fringe_max = df_const[df_name]['GREGORIAN_MONTH_FRINGE_MAX']
+            max_year = df_const[df_name]['GREGORIAN_MONTH_MAX_YEAR']
         else:
-            fringe_min = session[df_name].FISCAL_MONTH_FRINGE_MIN
-            fringe_max = session[df_name].FISCAL_MONTH_FRINGE_MAX
-            max_year = session[df_name].FISCAL_MONTH_MAX_YEAR
+            fringe_min = df_const[df_name]['FISCAL_MONTH_FRINGE_MIN']
+            fringe_max = df_const[df_name]['FISCAL_MONTH_FRINGE_MAX']
+            max_year = df_const[df_name]['FISCAL_MONTH_MAX_YEAR']
         if fringe_max == 12:
             max_year += 1
             fringe_max = 1
@@ -188,13 +188,13 @@ def get_secondary_data(conditions, fiscal_toggle, df_name):
         week_disabled = True
         default_max = 52
         if fiscal_toggle == 'Gregorian':
-            fringe_min = session[df_name].GREGORIAN_WEEK_FRINGE_MIN
-            fringe_max = session[df_name].GREGORIAN_WEEK_FRINGE_MAX
-            max_year = session[df_name].GREGORIAN_WEEK_MAX_YEAR
+            fringe_min = df_const[df_name]['GREGORIAN_WEEK_FRINGE_MIN']
+            fringe_max = df_const[df_name]['GREGORIAN_WEEK_FRINGE_MAX']
+            max_year = df_const[df_name]['GREGORIAN_WEEK_MAX_YEAR']
         else:
-            fringe_min = session[df_name].FISCAL_WEEK_FRINGE_MIN
-            fringe_max = session[df_name].FISCAL_WEEK_FRINGE_MAX
-            max_year = session[df_name].FISCAL_WEEK_MAX_YEAR
+            fringe_min = df_const[df_name]['FISCAL_WEEK_FRINGE_MIN']
+            fringe_max = df_const[df_name]['FISCAL_WEEK_FRINGE_MAX']
+            max_year = df_const[df_name]['FISCAL_WEEK_MAX_YEAR']
         if fringe_max == 52:
             max_year += 1
             fringe_max = 1

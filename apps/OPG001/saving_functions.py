@@ -224,17 +224,17 @@ def delete_dashboard(key, dashboards):
             file.close()
 
 
-def load_graph_menu(graph_type, tile, df_name, args_list):
+def load_graph_menu(graph_type, tile, df_name, args_list, df_const):
     if graph_type == 'Line' or graph_type == 'Scatter' or graph_type == 'Bar':
         x = args_list[0]
         measure_type = args_list[1]
         y = args_list[2]
         if graph_type == 'Line':
-            graph_menu = get_line_graph_menu(tile=tile, x=x, y=y, measure_type=measure_type, df_name=df_name)
+            graph_menu = get_line_graph_menu(tile=tile, x=x, y=y, measure_type=measure_type, df_name=df_name, df_const=df_const)
         elif graph_type == 'Scatter':
-            graph_menu = get_scatter_graph_menu(tile=tile, x=x, y=y, measure_type=measure_type, df_name=df_name)
+            graph_menu = get_scatter_graph_menu(tile=tile, x=x, y=y, measure_type=measure_type, df_name=df_name, df_const=df_const)
         else:
-            graph_menu = get_bar_graph_menu(tile=tile, x=x, y=y, measure_type=measure_type, df_name=df_name)
+            graph_menu = get_bar_graph_menu(tile=tile, x=x, y=y, measure_type=measure_type, df_name=df_name, df_const=df_const)
     elif graph_type == 'Table':
         number_of_columns = args_list[1]
         graph_menu = get_table_graph_menu(tile=tile, number_of_columns=number_of_columns)
@@ -245,9 +245,9 @@ def load_graph_menu(graph_type, tile, df_name, args_list):
         show_data_points = args_list[3]
         graph_menu = get_box_plot_menu(tile=tile, axis_measure=axis_measure,
                                        graphed_variables=graphed_variables, graph_orientation=graph_orientation,
-                                       df_name=df_name, show_data_points=show_data_points)
+                                       df_name=df_name, show_data_points=show_data_points, df_const=df_const)
     elif graph_type == 'Sankey':
-        graph_menu = get_sankey_menu(tile=tile, graphed_options=args_list[0], df_name=df_name)
+        graph_menu = get_sankey_menu(tile=tile, graphed_options=args_list[0], df_name=df_name, df_const=df_const)
     else:
         raise PreventUpdate
 

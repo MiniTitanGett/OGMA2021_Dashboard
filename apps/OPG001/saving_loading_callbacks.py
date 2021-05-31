@@ -818,9 +818,10 @@ def _load_select_range_inputs(tile_tab, dashboard_tab, tile_start_year, tile_end
      Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-end_year'),
      Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-start_secondary'),
      Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-end_secondary')],
-    [Input({'type': 'select-layout-dropdown', 'index': MATCH}, 'value')]
+    [Input({'type': 'select-layout-dropdown', 'index': MATCH}, 'value')],
+    [State('df-constants-storage', 'data')]
 )
-def _load_tile_layout(selected_layout):
+def _load_tile_layout(selected_layout, df_const):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.' or selected_layout == '' or selected_layout is None:
@@ -835,7 +836,7 @@ def _load_tile_layout(selected_layout):
     graph_type = saved_layouts[selected_layout]['Graph Type']
     args_list = saved_layouts[selected_layout]['Args List']
 
-    graph_menu = load_graph_menu(graph_type=graph_type, tile=tile, df_name=df_name, args_list=args_list)
+    graph_menu = load_graph_menu(graph_type=graph_type, tile=tile, df_name=df_name, args_list=args_list, df_const=df_const)
 
     customize_content = get_customize_content(tile=tile, graph_type=graph_type, graph_menu=graph_menu)
 
@@ -940,9 +941,10 @@ def _reset_selected_layout(trigger):
      Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-end_secondary'),
      # num tiles update
      Output('num-tiles-4', 'data-num-tiles')],
-    [Input('select-dashboard-dropdown', 'value')]
+    [Input('select-dashboard-dropdown', 'value')],
+    [State('df-constants-storage', 'data')]
 )
-def _load_dashboard_layout(selected_dashboard):
+def _load_dashboard_layout(selected_dashboard, df_const):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':
@@ -1011,7 +1013,7 @@ def _load_dashboard_layout(selected_dashboard):
                     data_index = 4
 
             # create tile keys
-            graph_menu = load_graph_menu(graph_type=graph_type, tile=tile_index, df_name=df_name, args_list=args_list)
+            graph_menu = load_graph_menu(graph_type=graph_type, tile=tile_index, df_name=df_name, args_list=args_list, df_const=df_const)
             customize_content = get_customize_content(tile=tile_index, graph_type=graph_type, graph_menu=graph_menu)
             tile_key = {'Tile Title': tile_title, 'Link': link_state, 'Customize Content': customize_content}
             tile_keys[tile_index] = tile_key

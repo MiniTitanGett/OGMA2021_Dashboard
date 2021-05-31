@@ -419,7 +419,8 @@ for x in range(4):
          State({'type': 'data-set', 'index': 4}, 'value'),
          State('df-constants-storage', 'data')]
     )
-    def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_options_state, df_name, master_df_name, df_const):
+    def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_options_state, df_name, master_df_name,
+                           df_const):
         """
         :param selected_graph_type: Selected graph type, ie. 'bar', 'line', etc.
         :param graph_options_state: State of the current graph options div
@@ -453,24 +454,28 @@ for x in range(4):
         if selected_graph_type == 'Line':
             menu = get_line_graph_menu(tile=tile, x=X_AXIS_OPTIONS[0],
                                        y=df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
-                                       measure_type=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0], df_name=df_name, df_const=df_const)
+                                       measure_type=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0], df_name=df_name,
+                                       df_const=df_const)
 
         elif selected_graph_type == 'Bar':
             menu = get_bar_graph_menu(tile=tile, x=BAR_X_AXIS_OPTIONS[0],
                                       y=df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
-                                      measure_type=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0], df_name=df_name, df_const=df_const)
+                                      measure_type=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0], df_name=df_name,
+                                      df_const=df_const)
 
         elif selected_graph_type == 'Scatter':
             menu = get_scatter_graph_menu(tile=tile, x=X_AXIS_OPTIONS[0],
                                           y=df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
-                                          measure_type=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0], df_name=df_name, df_const=df_const)
+                                          measure_type=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0], df_name=df_name,
+                                          df_const=df_const)
 
         elif selected_graph_type == 'Bubble':
             menu = get_bubble_graph_menu(tile=tile, x=X_AXIS_OPTIONS[0],
                                          x_measure=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
                                          y=X_AXIS_OPTIONS[0], y_measure=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
                                          size=X_AXIS_OPTIONS[0],
-                                         size_measure=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0], df_name=df_name, df_const=df_const)
+                                         size_measure=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0], df_name=df_name,
+                                         df_const=df_const)
 
         elif selected_graph_type == 'Table':
             menu = get_table_graph_menu(tile=tile, number_of_columns=15)
@@ -478,7 +483,8 @@ for x in range(4):
         elif selected_graph_type == 'Box_Plot':
             menu = get_box_plot_menu(tile=tile, axis_measure=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
                                      graphed_variables=df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
-                                     graph_orientation='Horizontal', df_name=df_name, show_data_points=[], df_const=df_const)
+                                     graph_orientation='Horizontal', df_name=df_name, show_data_points=[],
+                                     df_const=df_const)
 
         elif selected_graph_type == 'Sankey':
             menu = get_sankey_menu(tile=tile, graphed_options=df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],

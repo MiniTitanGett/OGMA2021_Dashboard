@@ -730,7 +730,7 @@ def get_animated_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                     for k in filtered_df[get_label(color)].unique():
                         if filtered_df.query("`Date of Event` == @i and `{}` == @j and `{}` == @k".format(get_label(x),
                                                                                                           get_label(
-                                                                                                                  color))).empty:
+                                                                                                              color))).empty:
                             filtered_df = filtered_df.append(
                                 {'Date of Event': i, get_label(x): j, get_label(color): k, 'Measure Value': 0},
                                 ignore_index=True)
@@ -1035,7 +1035,7 @@ def get_sankey_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
             responsive=True,
             config=dict(locale=LANGUAGE),
             figure=get_blank_figure(tile_title, title, hierarchy_type, hierarchy_level_dropdown,
-                                    hierarchy_path, hierarchy_graph_children))
+                                    hierarchy_path, hierarchy_graph_children, []))
 
     title += '<br><sub>{} {} </sub>'.format(get_label('Data Accessed on'), datetime.date(datetime.now()))
 
@@ -1159,16 +1159,19 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
     # line graph creation
     if graph_type == 'Line':
         return get_line_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
-                               list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name, df_const)
+                               list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
+                               df_const)
     # scatter graph creation
     elif graph_type == 'Scatter':
         return get_scatter_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
-                                  list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name, df_const)
+                                  list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
+                                  df_const)
 
     # bubble graph creation
     elif graph_type == 'Bubble':
         return get_bubble_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
-                                 list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name, df_const)
+                                 list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
+                                 df_const)
 
     # bar graph creation
     elif graph_type == 'Bar':
@@ -1179,7 +1182,8 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
                                            df_name, df_const)
         else:
             return get_bar_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
-                                  list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name, df_const)
+                                  list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
+                                  df_const)
     # box plot creation
     elif graph_type == 'Box_Plot':
         return get_box_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
@@ -1198,7 +1202,8 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
     # sankey creation
     elif graph_type == 'Sankey':
         return get_sankey_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
-                                 list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name, df_const)
+                                 list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
+                                 df_const)
 
     # catch all
     else:

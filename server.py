@@ -10,6 +10,7 @@ import logging
 from apps.OPG001.data import load_datasets
 from flask_session import Session
 
+
 # https://stackoverflow.com/questions/18967441/add-a-prefix-to-all-flask-routes/36033627#36033627
 # https://docs.microsoft.com/en-us/visualstudio/python/configure-web-apps-for-iis-windows?view=vs-2019
 
@@ -42,7 +43,6 @@ server.debug = config.DEBUG
 # ==================
 server.wsgi_app = PrefixMiddleware(server.wsgi_app)  # , prefix=config.APPLICATION_ROOT)
 
-
 server.config['SESSION_TYPE'] = 'filesystem'
 server.config['SESSION_PERMANENT'] = True
 server.config['SESSION_USE_SIGNER'] = True
@@ -53,7 +53,6 @@ server_session = Session(server)
 
 
 def dict_to_string(d):
-
     if d is None:
         return "None"
 
@@ -162,7 +161,7 @@ def before_request_func():
         cursor.close()
         del cursor
 
-        if session['sessionID'] == 105: # TODO: shows how we can get data specific to a session id
+        if session['sessionID'] == 105:  # TODO: shows how we can get data specific to a session id
             load_datasets(['OPG001_2016-17_Week_v3.csv'])
             session['dataset_list'] = ['OPG001_2016-17_Week_v3.csv']
         else:

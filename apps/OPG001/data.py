@@ -550,7 +550,6 @@ LANGUAGE_DF = pd.DataFrame(sql_query)
 # 'Fr' = French
 LANGUAGE = 'En'
 
-
 # *********************************************DATAFRAME OPERATIONS***************************************************
 
 # DATA_SETS = ['OPG001_2016-17_Week_v3.xlsx']  # 'OPG001_2016-17_Week_v2.xlsx'

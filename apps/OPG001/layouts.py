@@ -148,7 +148,8 @@ def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Fi
             style={'position': 'relative', 'left': '3px'},
             id={'type': 'data-menu-close', 'index': tile}),
         html.Div(get_data_set_picker(tile, df_name)),
-        html.Div(get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle, nid_path, df_const)),
+        html.Div(
+            get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle, nid_path, df_const)),
         html.Div(get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, period_type, df_const))]
 
     dashboard_loading_wrapper = html.Div(

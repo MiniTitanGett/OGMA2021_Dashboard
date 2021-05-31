@@ -95,6 +95,7 @@ def load_saved_graphs_from_db():
     for row in results:
         save_layout_state(row["ref_value"], row["clob_text"])
 
+
 #    query = """\
 #    declare @p_result_status varchar(255)
 #    exec dbo.opp_addgeteditdeletefind_extdashboardreports {}, \'{}\', null, null, null, null, null, @p_result_status output
@@ -150,7 +151,6 @@ def save_layout_to_file(layouts):
 
 
 def save_layout_to_db(graph_title):
-
     if config.SESSIONLESS:
         return
 
@@ -230,11 +230,14 @@ def load_graph_menu(graph_type, tile, df_name, args_list, df_const):
         measure_type = args_list[1]
         y = args_list[2]
         if graph_type == 'Line':
-            graph_menu = get_line_graph_menu(tile=tile, x=x, y=y, measure_type=measure_type, df_name=df_name, df_const=df_const)
+            graph_menu = get_line_graph_menu(tile=tile, x=x, y=y, measure_type=measure_type, df_name=df_name,
+                                             df_const=df_const)
         elif graph_type == 'Scatter':
-            graph_menu = get_scatter_graph_menu(tile=tile, x=x, y=y, measure_type=measure_type, df_name=df_name, df_const=df_const)
+            graph_menu = get_scatter_graph_menu(tile=tile, x=x, y=y, measure_type=measure_type, df_name=df_name,
+                                                df_const=df_const)
         else:
-            graph_menu = get_bar_graph_menu(tile=tile, x=x, y=y, measure_type=measure_type, df_name=df_name, df_const=df_const)
+            graph_menu = get_bar_graph_menu(tile=tile, x=x, y=y, measure_type=measure_type, df_name=df_name,
+                                            df_const=df_const)
     elif graph_type == 'Table':
         number_of_columns = args_list[1]
         graph_menu = get_table_graph_menu(tile=tile, number_of_columns=number_of_columns)

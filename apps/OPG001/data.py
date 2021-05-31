@@ -97,198 +97,90 @@ DATA_CONTENT_HIDE = {'display': 'none'}
 
 # ********************************************DATASET CLASS************************************************************
 
-class DataSet:
-    def __init__(self, df_name):
-        # print("hello world")
+def dataset_to_df(df_name):
+    if df_name.find('.csv') > -1:
+        # df = pd.DataFrame(None)
+        df = pd.read_csv('apps/OPG001/test_data/{}'.format(df_name),
+                         #  chunks = pd.read_csv('apps/OPG001/test_data/{}'.format(df_name),
+                         parse_dates=['Date of Event'],
+                         # infer_datetime_format=True,
+                         # chunksize=50_000,
+                         dtype={
+                             "Variable Name": object,
+                             "Variable Name Qualifier": object,
+                             "Variable Name Sub Qualifier": object
+                         })
+        # for chunk in chunks:
+        #    df = df.append(chunk, ignore_index=True)
+    elif df_name.find('.xlsx') > -1:
+        df = pd.read_excel('apps/OPG001/test_data/{}'.format(df_name),
+                           dtype={
+                               "Variable Name": object,
+                               "Variable Name Qualifier": object,
+                               "Variable Name Sub Qualifier": object
+                           })
+    elif df_name.find('.json') > -1:
+        df = pd.read_json('apps/OPG001/test_data/{}'.format(df_name),
+                          orient='records',
+                          lines=True)
+    elif df_name.find('.sql') > -1:  # TODO: This is testing code for connecting to a personal database
+        conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
+        sql_query = pd.read_sql_query(
+            '''
+        SELECT * FROM [OGMA_Test].[dbo].[{}] 
+        '''.format(df_name.split('.')[0]), conn)
+        df = pd.DataFrame(sql_query)
+        df[['Year of Event'
+            , 'Quarter'
+            , 'Month of Event'
+            , 'Week of Event'
+            , 'Fiscal Year of Event'
+            , 'Fiscal Quarter'
+            , 'Fiscal Month of Event'
+            , 'Fiscal Week of Event'
+            , 'Julian Day'
+            , 'Activity Event Id'
+            , 'Measure Value']] = df[['Year of Event'
+            , 'Quarter'
+            , 'Month of Event'
+            , 'Week of Event'
+            , 'Fiscal Year of Event'
+            , 'Fiscal Quarter'
+            , 'Fiscal Month of Event'
+            , 'Fiscal Week of Event'
+            , 'Julian Day'
+            , 'Activity Event Id'
+            , 'Measure Value']].apply(pd.to_numeric)
+    else:
+        raise Exception('Unknown file type: ', df_name)
 
-        if df_name.find('.csv') > -1:
-            # df = pd.DataFrame(None)
-            df = pd.read_csv('apps/OPG001/test_data/{}'.format(df_name),
-                             #  chunks = pd.read_csv('apps/OPG001/test_data/{}'.format(df_name),
-                             parse_dates=['Date of Event'],
-                             # infer_datetime_format=True,
-                             # chunksize=50_000,
-                             dtype={
-                                 "Variable Name": object,
-                                 "Variable Name Qualifier": object,
-                                 "Variable Name Sub Qualifier": object
-                             })
-            # for chunk in chunks:
-            #    df = df.append(chunk, ignore_index=True)
-        elif df_name.find('.xlsx') > -1:
-            df = pd.read_excel('apps/OPG001/test_data/{}'.format(df_name),
-                               dtype={
-                                   "Variable Name": object,
-                                   "Variable Name Qualifier": object,
-                                   "Variable Name Sub Qualifier": object
-                               })
-        elif df_name.find('.json') > -1:
-            df = pd.read_json('apps/OPG001/test_data/{}'.format(df_name),
-                              orient='records',
-                              lines=True)
-        elif df_name.find('.sql') > -1:  # TODO: This is testing code for connecting to a personal database
-            conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
-            sql_query = pd.read_sql_query(
-                '''
-            SELECT * FROM [OGMA_Test].[dbo].[{}] 
-            '''.format(df_name.split('.')[0]), conn)
-            df = pd.DataFrame(sql_query)
-            df[['Year of Event'
-                , 'Quarter'
-                , 'Month of Event'
-                , 'Week of Event'
-                , 'Fiscal Year of Event'
-                , 'Fiscal Quarter'
-                , 'Fiscal Month of Event'
-                , 'Fiscal Week of Event'
-                , 'Julian Day'
-                , 'Activity Event Id'
-                , 'Measure Value']] = df[['Year of Event'
-                , 'Quarter'
-                , 'Month of Event'
-                , 'Week of Event'
-                , 'Fiscal Year of Event'
-                , 'Fiscal Quarter'
-                , 'Fiscal Month of Event'
-                , 'Fiscal Week of Event'
-                , 'Julian Day'
-                , 'Activity Event Id'
-                , 'Measure Value']].apply(pd.to_numeric)
-        else:
-            raise Exception('Unknown file type: ', df_name)
+    # add all variable names without qualifiers to col
+    col = pd.Series(df['Variable Name'][df['Variable Name Qualifier'].isna()])
+    # combine variable hierarchy columns into col for rows with qualifiers
+    col = col.append(
+        pd.Series(
+            df['Variable Name'][df['Variable Name Qualifier'].notna()]
+            + "|"
+            + df['Variable Name Qualifier'][df['Variable Name Qualifier'].notna()]))
+    df['Variable Name'] = col
 
-        # add all variable names without qualifiers to col
-        col = pd.Series(df['Variable Name'][df['Variable Name Qualifier'].isna()])
-        # combine variable hierarchy columns into col for rows with qualifiers
-        col = col.append(
-            pd.Series(
-                df['Variable Name'][df['Variable Name Qualifier'].notna()]
-                + "|"
-                + df['Variable Name Qualifier'][df['Variable Name Qualifier'].notna()]))
-        df['Variable Name'] = col
+    # Can be redone to exclude hierarchy one name and to include more levels
+    df = df.rename(columns={'Hierarchy One Top': 'H1',
+                            'Hierarchy One -1': 'H2',
+                            'Hierarchy One -2': 'H3',
+                            'Hierarchy One -3': 'H4',
+                            'Hierarchy One -4': 'H5',
+                            'Hierarchy One Leaf': 'H6'})
 
-        # Can be redone to exclude hierarchy one name and to include more levels
-        df = df.rename(columns={'Hierarchy One Top': 'H1',
-                                'Hierarchy One -1': 'H2',
-                                'Hierarchy One -2': 'H3',
-                                'Hierarchy One -3': 'H4',
-                                'Hierarchy One -4': 'H5',
-                                'Hierarchy One Leaf': 'H6'})
+    # Shrinks Data Size
+    df = create_categories(df, ['H1', 'H2', 'H3', 'H4', 'H5', 'H6'])
 
-        self.HIERARCHY_LEVELS = ['H{}'.format(i + 1) for i in range(6)]
+    # replaces all strings that are just spaces with NaN
+    df.replace(to_replace=r'^\s*$', value=np.NaN, regex=True, inplace=True)
 
-        # Shrinks Data Size
-        df = create_categories(df, self.HIERARCHY_LEVELS)
-
-        # replaces all strings that are just spaces with NaN
-        df.replace(to_replace=r'^\s*$', value=np.NaN, regex=True, inplace=True)
-
-        # If we are dealing with links in the future we must format them as follows and edit the table drawer
-        # dataframe_table.Link = list(map(lambda x: '[Link]({})'.format(x), dataframe_table.Link))
-
-        # list of variable column names
-        self.VARIABLE_LEVEL = 'Variable Name'
-
-        # list of column names
-        self.COLUMN_NAMES = df.columns.values
-
-        # list of measure type options
-        self.MEASURE_TYPE_OPTIONS = df['Measure Type'].dropna().unique().tolist()
-
-        # New date picker values
-
-        self.GREGORIAN_MIN_YEAR = int(df['Year of Event'].min())
-        self.GREGORIAN_YEAR_MAX = int(df['Year of Event'][df['Calendar Entry Type'] == 'Year'].max())
-        self.GREGORIAN_QUARTER_MAX_YEAR = int(df['Year of Event'][df['Calendar Entry Type'] == 'Quarter'].max())
-        self.GREGORIAN_QUARTER_FRINGE_MIN = int(df['Quarter'][df['Year of Event'] == self.GREGORIAN_MIN_YEAR].min())
-        self.GREGORIAN_QUARTER_FRINGE_MAX = \
-            int(df['Quarter'][df['Year of Event'] == self.GREGORIAN_QUARTER_MAX_YEAR].max())
-        self.GREGORIAN_MONTH_MAX_YEAR = int(df['Year of Event'][df['Calendar Entry Type'] == 'Month'].max())
-        self.GREGORIAN_MONTH_FRINGE_MIN = \
-            int(df['Month of Event'][df['Year of Event'] == self.GREGORIAN_MIN_YEAR].min())
-        self.GREGORIAN_MONTH_FRINGE_MAX = \
-            int(df['Month of Event'][df['Year of Event'] == self.GREGORIAN_MONTH_MAX_YEAR].max())
-
-        if len(df[df['Calendar Entry Type'] == 'Week']) > 0:
-            self.GREGORIAN_WEEK_AVAILABLE = True  # not currently used
-            self.GREGORIAN_WEEK_MAX_YEAR = int(df['Year of Event'][df['Calendar Entry Type'] == 'Week'].max())
-            self.GREGORIAN_WEEK_FRINGE_MIN = int(
-                df['Week of Event'][df['Year of Event'] == self.GREGORIAN_MIN_YEAR].min())
-            self.GREGORIAN_WEEK_FRINGE_MAX = int(
-                df['Week of Event'][df['Year of Event'] == self.GREGORIAN_WEEK_MAX_YEAR].max())
-        else:
-            self.GREGORIAN_WEEK_AVAILABLE = False  # not currently used, so set fake values
-            self.GREGORIAN_WEEK_MAX_YEAR = 52
-            self.GREGORIAN_WEEK_FRINGE_MIN = 1
-            self.GREGORIAN_WEEK_FRINGE_MAX = 52
-
-        if len(df['Fiscal Year of Event'].unique()) != 1 and df['Fiscal Year of Event'].unique()[0] is not None:
-            self.FISCAL_AVAILABLE = True
-
-            self.FISCAL_MIN_YEAR = int(df['Fiscal Year of Event'].min())
-            self.FISCAL_YEAR_MAX = int(df['Fiscal Year of Event'][df['Calendar Entry Type'] == 'Fiscal Year'].max())
-            self.FISCAL_QUARTER_MAX_YEAR = int(df['Fiscal Year of Event'][df['Calendar Entry Type'] == 'Quarter'].max())
-            self.FISCAL_QUARTER_FRINGE_MIN = \
-                int(df['Fiscal Quarter'][df['Fiscal Year of Event'] == self.FISCAL_MIN_YEAR].min())
-            self.FISCAL_QUARTER_FRINGE_MAX = int(
-                df['Fiscal Quarter'][df['Fiscal Year of Event'] == self.FISCAL_QUARTER_MAX_YEAR].max())
-            self.FISCAL_MONTH_MAX_YEAR = int(df['Fiscal Year of Event'][df['Calendar Entry Type'] == 'Month'].max())
-            self.FISCAL_MONTH_FRINGE_MIN = \
-                int(df['Fiscal Month of Event'][df['Fiscal Year of Event'] == self.FISCAL_MIN_YEAR].min())
-            self.FISCAL_MONTH_FRINGE_MAX = int(
-                df['Fiscal Month of Event'][df['Fiscal Year of Event'] == self.FISCAL_MONTH_MAX_YEAR].max())
-            self.FISCAL_WEEK_MAX_YEAR = int(df['Fiscal Year of Event'][df['Calendar Entry Type'] == 'Week'].max())
-            self.FISCAL_WEEK_FRINGE_MIN = int(df['Fiscal Week of Event'][df['Fiscal Year of Event']
-                                                                         == self.FISCAL_MIN_YEAR].min())
-            self.FISCAL_WEEK_FRINGE_MAX = int(df['Fiscal Week of Event'][df['Fiscal Year of Event']
-                                                                         == self.FISCAL_WEEK_MAX_YEAR].max())
-        else:
-            self.FISCAL_AVAILABLE = False
-
-        # self.MIN_DATE_UNF = datetime.strptime(str(df.loc[df['Date of Event'].idxmin(), 'Date of Event']), '%Y%m%d')
-        # self.MAX_DATE_UNF = datetime.strptime(str(df.loc[df['Date of Event'].idxmax(), 'Date of Event']), '%Y%m%d')
-
-        # this is a hack until we get the data delivered from the database
-        try:
-            self.MIN_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(),
-                                                         'Date of Event'], '%Y/%m/%d')
-        except:
-            self.MIN_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(), 'Date of Event']
-            # self.MIN_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64').idxmin(),  # at
-            #                                            'Date of Event'], '%Y/%m/%d')
-
-        try:
-            self.MAX_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64[ns]').idxmax(),
-                                                         'Date of Event'], '%Y/%m/%d')
-        except:
-            self.MAX_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmax(), 'Date of Event']
-            # self.MAX_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64').idxmax(),  # at
-            #                                            'Date of Event'], '%Y/%m/%d')
-
-        # replaces all Y in Partial Period with True & False
-        df['Partial Period'] = df['Partial Period'].transform(lambda x: x == 'Y')
-
-        # Sets the Date of Event in the df to be in the correct format for Plotly
-        # df['Date of Event'] = df['Date of Event'].transform(
-        #     lambda x: pd.to_datetime(x, format='%Y%m%d', errors='ignore'))
-
-        self.DF = create_categories(df, self.HIERARCHY_LEVELS)
-
-        self.VARIABLE_OPTIONS = None
-
-    def get_visual_hierarchy(self):
-
-        options = []
-
-        unique_vars = self.DF[self.VARIABLE_LEVEL].unique()
-        cleaned_list = [x for x in unique_vars if str(x) != 'nan']
-        cleaned_list.sort()
-
-        for unique_var in cleaned_list:
-            options.append(
-                {'label': "  " * unique_var.count("|") + str(unique_var).replace('|', ', '), 'value': unique_var})
-
-        self.VARIABLE_OPTIONS = options
+    # If we are dealing with links in the future we must format them as follows and edit the table drawer
+    # dataframe_table.Link = list(map(lambda x: '[Link]({})'.format(x), dataframe_table.Link))
+    return df
 
 
 def generate_constants():
@@ -296,7 +188,7 @@ def generate_constants():
     for df_name in session['dataset_list']:
         HIERARCHY_LEVELS = ['H{}'.format(i + 1) for i in range(6)]
 
-        df = session[df_name].DF
+        df = session[df_name]
 
         # list of variable column names
         VARIABLE_LEVEL = 'Variable Name'
@@ -351,9 +243,9 @@ def generate_constants():
                 df['Fiscal Month of Event'][df['Fiscal Year of Event'] == FISCAL_MONTH_MAX_YEAR].max())
             FISCAL_WEEK_MAX_YEAR = int(df['Fiscal Year of Event'][df['Calendar Entry Type'] == 'Week'].max())
             FISCAL_WEEK_FRINGE_MIN = int(df['Fiscal Week of Event'][df['Fiscal Year of Event']
-                                                                         == FISCAL_MIN_YEAR].min())
+                                                                    == FISCAL_MIN_YEAR].min())
             FISCAL_WEEK_FRINGE_MAX = int(df['Fiscal Week of Event'][df['Fiscal Year of Event']
-                                                                         == FISCAL_WEEK_MAX_YEAR].max())
+                                                                    == FISCAL_WEEK_MAX_YEAR].max())
         else:
             FISCAL_AVAILABLE = False
             FISCAL_MIN_YEAR = None
@@ -374,7 +266,7 @@ def generate_constants():
         # this is a hack until we get the data delivered from the database
         try:
             MIN_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(),
-                                                         'Date of Event'], '%Y/%m/%d')
+                                                    'Date of Event'], '%Y/%m/%d')
         except:
             MIN_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(), 'Date of Event']
             # MIN_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64').idxmin(),  # at
@@ -382,7 +274,7 @@ def generate_constants():
 
         try:
             MAX_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64[ns]').idxmax(),
-                                                         'Date of Event'], '%Y/%m/%d')
+                                                    'Date of Event'], '%Y/%m/%d')
         except:
             MAX_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmax(), 'Date of Event']
             # MAX_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64').idxmax(),  # at
@@ -445,8 +337,8 @@ def generate_constants():
     return storage
 
 
-
 # **********************************************DATA MANIPULATION FUNCTIONS*******************************************
+
 
 def data_filter(hierarchy_path, secondary_type, end_secondary, end_year, start_secondary, start_year,
                 timeframe, fiscal_toggle, num_periods, period_type, hierarchy_toggle, hierarchy_level_dropdown,
@@ -455,7 +347,7 @@ def data_filter(hierarchy_path, secondary_type, end_secondary, end_year, start_s
 
     if hierarchy_toggle == 'Level Filter' or (
             (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == ['graph_children'])):
-        filtered_df = session[df_name].DF.copy()
+        filtered_df = session[df_name].copy()
 
         if hierarchy_toggle == 'Level Filter':
             # If anything is in the drop down
@@ -480,7 +372,7 @@ def data_filter(hierarchy_path, secondary_type, end_secondary, end_year, start_s
                 filtered_df = filtered_df[bool_series]
             filtered_df.dropna(subset=[df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)]], inplace=True)
     else:
-        filtered_df = session[df_name].DF
+        filtered_df = session[df_name]
         # Filters out all rows that don't include path member at specific level
         for i in range(len(hierarchy_path)):
             filtered_df = filtered_df[filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i]]
@@ -685,10 +577,6 @@ LANGUAGE = 'en'
 
 
 def load_datasets(data_sets):
-    # data_sets = config.DATA_SETS
-
     for i in data_sets:
         # Load data frame and extract data
-        session[i] = DataSet(i)
-        # Build variable tree
-        session[i].get_visual_hierarchy()
+        session[i] = dataset_to_df(i)

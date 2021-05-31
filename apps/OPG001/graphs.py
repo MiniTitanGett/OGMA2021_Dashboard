@@ -22,7 +22,7 @@ import os
 import plotly.graph_objects as go
 
 # Internal Modules
-from apps.OPG001.data import get_label, data_filter, LANGUAGE, customize_menu_filter, LOADED_DFS
+from apps.OPG001.data import get_label, data_filter, LANGUAGE, customize_menu_filter, session
 
 
 # Contents:
@@ -190,10 +190,10 @@ def get_line_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level
         if hierarchy_type == 'Level Filter' or (hierarchy_type == 'Specific Item' and
                                                 hierarchy_graph_children == ['graph_children']):
             color = hierarchy_level_dropdown if hierarchy_type == 'Level Filter' else \
-                LOADED_DFS[df_name].HIERARCHY_LEVELS[len(hierarchy_path)]
+                session[df_name].HIERARCHY_LEVELS[len(hierarchy_path)]
             line_group = get_label('Variable Name')
             legend_title_text = get_label(hierarchy_level_dropdown) if hierarchy_type == 'Level Filter' else \
-                get_label(LOADED_DFS[df_name].HIERARCHY_LEVELS[len(hierarchy_path)])
+                get_label(session[df_name].HIERARCHY_LEVELS[len(hierarchy_path)])
             filtered_df.rename(columns={color: get_label(color)}, inplace=True)
         else:
             color = 'Variable Name'
@@ -294,9 +294,9 @@ def get_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_le
         if hierarchy_type == 'Level Filter' or (hierarchy_type == 'Specific Item' and
                                                 hierarchy_graph_children == ['graph_children']):
             color = hierarchy_level_dropdown if hierarchy_type == 'Level Filter' else \
-                LOADED_DFS[df_name].HIERARCHY_LEVELS[len(hierarchy_path)]
+                session[df_name].HIERARCHY_LEVELS[len(hierarchy_path)]
             legend_title_text = get_label(hierarchy_level_dropdown) if hierarchy_type == 'Level Filter' else \
-                get_label(LOADED_DFS[df_name].HIERARCHY_LEVELS[len(hierarchy_path)])
+                get_label(session[df_name].HIERARCHY_LEVELS[len(hierarchy_path)])
             filtered_df.rename(columns={color: get_label(color)}, inplace=True)
         # else, hierarchy type is specific item while "Graph all in Dropdown" is unselected
         else:
@@ -360,9 +360,9 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
     if hierarchy_type == 'Level Filter':
         color = hierarchy_level_dropdown
     elif hierarchy_type == 'Specific Item' and hierarchy_graph_children == ['graph_children']:
-        color = LOADED_DFS[df_name].HIERARCHY_LEVELS[len(hierarchy_path)]
+        color = session[df_name].HIERARCHY_LEVELS[len(hierarchy_path)]
     else:
-        color = LOADED_DFS[df_name].HIERARCHY_LEVELS[len(hierarchy_path) - 1]
+        color = session[df_name].HIERARCHY_LEVELS[len(hierarchy_path) - 1]
     filtered_df[['Date of Event', 'Measure Type', 'Variable Name',
                  'Partial Period', color]] = filtered_df[
         ['Date of Event', 'Measure Type', 'Variable Name',
@@ -537,7 +537,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                 if hierarchy_type == 'Level Filter':
                     color = hierarchy_level_dropdown
                 else:
-                    color = LOADED_DFS[df_name].HIERARCHY_LEVELS[len(hierarchy_path)]
+                    color = session[df_name].HIERARCHY_LEVELS[len(hierarchy_path)]
                 hover_data = [get_label('Date of Event'), get_label('Partial Period')]
                 filtered_df.rename(columns={color: get_label(color)}, inplace=True)
             elif hierarchy_type == 'Level Filter':
@@ -546,7 +546,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                 hover_data = [get_label('Date of Event'), get_label('Variable Name'), get_label('Partial Period')]
                 filtered_df.rename(columns={x_axis: get_label(x_axis)}, inplace=True)
             else:
-                x_axis = LOADED_DFS[df_name].HIERARCHY_LEVELS[len(hierarchy_path)]
+                x_axis = session[df_name].HIERARCHY_LEVELS[len(hierarchy_path)]
                 color = 'Variable Name'
                 hover_data = [get_label('Date of Event'), get_label('Variable Name'), get_label('Partial Period')]
                 filtered_df.rename(columns={x_axis: get_label(x_axis)}, inplace=True)
@@ -683,7 +683,7 @@ def get_animated_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                 if hierarchy_type == 'Level Filter':
                     color = hierarchy_level_dropdown
                 else:
-                    color = LOADED_DFS[df_name].HIERARCHY_LEVELS[len(hierarchy_path)]
+                    color = session[df_name].HIERARCHY_LEVELS[len(hierarchy_path)]
                 hover_data = [get_label('Date of Event'), get_label('Partial Period')]
                 filtered_df.rename(columns={color: get_label(color)}, inplace=True)
             elif hierarchy_type == 'Level Filter':
@@ -692,7 +692,7 @@ def get_animated_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                 hover_data = [get_label('Date of Event'), get_label('Variable Name'), get_label('Partial Period')]
                 filtered_df.rename(columns={x_axis: get_label(x_axis)}, inplace=True)
             else:
-                x_axis = LOADED_DFS[df_name].HIERARCHY_LEVELS[len(hierarchy_path)]
+                x_axis = session[df_name].HIERARCHY_LEVELS[len(hierarchy_path)]
                 color = 'Variable Name'
                 hover_data = [get_label('Date of Event'), get_label('Variable Name'), get_label('Partial Period')]
                 filtered_df.rename(columns={x_axis: get_label(x_axis)}, inplace=True)
@@ -833,13 +833,13 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                 if hierarchy_type == 'Level Filter':
                     yaxis = hierarchy_level_dropdown
                 else:
-                    yaxis = LOADED_DFS[df_name].HIERARCHY_LEVELS[len(hierarchy_path)]
+                    yaxis = session[df_name].HIERARCHY_LEVELS[len(hierarchy_path)]
                 filtered_df.rename(columns={yaxis: get_label(yaxis)}, inplace=True)
             else:
                 if hierarchy_type == 'Level Filter':
                     xaxis = hierarchy_level_dropdown
                 else:
-                    xaxis = LOADED_DFS[df_name].HIERARCHY_LEVELS[len(hierarchy_path)]
+                    xaxis = session[df_name].HIERARCHY_LEVELS[len(hierarchy_path)]
                 filtered_df.rename(columns={xaxis: get_label(xaxis)}, inplace=True)
                 yaxis = 'Measure Value'
 
@@ -1148,7 +1148,7 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
 
     # If "Last ___ ____" is active and the num_periods is invalid (None), return an empty graph
     if timeframe == 'to-current' and not num_periods:
-        filtered_df = pd.DataFrame(columns=LOADED_DFS[df_name].COLUMN_NAMES)
+        filtered_df = pd.DataFrame(columns=session[df_name].COLUMN_NAMES)
     # else, filter normally
     else:
         filtered_df = data_filter(list_of_names, secondary_type, end_secondary, end_year,

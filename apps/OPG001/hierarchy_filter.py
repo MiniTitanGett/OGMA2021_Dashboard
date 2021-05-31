@@ -14,7 +14,7 @@ import dash_html_components as html
 import pandas as pd
 
 # Internal Modules
-from apps.OPG001.data import get_label, LOADED_DFS, CLR
+from apps.OPG001.data import get_label, session, CLR
 
 
 # Contents:
@@ -30,7 +30,7 @@ from apps.OPG001.data import get_label, LOADED_DFS, CLR
 # helper function to generate hierarchy dropdown
 def generate_dropdown(tile, df_name, nid_path):
     # using a subset of our dataframe, turn it into a multiindex df, and access unique values for option
-    df = LOADED_DFS[df_name].DF[['H1', 'H2', 'H3', 'H4', 'H5', 'H6']]
+    df = session[df_name].DF[['H1', 'H2', 'H3', 'H4', 'H5', 'H6']]
     hierarchy_nid_list = list(nid_path.split("^||^"))[1:]
     l = len(hierarchy_nid_list)
     if l == 6:
@@ -86,7 +86,7 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
         html.Div([
             dcc.Dropdown(
                 id={'type': 'hierarchy_level_dropdown', 'index': tile},
-                options=[{'label': get_label(x), 'value': x} for x in LOADED_DFS[df_name].HIERARCHY_LEVELS],
+                options=[{'label': get_label(x), 'value': x} for x in session[df_name].HIERARCHY_LEVELS],
                 multi=False,
                 value=level_value,
                 style={'color': 'black', 'width': '100%', 'textAlign': 'center', 'margin-top': '10px'},

@@ -1,9 +1,14 @@
+from datetime import timedelta
+
 from flask import Flask, request, session, g
 import flask
 import pyodbc
 from werkzeug.utils import redirect
 import config
 import logging
+
+from apps.OPG001.data import load_datasets
+from flask_session import Session
 
 # https://stackoverflow.com/questions/18967441/add-a-prefix-to-all-flask-routes/36033627#36033627
 # https://docs.microsoft.com/en-us/visualstudio/python/configure-web-apps-for-iis-windows?view=vs-2019
@@ -36,6 +41,15 @@ server.debug = config.DEBUG
 # server.config['SESSION_COOKIE_DOMAIN'] = 'pacman.ogma.local:8080'
 # ==================
 server.wsgi_app = PrefixMiddleware(server.wsgi_app)  # , prefix=config.APPLICATION_ROOT)
+
+
+server.config['SESSION_TYPE'] = 'filesystem'
+server.config['SESSION_PERMANENT'] = True
+server.config['SESSION_USE_SIGNER'] = True
+server.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=2)
+server.config['SESSION_FILE_THRESHOLD'] = 100
+
+server_session = Session(server)
 
 
 def dict_to_string(d):
@@ -111,7 +125,7 @@ def before_request_func():
     conn = get_conn()
 
     # if the sessionid exists in the request, validate the nonce
-    # otherwiese validate the sessionid/tokenid out of the cookie
+    # otherwise validate the sessionid/tokenid out of the cookie
 
     sessionid = request.args.get("sessionID", type=int)
 
@@ -125,7 +139,7 @@ def before_request_func():
         query = """\
         declare @p_external_id int
         declare @p_result_status varchar(255)
-        exec dbo.opp_validate_nonce {}, \'{}\', \'{}\', @p_external_id output, @p_result_status output
+        exec dbo.OPP_Validate_Nonce {}, \'{}\', \'{}\', @p_external_id output, @p_result_status output
         select @p_external_id as external_id, @p_result_status as result_status
         """.format(sessionid, nonce_key, nonce_value)
 
@@ -162,7 +176,7 @@ def before_request_func():
     declare @p_external_id int
     declare @p_session_status varchar(64)
     declare @p_result_status varchar(255)
-    exec dbo.opp_get_session2 {}, {}, {}, null, null, null, null, null, null, null, null, null, null, null, null, null,
+    exec dbo.OPP_Get_Session2 {}, {}, {}, null, null, null, null, null, null, null, null, null, null, null, null, null,
     null, null, null, @p_session_status output, null, null, null, null, null, null, null, null, @p_external_id output,
     @p_result_status output
     select @p_external_id as external_id, @p_session_status as session_status, @p_result_status as result_status
@@ -195,6 +209,15 @@ def before_request_func():
 def after_request_func(response):
     logging.debug("request=" + dict_to_string(request.values))
     logging.debug("session=" + dict_to_string(session))
+
+    if 'dataset_list' not in session:
+        if session['sessionID'] == 105: # TODO: shows how we can get data specific to a session id
+            load_datasets(['OPG001_2016-17_Week_v3.csv'])
+            session['dataset_list'] = ['OPG001_2016-17_Week_v3.csv']
+        else:
+            load_datasets(config.DATA_SETS)
+            session['dataset_list'] = config.DATA_SETS
+
     return response
 
 

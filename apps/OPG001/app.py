@@ -24,7 +24,7 @@ from apps.OPG001.layouts import get_layout
 #                 assets_ignore='French Details.css' if LANGUAGE == 'en' else '')
 # server = app.server
 app = app.get_app('OPG001/')
-app.layout = get_layout()
+app.layout = get_layout
 
 # We import callbacks after setting the layout to avoid callback exception errors w/o suppressing
 import apps.OPG001.user_interface_callbacks

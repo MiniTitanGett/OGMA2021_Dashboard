@@ -1285,7 +1285,7 @@ def get_table_graph_menu(tile, number_of_columns):
                      the data-table to filter for matching entries within that column
                      - Use comparison operators for more precise numerical filtering,
                      for example: > 80, = 2019, < 200
-                    ''' if LANGUAGE == 'en' else
+                    ''' if LANGUAGE == 'En' else
                     '''
                     - Tapez un terme de recherche dans la ligne '' ... ''
                     en haut du tableau de données pour filtrer les entrées correspondantes
@@ -1303,7 +1303,7 @@ def get_table_graph_menu(tile, number_of_columns):
                      - Columns that have no data are not displayed 
                      - To hide a column click on the eye icon beside the column header
                      - To display hidden columns enable them within the 'TOGGLE COLUMNS' menu
-                    ''' if LANGUAGE == 'en' else
+                    ''' if LANGUAGE == 'En' else
                     '''
                     - Les colonnes sans données ne sont pas affichées
                     - Pour masquer une colonne, cliquez sur l'icône en forme d'œil à côté de

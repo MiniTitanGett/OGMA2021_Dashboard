@@ -4,9 +4,10 @@ GO
 /****** Object:  Table [dbo].[OP_ref_insert]    Script Date: 2021-05-19 12:03:31 PM ******/
 
 INSERT into [dbo].[OP_Ref] (ref_table,ref_value, language, ref_desc)
-values ('Data_set','OPG 001 Time Series Measures','En','OPG 001 Time Series Measures'), ('Data_set','OPG 001 Time Series Measures','Fr','OPG 001 Mesures de Séries Chronologiques'),
-('Data_set','OPG010 SanKey Series','En','OPG010 SanKey Series'),
-('Data_set','OPG010 SanKey Series','Fr','Série SanKey'),
+values ('Data_set','OPG001.sql','En','OPG 001 Time Series Measures'),
+('Data_set','OPG001.sql','Fr','OPG 001 Mesures de Séries Chronologiques'),
+('Data_set','OPG010.sql','En','OPG010 SanKey Series'),
+('Data_set','OPG010.sql','Fr','Série SanKey'),
 ('Labels','Parameter','En','Parameters'),
 ('Labels','Parameters','Fr','Paramètres'),
 ('Labels','Graph','En','Graph'),
@@ -21,8 +22,8 @@ values ('Data_set','OPG 001 Time Series Measures','En','OPG 001 Time Series Meas
 ('Labels','Specific Item','Fr','Article Spécifique'),
 ('Labels','Select','En','Select'),
 ('Labels','Select','Fr','Sélectionner'),
-('Labels','TimeFrame','En','TimeFrame'),
-('Labels','TimeFrame','Fr','Plage de Temps'),
+('Labels','Timeframe','En','TimeFrame'),
+('Labels','Timeframe','Fr','Plage de Temps'),
 ('Labels','Year','En','Year'),
 ('Labels','Year','Fr','Année'),
 ('Labels','Fiscal Year','En','Fiscal Year'),
@@ -318,11 +319,12 @@ values ('Data_set','OPG 001 Time Series Measures','En','OPG 001 Time Series Meas
 ('Labels','End_Long','Fr','Fr: Completed');
 
 go
-
+---when we update it from a space to underscore it gives key errors
+/*
 UPDATE [dbo].[OP_Ref]
 SET    ref_value = REPLACE(ref_value, ' ', '_')
 WHERE  ref_value LIKE '%[ ]%'
-go
+go*/
 
 IF OBJECT_ID('dbo.reftable') IS NOT NULL
     PRINT   'REFTABLE Procedure Exists'

@@ -48,7 +48,7 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
             options=[
                 {'label': get_label('All-Time (Monthly)'),
                  'value': 'all-time'},
-                {'label': '{}'.format(get_label('Last') if LANGUAGE == 'en' else '........... ' + get_label('Last')),
+                {'label': '{}'.format(get_label('Last') if LANGUAGE == 'En' else '........... ' + get_label('Last')),
                  'value': 'to-current'},
                 {'label': get_label('Select Range'),
                  'value': 'select-range'}],
@@ -67,7 +67,7 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                 style={'width': '45px', 'height': '27px', 'margin': '0', 'padding': '0', 'font-size': '15px',
                        'text-align': 'center', 'padding-top': '7px', 'border-radius': '0', 'color': '#333'})
         ], style={'width': '0', 'height': '0', 'position': 'relative', 'bottom': '55px',
-                  'left': '73px' if LANGUAGE == 'en' else '36px'}),
+                  'left': '73px' if LANGUAGE == 'En' else '36px'}),
         html.Div([
             dcc.Dropdown(
                 id={'type': 'period-type', 'index': tile},
@@ -86,7 +86,7 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                 style={'width': '100px', 'height': '27px', 'margin': '0', 'padding': '0', 'font-size': '15px',
                        'display': 'inline-block', 'text-align': 'center', 'border-radius': '0', 'color': '#333'})
         ], style={'width': '0', 'height': '0', 'position': 'relative', 'bottom': '55px',
-                  'left': '125px' if LANGUAGE == 'en' else '150px'}),
+                  'left': '125px' if LANGUAGE == 'En' else '150px'}),
         html.P(
             "{}: {} - {}".format(get_label('Available'), df_const[df_name]['MIN_DATE_UNF'].strftime('%m/%d/%Y'),
                                  df_const[df_name]['MAX_DATE_UNF'].strftime('%m/%d/%Y')),

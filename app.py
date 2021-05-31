@@ -14,7 +14,7 @@ def get_app(prefix=''):
         # meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1.0"}],
         external_stylesheets=external_stylesheets,
         external_scripts=external_scripts,
-        assets_ignore='BBB - french stylesheet1.css' if LANGUAGE == 'en' else '',
+        assets_ignore='BBB - french stylesheet1.css' if LANGUAGE == 'En' else '',
         server=server,
         url_base_pathname=config.BASE_PATHNAME + prefix
     )

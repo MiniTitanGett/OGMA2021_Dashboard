@@ -95,7 +95,7 @@ for x in range(4):
          State({'type': 'hierarchy_specific_dropdown', 'index': x}, 'options'),
          State({'type': 'hierarchy_specific_dropdown', 'index': 4}, 'options'),
          # Constants
-         State('df-constants-store', 'data')
+         State('df-constants-storage', 'data')
          ]
     )
     def _update_graph(_df_trigger, view_state, tile_title, _datepicker_trigger,

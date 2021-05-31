@@ -555,7 +555,7 @@ def get_layout_dashboard(df_const):
         dcc.Store(
             id='df-constants-storage',
             storage_type='memory',
-            data=[df_const])
+            data=df_const)
     ], style={'background-color': CLR['lightpink']})
 
 

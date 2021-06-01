@@ -214,8 +214,9 @@ def get_layout():
 
 
 def get_layout_graph(report_name):
-    if config.SESSIONLESS:
-        return PreventUpdate
+
+    # if config.SESSIONLESS:
+    #     return PreventUpdate
 
     conn = get_conn()
     # j = json.dumps(saved_layouts[graph_title], sort_keys=True)

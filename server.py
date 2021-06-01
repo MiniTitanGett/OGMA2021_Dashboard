@@ -114,8 +114,8 @@ def load_saved_graphs_from_db():
     """
     loads the saved layouts into the saved_layouts dictionary from the database
     """
-    if config.SESSIONLESS:
-        return
+    # if config.SESSIONLESS:
+    #     return
 
     conn = get_conn()
     cursor = conn.cursor()
@@ -222,10 +222,10 @@ def before_request_func():
     logging.debug("cookies=" + dict_to_string(request.cookies))
     # logging.debug("session=" + dict_to_string(session))
 
-    if config.SESSIONLESS:
-        session["sessionID"] = "0"
-        session["externalID"] = "0"
-        return None
+    # if config.SESSIONLESS:
+    #     session["sessionID"] = "0"
+    #     session["externalID"] = "0"
+    #     return None
 
     conn = get_conn()
 

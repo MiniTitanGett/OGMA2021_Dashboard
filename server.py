@@ -1,15 +1,16 @@
 from datetime import timedelta
-
-import flask
 from flask import Flask, request, session, g
+import flask
 import pyodbc
+# import pymssql
 from werkzeug.utils import redirect
 import config
 import logging
+# from pandas import DataFrame
+import pandas
 
-from apps.OPG001.data import load_datasets
+from apps.OPG001.data import saved_layouts, load_datasets
 from flask_session import Session
-
 
 # https://stackoverflow.com/questions/18967441/add-a-prefix-to-all-flask-routes/36033627#36033627
 # https://docs.microsoft.com/en-us/visualstudio/python/configure-web-apps-for-iis-windows?view=vs-2019
@@ -53,6 +54,7 @@ server_session = Session(server)
 
 
 def dict_to_string(d):
+
     if d is None:
         return "None"
 
@@ -69,6 +71,7 @@ def dict_to_string(d):
 
 
 def get_conn():
+
     if 'conn' not in g:
         g.conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
 
@@ -80,6 +83,109 @@ def close_conn():
 
     if conn is not None:
         conn.close()
+
+
+def get_ref(ref_table, language):
+    """
+    gets a table from OP_Ref
+    """
+    conn = get_conn()
+    # cursor = conn.cursor()
+    # query = "exec dbo.spopref_getoprefdata \'{}\', \'{}\'".format(ref_table, language)
+
+    # cursor.execute(query)
+
+    # results = DataFrame(cursor.fetchall())
+
+    # cursor.close()
+    # del cursor
+
+    query = pandas.read_sql("exec dbo.spopref_getoprefdata \'{}\', \'{}\'".format(ref_table, language), conn)
+    results = pandas.DataFrame(query, columns=["ref_value", "ref_desc"])
+
+    return results
+
+
+def load_labels(language="En"):
+    session["labels"] = get_ref("Labels", language)
+
+
+def load_saved_graphs_from_db():
+    """
+    loads the saved layouts into the saved_layouts dictionary from the database
+    """
+    if config.SESSIONLESS:
+        return
+
+    conn = get_conn()
+    cursor = conn.cursor()
+    query = """\
+    declare @p_result_status varchar(255)
+    exec dbo.opp_addgeteditdeletefind_extdashboardreports {}, 'Find', null, null, null, null, null,
+    @p_result_status output
+    select @p_result_status as result_status
+    """.format(session["sessionID"])
+    # params = (session["sessionID"], "Find", "", "", "", "", "", pymssql.output("VARCHAR", 255))
+    # params = cursor.callproc(query, params)
+
+#    if params[7] != "OK":
+#        result_status = params[7]
+#        cursor.close()
+#        del cursor
+#        logging.error(result_status)
+#        raise ValueError(result_status)
+
+    cursor.execute(query)
+
+    results = cursor.fetchall()
+
+    # for now, don't worry about @p_result_status
+
+    for row in results:
+        # save_layout_state(row["ref_value"], row["clob_text"])
+        saved_layouts[row["ref_value"]] = row["clob_text"]
+
+        cursor.close()
+        del cursor
+
+
+def validate_session(sessionid, externalid):
+    conn = get_conn()
+    cursor = conn.cursor()
+    query = """\
+    declare @p_external_id int
+    declare @p_session_status varchar(64)
+    declare @p_result_status varchar(255)
+    exec dbo.OPP_Get_Session2 {}, {}, {}, null, null, null, null, null, null, null, null, null, null, null, null, null,
+    null, null, null, @p_session_status output, null, null, null, null, null, null, null, null, @p_external_id output,
+    @p_result_status output
+    select @p_external_id as external_id, @p_session_status as session_status, @p_result_status as result_status
+    """.format(sessionid, sessionid, 1)
+
+    # logging.debug("\n" + query)
+
+    cursor.execute(query)
+
+    results = cursor.fetchone()
+
+    if results.result_status != "OK" or results.external_id != externalid or results.session_status != 'OK':
+        cursor.close()
+        del cursor
+        if results.result_status != "OK":
+            logging.error(results.result_status)
+        elif results.session_status != "OK":
+            logging.error(results.session_status)
+        else:
+            logging.error("Invalid external_id: {}".format(externalid))
+        flask.abort(404)
+
+    cursor.close()
+    del cursor
+
+
+def load_dataset_list():
+    df = get_ref("Data_set", session["language"])
+    return df["ref_value"].tolist()
 
 
 # def get_cursor():
@@ -105,7 +211,7 @@ def before_first_request_func():
     logging.debug(request.method + " " + request.url)
     logging.debug("request=" + dict_to_string(request.values))
     logging.debug("cookies=" + dict_to_string(request.cookies))
-    logging.debug("session=" + dict_to_string(session))
+    # logging.debug("session=" + dict_to_string(session))
 
 
 # WebModuleBeforeDispatch
@@ -114,7 +220,7 @@ def before_request_func():
     logging.debug(request.method + " " + request.url)
     logging.debug("request=" + dict_to_string(request.values))
     logging.debug("cookies=" + dict_to_string(request.cookies))
-    logging.debug("session=" + dict_to_string(session))
+    # logging.debug("session=" + dict_to_string(session))
 
     if config.SESSIONLESS:
         session["sessionID"] = "0"
@@ -131,6 +237,7 @@ def before_request_func():
     if sessionid:  # and (sessionid != session.get("sessionID")):
         session["sessionID"] = "0"
         session["externalID"] = "0"
+        session["language"] = "En"
 
         nonce_key = request.args.get("a")
         nonce_value = request.args.get("b")
@@ -161,12 +268,26 @@ def before_request_func():
         cursor.close()
         del cursor
 
-        if session['sessionID'] == 105:  # TODO: shows how we can get data specific to a session id
-            load_datasets(['OPG001_2016-17_Week_v3.csv'])
-            session['dataset_list'] = ['OPG001_2016-17_Week_v3.csv']
-        else:
-            load_datasets(config.DATA_SETS)
-            session['dataset_list'] = config.DATA_SETS
+        # validate the session on the first request
+        validate_session(sessionid, results.external_id)
+
+        # set the user's language
+        language = request.args.get("language")
+
+        if language:
+            session["language"] = language
+
+        # load the labels
+        load_labels(session["language"])
+
+        # load the available datasets
+        session["dataset_list"] = load_dataset_list()  # get_ref("Data_set", session["language"])
+        load_datasets(session["dataset_list"])
+
+        # load the available dashboards
+
+        # load the available graphs/layouts
+        load_saved_graphs_from_db()
 
         # redirect without the query params to prevent errors on refresh
         if request.args.get('reportName'):
@@ -174,47 +295,30 @@ def before_request_func():
         else:
             return redirect(request.path)
 
-    # validate session
-    sessionid = session["sessionID"]
-    externalid = session["externalID"]
-
-    query = """\
-    declare @p_external_id int
-    declare @p_session_status varchar(64)
-    declare @p_result_status varchar(255)
-    exec dbo.OPP_Get_Session2 {}, {}, {}, null, null, null, null, null, null, null, null, null, null, null, null, null,
-    null, null, null, @p_session_status output, null, null, null, null, null, null, null, null, @p_external_id output,
-    @p_result_status output
-    select @p_external_id as external_id, @p_session_status as session_status, @p_result_status as result_status
-    """.format(sessionid, sessionid, 1)
-
-    # logging.debug("\n" + query)
-
-    cursor = conn.cursor()
-    cursor.execute(query)
-
-    results = cursor.fetchone()
-
-    if results.result_status != "OK" or results.external_id != externalid or results.session_status != 'OK':
-        cursor.close()
-        del cursor
-        if results.result_status != "OK":
-            logging.error(results.result_status)
-        elif results.session_status != "OK":
-            logging.error(results.session_status)
-        else:
-            logging.error("Invalid external_id: {}".format(externalid))
-        flask.abort(404)
-
-    cursor.close()
-    del cursor
+    # validate session from the cookie
+    validate_session(int(request.cookies.get("sessionID")), int(request.cookies.get("externalID")))
 
 
 # WebModuleAfterDispatch
 @server.after_request
 def after_request_func(response):
     logging.debug("request=" + dict_to_string(request.values))
-    logging.debug("session=" + dict_to_string(session))
+    logging.debug("cookies=" + dict_to_string(request.cookies))
+    # logging.debug("session=" + dict_to_string(session))
+
+    # store sessionID and externalID in the cookie instead of the session
+    if not request.cookies.get("sessionID"):
+        response.set_cookie("sessionID", str(session["sessionID"]))
+        response.set_cookie("externalID", str(session["externalID"]))
+
+#    if 'dataset_list' not in session:
+#        if session['sessionID'] == 105: # TODO: shows how we can get data specific to a session id
+#            load_datasets(['OPG001_2016-17_Week_v3.csv'])
+#            session['dataset_list'] = ['OPG001_2016-17_Week_v3.csv']
+#        else:
+#            load_datasets(config.DATA_SETS)
+#            session['dataset_list'] = config.DATA_SETS
+
     return response
 
 
@@ -222,7 +326,8 @@ def after_request_func(response):
 @server.teardown_request
 def teardown_request_func(error=None):
     logging.debug("request=" + dict_to_string(request.values))
-    logging.debug("session=" + dict_to_string(session))
+    logging.debug("cookies=" + dict_to_string(request.cookies))
+    # logging.debug("session=" + dict_to_string(session))
 
     if error:
         logging.error(str(error))

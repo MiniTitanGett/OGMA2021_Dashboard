@@ -12,6 +12,7 @@ import numpy as np
 # External Packages
 import pandas as pd
 import pyodbc
+import logging
 from dateutil.relativedelta import relativedelta
 from flask import session
 
@@ -186,6 +187,8 @@ def dataset_to_df(df_name):
 def generate_constants():
     storage = {}
     for df_name in session['dataset_list']:
+    # for index, row in session["dataset_list"].iterrows():
+    #    df_name = row["ref_value"]
         HIERARCHY_LEVELS = ['H{}'.format(i + 1) for i in range(6)]
 
         df = session[df_name]
@@ -530,25 +533,25 @@ def get_table_columns(dff):
 # *********************************************LANGUAGE DATA***********************************************************
 
 def get_label(key):
-    key_row = LANGUAGE_DF[LANGUAGE_DF['ref_value'] == key]
-    key_row = key_row[key_row['language'] == LANGUAGE]
+    language_df = session["labels"]
+    key_row = language_df[language_df["ref_value"] == key]
+    # key_row = key_row[key_row['language'] == LANGUAGE]
     if key is None:
         return None
     if len(key_row) != 1:
         return 'Key Error: {}'.format(key)
-    return key_row.iloc[0]['ref_desc']
-
+    return key_row.iloc[0]["ref_desc"]
 
 # loads labels from language data from database
-conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
-sql_query = pd.read_sql_query('''exec dbo.reftable''', conn)
-LANGUAGE_DF = pd.DataFrame(sql_query)
-
+# conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
+# sql_query = pd.read_sql_query('''exec dbo.reftable''',conn)
+# LANGUAGE_DF = session["labels"]  # pd.DataFrame(sql_query)
 # LANGUAGE_DF = pd.read_csv('apps/OPG001/test_data/Language Data JG.csv')
+
 # Apparently will be passed in via the server
 # 'En' = English
 # 'Fr' = French
-LANGUAGE = 'En'
+# LANGUAGE = session["language"]
 
 # *********************************************DATAFRAME OPERATIONS***************************************************
 
@@ -581,13 +584,17 @@ LANGUAGE = 'En'
 
 # DATA_SETS = config.DATA_SETS
 
-cnxn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
-sql_query = pd.read_sql_query('''exec dbo.OPP_retrieve_datasets''', cnxn)
-DATA_SETS = pd.DataFrame(sql_query)['ref_value'].tolist()
-cnxn.close()
+# cnxn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
+# sql_query = pd.read_sql_query('''exec dbo.OPP_retrieve_datasets''', cnxn)
+# DATA_SETS = pd.DataFrame(sql_query)['ref_value'].tolist()
+# cnxn.close()
 
 
 def load_datasets(data_sets):
     for i in data_sets:
         # Load data frame and extract data
         session[i] = dataset_to_df(i)
+    # for index, row in data_sets.iterrows():
+    #    df_name = row["ref_value"]
+    #    logging.debug("loading dataset " + df_name)
+    #    session[df_name] = dataset_to_df(df_name)

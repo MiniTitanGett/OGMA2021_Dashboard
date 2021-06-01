@@ -57,8 +57,8 @@ def save_layout_to_file(layouts):
 
 def save_layout_to_db(graph_title):
 
-    if config.SESSIONLESS:
-        return
+    # if config.SESSIONLESS:
+    #     return
 
     conn = pyodbc.connect(
         'DRIVER={SQL Server};SERVER=PANDA\\DEV_COLLATION_01;DATABASE=OPEN_Dev_NB;Trusted_Connection=yes',

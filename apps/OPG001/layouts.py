@@ -17,9 +17,9 @@ import json
 # Internal Modules
 import config
 from server import get_conn
-from apps.OPG001.app import app
+# from apps.OPG001.app import app
 from apps.OPG001.data import GRAPH_OPTIONS, CLR, DATA_CONTENT_HIDE, VIEW_CONTENT_SHOW, BAR_X_AXIS_OPTIONS, \
-    CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LANGUAGE, LAYOUT_CONTENT_HIDE, \
+    CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LAYOUT_CONTENT_HIDE, \
     saved_layouts, saved_dashboards
 from apps.OPG001.hierarchy_filter import get_hierarchy_layout
 from apps.OPG001.datepicker import get_date_picker
@@ -214,8 +214,9 @@ def get_layout():
 
 
 def get_layout_graph(report_name):
-    if config.SESSIONLESS:
-        return PreventUpdate
+
+    # if config.SESSIONLESS:
+    #     return PreventUpdate
 
     conn = get_conn()
     # j = json.dumps(saved_layouts[graph_title], sort_keys=True)
@@ -1259,6 +1260,8 @@ def get_table_graph_menu(tile, number_of_columns):
     :return: Text instructions for how user can interact with table.
     """
     # (args-value: {})[0] = tile index
+    language = session["language"]
+
     return [
         html.Div([
             # id is used by create_graph callback to verify that the table menu is created before it activates
@@ -1294,7 +1297,7 @@ def get_table_graph_menu(tile, number_of_columns):
                      the data-table to filter for matching entries within that column
                      - Use comparison operators for more precise numerical filtering,
                      for example: > 80, = 2019, < 200
-                    ''' if LANGUAGE == 'En' else
+                    ''' if language == 'En' else
                     '''
                     - Tapez un terme de recherche dans la ligne '' ... ''
                     en haut du tableau de données pour filtrer les entrées correspondantes
@@ -1312,7 +1315,7 @@ def get_table_graph_menu(tile, number_of_columns):
                      - Columns that have no data are not displayed 
                      - To hide a column click on the eye icon beside the column header
                      - To display hidden columns enable them within the 'TOGGLE COLUMNS' menu
-                    ''' if LANGUAGE == 'En' else
+                    ''' if language == 'En' else
                     '''
                     - Les colonnes sans données ne sont pas affichées
                     - Pour masquer une colonne, cliquez sur l'icône en forme d'œil à côté de

@@ -74,8 +74,8 @@ def load_saved_graphs_from_db():
     """
     loads the saved layouts into the saved_layouts dictionary from the database
     """
-    if config.SESSIONLESS:
-        return
+    # if config.SESSIONLESS:
+    #     return
 
     conn = get_conn()
     cursor = conn.cursor()
@@ -151,8 +151,9 @@ def save_layout_to_file(layouts):
 
 
 def save_layout_to_db(graph_title):
-    if config.SESSIONLESS:
-        return
+
+    # if config.SESSIONLESS:
+    #     return
 
     conn = get_conn()
     j = json.dumps(saved_layouts[graph_title], sort_keys=True)

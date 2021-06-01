@@ -8,7 +8,7 @@ contains functions to generate graphs
 
 # External Packages
 from _datetime import datetime
-
+from flask import session
 import numpy as np
 import plotly.express as px
 import dash_core_components as dcc
@@ -22,7 +22,7 @@ import os
 import plotly.graph_objects as go
 
 # Internal Modules
-from apps.OPG001.data import get_label, data_filter, LANGUAGE, customize_menu_filter, session
+from apps.OPG001.data import get_label, data_filter, customize_menu_filter
 
 
 # Contents:
@@ -140,6 +140,7 @@ def get_line_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level
     # arg_value[0] = xaxis selector
     # arg_value[1] = measure type selector
     # arg_value[2] = variable names selector
+    language = session["language"]
 
     # Specialty filtering
     filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[2], df_const)
@@ -157,7 +158,7 @@ def get_line_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level
                 title = '{}: {} vs {}'.format(get_label(hierarchy_level_dropdown), arg_value[1], get_label('Time'))
             elif len(hierarchy_path) != 0:
                 # Item's children graph title
-                if LANGUAGE == 'En':
+                if language == 'En':
                     title = '{}\'s {}'.format(hierarchy_path[-1], get_label('Children'))
                 else:
                     title = '{} {}'.format(get_label('Children of'), hierarchy_path[-1])
@@ -233,7 +234,7 @@ def get_line_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level
         id='graph-display',
         className='fill-container',
         responsive=True,
-        config=dict(locale=LANGUAGE),
+        config=dict(locale=language.lower()),
         figure=fig)
 
     return graph
@@ -245,6 +246,7 @@ def get_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_le
     # arg_value[0] = xaxis selector
     # arg_value[1] = measure type selector
     # arg_value[2] = variable names selector
+    language = session["language"]
 
     # Specialty filtering
     filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[2], df_const)
@@ -262,7 +264,7 @@ def get_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_le
                 title = '{}: {} vs {}'.format(get_label(hierarchy_level_dropdown), arg_value[1], get_label('Time'))
             elif len(hierarchy_path) != 0:
                 # Specific item's children graph title
-                if LANGUAGE == 'En':
+                if language == 'En':
                     title = '{}\'s {}'.format(hierarchy_path[-1], get_label('Children'))
                 else:
                     title = '{} {}'.format(get_label('Children of'), hierarchy_path[-1])
@@ -335,7 +337,7 @@ def get_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_le
         id='graph-display',
         className='fill-container',
         responsive=True,
-        config=dict(locale=LANGUAGE),
+        config=dict(locale=language.lower()),
         figure=fig)
 
     return graph
@@ -350,6 +352,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
     # (args-value: {})[3] = y-axis measure
     # (args-value: {})[4] = size
     # (args-value: {})[5] = size measure
+    language = session["language"]
 
     # Specialty filtering
     filtered_df = dff.copy().query(
@@ -385,7 +388,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 title = '{}: {} vs {}'.format(get_label(hierarchy_level_dropdown), arg_value[2], arg_value[4])
             elif len(hierarchy_path) != 0:
                 # Specific item's children graph title
-                if LANGUAGE == 'En':
+                if language == 'En':
                     title = '{}\'s {}'.format(hierarchy_path[-1], get_label('Children'))
                 else:
                     title = '{} {}'.format(get_label('Children of'), hierarchy_path[-1])
@@ -453,7 +456,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
         id='graph-display',
         className='fill-container',
         responsive=True,
-        config=dict(locale=LANGUAGE),
+        config=dict(locale=language.lower()),
         figure=fig)
 
     return graph
@@ -467,6 +470,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
     # arg_value[2] = variable names selector
     # arg_value[3] = orientation
     # arg_value[4] = animation bool
+    language = session["language"]
 
     # Specialty filtering
     filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[2], df_const)
@@ -487,7 +491,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                     title = '{0}: {1} vs {0}'.format(get_label(hierarchy_level_dropdown), arg_value[1])
             elif len(hierarchy_path) != 0:
                 # Specific item's children graph title
-                if LANGUAGE == 'En':
+                if language == 'En':
                     title = '{}\'s {}'.format(hierarchy_path[-1], get_label('Children'))
                 else:
                     title = '{} {}'.format(get_label('Children of'), hierarchy_path[-1])
@@ -600,7 +604,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         id='graph-display',
         className='fill-container',
         responsive=True,
-        config=dict(locale=LANGUAGE),
+        config=dict(locale=language.lower()),
         figure=fig)
 
     return graph
@@ -614,6 +618,7 @@ def get_animated_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
     # arg_value[2] = variable names selector
     # arg_value[3] = orientation
     # arg_value[4] = animate bool
+    language = session["language"]
 
     # Specialty filtering
     filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[2], df_const)
@@ -633,7 +638,7 @@ def get_animated_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                     title = '{0}: {1} vs {0}'.format(get_label(hierarchy_level_dropdown), arg_value[1])
             elif len(hierarchy_path) != 0:
                 # Specific item's children graph title
-                if LANGUAGE == 'En':
+                if language == 'En':
                     title = '{}\'s {}'.format(hierarchy_path[-1], get_label('Children'))
                 else:
                     title = '{} {}'.format(get_label('Children of'), hierarchy_path[-1])
@@ -769,7 +774,7 @@ def get_animated_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
         id='graph-display',
         className='fill-container',
         responsive=True,
-        config=dict(locale=LANGUAGE),
+        config=dict(locale=language.lower()),
         figure=fig)
 
     return graph
@@ -781,6 +786,7 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
     # arg_value[1] = variable selector
     # arg_value[2] = orientation toggle
     # arg_value[3] = data points toggle
+    language = session["language"]
 
     # Specialty filtering
     filtered_df = customize_menu_filter(dff, df_name, arg_value[0], arg_value[1], df_const)
@@ -797,7 +803,7 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                 title = '{}: {} {}'.format(get_label(hierarchy_level_dropdown), arg_value[0], get_label('Distribution'))
             elif len(hierarchy_path) != 0:
                 # Specific item's children graph title
-                if LANGUAGE == 'En':
+                if language == 'En':
                     title = '{}\'s {}'.format(hierarchy_path[-1], get_label('Children'))
                 else:
                     title = '{} {}'.format(get_label('Children of'), hierarchy_path[-1])
@@ -893,7 +899,7 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         id='graph-display',
         className='fill-container',
         responsive=True,
-        config=dict(locale=LANGUAGE),
+        config=dict(locale=language.lower()),
         figure=fig)
 
     return graph
@@ -903,6 +909,7 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
                      hierarchy_type, hierarchy_graph_children, tile_title):
     # arg_value[0] = tile index
     # arg_value[1] = page_size
+    language = session["language"]
 
     # Clean dataframe to display nicely
     dff = dff.dropna(how='all', axis=1)
@@ -920,7 +927,7 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
             # if not roots children
             if len(hierarchy_path) != 0:
                 # Specific item's children graph title
-                if LANGUAGE == 'En':
+                if language == 'En':
                     title = '{}\'s {}'.format(hierarchy_path[-1], get_label('Children'))
                 else:
                     title = '{} {}'.format(get_label('Children of'), hierarchy_path[-1])
@@ -1021,7 +1028,7 @@ def get_sankey_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
     # arg_value[0] = xaxis selector
     # arg_value[1] = measure type selector
     # arg_value[2] = variable names selector
-
+    language = session["language"]
     title = tile_title
 
     # Specialty filtering
@@ -1033,7 +1040,7 @@ def get_sankey_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
             id='graph-display',
             className='fill-container',
             responsive=True,
-            config=dict(locale=LANGUAGE),
+            config=dict(locale=language.lower()),
             figure=get_blank_figure(tile_title, title, hierarchy_type, hierarchy_level_dropdown,
                                     hierarchy_path, hierarchy_graph_children, []))
 
@@ -1118,7 +1125,7 @@ def get_sankey_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
         id='graph-display',
         className='fill-container',
         responsive=True,
-        config=dict(locale=LANGUAGE),
+        config=dict(locale=language.lower()),
         figure=fig)
 
 

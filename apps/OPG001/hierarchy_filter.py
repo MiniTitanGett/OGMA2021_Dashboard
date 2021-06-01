@@ -51,7 +51,7 @@ def generate_dropdown(tile, df_name, nid_path):
     else:
         return dcc.Dropdown(
             id={'type': 'hierarchy_specific_dropdown', 'index': tile},
-            options=None,
+            options=[],
             multi=False,
             placeholder='{}...'.format(get_label('Select')))
 
@@ -70,7 +70,7 @@ def generate_history_button(name, index, tile):
 
 # get hierarchy layout
 def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle, nid_path, df_const):
-    if df_name and df_const is not None:
+    if df_name is not None and df_const is not None:
         hierarchy_nid_list = nid_path.split("^||^")
         hierarchy_button_path = []
         for nid in hierarchy_nid_list:
@@ -152,7 +152,7 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
             html.Div([
                 dcc.Dropdown(
                     id={'type': 'hierarchy_level_dropdown', 'index': tile},
-                    options=None,
+                    options=[],
                     multi=False,
                     value=level_value,
                     style={'color': 'black', 'width': '100%', 'textAlign': 'center', 'margin-top': '10px'},

@@ -307,7 +307,8 @@ def after_request_func(response):
     # logging.debug("session=" + dict_to_string(session))
 
     # store sessionID and externalID in the cookie instead of the session
-    if not request.cookies.get("sessionID") or request.cookies.get("sessionID") != session["sessionID"]:
+    if not request.cookies.get("sessionID") or request.cookies.get("sessionID") != str(session["sessionID"]):
+        logging.debug("set cookies")
         response.set_cookie("sessionID", str(session["sessionID"]))
         response.set_cookie("externalID", str(session["externalID"]))
 

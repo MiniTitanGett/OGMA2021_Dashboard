@@ -25,7 +25,7 @@ from apps.OPG001.layouts import get_line_graph_menu, get_bar_graph_menu, get_sca
 from apps.OPG001.app import app
 from apps.OPG001.data import VIEW_CONTENT_HIDE, VIEW_CONTENT_SHOW, CUSTOMIZE_CONTENT_HIDE, CUSTOMIZE_CONTENT_SHOW, \
     DATA_CONTENT_HIDE, DATA_CONTENT_SHOW, get_label, LAYOUT_CONTENT_SHOW, LAYOUT_CONTENT_HIDE, X_AXIS_OPTIONS, \
-    session, BAR_X_AXIS_OPTIONS, create_categories, generate_constants
+    session, BAR_X_AXIS_OPTIONS, create_categories, generate_constants, dataset_to_df
 
 
 # Contents:
@@ -67,8 +67,7 @@ def _generate_layout(href, pathname, query_string):
     if 'reportName' in query_params and query_params['reportName']:
         return [get_layout_graph(query_params['reportName'])]
     else:
-        df_const = generate_constants()
-        return [get_layout_dashboard(df_const)]
+        return [get_layout_dashboard()]
 
 
 # Handles Resizing of ContentWrapper, uses tab-content-wrapper n-clicks as a throw away output
@@ -452,43 +451,66 @@ for x in range(4):
 
         # apply graph selection and generate menu
         if selected_graph_type == 'Line':
-            menu = get_line_graph_menu(tile=tile, x=X_AXIS_OPTIONS[0],
+            menu = get_line_graph_menu(tile=tile,
+                                       x=X_AXIS_OPTIONS[0],
                                        y=df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
-                                       measure_type=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0], df_name=df_name,
+                                       measure_type=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
+                                       df_name=df_name,
                                        df_const=df_const)
 
         elif selected_graph_type == 'Bar':
-            menu = get_bar_graph_menu(tile=tile, x=BAR_X_AXIS_OPTIONS[0],
-                                      y=df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
-                                      measure_type=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0], df_name=df_name,
+            menu = get_bar_graph_menu(tile=tile,
+                                      x=BAR_X_AXIS_OPTIONS[0],
+                                      y=None if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
+                                      measure_type=None if df_const is None else
+                                      df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
+                                      df_name=df_name,
                                       df_const=df_const)
 
         elif selected_graph_type == 'Scatter':
-            menu = get_scatter_graph_menu(tile=tile, x=X_AXIS_OPTIONS[0],
-                                          y=df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
-                                          measure_type=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0], df_name=df_name,
+            menu = get_scatter_graph_menu(tile=tile,
+                                          x=X_AXIS_OPTIONS[0],
+                                          y=None if df_const is None else
+                                          df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
+                                          measure_type=None if df_const is None else
+                                          df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
+                                          df_name=df_name,
                                           df_const=df_const)
 
         elif selected_graph_type == 'Bubble':
-            menu = get_bubble_graph_menu(tile=tile, x=X_AXIS_OPTIONS[0],
-                                         x_measure=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
-                                         y=X_AXIS_OPTIONS[0], y_measure=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
+            menu = get_bubble_graph_menu(tile=tile,
+                                         x=X_AXIS_OPTIONS[0],
+                                         x_measure=None if df_const is None else
+                                         df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
+                                         y=X_AXIS_OPTIONS[0],
+                                         y_measure=None if df_const is None else
+                                         df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
                                          size=X_AXIS_OPTIONS[0],
-                                         size_measure=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0], df_name=df_name,
+                                         size_measure=None if df_const is None else
+                                         df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
+                                         df_name=df_name,
                                          df_const=df_const)
 
         elif selected_graph_type == 'Table':
             menu = get_table_graph_menu(tile=tile, number_of_columns=15)
 
         elif selected_graph_type == 'Box_Plot':
-            menu = get_box_plot_menu(tile=tile, axis_measure=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
-                                     graphed_variables=df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
-                                     graph_orientation='Horizontal', df_name=df_name, show_data_points=[],
+            menu = get_box_plot_menu(tile=tile,
+                                     axis_measure=None if df_const is None else
+                                     df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
+                                     graphed_variables=None if df_const is None else
+                                     df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
+                                     graph_orientation='Horizontal',
+                                     df_name=df_name,
+                                     show_data_points=[],
                                      df_const=df_const)
 
         elif selected_graph_type == 'Sankey':
-            menu = get_sankey_menu(tile=tile, graphed_options=df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
-                                   df_name=df_name, df_const=df_const)
+            menu = get_sankey_menu(tile=tile,
+                                   graphed_options=None if df_const is None else
+                                   df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
+                                   df_name=df_name,
+                                   df_const=df_const)
 
         else:
             raise PreventUpdate
@@ -550,7 +572,8 @@ def _change_link(selected_layout, _link_clicks, link_state):
      Output({'type': 'graph-menu-trigger', 'index': 0}, 'data-'),
      Output({'type': 'graph-menu-trigger', 'index': 1}, 'data-'),
      Output({'type': 'graph-menu-trigger', 'index': 2}, 'data-'),
-     Output({'type': 'graph-menu-trigger', 'index': 3}, 'data-')],
+     Output({'type': 'graph-menu-trigger', 'index': 3}, 'data-'),
+     Output('df-constants-storage', 'data')],
     [Input('dashboard-reset-trigger', 'data-'),
      Input('tile-closed-trigger', 'data-'),
      Input('select-dashboard-dropdown', 'value'),
@@ -591,6 +614,16 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
     data = [None] * 5
     sidemenu_styles = [DATA_CONTENT_HIDE] * 5
     graph_triggers = [no_update] * 5
+
+    # if there are no constants calculated for the datasets required then calc them
+    for x in [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]:
+        if x:
+            if df_const is None:
+                df_const = {}
+            # check if the dataset is loaded into the session and load it
+            if x not in session:
+                session[x] = dataset_to_df(x)
+            df_const[x] = generate_constants(x)
 
     # if 'data-menu-close' or 'select-dashboard-dropdown' requested, close all data menus
     if 'data-menu-close' in changed_id or 'select-dashboard-dropdown' in changed_id:
@@ -690,7 +723,7 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
 
     return (data[0], data[1], data[2], data[3], data[4],
             sidemenu_styles[0], sidemenu_styles[1], sidemenu_styles[2], sidemenu_styles[3], sidemenu_styles[4],
-            graph_triggers[0], graph_triggers[1], graph_triggers[2], graph_triggers[3])
+            graph_triggers[0], graph_triggers[1], graph_triggers[2], graph_triggers[3], df_const)
 
 
 # highlight tiles slaved to displayed data sidebar

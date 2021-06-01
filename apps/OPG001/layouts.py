@@ -140,8 +140,8 @@ def get_data_set_picker(tile, df_name):
 def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Filter', level_value=None,
                   nid_path="root", graph_all_toggle=None, fiscal_toggle='Gregorian', input_method='all-time',
                   num_periods='5', period_type='last-years', df_const=None):
-    if df_name is None:
-        df_name = session['dataset_list'][0]
+    # if df_name is None:
+    #     df_name = session['dataset_list'][0]
     content = [
         html.A(
             className='boxclose',
@@ -173,18 +173,18 @@ def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Fi
 # ****************************************************TAB LAYOUT******************************************************
 
 # get div body
-def get_div_body(num_tiles=1, input_tiles=None, tile_keys=None, df_const=None):
+def get_div_body(num_tiles=1, input_tiles=None, tile_keys=None):
     return [
         # body div
         html.Div(
-            get_tile_layout(num_tiles, input_tiles, tile_keys, df_const),
+            get_tile_layout(num_tiles, input_tiles, tile_keys),
             id='div-body',
             style={'overflow-x': 'hidden', 'overflow-y': 'hidden'},
             className='graph-container')]
 
 
 # default tab layout
-def get_default_tab_content(df_const):
+def get_default_tab_content():
     return [
         # stores number of tiles for the tab
         html.Div(
@@ -192,14 +192,14 @@ def get_default_tab_content(df_const):
             style={'display': 'none'},
             **{'data-num-tiles': 1}),
         # data side menu divs
-        html.Div(get_data_menu(0, df_const=df_const), id={'type': 'data-tile', 'index': 0}, style=DATA_CONTENT_HIDE),
-        html.Div(get_data_menu(1, df_const=df_const), id={'type': 'data-tile', 'index': 1}, style=DATA_CONTENT_HIDE),
-        html.Div(get_data_menu(2, df_const=df_const), id={'type': 'data-tile', 'index': 2}, style=DATA_CONTENT_HIDE),
-        html.Div(get_data_menu(3, df_const=df_const), id={'type': 'data-tile', 'index': 3}, style=DATA_CONTENT_HIDE),
-        html.Div(get_data_menu(4, df_const=df_const), id={'type': 'data-tile', 'index': 4}, style=DATA_CONTENT_HIDE),
+        html.Div(get_data_menu(0), id={'type': 'data-tile', 'index': 0}, style=DATA_CONTENT_HIDE),
+        html.Div(get_data_menu(1), id={'type': 'data-tile', 'index': 1}, style=DATA_CONTENT_HIDE),
+        html.Div(get_data_menu(2), id={'type': 'data-tile', 'index': 2}, style=DATA_CONTENT_HIDE),
+        html.Div(get_data_menu(3), id={'type': 'data-tile', 'index': 3}, style=DATA_CONTENT_HIDE),
+        html.Div(get_data_menu(4), id={'type': 'data-tile', 'index': 4}, style=DATA_CONTENT_HIDE),
         # div wrapper for body content
         html.Div(
-            get_div_body(df_const=df_const),
+            get_div_body(),
             id='div-body-wrapper',
             className='flex-div-body-wrapper')]
 
@@ -297,7 +297,7 @@ def get_dashboard_title_input(title=''):
 
 
 # defines entire dashboard layout
-def get_layout_dashboard(df_const):
+def get_layout_dashboard():
     """
     :return: Layout of app's UI.
     """
@@ -423,7 +423,7 @@ def get_layout_dashboard(df_const):
                 # tab content
                 html.Div([
                     html.Div(
-                        get_default_tab_content(df_const),
+                        get_default_tab_content(),
                         className='flex-container graph-container',
                         id='tab-content')],
                     className='flex-container graph-container',
@@ -551,12 +551,12 @@ def get_layout_dashboard(df_const):
         dcc.Store(
             id='tab-storage',
             storage_type='memory',
-            data=[{'content': get_default_tab_content(df_const), 'title': ''}]),
+            data=[{'content': get_default_tab_content(), 'title': ''}]),
         # memory locations for dataframe constants
         dcc.Store(
             id='df-constants-storage',
             storage_type='memory',
-            data=df_const)
+            data=None)
     ], style={'background-color': CLR['lightpink']})
 
 
@@ -874,7 +874,8 @@ def get_line_graph_menu(tile, x, y, measure_type, df_name, df_const):
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
-                        options=[{'label': get_label(i), 'value': i} for i in X_AXIS_OPTIONS],
+                        options=None if df_const is None else [{'label': get_label(i), 'value': i} for i in
+                                                               X_AXIS_OPTIONS],
                         value=x,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -889,7 +890,8 @@ def get_line_graph_menu(tile, x, y, measure_type, df_name, df_const):
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
-                        options=[{'label': i, 'value': i} for i in df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                        options=None if df_const is None else [{'label': i, 'value': i} for i in
+                                                               df_const[df_name]['MEASURE_TYPE_OPTIONS']],
                         clearable=False,
                         value=measure_type,
                         style={'font-size': '13px'})],
@@ -904,7 +906,7 @@ def get_line_graph_menu(tile, x, y, measure_type, df_name, df_const):
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
-                        options=df_const[df_name]['VARIABLE_OPTIONS'],
+                        options=None if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
                         value=y,
                         multi=True,
                         clearable=False,
@@ -959,7 +961,8 @@ def get_bar_graph_menu(tile, x, y, measure_type, df_name, df_const):
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
-                        options=[{'label': i, 'value': i} for i in df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                        options=None if df_const is None else [{'label': i, 'value': i} for i in
+                                                               df_const[df_name]['MEASURE_TYPE_OPTIONS']],
                         value=measure_type,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -974,7 +977,7 @@ def get_bar_graph_menu(tile, x, y, measure_type, df_name, df_const):
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
-                        options=df_const[df_name]['VARIABLE_OPTIONS'],
+                        options=None if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
                         value=y,
                         multi=True,
                         clearable=False,
@@ -1048,7 +1051,8 @@ def get_scatter_graph_menu(tile, x, y, measure_type, df_name, df_const):
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
-                        options=[{'label': i, 'value': i} for i in df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                        options=None if df_const is None else [{'label': i, 'value': i} for i in
+                                                               df_const[df_name]['MEASURE_TYPE_OPTIONS']],
                         value=measure_type,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -1063,7 +1067,7 @@ def get_scatter_graph_menu(tile, x, y, measure_type, df_name, df_const):
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
-                        options=df_const[df_name]['VARIABLE_OPTIONS'],
+                        options=None if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
                         value=y,
                         multi=True,
                         clearable=False,
@@ -1096,7 +1100,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
-                        options=df_const[df_name]['VARIABLE_OPTIONS'],
+                        options=None if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
                         value=x,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -1111,7 +1115,8 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
-                        options=[{'label': i, 'value': i} for i in df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                        options=None if df_const is None else [{'label': i, 'value': i} for i in
+                                                               df_const[df_name]['MEASURE_TYPE_OPTIONS']],
                         value=x_measure,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -1126,7 +1131,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
-                        options=df_const[df_name]['VARIABLE_OPTIONS'],
+                        options=None if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
                         value=y,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -1141,7 +1146,8 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
-                        options=[{'label': i, 'value': i} for i in df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                        options=None if df_const is None else [{'label': i, 'value': i} for i in
+                                                               df_const[df_name]['MEASURE_TYPE_OPTIONS']],
                         value=y_measure,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -1156,7 +1162,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
-                        options=df_const[df_name]['VARIABLE_OPTIONS'],
+                        options=None if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
                         value=size,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -1171,7 +1177,8 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
-                        options=[{'label': i, 'value': i} for i in df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                        options=None if df_const is None else [{'label': i, 'value': i} for i in
+                                                               df_const[df_name]['MEASURE_TYPE_OPTIONS']],
                         value=size_measure,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -1201,7 +1208,8 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
-                        options=[{'label': i, 'value': i} for i in df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                        options=None if df_const is None else [{'label': i, 'value': i} for i in
+                                                               df_const[df_name]['MEASURE_TYPE_OPTIONS']],
                         value=axis_measure,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -1216,7 +1224,7 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
-                        options=df_const[df_name]['VARIABLE_OPTIONS'],
+                        options=None if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
                         value=graphed_variables,
                         multi=True,
                         clearable=False,
@@ -1340,7 +1348,7 @@ def get_sankey_menu(tile, graphed_options, df_name, df_const):
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
-                        options=df_const[df_name]['VARIABLE_OPTIONS'],
+                        options=None if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
                         value=graphed_options,
                         multi=False,
                         clearable=False,

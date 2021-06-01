@@ -187,8 +187,6 @@ def dataset_to_df(df_name):
 def generate_constants():
     storage = {}
     for df_name in session['dataset_list']:
-    # for index, row in session["dataset_list"].iterrows():
-    #    df_name = row["ref_value"]
         HIERARCHY_LEVELS = ['H{}'.format(i + 1) for i in range(6)]
 
         df = session[df_name]
@@ -593,6 +591,7 @@ def get_label(key):
 def load_datasets(data_sets):
     for i in data_sets:
         # Load data frame and extract data
+        logging.debug("loading dataset " + i)
         session[i] = dataset_to_df(i)
     # for index, row in data_sets.iterrows():
     #    df_name = row["ref_value"]

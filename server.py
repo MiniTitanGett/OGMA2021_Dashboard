@@ -307,17 +307,9 @@ def after_request_func(response):
     # logging.debug("session=" + dict_to_string(session))
 
     # store sessionID and externalID in the cookie instead of the session
-    if not request.cookies.get("sessionID"):
+    if not request.cookies.get("sessionID") or request.cookies.get("sessionID") != session["sessionID"]:
         response.set_cookie("sessionID", str(session["sessionID"]))
         response.set_cookie("externalID", str(session["externalID"]))
-
-#    if 'dataset_list' not in session:
-#        if session['sessionID'] == 105: # TODO: shows how we can get data specific to a session id
-#            load_datasets(['OPG001_2016-17_Week_v3.csv'])
-#            session['dataset_list'] = ['OPG001_2016-17_Week_v3.csv']
-#        else:
-#            load_datasets(config.DATA_SETS)
-#            session['dataset_list'] = config.DATA_SETS
 
     return response
 

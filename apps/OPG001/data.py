@@ -17,6 +17,7 @@ from dateutil.relativedelta import relativedelta
 from flask import session
 
 import config
+from conn import get_conn
 
 # Contents:
 #   ARBITRARY CONSTANTS
@@ -532,15 +533,32 @@ def get_table_columns(dff):
 
 # *********************************************LANGUAGE DATA***********************************************************
 
-def get_label(key):
-    language_df = session["labels"]
-    key_row = language_df[language_df["ref_value"] == key]
-    # key_row = key_row[key_row['language'] == LANGUAGE]
-    if key is None:
+def get_label(label, table=None):
+
+    if label is None:
         return None
-    if len(key_row) != 1:
-        return 'Key Error: {}'.format(key)
-    return key_row.iloc[0]["ref_desc"]
+
+    if table is None:
+        table = "Labels"
+        lookup = "labels"
+    elif table.lower != "labels":
+        lookup = "labels_" + table.lower()
+
+    language_df = session[lookup]
+
+    if language_df is None:
+        conn = get_conn()
+        query = pd.read_sql("exec dbo.spopref_getoprefdata \'{}\', \'{}\'".format(table, session["language"]), conn)
+        language_df = pd.DataFrame(query, columns=["ref_value", "ref_desc"])
+        session[lookup] = language_df
+
+    row = language_df[language_df["ref_value"] == label]
+
+    if len(row) != 1:
+        return 'Key Error: {}|{}'.format(table, label)
+
+    return row.iloc[0]["ref_desc"]
+
 
 # loads labels from language data from database
 # conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)

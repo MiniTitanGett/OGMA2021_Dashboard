@@ -683,7 +683,7 @@ def get_tile(tile, tile_keys=None, df_const=None):
                                                   saved_layouts],
                                          style={'width': '400px', 'font-size': '13px'},
                                          value='',
-                                         placeholder='{}...'.format(get_label(LBL_Select')))
+                                         placeholder='{}...'.format(get_label('LBL_Select')))
                         ], style={'width': '400px'}),
                     html.Button(
                         id={'type': 'confirm-delete-button', 'index': tile},

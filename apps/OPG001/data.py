@@ -99,6 +99,8 @@ DATA_CONTENT_HIDE = {'display': 'none'}
 # ********************************************DATASET CLASS************************************************************
 
 def dataset_to_df(df_name):
+    logging.debug("loading dataset {}...".format(df_name))
+
     if df_name.find('.csv') > -1:
         # df = pd.DataFrame(None)
         df = pd.read_csv('apps/OPG001/test_data/{}'.format(df_name),
@@ -179,6 +181,8 @@ def dataset_to_df(df_name):
     # replaces all strings that are just spaces with NaN
     df.replace(to_replace=r'^\s*$', value=np.NaN, regex=True, inplace=True)
     df.replace(to_replace='', value=np.NaN, inplace=True)
+
+    logging.debug("dataset {} loaded.".format(df_name))
 
     # If we are dealing with links in the future we must format them as follows and edit the table drawer
     # dataframe_table.Link = list(map(lambda x: '[Link]({})'.format(x), dataframe_table.Link))

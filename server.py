@@ -8,14 +8,13 @@ import config
 import logging
 # from pandas import DataFrame
 import pandas
+import json
 
 from apps.OPG001.data import saved_layouts
 from flask_session import Session
 
 # https://stackoverflow.com/questions/18967441/add-a-prefix-to-all-flask-routes/36033627#36033627
 # https://docs.microsoft.com/en-us/visualstudio/python/configure-web-apps-for-iis-windows?view=vs-2019
-
-
 class PrefixMiddleware(object):
 
     def __init__(self, app, prefix=''):
@@ -31,6 +30,19 @@ class PrefixMiddleware(object):
         else:
             start_response('404', [('Content-Type', 'text/plain')])
             return ["This url does not belong to the app.".encode()]
+
+# https://kadler.io/2018/01/08/fetching-python-database-cursors-by-column-name.html
+class CursorByName:
+    def __init__(self, cursor):
+        self._cursor = cursor
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        row = self._cursor.__next__()
+
+        return {description[0]: row[col] for col, description in enumerate(self._cursor.description)}
 
 
 # https://pythonise.com/series/learning-flask/python-before-after-request
@@ -114,9 +126,6 @@ def load_saved_graphs_from_db():
     """
     loads the saved layouts into the saved_layouts dictionary from the database
     """
-    # if config.SESSIONLESS:
-    #     return
-
     conn = get_conn()
     cursor = conn.cursor()
     query = """\
@@ -125,28 +134,18 @@ def load_saved_graphs_from_db():
     @p_result_status output
     select @p_result_status as result_status
     """.format(session["sessionID"])
-    # params = (session["sessionID"], "Find", "", "", "", "", "", pymssql.output("VARCHAR", 255))
-    # params = cursor.callproc(query, params)
-
-#    if params[7] != "OK":
-#        result_status = params[7]
-#        cursor.close()
-#        del cursor
-#        logging.error(result_status)
-#        raise ValueError(result_status)
 
     cursor.execute(query)
 
-    results = cursor.fetchall()
+    results = CursorByName(cursor)  # cursor.fetchall()
 
     # for now, don't worry about @p_result_status
 
     for row in results:
-        # save_layout_state(row["ref_value"], row["clob_text"])
-        saved_layouts[row["ref_value"]] = row["clob_text"]
+        saved_layouts[row["ref_value"]] = json.loads(row["clob_text"])
 
-        cursor.close()
-        del cursor
+    cursor.close()
+    del cursor
 
 
 def validate_session(sessionid, externalid):
@@ -208,18 +207,19 @@ def load_dataset_list():
 # WebModuleCreate?
 @server.before_first_request
 def before_first_request_func():
-    logging.debug(request.method + " " + request.url)
-    logging.debug("request=" + dict_to_string(request.values))
-    logging.debug("cookies=" + dict_to_string(request.cookies))
+    # logging.debug(request.method + " " + request.url)
+    # logging.debug("request=" + dict_to_string(request.values))
+    # logging.debug("cookies=" + dict_to_string(request.cookies))
     # logging.debug("session=" + dict_to_string(session))
+    return
 
 
 # WebModuleBeforeDispatch
 @server.before_request
 def before_request_func():
-    logging.debug(request.method + " " + request.url)
-    logging.debug("request=" + dict_to_string(request.values))
-    logging.debug("cookies=" + dict_to_string(request.cookies))
+    # logging.debug(request.method + " " + request.url)
+    # logging.debug("request=" + dict_to_string(request.values))
+    # logging.debug("cookies=" + dict_to_string(request.cookies))
     # logging.debug("session=" + dict_to_string(session))
 
     # if config.SESSIONLESS:
@@ -301,8 +301,8 @@ def before_request_func():
 # WebModuleAfterDispatch
 @server.after_request
 def after_request_func(response):
-    logging.debug("request=" + dict_to_string(request.values))
-    logging.debug("cookies=" + dict_to_string(request.cookies))
+    # logging.debug("request=" + dict_to_string(request.values))
+    # logging.debug("cookies=" + dict_to_string(request.cookies))
     # logging.debug("session=" + dict_to_string(session))
 
     # store sessionID and externalID in the cookie instead of the session
@@ -317,8 +317,8 @@ def after_request_func(response):
 # WebModuleException?
 @server.teardown_request
 def teardown_request_func(error=None):
-    logging.debug("request=" + dict_to_string(request.values))
-    logging.debug("cookies=" + dict_to_string(request.cookies))
+    # logging.debug("request=" + dict_to_string(request.values))
+    # logging.debug("cookies=" + dict_to_string(request.cookies))
     # logging.debug("session=" + dict_to_string(session))
 
     if error:

@@ -1,6 +1,6 @@
 from datetime import timedelta
-from flask import Flask, request, session, g
 import flask
+from flask import Flask, request, session, g
 import pyodbc
 # import pymssql
 from werkzeug.utils import redirect
@@ -9,7 +9,7 @@ import logging
 # from pandas import DataFrame
 import pandas
 
-from apps.OPG001.data import saved_layouts, load_datasets
+from apps.OPG001.data import saved_layouts
 from flask_session import Session
 
 # https://stackoverflow.com/questions/18967441/add-a-prefix-to-all-flask-routes/36033627#36033627
@@ -282,7 +282,6 @@ def before_request_func():
 
         # load the available datasets
         session["dataset_list"] = load_dataset_list()  # get_ref("Data_set", session["language"])
-        load_datasets(session["dataset_list"])
 
         # load the available dashboards
 

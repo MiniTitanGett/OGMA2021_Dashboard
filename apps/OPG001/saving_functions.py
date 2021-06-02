@@ -160,7 +160,8 @@ def save_layout_to_db(graph_title):
 
     query = """\
     declare @p_result_status varchar(255)
-    exec dbo.opp_addgeteditdeletefind_extdashboardreports {}, \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', @p_result_status output
+    exec dbo.opp_addgeteditdeletefind_extdashboardreports {}, \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\',
+    @p_result_status output
     select @p_result_status as result_status
     """.format(session['sessionID'], 'Add', graph_title, 'Dash', j, 'application/json', 'json')
 

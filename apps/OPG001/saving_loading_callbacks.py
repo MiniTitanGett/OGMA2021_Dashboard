@@ -22,7 +22,6 @@ from apps.OPG001.app import app
 from apps.OPG001.data import get_label, saved_layouts, saved_dashboards, CLR
 from apps.OPG001.saving_functions import delete_layout, save_layout_state, save_layout_to_file, save_layout_to_db, \
     save_dashboard_state, save_dashboard_to_file, delete_dashboard, load_graph_menu
-from config import REPORT_POINTER_PREFIX, DASHBOARD_POINTER_PREFIX
 
 
 #   SAVING
@@ -33,6 +32,10 @@ from config import REPORT_POINTER_PREFIX, DASHBOARD_POINTER_PREFIX
 #       - _load_tile_layout()
 #       - _reset_selected_layout()
 
+# **********************************************GLOBAL VARIABLES*****************************************************
+
+REPORT_POINTER_PREFIX = 'Report_Ext_'
+DASHBOARD_POINTER_PREFIX = 'Dashboard_Ext_'
 
 # ************************************SHARED TILE LOADING/DASHBOARD SAVING*******************************************
 
@@ -228,7 +231,7 @@ for y in range(0, 4):
 
             # if tile is untitled, prevent updates but return save message
             if graph_title == '':
-                save_error_tooltip = get_label('Graphs require a title to be saved')
+                save_error_tooltip = get_label('LBL_Graphs_Require_A_Title_To_Be_Saved')
                 save_symbol = 'fa fa-ban'
                 save_status_symbols = get_status_symbol_display(save_error_tooltip, save_symbol)
 
@@ -237,7 +240,7 @@ for y in range(0, 4):
                     and 'confirm-overwrite' != trigger:
 
                 # was graph_title, changed to intermediate_pointer
-                overwrite_tooltip = "{} \'{}\'".format(get_label('Overwrite graph'),
+                overwrite_tooltip = "{} \'{}\'".format(get_label('LBL_Overwrite_Graph'),
                                                        saved_layouts[intermediate_pointer]['Title'])
 
                 save_status_symbols = html.Div([
@@ -260,7 +263,7 @@ for y in range(0, 4):
                             style={'position': 'absolute', 'top': '50%', 'margin-left': '-13px', 'width': '26px',
                                    'margin-top': '-15px', 'color': CLR['background1']}),
                         html.Span(
-                            get_label("Cancel save attempt"),
+                            get_label("LBL_Cancel_Save_Attempt"),
                             className='save-symbols-tooltip')],
                         id={'type': 'cancel-tile-overwrite', 'index': tile},
                         className='save-overwrite-symbols',
@@ -513,13 +516,13 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
 
         # check if the dashboard title is blank
         if dashboard_title == '':
-            save_error_tooltip = get_label('Dashboards require a title to be saved')
+            save_error_tooltip = get_label('LBL_Dashboards_Require_A_Title_To_Be_Saved')
             save_symbol = 'fa fa-ban'
             save_status_symbols = get_status_symbol_display(save_error_tooltip, save_symbol)
 
         # check if the dashboard is empty
         elif len(links) == 0:
-            save_error_tooltip = get_label('Dashboard must not be empty')
+            save_error_tooltip = get_label('LBL_Dashboard_Must_Not_Be_Empty')
             save_symbol = 'fa fa-ban'
             save_status_symbols = get_status_symbol_display(save_error_tooltip, save_symbol)
 
@@ -541,19 +544,19 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
                 # if conflicting graph titles and dashboard title
                 if dashboard_title in used_dashboard_titles:  # was saved_dashboards
                     overwrite_tooltip = "{} \'{}\', {} {}".format(
-                        get_label('Overwrite dashboard'),
+                        get_label('LBL_Overwrite_Dashboard'),
                         dashboard_title,
-                        get_label('and the graphs' if len(conflicting_graphs_list) > 1 else 'and the graph'),
+                        get_label('LBL_And_The_Graphs' if len(conflicting_graphs_list) > 1 else 'LBL_And_The_Graph'),
                         conflicting_graphs)
                 # else, just conflicting graph titles
                 else:
                     overwrite_tooltip = "{} {}".format(
-                        get_label('Overwrite graphs' if len(conflicting_graphs_list) > 1 else 'Overwrite graph'),
+                        get_label('LBL_Overwrite_Graphs' if len(conflicting_graphs_list) > 1 else 'LBL_Overwrite_Graph'),
                         conflicting_graphs)
 
             # else, just conflicting dashboard title
             else:
-                overwrite_tooltip = f"{get_label('Overwrite dashboard')} \'{dashboard_title}\'"
+                overwrite_tooltip = f"{get_label('LBL_Overwrite_Dashboard')} \'{dashboard_title}\'"
 
             save_status_symbols = html.Div([
                 html.I(
@@ -575,7 +578,7 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
                         style={'position': 'absolute', 'top': '50%', 'margin-left': '-13px', 'width': '26px',
                                'margin-top': '-15px', 'color': CLR['background1']}),
                     html.Span(
-                        get_label("Cancel save attempt"),
+                        get_label("LBL_Cancel_Save_Attempt"),
                         className='save-symbols-tooltip')],
                     id={'type': 'dashboard-overwrite', 'index': 1},
                     className='save-overwrite-symbols',

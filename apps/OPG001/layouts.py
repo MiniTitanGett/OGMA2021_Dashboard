@@ -127,7 +127,7 @@ def get_data_set_picker(tile, df_name):
     """
     return [
         html.H6(
-            "{}:".format(get_label('Data Set')),
+            "{}:".format(get_label('LBL_Data_Set')),
             style={'color': CLR['text1'], 'margin-top': '25px', 'display': 'inline-block'}),
         html.Div([
             dcc.Dropdown(
@@ -317,7 +317,7 @@ def get_layout_graph(report_name):
 def get_dashboard_title_input(title=''):
     return dcc.Input(
         id='dashboard-title',
-        placeholder=get_label('Enter Dashboard Title'),
+        placeholder=get_label('LBL_Enter_Dashboard_Title'),
         value=title,
         className='dashboard-title')
 
@@ -335,7 +335,7 @@ def get_layout_dashboard():
                 html.Div([
                     html.Div([
                         html.Button(
-                            get_label("Tab"),
+                            get_label("LBL_Tab"),
                             id={'type': 'dashboard-tab', 'index': 0},
                             className='dashboard-tab-button',
                             disabled=True),
@@ -358,7 +358,7 @@ def get_layout_dashboard():
                     html.Button(
                         className='master-nav',
                         n_clicks=1,
-                        children=get_label('New'),
+                        children=get_label('LBL_New'),
                         id='button-new',
                         disabled=False)
                 ], style={'display': 'inline-block'},
@@ -372,7 +372,7 @@ def get_layout_dashboard():
                     html.Div([
                         html.I(
                             html.Span(
-                                get_label("Reset dashboard - all unsaved changes will be lost"),
+                                get_label("LBL_Reset_Dashboard_All_Unsaved_Changes_will_Be-Lost"),
                                 className='save-symbols-tooltip'),
                             id='confirm-dashboard-reset',
                             className='fa fa-undo',
@@ -389,7 +389,7 @@ def get_layout_dashboard():
                                 style={'position': 'absolute', 'top': '50%', 'margin-left': '-13px', 'width': '26px',
                                        'margin-top': '-15px', 'color': CLR['background1']}),
                             html.Span(
-                                get_label("Cancel reset attempt"),
+                                get_label("LBL_Cancel_Reset_Attempt"),
                                 className='save-symbols-tooltip')],
                             className='save-overwrite-symbols',
                             style={'padding': '7px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
@@ -403,7 +403,7 @@ def get_layout_dashboard():
                 html.Button(
                     className='master-nav',
                     n_clicks=1,
-                    children=get_label('Confirm Delete'),
+                    children=get_label('LBL_Confirm_Delete'),
                     style={'display': 'inline-block', 'float': 'right', 'width': 'auto', 'margin-right': '20px'},
                     id='confirm-delete-dashboard'),
                 dcc.Dropdown(
@@ -415,7 +415,7 @@ def get_layout_dashboard():
                            'display': 'inline-block', 'vertical-align': 'bottom', 'float': 'right',
                            'border-radius': '0'},
                     value='',
-                    placeholder=get_label('Delete a saved dashboard')),
+                    placeholder=get_label('LBL_Delete_A_Saved_Dashboard')),
                 dcc.Dropdown(
                     id='select-dashboard-dropdown',
                     options=[{'label': saved_dashboards[key]['Dashboard Title'], 'value': key} for key in
@@ -425,7 +425,7 @@ def get_layout_dashboard():
                            'display': 'inline-block', 'vertical-align': 'bottom', 'float': 'right',
                            'border-radius': '0', 'margin-left': '20px'},
                     value='',
-                    placeholder=get_label('Select a saved dashboard')),
+                    placeholder=get_label('LBL_Select_A_Saved_Dashboard')),
                 html.Div(
                     [],
                     id='dashboard-save-status-symbols',
@@ -434,7 +434,7 @@ def get_layout_dashboard():
                 html.Button(
                     className='master-nav',
                     n_clicks=1,
-                    children=get_label('Save Dashboard'),
+                    children=get_label('LBL_Save_Dashboard'),
                     style={'display': 'inline-block', 'float': 'right', 'width': 'auto'},
                     id='button-save-dashboard'),
                 html.Div(
@@ -592,7 +592,7 @@ def get_layout_dashboard():
 def get_customize_content(tile, graph_type, graph_menu):
     return [
         html.P(
-            "{}:".format(get_label('Graph Type')),
+            "{}:".format(get_label('LBL_Graph_Type')),
             style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
         html.Div(
             dcc.Dropdown(
@@ -619,25 +619,25 @@ def get_tile(tile, tile_keys=None, df_const=None):
             html.Header([
                 dcc.Input(
                     id={'type': 'tile-title', 'index': tile},
-                    placeholder=get_label('Enter Graph Title'),
+                    placeholder=get_label('LBL_Enter_Graph_Title'),
                     value=tile_keys['Tile Title'] if tile_keys else '',
                     className='tile-title'),
                 html.Button(
-                    [get_label('View')],
+                    [get_label('LBL_View')],
                     id={'type': 'tile-view', 'index': tile},
                     className='tile-nav tile-nav--view tile-nav--selected'),
                 dcc.Store(
                     id={'type': 'tile-view-store', 'index': tile}),
                 html.Button(
-                    [get_label('Customize')],
+                    [get_label('LBL_Customize')],
                     id={'type': 'tile-customize', 'index': tile},
                     className='tile-nav tile-nav--customize'),
                 html.Button(
-                    [get_label('Graphs')],
+                    [get_label('LBL_Graphs')],
                     id={'type': 'tile-layouts', 'index': tile},
                     className='tile-nav tile-nav--layout'),
                 html.Button(
-                    [get_label('Data')],
+                    [get_label('LBL_Data')],
                     id={'type': 'tile-data', 'index': tile},
                     className='tile-nav tile-nav--data'),
                 html.I(
@@ -670,13 +670,13 @@ def get_tile(tile, tile_keys=None, df_const=None):
                 id={'type': 'tile-customize-content', 'index': tile},
                 className='customize-content'),
             html.Div([  # TODO : style this to match customize menu and get rid of unnecessary divs
-                html.P(get_label('Save the graph'),
+                html.P(get_label('LBL_Save_The_Graph'),
                        style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
                 html.Div([
                     html.Button(
                         id={'type': 'save-button', 'index': tile},
                         n_clicks=0,
-                        children=get_label('Save Graph'),
+                        children=get_label('LBL_Save_Graph'),
                         style={'display': 'inline-block'},
                         className='tile-save-button-{}'.format(str(tile))),
                     html.Div(
@@ -684,7 +684,7 @@ def get_tile(tile, tile_keys=None, df_const=None):
                         id={'type': 'tile-save-status-symbols', 'index': tile},
                         style={'display': 'inline-block', 'height': '38px', 'text-align': 'center',
                                'margin-left': '20px', 'position': 'relative', 'vertical-align': 'top'})]),
-                html.P(get_label('Select a saved graph'),
+                html.P(get_label('LBL_Select_A_Saved_Graph'),
                        style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
                 html.Div(
                     id={'type': 'select-layout-dropdown-div', 'index': tile},
@@ -695,9 +695,9 @@ def get_tile(tile, tile_keys=None, df_const=None):
                                      style={'width': '400px', 'font-size': '13px'},
                                      clearable=True,
                                      value='',
-                                     placeholder='{}...'.format(get_label('Select')))
+                                     placeholder='{}...'.format(get_label('LBL_Select')))
                     ], style={'width': '400px'}),
-                html.P(get_label('Delete a saved graph'),
+                html.P(get_label('LBL_Delete_A_Saved_Graph'),
                        style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
                 html.Div([
                     html.Div(
@@ -708,11 +708,11 @@ def get_tile(tile, tile_keys=None, df_const=None):
                                                   saved_layouts],
                                          style={'width': '400px', 'font-size': '13px'},
                                          value='',
-                                         placeholder='{}...'.format(get_label('Select')))
+                                         placeholder='{}...'.format(get_label('LBL_Select')))
                         ], style={'width': '400px'}),
                     html.Button(
                         id={'type': 'confirm-delete-button', 'index': tile},
-                        children=get_label('Confirm Delete'),
+                        children=get_label('LBL_Confirm_Delete'),
                         n_clicks=0)
                 ], style={'display': 'inline-block'})
             ], style=LAYOUT_CONTENT_HIDE, id={'type': 'tile-layouts-content', 'index': tile},
@@ -887,13 +887,13 @@ def get_line_graph_menu(tile, x, y, measure_type, df_name, df_const):
 
     return [
         html.P(
-            "{}:".format(get_label('Graph Options')),
+            "{}:".format(get_label('LBL_Graph_Options')),
             style={'margin-top': '10px', 'color': CLR['text1'], 'font-size': '15px'}),
         html.Div([
             html.Div([
                 html.Div([
                     html.P(
-                        "{}:".format(get_label('X-Axis')),
+                        "{}:".format(get_label('LBL_X_Axis')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
                            'margin-right': '5px'}),
@@ -909,7 +909,7 @@ def get_line_graph_menu(tile, x, y, measure_type, df_name, df_const):
             html.Div([
                 html.Div([
                     html.P(
-                        "{}:".format(get_label('Y-Axis')),
+                        "{}:".format(get_label('LBL_Y_Axis')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
                            'margin-right': '5px'}),
@@ -925,7 +925,7 @@ def get_line_graph_menu(tile, x, y, measure_type, df_name, df_const):
             html.Div([
                 html.Div([
                     html.P(
-                        "{}:".format(get_label('Graphed Variables')),
+                        "{}:".format(get_label('LBL_Graphed_Variables')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '60px', 'position': 'relative', 'top': '-3px',
                            'margin-right': '15px'}),
@@ -959,13 +959,13 @@ def get_bar_graph_menu(tile, x, y, measure_type, df_name, df_const):
 
     return [
         html.P(
-            "{}:".format(get_label('Graph Options')),
+            "{}:".format(get_label('LBL_Graph_Options')),
             style={'margin-top': '10px', 'color': CLR['text1'], 'font-size': '15px'}),
         html.Div([
             html.Div([
                 html.Div([
                     html.P(
-                        "{}:".format(get_label('Group By')),
+                        "{}:".format(get_label('LBL_Group_By')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-3px',
                            'margin-right': '5px'}),
@@ -980,7 +980,7 @@ def get_bar_graph_menu(tile, x, y, measure_type, df_name, df_const):
             html.Div([
                 html.Div([
                     html.P(
-                        "{}:".format(get_label('Y-Axis')),
+                        "{}:".format(get_label('LBL_Y_Axis')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
                            'margin-right': '5px'}),
@@ -996,7 +996,7 @@ def get_bar_graph_menu(tile, x, y, measure_type, df_name, df_const):
             html.Div([
                 html.Div([
                     html.P(
-                        "{}:".format(get_label('Graphed Variables')),
+                        "{}:".format(get_label('LBL_Graphed_Variables')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '60px', 'position': 'relative', 'top': '-3px',
                            'margin-right': '15px'}),
@@ -1012,20 +1012,20 @@ def get_bar_graph_menu(tile, x, y, measure_type, df_name, df_const):
             html.Div([
                 html.Div([
                     html.P(
-                        "{}:".format(get_label('Graph Orientation')),
+                        "{}:".format(get_label('LBL_Graph_Orientation')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '70px', 'position': 'relative', 'top': '-3px',
                            'margin-right': '15px'}),
                 html.Div([
                     dcc.RadioItems(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
-                        options=[{'label': get_label(i), 'value': i} for i in ['Vertical', 'Horizontal']],
+                        options=[{'label': get_label(i), 'value': i} for i in ['LBL_Vertical', 'LBL_Horizontal']],
                         value='Vertical',
                         style={'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
             dcc.Checklist(
                 id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
-                options=[{'label': get_label('Animate Over Time'),
+                options=[{'label': get_label('LBL_Animate_Over_Time'),
                           'value': 'animate'}],
                 value=[],
                 style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
@@ -1049,13 +1049,13 @@ def get_scatter_graph_menu(tile, x, y, measure_type, df_name, df_const):
 
     return [
         html.P(
-            "{}:".format(get_label('Graph Options')),
+            "{}:".format(get_label('LBL_Graph_Options')),
             style={'margin-top': '10px', 'color': CLR['text1'], 'font-size': '15px'}),
         html.Div([
             html.Div([
                 html.Div([
                     html.P(
-                        "{}:".format(get_label('X-Axis')),
+                        "{}:".format(get_label('LBL_X_Axis')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
                            'margin-right': '5px'}),
@@ -1070,7 +1070,7 @@ def get_scatter_graph_menu(tile, x, y, measure_type, df_name, df_const):
             html.Div([
                 html.Div([
                     html.P(
-                        "{}:".format(get_label('Y-Axis')),
+                        "{}:".format(get_label('LBL_Y_Axis')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
                            'margin-right': '5px'}),
@@ -1086,7 +1086,7 @@ def get_scatter_graph_menu(tile, x, y, measure_type, df_name, df_const):
             html.Div([
                 html.Div([
                     html.P(
-                        "{}:".format(get_label('Graphed Variables')),
+                        "{}:".format(get_label('LBL_Graphed_Variables')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '60px', 'position': 'relative', 'top': '-3px',
                            'margin-right': '15px'}),
@@ -1113,13 +1113,13 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
 
     return [
         html.P(
-            "{}:".format(get_label('Graph Options')),
+            "{}:".format(get_label('LBL_Graph_Options')),
             style={'margin-top': '10px', 'color': CLR['text1'], 'font-size': '15px'}),
         html.Div([
             html.Div([
                 html.Div([
                     html.P(
-                        "{}:".format(get_label('X-Axis')),
+                        "{}:".format(get_label('LBL_X_Axis')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
                            'margin-right': '5px'}),
@@ -1134,7 +1134,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
             html.Div([
                 html.Div([
                     html.P(
-                        "{}:".format(get_label('X-Axis Measure')),
+                        "{}:".format(get_label('LBL_X_Axis_Measure')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
                            'margin-right': '5px'}),
@@ -1150,7 +1150,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
             html.Div([
                 html.Div([
                     html.P(
-                        "{}:".format(get_label('Y-Axis')),
+                        "{}:".format(get_label('LBL_Y_Axis')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
                            'margin-right': '5px'}),
@@ -1165,7 +1165,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
             html.Div([
                 html.Div([
                     html.P(
-                        "{}:".format(get_label('Y-Axis Measure')),
+                        "{}:".format(get_label('LBL_Y_Axis_Measure')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
                            'margin-right': '5px'}),
@@ -1181,7 +1181,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
             html.Div([
                 html.Div([
                     html.P(
-                        "{}:".format(get_label('Size')),
+                        "{}:".format(get_label('LBL_Size')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
                            'margin-right': '5px'}),
@@ -1196,7 +1196,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
             html.Div([
                 html.Div([
                     html.P(
-                        "{}:".format(get_label('Size Measure')),
+                        "{}:".format(get_label('LBL_Size_Measure')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
                            'margin-right': '5px'}),
@@ -1221,13 +1221,13 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
 
     return [
         html.P(
-            "{}:".format(get_label('Graph Options')),
+            "{}:".format(get_label('LBL_Graph_Options')),
             style={'margin-top': '10px', 'color': CLR['text1'], 'font-size': '15px'}),
         html.Div([
             html.Div([
                 html.Div([
                     html.P(
-                        "{}:".format(get_label('Axis Measure')),
+                        "{}:".format(get_label('LBL_Axis_Measure')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '70px', 'position': 'relative', 'top': '-3px',
                            'margin-right': '5px'}),
@@ -1243,7 +1243,7 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
             html.Div([
                 html.Div([
                     html.P(
-                        "{}:".format(get_label('Graphed Variables')),
+                        "{}:".format(get_label('LBL_Graphed_Variables')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '70px', 'position': 'relative', 'top': '-3px',
                            'margin-right': '5px'}),
@@ -1259,20 +1259,20 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
             html.Div([
                 html.Div([
                     html.P(
-                        "{}:".format(get_label('Graph Orientation')),
+                        "{}:".format(get_label('LBL_Graph_Orientation')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '70px', 'position': 'relative', 'top': '-3px',
                            'margin-right': '15px'}),
                 html.Div([
                     dcc.RadioItems(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
-                        options=[{'label': get_label(i), 'value': i} for i in ['Vertical', 'Horizontal']],
+                        options=[{'label': get_label(i), 'value': i} for i in ['LBL_Vertical', 'LBL_Horizontal']],
                         value=graph_orientation,
                         style={'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
             dcc.Checklist(
                 id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
-                options=[{'label': get_label('Show Data Points'), 'value': 'show'}],
+                options=[{'label': get_label('LBL_Show_Data_Points'), 'value': 'show'}],
                 value=show_data_points)
         ], style={'margin-left': '15px'})]
 
@@ -1300,7 +1300,7 @@ def get_table_graph_menu(tile, number_of_columns):
             html.Div([
                 html.Div([
                     html.P(
-                        "{}:".format(get_label('# of Rows')),
+                        "{}:".format(get_label('LBL_Num_Of_Rows')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '10px'}),
                 html.Div([
@@ -1313,7 +1313,7 @@ def get_table_graph_menu(tile, number_of_columns):
                         style={'width': '80%', 'max-width': '350px'})],
                     style={'display': 'inline-block'})]),
             html.P(
-                "{}:".format(get_label('How to Filter the Table')),
+                "{}:".format(get_label('LBL_How_To_Filter_The_Table')),
                 style={'margin-top': '10px', 'color': CLR['text1'], 'font-size': '15px'}),
             html.Div([
                 dcc.Markdown(
@@ -1332,7 +1332,7 @@ def get_table_graph_menu(tile, number_of_columns):
                     ''')],
                 style={'margin-left': '15px'}),
             html.P(
-                "{}:".format(get_label('How to Hide Columns')),
+                "{}:".format(get_label('LBL_How_To_Hide_Columns')),
                 style={'margin-top': '10px', 'color': CLR['text1'], 'font-size': '15px'}),
             html.Div([
                 dcc.Markdown(
@@ -1363,13 +1363,13 @@ def get_sankey_menu(tile, graphed_options, df_name, df_const):
 
     return [
         html.P(
-            "{}:".format(get_label('Graph Options')),
+            "{}:".format(get_label('LBL_Graph_Options')),
             style={'margin-top': '10px', 'color': CLR['text1'], 'font-size': '15px'}),
         html.Div([
             html.Div([
                 html.Div([
                     html.P(
-                        "{}:".format(get_label('Graphed Variables')),
+                        "{}:".format(get_label('LBL_Graphed_Variables')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '60px', 'position': 'relative', 'top': '-3px',
                            'margin-right': '15px'}),

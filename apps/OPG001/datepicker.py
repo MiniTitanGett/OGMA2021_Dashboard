@@ -32,28 +32,28 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
     if df_name:
         children = [
             html.H6(
-                '{}:'.format(get_label("Calendar Type")),
+                '{}:'.format(get_label("LBL_Calendar_Type")),
                 style={'margin-top': '20px', 'color': CLR['text1']} if df_const[df_name]['FISCAL_AVAILABLE']
                 else {'display': 'None'}),
             dcc.Tabs([
-                dcc.Tab(label="{}".format(get_label("Gregorian")), value='Gregorian'),
-                dcc.Tab(label="{}".format(get_label("Fiscal")), value='Fiscal')],
+                dcc.Tab(label="{}".format(get_label("LBL_Gregorian")), value='Gregorian'),
+                dcc.Tab(label="{}".format(get_label("LBL_Fiscal")), value='Fiscal')],
                 id={'type': 'fiscal-year-toggle', 'index': tile},
                 className='toggle-tabs-wrapper',
                 value=fiscal_toggle,
                 style={'display': 'block', 'text-align': 'center'} if df_const[df_name]['FISCAL_AVAILABLE']
                 else {'display': 'none'}),
             html.H6(
-                '{}:'.format(get_label("Timeframe")),
+                '{}:'.format(get_label("LBL_Timeframe")),
                 style={'margin-top': '20px', 'color': CLR['text1']}),
             dcc.RadioItems(
                 id={'type': 'radio-timeframe', 'index': tile},
                 options=[
-                    {'label': get_label('All-Time (Monthly)'),
+                    {'label': get_label('LBL_All_Time_Monthly'),
                      'value': 'all-time'},
-                    {'label': '{}'.format(get_label('Last') if language == 'En' else '........... ' + get_label('Last')),
+                    {'label': '{}'.format(get_label('LBL_Last') if language == 'En' else '........... ' + get_label('LBL_Last')),
                      'value': 'to-current'},
-                    {'label': get_label('Select Range'),
+                    {'label': get_label('LBL_Select_Range'),
                      'value': 'select-range'}],
                 value=input_method,
                 className='seperated-radio-buttons',
@@ -78,20 +78,20 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                     disabled=input_method != 'to-current',
                     clearable=False,
                     options=[
-                        {'label': get_label('Year(s)'),
+                        {'label': get_label('LBL_Years'),
                          'value': 'last-years'},
-                        {'label': get_label('Quarter(s)'),
+                        {'label': get_label('LBL_Quarters'),
                          'value': 'last-quarters'},
-                        {'label': get_label('Month(s)'),
+                        {'label': get_label('LBL_Months'),
                          'value': 'last-months'},
-                        {'label': get_label('Week(s)'),
+                        {'label': get_label('LBL_Weeks'),
                          'value': 'last-weeks'}],
                     style={'width': '100px', 'height': '27px', 'margin': '0', 'padding': '0', 'font-size': '15px',
                            'display': 'inline-block', 'text-align': 'center', 'border-radius': '0', 'color': '#333'})
             ], style={'width': '0', 'height': '0', 'position': 'relative', 'bottom': '55px',
                       'left': '125px' if language == 'En' else '150px'}),
             html.P(
-                "{}: {} - {}".format(get_label('Available'), df_const[df_name]['MIN_DATE_UNF'].strftime('%m/%d/%Y'),
+                "{}: {} - {}".format(get_label('LBL_Available'), df_const[df_name]['MIN_DATE_UNF'].strftime('%m/%d/%Y'),
                                      df_const[df_name]['MAX_DATE_UNF'].strftime('%m/%d/%Y')),
                 style={'margin-top': '10px', 'text-align': 'center', 'font-size': '85%', 'color': CLR['text1']}),
             html.Div([
@@ -125,27 +125,27 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
     else:
         children = [
             html.H6(
-                '{}:'.format(get_label("Calendar Type")),
+                '{}:'.format(get_label("LBL_Calendar_Type")),
                 style={'margin-top': '20px', 'color': CLR['text1']}),
             dcc.Tabs([
-                dcc.Tab(label="{}".format(get_label("Gregorian")), value='Gregorian'),
-                dcc.Tab(label="{}".format(get_label("Fiscal")), value='Fiscal')],
+                dcc.Tab(label="{}".format(get_label("LBL_Gregorian")), value='Gregorian'),
+                dcc.Tab(label="{}".format(get_label("LBL_Fiscal")), value='Fiscal')],
                 id={'type': 'fiscal-year-toggle', 'index': tile},
                 className='toggle-tabs-wrapper',
                 value=fiscal_toggle,
                 style={'display': 'block', 'text-align': 'center'}),
             html.H6(
-                '{}:'.format(get_label("Timeframe")),
+                '{}:'.format(get_label("LBL_Timeframe")),
                 style={'margin-top': '20px', 'color': CLR['text1']}),
             dcc.RadioItems(
                 id={'type': 'radio-timeframe', 'index': tile},
                 options=[
-                    {'label': get_label('All-Time (Monthly)'),
+                    {'label': get_label('All_Time_Monthly'),
                      'value': 'all-time'},
                     {'label': '{}'.format(
-                        get_label('Last') if language == 'En' else '........... ' + get_label('Last')),
+                        get_label('LBL_Last') if language == 'En' else '........... ' + get_label('LBL_Last')),
                         'value': 'to-current'},
-                    {'label': get_label('Select Range'),
+                    {'label': get_label('LBL_Select_Range'),
                      'value': 'select-range'}],
                 value=input_method,
                 className='seperated-radio-buttons',
@@ -170,19 +170,19 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                     disabled=input_method != 'to-current',
                     clearable=False,
                     options=[
-                        {'label': get_label('Year(s)'),
+                        {'label': get_label('LBL_Years'),
                          'value': 'last-years'},
-                        {'label': get_label('Quarter(s)'),
+                        {'label': get_label('LBL_Quarters'),
                          'value': 'last-quarters'},
-                        {'label': get_label('Month(s)'),
+                        {'label': get_label('LBL_Months'),
                          'value': 'last-months'},
-                        {'label': get_label('Week(s)'),
+                        {'label': get_label('LBL_Weeks'),
                          'value': 'last-weeks'}],
                     style={'width': '100px', 'height': '27px', 'margin': '0', 'padding': '0', 'font-size': '15px',
                            'display': 'inline-block', 'text-align': 'center', 'border-radius': '0', 'color': '#333'})
             ], style={'width': '0', 'height': '0', 'position': 'relative', 'bottom': '55px',
                       'left': '125px' if language == 'En' else '150px'}),
-            html.P("{}: {} - {}".format(get_label('Available'), '_', '_'),
+            html.P("{}: {} - {}".format(get_label('LBL_Available'), '_', '_'),
                    style={'margin-top': '10px', 'text-align': 'center', 'font-size': '85%', 'color': CLR['text1']}),
             html.Div([
                 # placeholders for datepicker inputs to avoid callback errors. Inputs are initialized to 1 so that they

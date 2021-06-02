@@ -254,9 +254,9 @@ for x in range(5):
 
         # check if leaf node, if so say graph all siblings instead of graph all in dropdown
         if 'options=[]' not in str(dropdown):
-            options = [{'label': get_label('Graph All in Dropdown'), 'value': 'graph_children'}]
+            options = [{'label': get_label('LBL_Graph_All_In_Dropdown'), 'value': 'graph_children'}]
         else:
-            options = [{'label': get_label('Graph All Siblings'), 'value': 'graph_children'}]
+            options = [{'label': get_label('LBL_Graph_All_Siblings'), 'value': 'graph_children'}]
 
         return display_button, dropdown, options
 
@@ -466,16 +466,16 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
         bottom = '0' if not fringe_min else '17px'
         children = [
             html.Header([
-                html.Button(get_label("Year"), className=year_className,
+                html.Button(get_label("LBL_Year"), className=year_className,
                             id={'type': 'date-picker-year-button', 'index': tile},
                             disabled=year_disabled),
-                html.Button(get_label("Quarter"), className=quarter_className,
+                html.Button(get_label("LBL_Quarter"), className=quarter_className,
                             id={'type': 'date-picker-quarter-button', 'index': tile},
                             disabled=quarter_disabled),
-                html.Button(get_label("Month"), className=month_className,
+                html.Button(get_label("LBL_Month"), className=month_className,
                             id={'type': 'date-picker-month-button', 'index': tile},
                             disabled=month_disabled),
-                html.Button(get_label("Week"), className=week_className,
+                html.Button(get_label("LBL_Week"), className=week_className,
                             id={'type': 'date-picker-week-button', 'index': tile},
                             disabled=week_disabled)
             ], style={'display': 'inline-block', 'width': '100%'}),

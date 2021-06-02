@@ -678,9 +678,6 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
     # elif 'data-set' in changed id, reset data tile with new df set as active, keep shown, and trigger graph update
     elif '"type":"data-set"}.value' in changed_id:
         changed_index = int(search(r'\d+', changed_id).group())
-        df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
-        df_name = df_names[changed_index]
-        data[changed_index] = get_data_menu(changed_index, df_name, df_const=df_const)
         sidemenu_styles[changed_index] = DATA_CONTENT_SHOW
         confirm_button[changed_index] = {}
 
@@ -728,7 +725,7 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
     # determine returns
     for i in range(5):
         # if the data was not changed, do not update
-        if '"type":"confirm-load-data"}.n_clicks' not in changed_id:
+        if data[i] is None:
             data[i] = no_update
         # if the style of a data tile has not changed, do not update
         if sidemenu_styles[i] == sidemenu_style_states[i]:

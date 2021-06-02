@@ -628,8 +628,8 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
     data = [None] * 5
     sidemenu_styles = [DATA_CONTENT_HIDE] * 5
     graph_triggers = [no_update] * 5
-    confirm_button = [DATA_CONTENT_HIDE] * 5
-    refresh_button = [DATA_CONTENT_HIDE] * 5
+    confirm_button = [no_update] * 5
+    refresh_button = [no_update] * 5
 
     # if there are no constants calculated for the datasets required then calc them
     for x in [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]:
@@ -694,6 +694,15 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
             refresh_button[changed_index] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
                                              'position': 'relative',
                                              'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}
+            data[changed_index] = get_data_menu(changed_index, df_name, df_const=df_const)
+            sidemenu_styles[changed_index] = DATA_CONTENT_SHOW
+            # trigger update for all tiles that are linked to the active data menu
+            if changed_index == 4:
+                for i in range(len(links_style)):
+                    if links_style[i] == 'fa fa-link':
+                        graph_triggers[i] = df_name
+            else:
+                graph_triggers[changed_index] = df_name
         else:
             confirm_button[changed_index] = {'padding': '10px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
                                              'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}
@@ -704,6 +713,8 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
         changed_index = int(search(r'\d+', changed_id).group())
         df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
         df_name = df_names[changed_index]
+        if '"type":"confirm-data-set-refresh"}.n_clicks' in changed_id:
+            session[df_names[changed_index]] = dataset_to_df(df_names[changed_index])
         data[changed_index] = get_data_menu(changed_index, df_name, df_const=df_const)
         sidemenu_styles[changed_index] = DATA_CONTENT_SHOW
         # trigger update for all tiles that are linked to the active data menu
@@ -716,8 +727,6 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
         confirm_button[changed_index] = DATA_CONTENT_HIDE
         refresh_button[changed_index] = {'padding': '10px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
                                          'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}
-        if '"type":"confirm-data-set-refresh"}.n_clicks' in changed_id:
-            session[df_names[changed_index]] = dataset_to_df(df_names[changed_index])
 
     # elif 'RESET' dashboard requested, hide and reset all data tiles
     elif 'dashboard-reset-trigger' in changed_id:

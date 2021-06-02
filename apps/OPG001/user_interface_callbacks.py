@@ -145,7 +145,7 @@ def _new_and_delete(new_clicks, _close_clicks, dashboard_reset, input_tiles, num
         raise PreventUpdate
     # disable the NEW button
     new_button = html.Button(
-        className='master-nav', n_clicks=0, children=get_label('New'), id='button-new', disabled=True)
+        className='master-nav', n_clicks=0, children=get_label('LBL_New'), id='button-new', disabled=True)
     return children, new_button, deleted_tile, num_tiles, dashboard_reset_trigger
 
 
@@ -202,7 +202,7 @@ def _change_tab(tab_clicks, tab_close_clicks, _tab_add_nclicks,
         tab_toggle_children = tab_toggle_children + [
             html.Div([
                 html.Button(
-                    get_label("Tab"),
+                    get_label("LBL_Tab"),
                     id={'type': 'dashboard-tab', 'index': len(tab_toggle_children)},
                     className='dashboard-tab-button'),
                 html.Button(
@@ -312,7 +312,7 @@ def _update_num_tiles(input1, input2, input3):
 )
 def _update_tab_title(title, active_tab, list_of_children):
     if title == '':
-        list_of_children[active_tab] = get_label('Tab')
+        list_of_children[active_tab] = get_label('LBL_Tab')
     else:
         if len(title) > 5:
             title = title[:3] + '...'

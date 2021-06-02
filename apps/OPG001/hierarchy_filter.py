@@ -47,13 +47,13 @@ def generate_dropdown(tile, df_name, nid_path):
             id={'type': 'hierarchy_specific_dropdown', 'index': tile},
             options=options,
             multi=False,
-            placeholder='{}...'.format(get_label('Select')))
+            placeholder='{}...'.format(get_label('LBL_Select')))
     else:
         return dcc.Dropdown(
             id={'type': 'hierarchy_specific_dropdown', 'index': tile},
             options=[],
             multi=False,
-            placeholder='{}...'.format(get_label('Select')))
+            placeholder='{}...'.format(get_label('LBL_Select')))
 
 
 # helper function to generate a hierarchy button for hierarchy path
@@ -84,8 +84,8 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
                 style={'color': CLR['text1'], 'margin-top': '20px', 'display': 'inline-block', 'text-align': 'none'}),
             # Hierarchy level filter vs specific node toggle switch
             dcc.Tabs([
-                dcc.Tab(label="{}".format(get_label("Level Filter")), value='Level Filter'),
-                dcc.Tab(label="{}".format(get_label("Specific Item")), value='Specific Item')],
+                dcc.Tab(label="{}".format(get_label("LBL_Level_Filter")), value='Level Filter'),
+                dcc.Tab(label="{}".format(get_label("LBL_Specific_Item")), value='Specific Item')],
                 id={'type': 'hierarchy-toggle', 'index': tile},
                 className='toggle-tabs-wrapper',
                 value=hierarchy_toggle,
@@ -98,7 +98,7 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
                     multi=False,
                     value=level_value,
                     style={'color': 'black', 'width': '100%', 'textAlign': 'center', 'margin-top': '10px'},
-                    placeholder='{}...'.format(get_label('Select')))],
+                    placeholder='{}...'.format(get_label('LBL_Select')))],
                 id={'type': 'hierarchy_level_filter', 'index': tile},
                 style={} if hierarchy_toggle == 'Level Filter' else {'display': 'none'}),
             # Hierarchy Specific Filter Menu
@@ -110,19 +110,19 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
                            'height': '60px'}),
                 dcc.Checklist(
                     id={'type': 'graph_children_toggle', 'index': tile},
-                    options=[{'label': get_label('Graph All in Dropdown'),
+                    options=[{'label': get_label('LBL_Graph_All_In_Dropdown'),
                               'value': 'graph_children'}],
                     value=graph_all_toggle if graph_all_toggle else [],
                     style={'color': 'black', 'width': '100%', 'display': 'inline-block', 'text-align': 'center'}),
                 html.Div([
                     html.Div([
                         html.Button(
-                            get_label('Top'),
+                            get_label('LBL_Top'),
                             id={'type': 'hierarchy_to_top', 'index': tile},
                             n_clicks=0,
                             style={'min-width': '45px', 'display': 'inline-block', 'padding': '0 0 0 0'}),
                         html.Button(
-                            get_label('Back'),
+                            get_label('LBL_Back'),
                             id={'type': 'hierarchy_revert', 'index': tile},
                             n_clicks=0,
                             style={'min-width': '45px', 'display': 'inline-block', 'padding': '0 0 0 0'})],
@@ -142,8 +142,8 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
                 style={'color': CLR['text1'], 'margin-top': '20px', 'display': 'inline-block', 'text-align': 'none'}),
             # Hierarchy level filter vs specific node toggle switch
             dcc.Tabs([
-                dcc.Tab(label="{}".format(get_label("Level Filter")), value='Level Filter'),
-                dcc.Tab(label="{}".format(get_label("Specific Item")), value='Specific Item')],
+                dcc.Tab(label="{}".format(get_label("LBL_Level_Filter")), value='Level Filter'),
+                dcc.Tab(label="{}".format(get_label("LBL_Specific_Item")), value='Specific Item')],
                 id={'type': 'hierarchy-toggle', 'index': tile},
                 className='toggle-tabs-wrapper',
                 value=hierarchy_toggle,
@@ -156,7 +156,7 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
                     multi=False,
                     value=level_value,
                     style={'color': 'black', 'width': '100%', 'textAlign': 'center', 'margin-top': '10px'},
-                    placeholder='{}...'.format(get_label('Select')))],
+                    placeholder='{}...'.format(get_label('LBL_Select')))],
                 id={'type': 'hierarchy_level_filter', 'index': tile},
                 style={} if hierarchy_toggle == 'Level Filter' else {'display': 'none'}),
             # Hierarchy Specific Filter Menu
@@ -168,19 +168,19 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
                            'height': '60px'}),
                 dcc.Checklist(
                     id={'type': 'graph_children_toggle', 'index': tile},
-                    options=[{'label': get_label('Graph All in Dropdown'),
+                    options=[{'label': get_label('LBL_Graph_All_In_Dropdown'),
                               'value': 'graph_children'}],
                     value=graph_all_toggle if graph_all_toggle else [],
                     style={'color': 'black', 'width': '100%', 'display': 'inline-block', 'text-align': 'center'}),
                 html.Div([
                     html.Div([
                         html.Button(
-                            get_label('Top'),
+                            get_label('LBL_Top'),
                             id={'type': 'hierarchy_to_top', 'index': tile},
                             n_clicks=0,
                             style={'min-width': '45px', 'display': 'inline-block', 'padding': '0 0 0 0'}),
                         html.Button(
-                            get_label('Back'),
+                            get_label('LBL_Back'),
                             id={'type': 'hierarchy_revert', 'index': tile},
                             n_clicks=0,
                             style={'min-width': '45px', 'display': 'inline-block', 'padding': '0 0 0 0'})],

@@ -32,11 +32,9 @@ import config
 #       - LAYOUT_CONTENT_HIDE
 #       - DATA_CONTENT_SHOW
 #       - DATA_CONTENT_HIDE
-#   DATASET CLASS
-#       - DataSet
-#             - __init__()
-#             - filter_list()
-#             - generate_tree()
+#   DATASET
+#       - dataset_to_df()
+#       - generate_constants()
 #   DATA MANIPULATION FUNCTIONS
 #       - data_filter()
 #       - customize_menu_filter()
@@ -96,7 +94,7 @@ DATA_CONTENT_SHOW = {'max-width': '300px', 'min-width': '300px', 'background-col
 DATA_CONTENT_HIDE = {'display': 'none'}
 
 
-# ********************************************DATASET CLASS************************************************************
+# ********************************************DATASET*****************************************************************
 
 def dataset_to_df(df_name):
     if df_name.find('.csv') > -1:

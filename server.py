@@ -47,7 +47,7 @@ server.wsgi_app = PrefixMiddleware(server.wsgi_app)  # , prefix=config.APPLICATI
 server.config['SESSION_TYPE'] = 'filesystem'
 server.config['SESSION_PERMANENT'] = True
 server.config['SESSION_USE_SIGNER'] = True
-server.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=2)
+server.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=15)
 server.config['SESSION_FILE_THRESHOLD'] = 100
 
 server_session = Session(server)

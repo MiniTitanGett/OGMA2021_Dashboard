@@ -140,16 +140,14 @@ def get_data_set_picker(tile, df_name):
                 html.Div([
                     html.I(
                         html.Span(
-                            # get_label("Refresh Data Set"),
-                            "Confirm Data Set Load",
+                            get_label("Refresh Data Set"),
                             className='save-symbols-tooltip'),
                         id={'type': 'confirm-load-data', 'index': tile},
                         className='fa fa-check',
                         style=DATA_CONTENT_HIDE),
                     html.I(
                         html.Span(
-                            # get_label("Confirm Data Set Load"),
-                            "Refresh Data Set",
+                            get_label("Confirm Data Set Load"),
                             className='save-symbols-tooltip'),
                         id={'type': 'confirm-data-set-refresh', 'index': tile},
                         className='fa fa-refresh',

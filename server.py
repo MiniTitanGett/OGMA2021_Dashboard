@@ -13,6 +13,7 @@ import json
 from apps.OPG001.data import saved_layouts
 from flask_session import Session
 
+
 # https://stackoverflow.com/questions/18967441/add-a-prefix-to-all-flask-routes/36033627#36033627
 # https://docs.microsoft.com/en-us/visualstudio/python/configure-web-apps-for-iis-windows?view=vs-2019
 class PrefixMiddleware(object):
@@ -31,6 +32,7 @@ class PrefixMiddleware(object):
             start_response('404', [('Content-Type', 'text/plain')])
             return ["This url does not belong to the app.".encode()]
 
+
 # https://kadler.io/2018/01/08/fetching-python-database-cursors-by-column-name.html
 class CursorByName:
     def __init__(self, cursor):
@@ -48,19 +50,19 @@ class CursorByName:
 # https://pythonise.com/series/learning-flask/python-before-after-request
 
 server = Flask(__name__)
-server.config['SECRET_KEY'] = config.SECRET_KEY
+
 server.debug = config.DEBUG
+server.wsgi_app = PrefixMiddleware(server.wsgi_app)  # , prefix=config.APPLICATION_ROOT)
+server.config['SECRET_KEY'] = config.SECRET_KEY
+server.config['SESSION_TYPE'] = 'filesystem'
+server.config['SESSION_PERMANENT'] = False  # delete the session when the user closes the browser; use to be set to True
+server.config['SESSION_USE_SIGNER'] = True
+# server.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=2)
+server.config['SESSION_FILE_THRESHOLD'] = 100
 # ==================
 # server.config['SERVER_NAME'] = 'pacman.ogma.local:8080'
 # server.config['SESSION_COOKIE_DOMAIN'] = 'pacman.ogma.local:8080'
 # ==================
-server.wsgi_app = PrefixMiddleware(server.wsgi_app)  # , prefix=config.APPLICATION_ROOT)
-
-server.config['SESSION_TYPE'] = 'filesystem'
-server.config['SESSION_PERMANENT'] = True
-server.config['SESSION_USE_SIGNER'] = True
-server.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=2)
-server.config['SESSION_FILE_THRESHOLD'] = 100
 
 server_session = Session(server)
 
@@ -207,25 +209,25 @@ def load_dataset_list():
 # WebModuleCreate?
 @server.before_first_request
 def before_first_request_func():
-    # logging.debug(request.method + " " + request.url)
-    # logging.debug("request=" + dict_to_string(request.values))
-    # logging.debug("cookies=" + dict_to_string(request.cookies))
-    # logging.debug("session=" + dict_to_string(session))
+
+    if config.LOG_REQUEST:
+        logging.debug(request.method + " " + request.url)
+        logging.debug("request=" + dict_to_string(request.values))
+        logging.debug("cookies=" + dict_to_string(request.cookies))
+        # logging.debug("session=" + dict_to_string(session))
+
     return
 
 
 # WebModuleBeforeDispatch
 @server.before_request
 def before_request_func():
-    # logging.debug(request.method + " " + request.url)
-    # logging.debug("request=" + dict_to_string(request.values))
-    # logging.debug("cookies=" + dict_to_string(request.cookies))
-    # logging.debug("session=" + dict_to_string(session))
 
-    # if config.SESSIONLESS:
-    #     session["sessionID"] = "0"
-    #     session["externalID"] = "0"
-    #     return None
+    if config.LOG_REQUEST:
+        logging.debug(request.method + " " + request.url)
+        logging.debug("request=" + dict_to_string(request.values))
+        logging.debug("cookies=" + dict_to_string(request.cookies))
+        # logging.debug("session=" + dict_to_string(session))
 
     conn = get_conn()
 
@@ -235,8 +237,8 @@ def before_request_func():
     sessionid = request.args.get("sessionID", type=int)
 
     if sessionid:  # and (sessionid != session.get("sessionID")):
-        session["sessionID"] = "0"
-        session["externalID"] = "0"
+        session["sessionID"] = 0
+        session["externalID"] = 0
         session["language"] = "En"
 
         nonce_key = request.args.get("a")
@@ -248,8 +250,6 @@ def before_request_func():
         exec dbo.OPP_Validate_Nonce {}, \'{}\', \'{}\', @p_external_id output, @p_result_status output
         select @p_external_id as external_id, @p_result_status as result_status
         """.format(sessionid, nonce_key, nonce_value)
-
-        # logging.debug("\n" + query)
 
         cursor = conn.cursor()
         cursor.execute(query)
@@ -301,15 +301,17 @@ def before_request_func():
 # WebModuleAfterDispatch
 @server.after_request
 def after_request_func(response):
-    # logging.debug("request=" + dict_to_string(request.values))
-    # logging.debug("cookies=" + dict_to_string(request.cookies))
-    # logging.debug("session=" + dict_to_string(session))
+
+    if config.LOG_REQUEST:
+        logging.debug("request=" + dict_to_string(request.values))
+        logging.debug("cookies=" + dict_to_string(request.cookies))
+        # logging.debug("session=" + dict_to_string(session))
 
     # store sessionID and externalID in the cookie instead of the session
     if not request.cookies.get("sessionID") or request.cookies.get("sessionID") != str(session["sessionID"]):
-        logging.debug("set cookies")
-        response.set_cookie("sessionID", str(session["sessionID"]))
-        response.set_cookie("externalID", str(session["externalID"]))
+        logging.debug("setting cookies.")
+        response.set_cookie(key="sessionID", value=str(session["sessionID"]))
+        response.set_cookie(key="externalID", value=str(session["externalID"]))
 
     return response
 
@@ -317,9 +319,11 @@ def after_request_func(response):
 # WebModuleException?
 @server.teardown_request
 def teardown_request_func(error=None):
-    # logging.debug("request=" + dict_to_string(request.values))
-    # logging.debug("cookies=" + dict_to_string(request.cookies))
-    # logging.debug("session=" + dict_to_string(session))
+
+    if config.LOG_REQUEST:
+        logging.debug("request=" + dict_to_string(request.values))
+        logging.debug("cookies=" + dict_to_string(request.cookies))
+        # logging.debug("session=" + dict_to_string(session))
 
     if error:
         logging.error(str(error))

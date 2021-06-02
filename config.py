@@ -26,16 +26,6 @@ BASE_PATHNAME = os.getenv("BASE_PATHNAME")
 if BASE_PATHNAME is None:
     BASE_PATHNAME = "/python/"
 
-# DATA_SETS = os.getenv("DATA_SETS")
-#
-# if DATA_SETS is None:
-#     DATA_SETS = ["OPG001_2016-17_Week_v3.csv", "OPG010 Sankey Data.xlsx"]
-# else:
-#     DATA_SETS = json.loads(DATA_SETS)
-#
-#     if DATA_SETS is None:
-#         DATA_SETS = ["OPG001_2016-17_Week_v3.csv", "OPG010 Sankey Data.xlsx"]
-
 LOG_FILE = os.getenv("LOG_FILE")
 
 if LOG_FILE is None:
@@ -49,10 +39,14 @@ LOG_LEVEL = os.getenv("LOG_LEVEL")  # DEBUG, INFO, WARNING, ERROR, CRITICAL, or 
 if LOG_LEVEL is None:
     LOG_LEVEL = "ERROR"
 
-DEBUG = (LOG_LEVEL == "DEBUG")
+DEBUG = (LOG_LEVEL.upper() == "DEBUG")
 
-# SESSIONLESS = os.getenv("SESSIONLESS")
-# SESSIONLESS = (SESSIONLESS is None) or (SESSIONLESS == 'true')
+LOG_REQUEST = os.getenv("LOG_REQUEST")
+
+if LOG_REQUEST is None:
+    LOG_REQUEST = False
+else:
+    LOG_REQUEST = (LOG_REQUEST.lower() == 'true')
 
 # logging setup ########################################################################################################
 

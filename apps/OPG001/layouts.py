@@ -126,20 +126,40 @@ def get_data_set_picker(tile, df_name):
     :return: Drop down of the possible data sets.
     """
     return [
+        html.H6(
+            "{}:".format(get_label('Data Set')),
+            style={'color': CLR['text1'], 'margin-top': '25px', 'display': 'inline-block'}),
         html.Div([
-            html.H6(
-                "{}:".format(get_label('Data Set')),
-                style={'color': CLR['text1'], 'margin-top': '25px', 'display': 'inline-block'}),
-            html.Button(
-                n_clicks=1,
-                children=get_label('Confirm Load'),
-                id={'type': 'confirm-load-data', 'index': tile},
-                style=DATA_CONTENT_HIDE)]),
-        dcc.Dropdown(
-            id={'type': 'data-set', 'index': tile},
-            options=[{'label': i, 'value': i} for i in session['dataset_list']],
-            value=df_name,
-            clearable=False)]
+            dcc.Dropdown(
+                id={'type': 'data-set', 'index': tile},
+                options=[{'label': i, 'value': i} for i in session['dataset_list']],
+                value=df_name,
+                clearable=False,
+                style={'flex-grow': '1'}),
+            html.Div(
+                html.Div([
+                    html.I(
+                        html.Span(
+                            # get_label("Refresh Data Set"),
+                            "Confirm Data Set Load",
+                            className='save-symbols-tooltip'),
+                        id={'type': 'confirm-load-data', 'index': tile},
+                        className='fa fa-check',
+                        style=DATA_CONTENT_HIDE),
+                    html.I(
+                        html.Span(
+                            # get_label("Confirm Data Set Load"),
+                            "Refresh Data Set",
+                            className='save-symbols-tooltip'),
+                        id={'type': 'confirm-data-set-refresh', 'index': tile},
+                        className='fa fa-refresh',
+                        style=DATA_CONTENT_HIDE)],
+                    id='dataset-confirmation-symbols'),
+                style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
+                       'position': 'relative', 'vertical-align': 'top', 'background-color': 'white', 'width': '40px',
+                       'border': '1px solid {}'.format(CLR['lightgray']), 'border-radius': '6px'})],
+            style={'display': 'flex'})
+    ]
 
 
 # get DATA side-menu

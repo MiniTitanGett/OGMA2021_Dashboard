@@ -700,15 +700,35 @@ tile-nav:hover {
     margin-left: -100px; /* Use half of the width (120/2 = 60), to center the tooltip */
     left: 50%;
 }
+.fa-check .save-symbols-tooltip,
+.fa-refresh .save-symbols-tooltip{
+    visibility: hidden;
+    position: absolute;
+    padding: 5px;
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+    border-radius: 6px;
+    top: 100%;
+    z-index: 1000;
+    width: 120px;
+    color: white;
+    background-color: #9B6072;
+    margin-left: -60px; /* Use half of the width (120/2 = 60), to center the tooltip */
+    left: 50%;
+}
 .fa-ban:hover .save-symbols-tooltip,
 .fa-floppy-o:hover .save-symbols-tooltip,
 .fa-undo:hover .save-symbols-tooltip,
+.fa-check:hover .save-symbols-tooltip,
+.fa-refresh:hover .save-symbols-tooltip,
 .save-overwrite-symbols:hover .save-symbols-tooltip {
     visibility: visible;
 }
 .fa-ban .save-symbols-tooltip::after,
 .fa-floppy-o .save-symbols-tooltip::after,
 .fa-undo .save-symbols-tooltip::after,
+.fa-check .save-symbols-tooltip::after,
+.fa-refresh .save-symbols-tooltip::after,
 .save-overwrite-symbols .save-symbols-tooltip::after {
   content: "";
   position: absolute;

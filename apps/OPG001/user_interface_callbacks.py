@@ -675,7 +675,7 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
                 else:
                     sidemenu_styles[new_active_tile] = DATA_CONTENT_SHOW
 
-    # elif 'data-set' in changed id, reset data tile with new df set as active, keep shown, and trigger graph update
+    # elif 'data-set' in changed id keep shown and show confirmation button
     elif '"type":"data-set"}.value' in changed_id:
         changed_index = int(search(r'\d+', changed_id).group())
         sidemenu_styles[changed_index] = DATA_CONTENT_SHOW

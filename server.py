@@ -10,7 +10,8 @@ import logging
 import pandas
 import json
 
-from apps.OPG001.data import saved_layouts
+from conn import get_conn, close_conn
+from apps.OPG001.data import saved_layouts, saved_dashboards
 from flask_session import Session
 
 
@@ -84,21 +85,6 @@ def dict_to_string(d):
     return "[" + s + "]"
 
 
-def get_conn():
-
-    if 'conn' not in g:
-        g.conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
-
-    return g.conn
-
-
-def close_conn():
-    conn = g.pop('conn', None)
-
-    if conn is not None:
-        conn.close()
-
-
 def get_ref(ref_table, language):
     """
     gets a table from OP_Ref
@@ -145,6 +131,32 @@ def load_saved_graphs_from_db():
 
     for row in results:
         saved_layouts[row["ref_value"]] = json.loads(row["clob_text"])
+
+    cursor.close()
+    del cursor
+
+
+def load_saved_dashboards_from_db():
+    """
+    loads the saved dashboards into the saved_dashboards dictionary from the database
+    """
+    conn = get_conn()
+    cursor = conn.cursor()
+    query = """\
+    declare @p_result_status varchar(255)
+    exec dbo.opp_addgeteditdeletefind_extdashboards {}, 'Find', null, null, null, null, null,
+    @p_result_status output
+    select @p_result_status as result_status
+    """.format(session["sessionID"])
+
+    cursor.execute(query)
+
+    results = CursorByName(cursor)  # cursor.fetchall()
+
+    # for now, don't worry about @p_result_status
+
+    for row in results:
+        saved_dashboards[row["ref_value"]] = json.loads(row["clob_text"])
 
     cursor.close()
     del cursor
@@ -283,10 +295,11 @@ def before_request_func():
         # load the available datasets
         session["dataset_list"] = load_dataset_list()  # get_ref("Data_set", session["language"])
 
-        # load the available dashboards
-
         # load the available graphs/layouts
         load_saved_graphs_from_db()
+
+        # load the available dashboards
+        load_saved_dashboards_from_db()
 
         # redirect without the query params to prevent errors on refresh
         if request.args.get('reportName'):

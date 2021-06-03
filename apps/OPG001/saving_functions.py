@@ -9,15 +9,15 @@ stores all functions used for saving graph meta data and dashboard meta data
 # External Packages
 import os
 import json
-import pyodbc
+# import pyodbc
 import logging
 import pymssql
 from flask import session
 from dash.exceptions import PreventUpdate
 
 # Internal Packages
-import config
-from server import get_conn
+# import config
+from conn import get_conn
 from apps.OPG001.layouts import get_line_graph_menu, get_bar_graph_menu, get_scatter_graph_menu, get_table_graph_menu, \
     get_box_plot_menu, get_sankey_menu
 from apps.OPG001.data import saved_layouts, saved_dashboards
@@ -57,106 +57,52 @@ def save_dashboard_state(name, attributes):
         saved_dashboards[name] = attributes
 
 
-# loads the saved graphs into a dictionary
-def load_saved_graphs():
-    """
-    loads the saved layouts into the saved_layouts dictionary upon dashboard startup
-    """
-    if os.stat('apps/OPG001/saved_layouts.json').st_size != 0:
-        with open('apps/OPG001/saved_layouts.json') as json_file:
-            saved_graphs_temp = json.load(json_file)
-            for key in saved_graphs_temp:
-                save_layout_state(key, saved_graphs_temp[key])
-        json_file.close()
+# # loads the saved graphs into a dictionary
+# def load_saved_graphs():
+#     """
+#     loads the saved layouts into the saved_layouts dictionary upon dashboard startup
+#     """
+#     if os.stat('apps/OPG001/saved_layouts.json').st_size != 0:
+#         with open('apps/OPG001/saved_layouts.json') as json_file:
+#             saved_graphs_temp = json.load(json_file)
+#             for key in saved_graphs_temp:
+#                 save_layout_state(key, saved_graphs_temp[key])
+#         json_file.close()
 
 
-def load_saved_graphs_from_db():
-    """
-    loads the saved layouts into the saved_layouts dictionary from the database
-    """
-    # if config.SESSIONLESS:
-    #     return
-
-    conn = get_conn()
-    cursor = conn.cursor()
-    query = "dbo.opp_addgeteditdeletefind_extdashboardreports"
-    params = (session["sessionID"], "Find", "", "", "", "", "", pymssql.output("VARCHAR", 255))
-    params = cursor.callproc(query, params)
-
-    if params[7] != "OK":
-        result_status = params[7]
-        cursor.close()
-        del cursor
-        logging.error(result_status)
-        raise ValueError(result_status)
-
-    results = cursor.fetchall()
-
-    for row in results:
-        save_layout_state(row["ref_value"], row["clob_text"])
+# # loads the saved graphs into a dictionary
+# def load_saved_dashboards():
+#     """
+#     loads the saved dashboards into the saved_dashboards dictionary upon dashboard startup
+#     """
+#     if os.stat('apps/OPG001/saved_dashboards.json').st_size != 0:
+#         with open('apps/OPG001/saved_dashboards.json') as json_file:
+#             saved_dashboards_temp = json.load(json_file)
+#             for key in saved_dashboards_temp:
+#                 save_dashboard_state(key, saved_dashboards_temp[key])
+#         json_file.close()
 
 
-#    query = """\
-#    declare @p_result_status varchar(255)
-#    exec dbo.opp_addgeteditdeletefind_extdashboardreports {}, \'{}\', null, null, null, null, null, @p_result_status output
-#    select @p_result_status as result_status
-#    """.format(session['sessionID'], 'Find')
-
-#    cursor = conn.cursor()
-#    cursor.execute(query)
-
-#    results = cursor.fetchone()
-
-#    if results.result_status != "OK":
-#        cursor.close()
-#        del cursor
-#        logging.error(results.result_status)
-#        raise ValueError(results.result_status)
-
-#    cursor.close()
-#    del cursor
+# load_saved_dashboards()
 
 
-# load_saved_graphs()
-# load_saved_graphs_from_db()
+# # saves the tiles meta data to the saved layouts file
+# def save_layout_to_file(layouts):
+#     """
+#     saves the layouts to the json file
+#     :param layouts: the dictionary containing all of the saved layouts
+#     """
+#     j = json.dumps(layouts, sort_keys=True)
+#     if j:
+#         with open('apps/OPG001/saved_layouts.json', 'w') as file:
+#             file.write(j)
+#             file.close()
 
 
-# loads the saved graphs into a dictionary
-def load_saved_dashboards():
-    """
-    loads the saved dashboards into the saved_dashboards dictionary upon dashboard startup
-    """
-    if os.stat('apps/OPG001/saved_dashboards.json').st_size != 0:
-        with open('apps/OPG001/saved_dashboards.json') as json_file:
-            saved_dashboards_temp = json.load(json_file)
-            for key in saved_dashboards_temp:
-                save_dashboard_state(key, saved_dashboards_temp[key])
-        json_file.close()
-
-
-load_saved_dashboards()
-
-
-# saves the tiles meta data to the saved layouts file
-def save_layout_to_file(layouts):
-    """
-    saves the layouts to the json file
-    :param layouts: the dictionary containing all of the saved layouts
-    """
-    j = json.dumps(layouts, sort_keys=True)
-    if j:
-        with open('apps/OPG001/saved_layouts.json', 'w') as file:
-            file.write(j)
-            file.close()
-
-
-def save_layout_to_db(graph_title):
-
-    # if config.SESSIONLESS:
-    #     return
+def save_layout_to_db(graph_title, graph_id):
 
     conn = get_conn()
-    j = json.dumps(saved_layouts[graph_title], sort_keys=True)
+    j = json.dumps(saved_layouts[graph_id], sort_keys=True)
 
     query = """\
     declare @p_result_status varchar(255)
@@ -176,16 +122,39 @@ def save_layout_to_db(graph_title):
     del cursor
 
 
-# saves the dashboards meta data to the saved layouts file
-def save_dashboard_to_file(dashboard):
-    """
-    saves the dashboards to the json file
-    :param dashboard: the dictionary containing all of the saved dashboards
-    """
-    j = json.dumps(dashboard, sort_keys=True)
-    with open('apps/OPG001/saved_dashboards.json', 'w') as file:
-        file.write(j)
-        file.close()
+# # saves the dashboards meta data to the saved layouts file
+# def save_dashboard_to_file(dashboard):
+#     """
+#     saves the dashboards to the json file
+#     :param dashboard: the dictionary containing all of the saved dashboards
+#     """
+#     j = json.dumps(dashboard, sort_keys=True)
+#     with open('apps/OPG001/saved_dashboards.json', 'w') as file:
+#         file.write(j)
+#         file.close()
+
+
+def save_dashboard_to_db(dashboard_title, dashboard_id):
+
+    conn = get_conn()
+    j = json.dumps(saved_dashboards[dashboard_id], sort_keys=True)
+
+    query = """\
+    declare @p_result_status varchar(255)
+    exec dbo.opp_addgeteditdeletefind_extdashboards {}, \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\',
+    @p_result_status output
+    select @p_result_status as result_status
+    """.format(session['sessionID'], 'Add', dashboard_title, 'Dash', j, 'application/json', 'json')
+
+    cursor = conn.cursor()
+    cursor.execute(query)
+
+    # results = cursor.fetchone()
+
+    # ignore result status for now
+
+    cursor.close()
+    del cursor
 
 
 #  function for deleting line from text file
@@ -195,16 +164,16 @@ def delete_layout(key, layouts):
     :param key: the title of the graph, this is the key in the dictionary of saved layouts
     :param layouts: the dictionary containing all of the saved layouts
     """
-    if os.stat('apps/OPG001/saved_layouts.json').st_size != 0:
-        with open('apps/OPG001/saved_layouts.json', 'r') as file:
-            saved_graphs_temp = json.load(file)
-            del saved_graphs_temp[key]
-            del layouts[key]
-            file.close()
-        with open('apps/OPG001/saved_layouts.json', 'w') as file:
-            j = json.dumps(saved_graphs_temp, sort_keys=True)
-            file.write(j)
-            file.close()
+    # if os.stat('apps/OPG001/saved_layouts.json').st_size != 0:
+    #     with open('apps/OPG001/saved_layouts.json', 'r') as file:
+    #         saved_graphs_temp = json.load(file)
+    #         del saved_graphs_temp[key]
+    #         del layouts[key]
+    #         file.close()
+    #     with open('apps/OPG001/saved_layouts.json', 'w') as file:
+    #         j = json.dumps(saved_graphs_temp, sort_keys=True)
+    #         file.write(j)
+    #         file.close()
 
 
 #  function for deleting line from text file
@@ -214,16 +183,16 @@ def delete_dashboard(key, dashboards):
     :param key: the title of the dashboard, this is the key in the dictionary of saved dashboards
     :param dashboards: the dictionary containing all of the saved dashboards
     """
-    if os.stat('apps/OPG001/saved_dashboards.json').st_size != 0:
-        with open('apps/OPG001/saved_dashboards.json', 'r') as file:
-            saved_dashboards_temp = json.load(file)
-            del saved_dashboards_temp[key]
-            del dashboards[key]
-            file.close()
-        with open('apps/OPG001/saved_dashboards.json', 'w') as file:
-            j = json.dumps(saved_dashboards_temp, sort_keys=True)
-            file.write(j)
-            file.close()
+    # if os.stat('apps/OPG001/saved_dashboards.json').st_size != 0:
+    #     with open('apps/OPG001/saved_dashboards.json', 'r') as file:
+    #         saved_dashboards_temp = json.load(file)
+    #         del saved_dashboards_temp[key]
+    #         del dashboards[key]
+    #         file.close()
+    #     with open('apps/OPG001/saved_dashboards.json', 'w') as file:
+    #         j = json.dumps(saved_dashboards_temp, sort_keys=True)
+    #         file.write(j)
+    #         file.close()
 
 
 def load_graph_menu(graph_type, tile, df_name, args_list, df_const):

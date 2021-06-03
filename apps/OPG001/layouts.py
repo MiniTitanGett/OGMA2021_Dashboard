@@ -13,6 +13,7 @@ import dash_html_components as html
 from dash.exceptions import PreventUpdate
 from flask import session
 import json
+import logging
 
 # Internal Modules
 import config

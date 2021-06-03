@@ -16,6 +16,7 @@ import dash_html_components as html
 import dash_core_components as dcc
 from re import search
 import locale
+import logging
 
 # Internal Packages
 from apps.app0003.graphs import get_line_figure, get_scatter_figure, get_bar_figure, get_table_figure, get_box_figure

@@ -20,8 +20,8 @@ import regex
 from apps.OPG001.layouts import get_data_menu, get_customize_content, get_div_body
 from apps.OPG001.app import app
 from apps.OPG001.data import get_label, saved_layouts, saved_dashboards, CLR
-from apps.OPG001.saving_functions import delete_layout, save_layout_state, save_layout_to_file, save_layout_to_db, \
-    save_dashboard_state, save_dashboard_to_file, delete_dashboard, load_graph_menu
+from apps.OPG001.saving_functions import delete_layout, save_layout_state, save_layout_to_db, \
+    save_dashboard_state, save_dashboard_to_db, delete_dashboard, load_graph_menu
 
 
 #   SAVING
@@ -210,7 +210,7 @@ for y in range(0, 4):
 
             tile = int(dash.callback_context.inputs_list[0]['id']['index'])
 
-            intermediate_pointer = REPORT_POINTER_PREFIX + regex.sub('[^A-Za-z0-9]+', '', graph_title)
+            intermediate_pointer = REPORT_POINTER_PREFIX + graph_title.replace(" ", "")  # regex.sub('[^A-Za-z0-9]+', '', graph_title)
 
             graph_titles = []
 
@@ -308,9 +308,9 @@ for y in range(0, 4):
                 # calls the save_graph_state function to save the graph to the sessions dictionary
                 save_layout_state(layout_pointer, elements_to_save)
                 # saves the graph title and layout to the file where you are storing all of the saved layouts
-                save_layout_to_file(saved_layouts)
+                # save_layout_to_file(saved_layouts)
                 # saves the graph layout to the database
-                save_layout_to_db(layout_pointer)
+                save_layout_to_db(graph_title, layout_pointer)
 
                 save_error_tooltip = ''
                 save_symbol = 'fa fa-check'
@@ -478,7 +478,7 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
     # if save requested or the overwrite was confirmed, check for exceptions and save
     if 'button-save-dashboard' in changed_id or '{"index":0,"type":"dashboard-overwrite"}.n_clicks' == changed_id:
 
-        intermediate_dashboard_pointer = DASHBOARD_POINTER_PREFIX + regex.sub('[^A-Za-z0-9]+', '', dashboard_title)
+        intermediate_dashboard_pointer = DASHBOARD_POINTER_PREFIX + dashboard_title.replace(" ", "")  # regex.sub('[^A-Za-z0-9]+', '', dashboard_title)
 
         while True:
             if intermediate_dashboard_pointer in saved_layouts:
@@ -658,7 +658,7 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
 
             for i in range(len(links)):
 
-                intermediate_pointer = REPORT_POINTER_PREFIX + regex.sub('[^A-Za-z0-9]+', '', tile_titles[i])
+                intermediate_pointer = REPORT_POINTER_PREFIX + tile_titles[i].replace(" ", "")  # regex.sub('[^A-Za-z0-9]+', '', tile_titles[i])
 
                 used_titles = []
 
@@ -727,13 +727,14 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
                 # save tile to file
                 save_layout_state(tile_pointer, {'Graph Type': graph_types[i], 'Args List': args_list, **tile_data,
                                                  'Title': tile_titles[i]})
-                save_layout_to_file(saved_layouts)
-                save_layout_to_db(tile_pointer)
+                # save_layout_to_file(saved_layouts)
+                save_layout_to_db(tile_titles[i], tile_pointer)
 
             # save dashboard to file
             # Change to a dashboard pointer from dashboard_title
             save_dashboard_state(dashboard_pointer, dashboard_saves)
-            save_dashboard_to_file(saved_dashboards)
+            # save_dashboard_to_file(saved_dashboards)
+            save_dashboard_to_db(dashboard_title, dashboard_pointer)
 
             save_error_tooltip = ''
             update_graph_options_trigger = 'trigger'

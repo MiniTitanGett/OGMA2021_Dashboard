@@ -16,8 +16,8 @@ from flask import session
 from dash.exceptions import PreventUpdate
 
 # Internal Packages
-import config
-from server import get_conn
+# import config
+from conn import get_conn
 from apps.OPG001.layouts import get_line_graph_menu, get_bar_graph_menu, get_scatter_graph_menu, get_table_graph_menu, \
     get_box_plot_menu, get_sankey_menu
 from apps.OPG001.data import saved_layouts, saved_dashboards

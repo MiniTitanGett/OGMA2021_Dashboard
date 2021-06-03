@@ -16,7 +16,7 @@ import json
 
 # Internal Modules
 import config
-from server import get_conn
+from conn import get_conn
 # from apps.OPG001.app import app
 from apps.OPG001.data import GRAPH_OPTIONS, CLR, DATA_CONTENT_HIDE, VIEW_CONTENT_SHOW, BAR_X_AXIS_OPTIONS, \
     CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LAYOUT_CONTENT_HIDE, \

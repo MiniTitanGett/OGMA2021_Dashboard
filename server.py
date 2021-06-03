@@ -10,6 +10,7 @@ import logging
 import pandas
 import json
 
+from conn import get_conn, close_conn
 from apps.OPG001.data import saved_layouts
 from flask_session import Session
 
@@ -82,21 +83,6 @@ def dict_to_string(d):
         s += "('" + key + "', '" + str(d[key]) + "')"
 
     return "[" + s + "]"
-
-
-def get_conn():
-
-    if 'conn' not in g:
-        g.conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
-
-    return g.conn
-
-
-def close_conn():
-    conn = g.pop('conn', None)
-
-    if conn is not None:
-        conn.close()
 
 
 def get_ref(ref_table, language):

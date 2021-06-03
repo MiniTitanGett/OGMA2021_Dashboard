@@ -51,7 +51,8 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                 options=[
                     {'label': get_label('LBL_All_Time_Monthly'),
                      'value': 'all-time'},
-                    {'label': '{}'.format(get_label('LBL_Last') if language == 'En' else '........... ' + get_label('LBL_Last')),
+                    {'label': '{}'.format(
+                        get_label('LBL_Last') if language == 'En' else '........... ' + get_label('LBL_Last')),
                      'value': 'to-current'},
                     {'label': get_label('LBL_Select_Range'),
                      'value': 'select-range'}],
@@ -140,7 +141,7 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
             dcc.RadioItems(
                 id={'type': 'radio-timeframe', 'index': tile},
                 options=[
-                    {'label': get_label('All_Time_Monthly'),
+                    {'label': get_label('LBL_All_Time_Monthly'),
                      'value': 'all-time'},
                     {'label': '{}'.format(
                         get_label('LBL_Last') if language == 'En' else '........... ' + get_label('LBL_Last')),

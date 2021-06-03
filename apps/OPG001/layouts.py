@@ -140,14 +140,14 @@ def get_data_set_picker(tile, df_name):
                 html.Div([
                     html.I(
                         html.Span(
-                            get_label("Refresh Data Set"),
+                            get_label("LBL_Refresh_Data_Set"),
                             className='save-symbols-tooltip'),
                         id={'type': 'confirm-load-data', 'index': tile},
                         className='fa fa-check',
                         style=DATA_CONTENT_HIDE),
                     html.I(
                         html.Span(
-                            get_label("Confirm Data Set Load"),
+                            get_label("LBL_Confirm_Data_Set_Load"),
                             className='save-symbols-tooltip'),
                         id={'type': 'confirm-data-set-refresh', 'index': tile},
                         className='fa fa-refresh',
@@ -596,7 +596,7 @@ def get_customize_content(tile, graph_type, graph_menu):
             dcc.Dropdown(
                 id={'type': 'graph-type-dropdown', 'index': tile},
                 clearable=False,
-                options=[{'label': get_label(i), 'value': i} for i in GRAPH_OPTIONS],
+                options=[{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in GRAPH_OPTIONS],
                 value=graph_type,
                 style={'max-width': '405px', 'width': '100%', 'font-size': '13px'}),
             style={'margin-left': '15px'}),
@@ -898,7 +898,7 @@ def get_line_graph_menu(tile, x, y, measure_type, df_name, df_const):
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
-                        options=[] if df_const is None else [{'label': get_label(i), 'value': i} for i in
+                        options=[] if df_const is None else [{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in
                                                              X_AXIS_OPTIONS],
                         value=x,
                         clearable=False,
@@ -970,7 +970,7 @@ def get_bar_graph_menu(tile, x, y, measure_type, df_name, df_const):
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
-                        options=[{'label': get_label(i), 'value': i} for i in BAR_X_AXIS_OPTIONS],
+                        options=[{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in BAR_X_AXIS_OPTIONS],
                         value=x,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -1060,7 +1060,7 @@ def get_scatter_graph_menu(tile, x, y, measure_type, df_name, df_const):
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
-                        options=[{'label': get_label(i), 'value': i} for i in X_AXIS_OPTIONS],
+                        options=[{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in X_AXIS_OPTIONS],
                         value=x,
                         clearable=False,
                         style={'font-size': '13px'})],

@@ -8,6 +8,7 @@ CREATE PROC InsertOPRef(
     @language varchar(20),
     @ref_desc varchar(max))
 AS
+set nocount on
 IF EXISTS(SELECT 'TRUE' FROM [dbo].[OP_Ref] WHERE @ref_table = [dbo].[OP_Ref].ref_table AND @ref_value =[dbo].[OP_Ref].ref_value AND @language = [dbo].[OP_Ref].language)
     BEGIN
     print('The Entry Already Exists Update Description')
@@ -336,8 +337,3 @@ ELSE
 		END')
 	END
     GO
-
-/*
-/*
-exec dbo.reftable
-go*/

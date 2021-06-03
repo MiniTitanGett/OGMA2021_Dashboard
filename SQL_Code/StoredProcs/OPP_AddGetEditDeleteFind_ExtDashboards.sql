@@ -13,11 +13,12 @@ Create Procedure dbo.OPP_AddGetEditDeleteFind_ExtDashboards
 
 @pr_session_id      int, 
 @pr_action          varchar(64),          -- Add|Get|Edit|Delete|Find
-@pr_dashboard_name  varchar(64),
-@p_dashboard_type   varchar(64),          -- ex. 'Dash' required on Add/Edit
+@pr_dashboard_name  varchar(64),          -- ex. 'Dashboard_Ext_MyNewDashboard' required on Add/Get/Edit/Delete
+@p_dashboard_title  varchar(255),         -- ex. 'My New Dashboard' required on Add
+@p_dashboard_type   varchar(64),          -- ex. 'Dash' required on Add
 @p_dashboard_layout varchar(max),         -- required on Add/Edit
-@p_layout_type      varchar(64),          -- ex. 'application/json', content type of layout file; required on Add/Edit
-@p_layout_ext       varchar(6),           -- ex. 'json', layout filename extension; required on Add/Edit
+@p_layout_type      varchar(64),          -- ex. 'application/json', content type of layout file; required on Add
+@p_layout_ext       varchar(6),           -- ex. 'json', layout filename extension; required on Add
 @p_result_status    varchar(255)  output
  
 as
@@ -35,8 +36,8 @@ begin
   declare @t_ref_id int
   declare @t_ref_value varchar(64)
   declare @t_ref_desc varchar(255)
-  declare @t_dashboard_ref varchar(64)
-  declare @t_dashboard_char varchar(64)
+  --declare @t_dashboard_ref varchar(64)
+  --declare @t_dashboard_char varchar(64)
   declare @t_dashboard_desc varchar(255)
   declare @t_parent_char_id int
   declare @t_char_id int
@@ -56,8 +57,8 @@ begin
     return
   end
 
-  set @t_dashboard_ref = 'Dashboard_Ext_' + replace(@pr_dashboard_name, ' ', '')
-  set @t_dashboard_char = @t_dashboard_ref + 'Char'
+  --set @t_dashboard_ref = 'Dashboard_Ext_' + replace(@pr_dashboard_name, ' ', '')
+  --set @t_dashboard_char = @t_dashboard_ref + 'Char'
 
   --
   -- get the person id from the session
@@ -72,9 +73,15 @@ begin
   if (@pr_action = 'Add')
   begin
 
+    if (isnull(@p_dashboard_title, '') = '')
+    begin
+      set @p_result_status = @errPref + '030|dashboard_title is required with an action of Add or Edit.'
+      return
+    end
+
     if (isnull(@p_dashboard_type, '') = '')
     begin
-      set @p_result_status = @errPref + '003|dashboard_type is required with an action of Add or Edit.'
+      set @p_result_status = @errPref + '003|dashboard_type is required with an action of Add.'
       return
     end
 
@@ -86,13 +93,13 @@ begin
 
     if (isnull(@p_layout_type, '') = '')
     begin
-      set @p_result_status = @errPref + '013|layout_type is required with an action of Add or Edit.'
+      set @p_result_status = @errPref + '013|layout_type is required with an action of Add.'
       return
     end
 
     if (isnull(@p_layout_ext, '') = '')
     begin
-      set @p_result_status = @errPref + '014|layout_ext is required with an action of Add or Edit.'
+      set @p_result_status = @errPref + '014|layout_ext is required with an action of Add.'
       return
     end
 
@@ -102,7 +109,7 @@ begin
     if (exists (select top 1 1
                   from dbo.op_ref with (nolock)
                  where ref_table = 'ExtDashboards'
-                   and ref_value = @t_dashboard_ref))
+                   and ref_value = @pr_dashboard_name))
     begin
       set @p_result_status = @errPref + '022|Dashboard already exists.'
       return
@@ -112,18 +119,18 @@ begin
     -- add the ext dashboard ref entry
     --
     insert dbo.op_ref (ref_table, ref_value, [language], ref_desc)
-    values ('ExtDashboards', @t_dashboard_ref, 'En', @pr_dashboard_name)
+    values ('ExtDashboards', @pr_dashboard_name, 'En', @p_dashboard_title)
 
     --
     -- add the layoutFile ref entry
     --
     insert dbo.op_ref (ref_table, ref_value, [language], ref_desc)
-    values (@t_dashboard_ref, 'layoutFile', 'En', @t_dashboard_ref)
+    values (@pr_dashboard_name, 'layoutFile', 'En', @pr_dashboard_name)
 
     --
     -- add the layoutFile char
     insert dbo.op_char (person_id, char_type, char_type_qualifier, char_value_text)
-    values (@t_popt_id, @t_dashboard_ref, 'layoutFile', @p_dashboard_layout)
+    values (@t_popt_id, @pr_dashboard_name, 'layoutFile', @p_dashboard_layout)
 
   end
 
@@ -156,27 +163,9 @@ begin
   else if (@pr_action = 'Edit')
   begin
 
-    if (isnull(@p_dashboard_type, '') = '')
-    begin
-      set @p_result_status = @errPref + '003|dashboard_type is required with an action of Add or Edit.'
-      return
-    end
-
     if (isnull(@p_dashboard_layout, '') = '')
     begin
       set @p_result_status = @errPref + '004|dashboard_layout is required with an action of Add or Edit.'
-      return
-    end
-
-    if (isnull(@p_layout_type, '') = '')
-    begin
-      set @p_result_status = @errPref + '013|layout_type is required with an action of Add or Edit.'
-      return
-    end
-
-    if (isnull(@p_layout_ext, '') = '')
-    begin
-      set @p_result_status = @errPref + '014|layout_ext is required with an action of Add or Edit.'
       return
     end
 
@@ -184,12 +173,12 @@ begin
     set @t_char_id = (select char_id
                         from dbo.op_char with (nolock)
                        where person_id = @t_popt_id
-                         and char_type = @t_dashboard_ref
+                         and char_type = @pr_dashboard_name
                          and char_type_qualifier = 'layoutFile')
 
     if (@t_char_id is null)
     begin
-      set @p_result_status = @errPref + '016|dashboard not found.'
+      set @p_result_status = @errPref + '016|dashboard layout not found.'
       return
     end
 
@@ -211,9 +200,40 @@ begin
 
     -- for now, just super delete
 
+    --
+    -- check if the dashboard exists in ref
+    --
+    if (not exists (select top 1 1
+                      from dbo.op_ref with (nolock)
+                     where ref_table = 'ExtDashboards'
+                       and ref_value = @pr_dashboard_name))
+    begin
+      set @p_result_status = @errPref + '023|Dashboard does not exist.'
+      return
+    end
 
-    set @p_result_status = @errPref + '|Delete not currently available.'
-    return
+    --
+    -- delete the layoutFile char
+    --
+    delete dbo.op_char
+     where person_id = @t_popt_id
+       and char_type = @pr_dashboard_name
+       and char_type_qualifier = 'layoutFile'
+
+    --
+    -- delete the layoutFile ref entry
+    --
+    delete dbo.op_ref
+     where ref_table = @pr_dashboard_name
+       and ref_value = 'layoutFile'
+
+    --
+    -- add the ext dashboard ref entry
+    --
+    delete dbo.op_ref
+     where ref_table = 'ExtDashboards'
+       and ref_value = @pr_dashboard_name
+
   end
 
   --

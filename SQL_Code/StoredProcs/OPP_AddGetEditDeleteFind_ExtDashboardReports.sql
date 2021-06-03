@@ -13,11 +13,12 @@ Create Procedure dbo.OPP_AddGetEditDeleteFind_ExtDashboardReports
 
 @pr_session_id     int, 
 @pr_action         varchar(64),          -- Add|Get|Edit|Delete|Find
-@pr_report_name    varchar(64),
-@p_report_type     varchar(64),          -- ex. 'Dash' required on Add/Edit
+@pr_report_name    varchar(64),          -- ex. 'Report_Ext_MyNewReport' required on Add/Get/Edit/Delete
+@p_report_title    varchar(255),         -- ex. 'My New Report' required on Add
+@p_report_type     varchar(64),          -- ex. 'Dash' required on Add
 @p_report_layout   varchar(max),         -- required on Add/Edit
-@p_layout_type     varchar(64),          -- ex. 'application/json', content type of layout file; required on Add/Edit
-@p_layout_ext      varchar(6),           -- ex. 'json', layout filename extension; required on Add/Edit
+@p_layout_type     varchar(64),          -- ex. 'application/json', content type of layout file; required on Add
+@p_layout_ext      varchar(6),           -- ex. 'json', layout filename extension; required on Add
 @p_result_status   varchar(255)  output
  
 as
@@ -35,8 +36,8 @@ begin
   declare @t_ref_id int
   declare @t_ref_value varchar(64)
   declare @t_ref_desc varchar(255)
-  declare @t_report_ref varchar(64)
-  declare @t_report_char varchar(64)
+  --declare @t_report_ref varchar(64)
+  --declare @t_report_char varchar(64)
   declare @t_report_desc varchar(255)
   declare @t_parent_char_id int
   declare @t_char_id int
@@ -56,8 +57,8 @@ begin
     return
   end
 
-  set @t_report_ref = 'Report_Ext_' + replace(@pr_report_name, ' ', '')
-  set @t_report_char = @t_report_ref + 'Char'
+  --set @t_report_ref = 'Report_Ext_' + replace(@pr_report_name, ' ', '')
+  --set @t_report_char = @t_report_ref + 'Char'
 
   --
   -- get the person id from the session
@@ -72,9 +73,15 @@ begin
   if (@pr_action = 'Add')
   begin
 
+    if (isnull(@p_report_title, '') = '')
+    begin
+      set @p_result_status = @errPref + '030|report_title is required with an action of Add.'
+      return
+    end
+
     if (isnull(@p_report_type, '') = '')
     begin
-      set @p_result_status = @errPref + '003|report_type is required with an action of Add or Edit.'
+      set @p_result_status = @errPref + '003|report_type is required with an action of Add.'
       return
     end
 
@@ -86,13 +93,13 @@ begin
 
     if (isnull(@p_layout_type, '') = '')
     begin
-      set @p_result_status = @errPref + '013|layout_type is required with an action of Add or Edit.'
+      set @p_result_status = @errPref + '013|layout_type is required with an action of Add.'
       return
     end
 
     if (isnull(@p_layout_ext, '') = '')
     begin
-      set @p_result_status = @errPref + '014|layout_ext is required with an action of Add or Edit.'
+      set @p_result_status = @errPref + '014|layout_ext is required with an action of Add.'
       return
     end
 
@@ -102,7 +109,7 @@ begin
     if (exists (select top 1 1
                   from dbo.op_ref with (nolock)
                  where ref_table = 'ExtDashboardReports'
-                   and ref_value = @t_report_ref))
+                   and ref_value = @pr_report_name))
     begin
       set @p_result_status = @errPref + '022|Report already exists.'
       return
@@ -112,18 +119,19 @@ begin
     -- add the ext report ref entry
     --
     insert dbo.op_ref (ref_table, ref_value, [language], ref_desc)
-    values ('ExtDashboardReports', @t_report_ref, 'En', @pr_report_name)
+    values ('ExtDashboardReports', @pr_report_name, 'En', @p_report_title)
 
     --
     -- add the layoutFile ref entry
     --
     insert dbo.op_ref (ref_table, ref_value, [language], ref_desc)
-    values (@t_report_ref, 'layoutFile', 'En', @t_report_ref)
+    values (@pr_report_name, 'layoutFile', 'En', @pr_report_name)
 
     --
     -- add the layoutFile char
+    --
     insert dbo.op_char (person_id, char_type, char_type_qualifier, char_value_text)
-    values (@t_popt_id, @t_report_ref, 'layoutFile', @p_report_layout)
+    values (@t_popt_id, @pr_report_name, 'layoutFile', @p_report_layout)
 
   end
 
@@ -156,27 +164,9 @@ begin
   else if (@pr_action = 'Edit')
   begin
 
-    if (isnull(@p_report_type, '') = '')
-    begin
-      set @p_result_status = @errPref + '003|report_type is required with an action of Add or Edit.'
-      return
-    end
-
     if (isnull(@p_report_layout, '') = '')
     begin
       set @p_result_status = @errPref + '004|report_layout is required with an action of Add or Edit.'
-      return
-    end
-
-    if (isnull(@p_layout_type, '') = '')
-    begin
-      set @p_result_status = @errPref + '013|layout_type is required with an action of Add or Edit.'
-      return
-    end
-
-    if (isnull(@p_layout_ext, '') = '')
-    begin
-      set @p_result_status = @errPref + '014|layout_ext is required with an action of Add or Edit.'
       return
     end
 
@@ -184,12 +174,12 @@ begin
     set @t_char_id = (select char_id
                         from dbo.op_char with (nolock)
                        where person_id = @t_popt_id
-                         and char_type = @t_report_ref
+                         and char_type = @pr_report_name
                          and char_type_qualifier = 'layoutFile')
 
     if (@t_char_id is null)
     begin
-      set @p_result_status = @errPref + '016|report not found.'
+      set @p_result_status = @errPref + '016|report layout not found.'
       return
     end
 
@@ -211,9 +201,40 @@ begin
 
     -- for now, just super delete
 
+    --
+    -- check if the report exists in ref
+    --
+    if (not exists (select top 1 1
+                      from dbo.op_ref with (nolock)
+                     where ref_table = 'ExtDashboardReports'
+                       and ref_value = @pr_report_name))
+    begin
+      set @p_result_status = @errPref + '023|Report does not exist.'
+      return
+    end
 
-    set @p_result_status = @errPref + '|Delete not currently available.'
-    return
+    --
+    -- delete the layoutFile char
+    --
+    delete dbo.op_char
+     where person_id = @t_popt_id
+       and char_type = @pr_report_name
+       and char_type_qualifier = 'layoutFile'
+
+    --
+    -- delete the layoutFile ref entry
+    --
+    delete dbo.op_ref
+     where ref_table = @pr_report_name
+       and ref_value = 'layoutFile'
+
+    --
+    -- delete the ext report ref entry
+    --
+    delete dbo.op_ref
+     where ref_table = 'ExtDashboardReports'
+       and ref_value = @pr_report_name
+
   end
 
   --

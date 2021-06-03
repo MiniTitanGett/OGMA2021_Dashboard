@@ -310,7 +310,7 @@ for y in range(0, 4):
                 # saves the graph title and layout to the file where you are storing all of the saved layouts
                 # save_layout_to_file(saved_layouts)
                 # saves the graph layout to the database
-                save_layout_to_db(graph_title, layout_pointer)
+                save_layout_to_db(layout_pointer, graph_title)
 
                 save_error_tooltip = ''
                 save_symbol = 'fa fa-check'
@@ -325,7 +325,7 @@ for y in range(0, 4):
         else:
 
             if remove_layout != '':
-                delete_layout(remove_layout, saved_layouts)
+                delete_layout(remove_layout)
                 update_options_trigger = 'trigger'
                 delete_dropdown_val = ''
 
@@ -728,13 +728,13 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
                 save_layout_state(tile_pointer, {'Graph Type': graph_types[i], 'Args List': args_list, **tile_data,
                                                  'Title': tile_titles[i]})
                 # save_layout_to_file(saved_layouts)
-                save_layout_to_db(tile_titles[i], tile_pointer)
+                save_layout_to_db(tile_pointer, tile_titles[i])
 
             # save dashboard to file
             # Change to a dashboard pointer from dashboard_title
             save_dashboard_state(dashboard_pointer, dashboard_saves)
             # save_dashboard_to_file(saved_dashboards)
-            save_dashboard_to_db(dashboard_title, dashboard_pointer)
+            save_dashboard_to_db(dashboard_pointer, dashboard_title)
 
             save_error_tooltip = ''
             update_graph_options_trigger = 'trigger'
@@ -751,7 +751,7 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
     else:
 
         if remove_dashboard != '':
-            delete_dashboard(remove_dashboard, saved_dashboards)
+            delete_dashboard(remove_dashboard)
             update_graph_options_trigger = 'trigger'
             options = [{'label': saved_dashboards[key]["Dashboard Title"], 'value': key} for key in saved_dashboards]
             delete_dropdown_val = ''

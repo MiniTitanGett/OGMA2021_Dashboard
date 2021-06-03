@@ -1017,7 +1017,7 @@ def get_bar_graph_menu(tile, x, y, measure_type, df_name, df_const):
                 html.Div([
                     dcc.RadioItems(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
-                        options=[{'label': get_label(i), 'value': i} for i in ['LBL_Vertical', 'LBL_Horizontal']],
+                        options=[{'label': get_label('LBL_'+i), 'value': i} for i in ['Vertical', 'Horizontal']],
                         value='Vertical',
                         style={'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
@@ -1264,7 +1264,7 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                 html.Div([
                     dcc.RadioItems(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
-                        options=[{'label': get_label(i), 'value': i} for i in ['LBL_Vertical', 'LBL_Horizontal']],
+                        options=[{'label': get_label('LBL_'+i), 'value': i} for i in ['Vertical', 'Horizontal']],
                         value=graph_orientation,
                         style={'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),

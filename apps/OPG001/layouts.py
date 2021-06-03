@@ -16,7 +16,7 @@ import json
 
 # Internal Modules
 import config
-from server import get_conn
+from conn import get_conn
 # from apps.OPG001.app import app
 from apps.OPG001.data import GRAPH_OPTIONS, CLR, DATA_CONTENT_HIDE, VIEW_CONTENT_SHOW, BAR_X_AXIS_OPTIONS, \
     CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LAYOUT_CONTENT_HIDE, \
@@ -129,11 +129,35 @@ def get_data_set_picker(tile, df_name):
         html.H6(
             "{}:".format(get_label('LBL_Data_Set')),
             style={'color': CLR['text1'], 'margin-top': '25px', 'display': 'inline-block'}),
-        dcc.Dropdown(
-            id={'type': 'data-set', 'index': tile},
-            options=[{'label': i, 'value': i} for i in session['dataset_list']],
-            value=df_name,
-            clearable=False)]
+        html.Div([
+            dcc.Dropdown(
+                id={'type': 'data-set', 'index': tile},
+                options=[{'label': i, 'value': i} for i in session['dataset_list']],
+                value=df_name,
+                clearable=False,
+                style={'flex-grow': '1'}),
+            html.Div(
+                html.Div([
+                    html.I(
+                        html.Span(
+                            get_label("Refresh Data Set"),
+                            className='save-symbols-tooltip'),
+                        id={'type': 'confirm-load-data', 'index': tile},
+                        className='fa fa-check',
+                        style=DATA_CONTENT_HIDE),
+                    html.I(
+                        html.Span(
+                            get_label("Confirm Data Set Load"),
+                            className='save-symbols-tooltip'),
+                        id={'type': 'confirm-data-set-refresh', 'index': tile},
+                        className='fa fa-refresh',
+                        style=DATA_CONTENT_HIDE)],
+                    id='dataset-confirmation-symbols'),
+                style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
+                       'position': 'relative', 'vertical-align': 'top', 'background-color': 'white', 'width': '40px',
+                       'border': '1px solid {}'.format(CLR['lightgray']), 'border-radius': '6px'})],
+            style={'display': 'flex'})
+    ]
 
 
 # get DATA side-menu
@@ -214,7 +238,6 @@ def get_layout():
 
 
 def get_layout_graph(report_name):
-
     # if config.SESSIONLESS:
     #     return PreventUpdate
 
@@ -683,7 +706,7 @@ def get_tile(tile, tile_keys=None, df_const=None):
                                                   saved_layouts],
                                          style={'width': '400px', 'font-size': '13px'},
                                          value='',
-                                         placeholder='{}...'.format(get_label(LBL_Select')))
+                                         placeholder='{}...'.format(get_label('LBL_Select')))
                         ], style={'width': '400px'}),
                     html.Button(
                         id={'type': 'confirm-delete-button', 'index': tile},
@@ -876,7 +899,7 @@ def get_line_graph_menu(tile, x, y, measure_type, df_name, df_const):
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
                         options=[] if df_const is None else [{'label': get_label(i), 'value': i} for i in
-                                                               X_AXIS_OPTIONS],
+                                                             X_AXIS_OPTIONS],
                         value=x,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -892,7 +915,7 @@ def get_line_graph_menu(tile, x, y, measure_type, df_name, df_const):
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
                         options=[] if df_const is None else [{'label': i, 'value': i} for i in
-                                                               df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                                                             df_const[df_name]['MEASURE_TYPE_OPTIONS']],
                         clearable=False,
                         value=measure_type,
                         style={'font-size': '13px'})],
@@ -963,7 +986,7 @@ def get_bar_graph_menu(tile, x, y, measure_type, df_name, df_const):
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
                         options=[] if df_const is None else [{'label': i, 'value': i} for i in
-                                                               df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                                                             df_const[df_name]['MEASURE_TYPE_OPTIONS']],
                         value=measure_type,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -1053,7 +1076,7 @@ def get_scatter_graph_menu(tile, x, y, measure_type, df_name, df_const):
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
                         options=[] if df_const is None else [{'label': i, 'value': i} for i in
-                                                               df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                                                             df_const[df_name]['MEASURE_TYPE_OPTIONS']],
                         value=measure_type,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -1117,7 +1140,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
                         options=[] if df_const is None else [{'label': i, 'value': i} for i in
-                                                               df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                                                             df_const[df_name]['MEASURE_TYPE_OPTIONS']],
                         value=x_measure,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -1148,7 +1171,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
                         options=[] if df_const is None else [{'label': i, 'value': i} for i in
-                                                               df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                                                             df_const[df_name]['MEASURE_TYPE_OPTIONS']],
                         value=y_measure,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -1179,7 +1202,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
                         options=[] if df_const is None else [{'label': i, 'value': i} for i in
-                                                               df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                                                             df_const[df_name]['MEASURE_TYPE_OPTIONS']],
                         value=size_measure,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -1210,7 +1233,7 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
                         options=[] if df_const is None else [{'label': i, 'value': i} for i in
-                                                               df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                                                             df_const[df_name]['MEASURE_TYPE_OPTIONS']],
                         value=axis_measure,
                         clearable=False,
                         style={'font-size': '13px'})],

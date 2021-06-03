@@ -22,7 +22,6 @@ from apps.OPG001.app import app
 from apps.OPG001.data import get_label, saved_layouts, saved_dashboards, CLR
 from apps.OPG001.saving_functions import delete_layout, save_layout_state, save_layout_to_file, save_layout_to_db, \
     save_dashboard_state, save_dashboard_to_file, delete_dashboard, load_graph_menu
-from config import REPORT_POINTER_PREFIX, DASHBOARD_POINTER_PREFIX
 
 
 #   SAVING
@@ -33,6 +32,10 @@ from config import REPORT_POINTER_PREFIX, DASHBOARD_POINTER_PREFIX
 #       - _load_tile_layout()
 #       - _reset_selected_layout()
 
+# **********************************************GLOBAL VARIABLES*****************************************************
+
+REPORT_POINTER_PREFIX = 'Report_Ext_'
+DASHBOARD_POINTER_PREFIX = 'Dashboard_Ext_'
 
 # ************************************SHARED TILE LOADING/DASHBOARD SAVING*******************************************
 

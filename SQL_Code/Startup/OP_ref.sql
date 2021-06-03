@@ -2,12 +2,57 @@ USE [OGMA_Test]
 GO
 
 /****** Object:  Table [dbo].[OP_ref_insert]    Script Date: 2021-05-19 12:03:31 PM ******/
+CREATE PROC InsertOPRef(
+    @ref_table varchar(64),
+    @ref_value varchar(64),
+    @language varchar(20),
+    @ref_desc varchar(max))
+AS
+IF EXISTS(SELECT 'TRUE' FROM [dbo].[OP_Ref] WHERE @ref_table = ref_table,
+    @ref_value =ref_value,@language = language)
+    BEGIN
+    print('The Entry Already Exists Update Description')
+    UPDATE [dbo].[OP_Ref] SET ref_desc = @ref_desc WHERE @ref_table = ref_table,
+    @ref_value =ref_value,@language = language
+    END
+    GO
+ELSE
+    BEGIN
+    print('Entry added')
+    INSERT into [dbo].[OP_Ref] (ref_table,ref_value, language, ref_desc)
+    values (@ref_table,@ref_value,@language,@ref_desc)
+    END
+GO
 
 INSERT into [dbo].[OP_Ref] (ref_table,ref_value, language, ref_desc)
 values ('Data_set','OPG001.sql','En','OPG 001 Time Series Measures'),
-('Data_set','OPG001.sql','Fr','OPG 001 Mesures de Séries Chronologiques'),
-('Data_set','OPG010.sql','En','OPG010 SanKey Series'),
-('Data_set','OPG010.sql','Fr','Série SanKey'),
+('Data_set','OPG001','Fr','OPG 001 Mesures de Séries Chronologiques'),
+('Data_set','OPG010','En','OPG010 SanKey Series'),
+('Data_set','OPG010','Fr','Série SanKey'),
+('OPG010','LBL_H1','Fr','Niveau d''Organisation 1 (Haut)'),
+('OPG010','LBL_H1','En','Organization Level 1 (Top)'),
+('OPG010','LBL_H2','En','Organization Level 2'),
+('OPG010','LBL_H2','Fr','Niveau d''Organisation 2'),
+('OPG010','LBL_H3','En','Organization Level 3'),
+('OPG010','LBL_H3','Fr','Niveau d''Organisation 3'),
+('OPG010','LBL_H4','En','Organization Level 4'),
+('OPG010','LBL_H4','Fr','Niveau d''Organisation 4'),
+('OPG010','LBL_H5','En','Organization Level 5'),
+('OPG010','LBL_H5','Fr','Niveau d''Organisation 5'),
+('OPG010','LBL_H6','En','Organization'),
+('OPG010','LBL_H6','Fr','Organisation');
+('OPG001','LBL_H1','Fr','Niveau d''Organisation 1 (Haut)'),
+('OPG001','LBL_H1','En','Organization Level 1 (Top)'),
+('OPG001','LBL_H2','En','Organization Level 2'),
+('OPG001','LBL_H2','Fr','Niveau d''Organisation 2'),
+('OPG001','LBL_H3','En','Organization Level 3'),
+('OPG001','LBL_H3','Fr','Niveau d''Organisation 3'),
+('OPG001','LBL_H4','En','Organization Level 4'),
+('OPG001','LBL_H4','Fr','Niveau d''Organisation 4'),
+('OPG001','LBL_H5','En','Organization Level 5'),
+('OPG001','LBL_H5','Fr','Niveau d''Organisation 5'),
+('OPG001','LBL_H6','En','Organization'),
+('OPG001','LBL_H6','Fr','Organisation');
 ('Labels','LBL_Parameters','En','Parameters'),
 ('Labels','LBL_Parameters','Fr','Paramètres'),
 ('Labels','LBL_Graph','En','Graph'),
@@ -60,18 +105,6 @@ values ('Data_set','OPG001.sql','En','OPG 001 Time Series Measures'),
 ('Labels','LBL_Variable_Names','Fr','Noms de Variables'),
 ('Labels','LBL_Children','En','Children'),
 ('Labels','LBL_Children','Fr','Enfants'),
-('Labels','LBL_H1','Fr','Niveau d''Organisation 1 (Haut)'),
-('Labels','LBL_H1','En','Organization Level 1 (Top)'),
-('Labels','LBL_H2','En','Organization Level 2'),
-('Labels','LBL_H2','Fr','Niveau d''Organisation 2'),
-('Labels','LBL_H3','En','Organization Level 3'),
-('Labels','LBL_H3','Fr','Niveau d''Organisation 3'),
-('Labels','LBL_H4','En','Organization Level 4'),
-('Labels','LBL_H4','Fr','Niveau d''Organisation 4'),
-('Labels','LBL_H5','En','Organization Level 5'),
-('Labels','LBL_H5','Fr','Niveau d''Organisation 5'),
-('Labels','LBL_H6','En','Organization'),
-('Labels','LBL_H6','Fr','Organisation'),
 ('Labels','LBL_TRUE','En','TRUE'),
 ('Labels','LBL_TRUE','Fr','Vrai'),
 ('Labels','LBL_FALSE','En','FALSE'),
@@ -317,9 +350,10 @@ values ('Data_set','OPG001.sql','En','OPG 001 Time Series Measures'),
 ('Labels','LBL_End','Fr','Fr: Cpltd'),
 ('Labels','LBL_End_Long','En','Completed'),
 ('Labels','LBL_End_Long','Fr','Fr: Completed');
+GO
 
-
-go
+DROP PROC InsertOPRef
+GO
 ---when we update it from a space to underscore it gives key errors
 /*
 UPDATE [dbo].[OP_Ref]
@@ -340,7 +374,7 @@ ELSE
     Select * From [dbo].[OP_Ref]
 		END')
 	END
-    go
+    GO
 
 /*
 exec dbo.reftable

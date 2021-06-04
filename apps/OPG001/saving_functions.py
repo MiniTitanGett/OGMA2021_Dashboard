@@ -99,24 +99,28 @@ def save_dashboard_state(name, attributes):
 #             file.close()
 
 
-def save_layout_to_db(graph_title, graph_id):
+def save_layout_to_db(graph_id, graph_title):
 
     conn = get_conn()
     j = json.dumps(saved_layouts[graph_id], sort_keys=True)
 
     query = """\
     declare @p_result_status varchar(255)
-    exec dbo.opp_addgeteditdeletefind_extdashboardreports {}, \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\',
-    @p_result_status output
+    exec dbo.opp_addgeteditdeletefind_extdashboardreports {}, 'Add', \'{}\', \'{}\', 'Dash', \'{}\', 'application/json',
+    'json', @p_result_status output
     select @p_result_status as result_status
-    """.format(session['sessionID'], 'Add', graph_title, 'Dash', j, 'application/json', 'json')
+    """.format(session['sessionID'], graph_id, graph_title, j)
 
     cursor = conn.cursor()
     cursor.execute(query)
 
-    # results = cursor.fetchone()
+    results = cursor.fetchone()
 
-    # ignore result status for now
+    if results.result_status != 'OK':
+        cursor.close()
+        del cursor
+        logging.error(results.result_status)
+        return PreventUpdate
 
     cursor.close()
     del cursor
@@ -134,65 +138,85 @@ def save_layout_to_db(graph_title, graph_id):
 #         file.close()
 
 
-def save_dashboard_to_db(dashboard_title, dashboard_id):
+def save_dashboard_to_db(dashboard_id, dashboard_title):
 
     conn = get_conn()
     j = json.dumps(saved_dashboards[dashboard_id], sort_keys=True)
 
     query = """\
     declare @p_result_status varchar(255)
-    exec dbo.opp_addgeteditdeletefind_extdashboards {}, \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\',
-    @p_result_status output
+    exec dbo.opp_addgeteditdeletefind_extdashboards {}, 'Add', \'{}\', \'{}\', 'Dash', \'{}\', 'application/json',
+    'json', @p_result_status output
     select @p_result_status as result_status
-    """.format(session['sessionID'], 'Add', dashboard_title, 'Dash', j, 'application/json', 'json')
+    """.format(session['sessionID'], dashboard_id, dashboard_title, j)
 
     cursor = conn.cursor()
     cursor.execute(query)
 
-    # results = cursor.fetchone()
+    results = cursor.fetchone()
 
-    # ignore result status for now
+    if results.result_status != 'OK':
+        cursor.close()
+        del cursor
+        logging.error(results.result_status)
+        return PreventUpdate
 
     cursor.close()
     del cursor
 
 
-#  function for deleting line from text file
-def delete_layout(key, layouts):
-    """
-    removes selected layouts from the json file
-    :param key: the title of the graph, this is the key in the dictionary of saved layouts
-    :param layouts: the dictionary containing all of the saved layouts
-    """
-    # if os.stat('apps/OPG001/saved_layouts.json').st_size != 0:
-    #     with open('apps/OPG001/saved_layouts.json', 'r') as file:
-    #         saved_graphs_temp = json.load(file)
-    #         del saved_graphs_temp[key]
-    #         del layouts[key]
-    #         file.close()
-    #     with open('apps/OPG001/saved_layouts.json', 'w') as file:
-    #         j = json.dumps(saved_graphs_temp, sort_keys=True)
-    #         file.write(j)
-    #         file.close()
+def delete_layout(graph_id):
+
+    conn = get_conn()
+    query = """\
+    declare @p_result_status varchar(255)
+    exec dbo.opp_addgeteditdeletefind_extdashboardreports {}, 'Delete', \'{}\', null, null, null, null, null,
+    @p_result_status output
+    select @p_result_status as result_status
+    """.format(session['sessionID'], graph_id)
+
+    cursor = conn.cursor()
+    cursor.execute(query)
+
+    results = cursor.fetchone()
+
+    if results.result_status != 'OK':
+        cursor.close()
+        del cursor
+        logging.error(results.result_status)
+        return PreventUpdate
+
+    cursor.close()
+    del cursor
+
+    del saved_layouts[graph_id]
 
 
-#  function for deleting line from text file
-def delete_dashboard(key, dashboards):
-    """
-    removes selected dashboard from the json file
-    :param key: the title of the dashboard, this is the key in the dictionary of saved dashboards
-    :param dashboards: the dictionary containing all of the saved dashboards
-    """
-    # if os.stat('apps/OPG001/saved_dashboards.json').st_size != 0:
-    #     with open('apps/OPG001/saved_dashboards.json', 'r') as file:
-    #         saved_dashboards_temp = json.load(file)
-    #         del saved_dashboards_temp[key]
-    #         del dashboards[key]
-    #         file.close()
-    #     with open('apps/OPG001/saved_dashboards.json', 'w') as file:
-    #         j = json.dumps(saved_dashboards_temp, sort_keys=True)
-    #         file.write(j)
-    #         file.close()
+def delete_dashboard(dashboard_id):
+
+    conn = get_conn()
+    query = """\
+    declare @p_result_status varchar(255)
+    exec dbo.opp_addgeteditdeletefind_extdashboardrs {}, \'{}\', \'{}\', null, null, null, null, null,
+    @p_result_status output
+    select @p_result_status as result_status
+    """.format(session['sessionID'], 'Delete', dashboard_id)
+
+    cursor = conn.cursor()
+    cursor.execute(query)
+
+    results = cursor.fetchone()
+
+    if results.result_status != 'OK':
+        cursor.close()
+        del cursor
+        logging.error(results.result_status)
+        return PreventUpdate
+
+    cursor.close()
+    del cursor
+
+    del saved_dashboards[dashboard_id]
 
 
 def load_graph_menu(graph_type, tile, df_name, args_list, df_const):

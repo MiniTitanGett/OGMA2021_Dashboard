@@ -8,348 +8,310 @@ CREATE PROC InsertOPRef(
     @language varchar(20),
     @ref_desc varchar(max))
 AS
-IF EXISTS(SELECT 'TRUE' FROM [dbo].[OP_Ref] WHERE @ref_table = ref_table,
-    @ref_value =ref_value,@language = language)
+set nocount on
+IF EXISTS(SELECT 'TRUE' FROM [dbo].[OP_Ref] WHERE @ref_table = [dbo].[OP_Ref].ref_table AND @ref_value =[dbo].[OP_Ref].ref_value AND @language = [dbo].[OP_Ref].language)
     BEGIN
     print('The Entry Already Exists Update Description')
-    UPDATE [dbo].[OP_Ref] SET ref_desc = @ref_desc WHERE @ref_table = ref_table,
-    @ref_value =ref_value,@language = language
+    UPDATE [dbo].[OP_Ref] SET ref_desc = @ref_desc WHERE @ref_table = [dbo].[OP_Ref].ref_table AND
+    @ref_value =[dbo].[OP_Ref].ref_value AND @language = [dbo].[OP_Ref].language
     END
-    GO
+
 ELSE
-    BEGIN
+ BEGIN
     print('Entry added')
     INSERT into [dbo].[OP_Ref] (ref_table,ref_value, language, ref_desc)
     values (@ref_table,@ref_value,@language,@ref_desc)
-    END
+END
 GO
 
-INSERT into [dbo].[OP_Ref] (ref_table,ref_value, language, ref_desc)
-values ('Data_set','OPG001.sql','En','OPG 001 Time Series Measures'),
-('Data_set','OPG001','Fr','OPG 001 Mesures de Séries Chronologiques'),
-('Data_set','OPG010','En','OPG010 SanKey Series'),
-('Data_set','OPG010','Fr','Série SanKey'),
-('OPG010','LBL_H1','Fr','Niveau d''Organisation 1 (Haut)'),
-('OPG010','LBL_H1','En','Organization Level 1 (Top)'),
-('OPG010','LBL_H2','En','Organization Level 2'),
-('OPG010','LBL_H2','Fr','Niveau d''Organisation 2'),
-('OPG010','LBL_H3','En','Organization Level 3'),
-('OPG010','LBL_H3','Fr','Niveau d''Organisation 3'),
-('OPG010','LBL_H4','En','Organization Level 4'),
-('OPG010','LBL_H4','Fr','Niveau d''Organisation 4'),
-('OPG010','LBL_H5','En','Organization Level 5'),
-('OPG010','LBL_H5','Fr','Niveau d''Organisation 5'),
-('OPG010','LBL_H6','En','Organization'),
-('OPG010','LBL_H6','Fr','Organisation');
-('OPG001','LBL_H1','Fr','Niveau d''Organisation 1 (Haut)'),
-('OPG001','LBL_H1','En','Organization Level 1 (Top)'),
-('OPG001','LBL_H2','En','Organization Level 2'),
-('OPG001','LBL_H2','Fr','Niveau d''Organisation 2'),
-('OPG001','LBL_H3','En','Organization Level 3'),
-('OPG001','LBL_H3','Fr','Niveau d''Organisation 3'),
-('OPG001','LBL_H4','En','Organization Level 4'),
-('OPG001','LBL_H4','Fr','Niveau d''Organisation 4'),
-('OPG001','LBL_H5','En','Organization Level 5'),
-('OPG001','LBL_H5','Fr','Niveau d''Organisation 5'),
-('OPG001','LBL_H6','En','Organization'),
-('OPG001','LBL_H6','Fr','Organisation');
-('Labels','LBL_Parameters','En','Parameters'),
-('Labels','LBL_Parameters','Fr','Paramètres'),
-('Labels','LBL_Graph','En','Graph'),
-('Labels','LBL_Graph','Fr','Graphique'),
-('Labels','LBL_Graphing_App','En','Graphing App'),
-('Labels','LBL_Graphing_App','Fr','Application Graphique'),
-('Labels','LBL_Hierarchy','En','Hierarchy'),
-('Labels','LBL_Hierarchy','Fr','Hiérarchie'),
-('Labels','LBL_Level_Filter','En','Level Filter'),
-('Labels','LBL_Level_Filter','Fr','Filtre de Niveau'),
-('Labels','LBL_Specific_Item','En','Specific Item'),
-('Labels','LBL_Specific_Item','Fr','Article Spécifique'),
-('Labels','LBL_Select','En','Select'),
-('Labels','LBL_Select','Fr','Sélectionner'),
-('Labels','LBL_Timeframe','En','TimeFrame'),
-('Labels','LBL_Timeframe','Fr','Plage de Temps'),
-('Labels','LBL_Year','En','Year'),
-('Labels','LBL_Year','Fr','Année'),
-('Labels','LBL_Fiscal_Year','En','Fiscal Year'),
-('Labels','LBL_Fiscal_Year','Fr','Exercice fiscal'),
-('Labels','LBL_Month','En','Month'),
-('Labels','LBL_Month','Fr','Mois'),
-('Labels','LBL_Quarter','En','Quarter'),
-('Labels','LBL_Quarter','Fr','Trimestre'),
-('Labels','LBL_Graph_Type','En','Graph Type'),
-('Labels','LBL_Graph_Type','Fr','Type de Graphique'),
-('Labels','LBL_X_Axis','En','X-Axis'),
-('Labels','LBL_X_Axis','Fr','Axe X'),
-('Labels','LBL_Y_Axis','En','Y-Axis'),
-('Labels','LBL_Y_Axis','Fr','Axe Y'),
-('Labels','LBL_Line','En','Line'),
-('Labels','LBL_Line','Fr','Linéaire'),
-('Labels','LBL_Bar','En','Bar'),
-('Labels','LBL_Bar','Fr','Barres'),
-('Labels','LBL_Scatter','En','Scatter'),
-('Labels','LBL_Scatter','Fr','Dispersion'),
-('Labels','LBL_Partial_Period','En','Partial Period'),
-('Labels','LBL_Partial_Period','Fr','Période Partielle'),
-('Labels','LBL_Graph_Options','En','Graph Options'),
-('Labels','LBL_Graph_Options','Fr','Options de Graphique'),
-('Labels','LBL_Revert','En','Revert'),
-('Labels','LBL_Revert','Fr','Revenir'),
-('Labels','LBL_To_Top','En','To Top'),
-('Labels','LBL_To_Top','Fr','Au Début'),
-('Labels','LBL_Graph_All_In_Dropdown','En','Graph All in Dropdown'),
-('Labels','LBL_Graph_All_In_Dropdown','Fr','Graphique Tout dans la Liste Déroulante'),
-('Labels','LBL_Time','En','Time'),
-('Labels','LBL_Time','Fr','Temps'),
-('Labels','LBL_Variable_Names','En','Variable Names'),
-('Labels','LBL_Variable_Names','Fr','Noms de Variables'),
-('Labels','LBL_Children','En','Children'),
-('Labels','LBL_Children','Fr','Enfants'),
-('Labels','LBL_TRUE','En','TRUE'),
-('Labels','LBL_TRUE','Fr','Vrai'),
-('Labels','LBL_FALSE','En','FALSE'),
-('Labels','LBL_FALSE','Fr','Faux'),
-('Labels','LBL_New','En','New'),
-('Labels','LBL_New','Fr','Nouveau'),
-('Labels','LBL_View','En','View'),
-('Labels','LBL_View','Fr','Vue'),
-('Labels','LBL_Data','En','Data'),
-('Labels','LBL_Data','Fr','Données'),
-('Labels','LBL_Customize','En','Customize'),
-('Labels','LBL_Customize','Fr','Personnaliser'),
-('Labels','LBL_Enter_Graph_Title','En','Enter Graph Title'),
-('Labels','LBL_Enter_Graph_Title','Fr','Entrez le Titre du Graphique'),
-('Labels','LBL_Hierarchy_Selection''s_Children','En','Hierarchy Selection''s Children'),
-('Labels','LBL_Hierarchy_Selection''s_Children','Fr','Enfants de la Sélection de Hiérarchie'),
-('Labels','LBL_Table','En','Table'),
-('Labels','LBL_Table','Fr','Tableau'),
-('Labels','LBL_Hierarchy_One_Name','En','Hierarchy One Name'),
-('Labels','LBL_Hierarchy_One_Name','Fr','Hiérarchie un Nom'),
-('Labels','LBL_Variable_Name','En','Document Type'),
-('Labels','LBL_Variable_Name','Fr','Nom de Variable'),
-('Labels','LBL_Variable_Name_Qualifier','En','Document Type Qualifier'),
-('Labels','LBL_Variable_Name_Qualifier','Fr','Qualificateur de Nom de Variable'),
-('Labels','LBL_Variable_Name_Sub_Qualifier','En','Document Type Sub Qualifier'),
-('Labels','LBL_Variable_Name_Sub_Qualifier','Fr','Sous-Qualificateur de Nom de Variable'),
-('Labels','LBL_Date_Of_Event','En','Date of Event'),
-('Labels','LBL_Date_Of_Event','Fr','Date de l''évènement'),
-('Labels','LBL_Calendar_Entry_Type','En','Calendar Entry Type'),
-('Labels','LBL_Calendar_Entry_Type','Fr','Type d''entrée d''Agenda'),
-('Labels','LBL_Year_Of_Event','En','Year of Event'),
-('Labels','LBL_Year_Of_Event','Fr','Année de l''événement'),
-('Labels','LBL_Month_Of_Event','En','Month of Event'),
-('Labels','LBL_Month_Of_Event','Fr','Mois de l''événement'),
-('Labels','LBL_Week_Of_Event','En','Week of Event'),
-('Labels','LBL_Week_Of_Event','Fr','Semaine d''événement'),
-('Labels','LBL_Fiscal_Year_Of_Event','En','Fiscal Year of Event'),
-('Labels','LBL_Fiscal_Year_Of_Event','Fr','Année Financière de l''événement'),
-('Labels','LBL_Fiscal_Quarter','En','Fiscal Quarter'),
-('Labels','LBL_Fiscal_Quarter','Fr','Trimestre Fiscal'),
-('Labels','LBL_Fiscal_Month_Of_Event','En','Fiscal Month of Event'),
-('Labels','LBL_Fiscal_Month_Of_Event','Fr','Mois Fiscal de l''événement'),
-('Labels','LBL_Fiscal_Week_Of_Event','En','Fiscal Week of Event'),
-('Labels','LBL_Fiscal_Week_Of_Event','Fr','Semaine Fiscale de l''événement'),
-('Labels','LBL_Julian_Day','En','Julian Day'),
-('Labels','LBL_Julian_Day','Fr','Julian Day'),
-('Labels','LBL_Activity_Event_Id','En','Activity Event Id'),
-('Labels','LBL_Activity_Event_Id','Fr','ID d''événement d''Activité'),
-('Labels','LBL_Measure_Value','En','Measure Value'),
-('Labels','LBL_Measure_Value','Fr','Mesurer la Valeur'),
-('Labels','LBL_Measure_Type','En','Measure Type'),
-('Labels','LBL_Measure_Type','Fr','Type de Mesure'),
-('Labels','LBL_Toggle_Columns','En','Toggle Columns'),
-('Labels','LBL_Toggle_Columns','Fr','Basculer les Colonnes'),
-('Labels','LBL_Box_Plot','En','Box Plot'),
-('Labels','LBL_Box_Plot','Fr','Boîte à Moustaches'),
-('Labels','LBL_Show_Data_Points','En','Show Data Points'),
-('Labels','LBL_Show_Data_Points','Fr','Afficher les Points de Données'),
-('Labels','LBL_Horizontal','En','Horizontal'),
-('Labels','LBL_Horizontal','Fr','Horizontal'),
-('Labels','LBL_Vertical','En','Vertical'),
-('Labels','LBL_Vertical','Fr','Vertical'),
-('Labels','LBL_Graphed_Variables','En','Graphed Variables'),
-('Labels','LBL_Graphed_Variables','Fr','Variables Graphiques'),
-('Labels','LBL_Median','En','Median'),
-('Labels','LBL_Median','Fr','Médiane'),
-('Labels','LBL_Min','En','Min'),
-('Labels','LBL_Min','Fr','Min'),
-('Labels','LBL_Max','En','Max'),
-('Labels','LBL_Max','Fr','Max'),
-('Labels','LBL_Distribution','En','Distribution'),
-('Labels','LBL_Distribution','Fr','Distribution'),
-('Labels','LBL_Calendar_Type','En','Calendar Type'),
-('Labels','LBL_Calendar_Type','Fr','Type de Calendrier'),
-('Labels','LBL_Gregorian','En','Gregorian'),
-('Labels','LBL_Gregorian','Fr','Grégorien'),
-('Labels','LBL_Fiscal','En','Fiscal'),
-('Labels','LBL_Fiscal','Fr','Fiscal'),
-('Labels','LBL_All_Time_Monthly','En','All-Time (Monthly)'),
-('Labels','LBL_All_Time_Monthly','Fr','Tous les Temps (Mensuel)'),
-('Labels','LBL_Last','En','Last'),
-('Labels','LBL_Last','Fr','Dernière'),
-('Labels','LBL_Select_Range','En','Select Range'),
-('Labels','LBL_Select_Range','Fr','Sélectionnez la Gamme'),
-('Labels','LBL_Years','En','Year(s)'),
-('Labels','LBL_Years','Fr','Année(s)'),
-('Labels','LBL_Months','En','Month(s)'),
-('Labels','LBL_Months','Fr','Mois'),
-('Labels','LBL_Quarters','En','Quarter(s)'),
-('Labels','LBL_Quarters','Fr','Trimestre(s)'),
-('Labels','LBL_Weeks','En','Week(s)'),
-('Labels','LBL_Weeks','Fr','Semaine(s)'),
-('Labels','LBL_Available','En','Available'),
-('Labels','LBL_Available','Fr','Valide'),
-('Labels','LBL_Week','En','Week'),
-('Labels','LBL_Week','Fr','Semaine'),
-('Labels','LBL_Root''s_Children','En','Root''s Children'),
-('Labels','LBL_Root''s_Children','Fr','Les Enfants de Root'),
-('Labels','LBL_Back','En','Back'),
-('Labels','LBL_Back','Fr','Arrière'),
-('Labels','LBL_Top','En','Top'),
-('Labels','LBL_Top','Fr','Haut'),
-('Labels','LBL_Axis_Measure','En','Axis Measure'),
-('Labels','LBL_Axis_Measure','Fr','Mesure d''Axe'),
-('Labels','LBL_Graph_Orientation','En','Graph Orientation'),
-('Labels','LBL_Graph_Orientation','Fr','Orientation du Graphique'),
-('Labels','LBL_Num_Of_Rows','En','# of Rows'),
-('Labels','LBL_Num_Of_Rows','Fr','# de Ros'),
-('Labels','LBL_How_To_Filter_The_Table','En','How to Filter the Table'),
-('Labels','LBL_How_To_Filter_The_Table','Fr','Comment Filtrer le Tableau'),
-('Labels','LBL_How_To_Hide_Columns','En','How to Hide Columns'),
-('Labels','LBL_How_To_Hide_Columns','Fr','Comment Masquer les Colonnes'),
-('Labels','LBL_Date','En','Date'),
-('Labels','LBL_Date','Fr','Date'),
-('Labels','LBL_Root','En','Root'),
-('Labels','LBL_Root','Fr','l'' Origine'),
-('Labels','LBL_Group_By','En','Group By'),
-('Labels','LBL_Group_By','Fr','Par Groupe'),
-('Labels','LBL_Children_Of','En','Children of'),
-('Labels','LBL_Children_Of','Fr','Les Enfants de'),
-('Labels','LBL_Tab','En','Tab'),
-('Labels','LBL_Tab','Fr','Onglet'),
-('Labels','LBL_Graphs','En','Graphs'),
-('Labels','LBL_Graphs','Fr','Graphiques'),
-('Labels','LBL_Save_The_Graph','En','Save the graph:'),
-('Labels','LBL_Save_The_Graph','Fr','Enregistrer le graphique:'),
-('Labels','LBL_Select_A_saved_Graph','En','Select a saved graph:'),
-('Labels','LBL_Select_A_saved_Graph','Fr','Sélectionnez un graphique enregistré:'),
-('Labels','LBL_Delete_A_saved_Graph','En','Delete a saved graph:'),
-('Labels','LBL_Delete_A_saved_Graph','Fr','Supprimer un graphique enregistré:'),
-('Labels','LBL_Save_Graph','En','Save Graph'),
-('Labels','LBL_Save_Graph','Fr','Enregistrer le graphique'),
-('Labels','LBL_Confirm_Delete','En','Confirm Delete'),
-('Labels','LBL_Confirm_Delete','Fr','Confirmation de la Suppression'),
-('Labels','LBL_Enter_Dashboard_Title','En','Enter Dashboard Title'),
-('Labels','LBL_Enter_Dashboard_Title','Fr','Entrez le titre du tableau de bord'),
-('Labels','LBL_Save_Dashboard','En','Save Dashboard'),
-('Labels','LBL_Save_Dashboard','Fr','Enregistrez le tableau de bord'),
-('Labels','LBL_Delete_A_Saved_Dashboard','En','Delete a saved dashboard'),
-('Labels','LBL_Delete_A_Saved_Dashboard','Fr','Supprimer un tableau de bord enregistré'),
-('Labels','LBL_Dashboards_Require_A_Title_To_Be_Saved','En','Dashboards require a title to be saved'),
-('Labels','LBL_Dashboards_Require_A_Title_To_Be_Saved','Fr','Les tableaux de bord nécessitent un titre pour être enregistrés'),
-('Labels','LBL_Graph_All_Siblings','En','Graph All Siblings'),
-('Labels','LBL_Graph_All_Siblings','Fr','Graphique de Tous les fratries'),
-('Labels','LBL_No_Data_Found','En','No Data Found'),
-('Labels','LBL_No_Data_Found','Fr','Aucune Donnée Disponible'),
-('Labels','LBL_No_Data_Specified','En','No Data Specified'),
-('Labels','LBL_No_Data_Specified','Fr','Aucune Donnée Spécifiée'),
-('Labels','LBL_Data_Accessed_On','En','Data Accessed on'),
-('Labels','LBL_Data_Accessed_On','Fr','Données Consultées le '),
-('Labels','LBL_Data_Set','En','Data Set'),
-('Labels','LBL_Data_Set','Fr','Base de Données'),
-('Labels','LBL_Graphs_Require_A_Title_To_Be_Saved','En','Graphs require a title to be saved'),
-('Labels','LBL_Graphs_Require_A_Title_To_Be_Saved','Fr','Les graphiques nécessitent un titre pour être enregistrés'),
-('Labels','LBL_The_Graph_Has_Been_Saved','En','The graph has been saved'),
-('Labels','LBL_The_Graph_Has_Been_Saved','Fr','Le graphique a été enregistré'),
-('Labels','LBL_A_Saved_Graph_With_This_Title_Already_Exists','En','A saved graph with this title already exists'),
-('Labels','LBL_A_Saved_Graph_With_This_Title_Already_Exists','Fr','Un graphique enregistré avec ce titre existe déjà'),
-('Labels','LBL_The_Dashboard_Has_Been_Saved','En','The dashboard has been saved'),
-('Labels','LBL_The_Dashboard_Has_Been_Saved','Fr','Le tableau de bord a été enregistré'),
-('Labels','LBL_Dashboard_Must_Not_Be_Empty','En','Dashboard must not be empty'),
-('Labels','LBL_Dashboard_Must_Not_Be_Empty','Fr','Le tableau de bord ne doit pas être vide'),
-('Labels','LBL_A_Saved_Dashboard_With_This_Title_Already_Exists','En','A saved dashboard with this title already exists'),
-('Labels','LBL_A_Saved_Dashboard_With_This_Title_Already_Exists','Fr','Un tableau de bord enregistré avec ce titre existe déjà'),
-('Labels','LBL_Saved_Graphs_Already_Exist_For','En','Saved graphs already exist for'),
-('Labels','LBL_Saved_Graphs_Already_Exist_For','Fr','Des graphiques enregistrés existent déjà pour'),
-('Labels','LBL_Select_A_Saved_Dashboard','En','Select a saved dashboard'),
-('Labels','LBL_Select_A_Saved_Dashboard','Fr','Sélectionnez un tableau de bord enregistré'),
-('Labels','LBL_Cancel_Save_Attempt','En','Cancel save attempt'),
-('Labels','LBL_Cancel_Save_Attempt','Fr','Annuler la tentative de sauvegarde'),
-('Labels','LBL_Overwrite_Dashboard','En','Overwrite dashboard'),
-('Labels','LBL_Overwrite_Dashboard','Fr','Écraser le tableau de bord'),
-('Labels','LBL_And_The_Graph','En','and the graph'),
-('Labels','LBL_And_The_Graph','Fr','et le graphique'),
-('Labels','LBL_And_The_Graphs','En','and the graphs'),
-('Labels','LBL_And_The_Graphs','Fr','et les graphiques'),
-('Labels','LBL_Overwrite_Graph','En','Overwrite graph'),
-('Labels','LBL_Overwrite_Graph','Fr','Écraser le graphique'),
-('Labels','LBL_Overwrite_Graphs','En','Overwrite graphs'),
-('Labels','LBL_Overwrite_Graphs','Fr','Écraser les graphiques'),
-('Labels','LBL_Reset_dashboard_All_Unsaved_Changes_Will_Be_Lost','En','Reset dashboard - all unsaved changes will be lost'),
-('Labels','LBL_Reset_dashboard_All_Unsaved_Changes_Will_Be_Lost','Fr','Réinitialiser le tableau de bord - toutes les modifications non enregistrées seront perdues'),
-('Labels','LBL_Cancel_Reset_Attempt','En','Cancel reset attempt'),
-('Labels','LBL_Cancel_Reset_Attempt','Fr','Annuler la tentative de réinitialisation'),
-('Labels','LBL_Sankey','En','Sankey'),
-('Labels','LBL_Sankey','Fr','Fr: Sankey'),
-('Labels','LBL_In6','En','150+'),
-('Labels','LBL_In5','En','121-150'),
-('Labels','LBL_In4','En','91-120'),
-('Labels','LBL_In3','En','61-90'),
-('Labels','LBL_In2','En','31-60'),
-('Labels','LBL_In1','En','LT 31'),
-('Labels','LBL_End6','En','Cpltd 150+'),
-('Labels','LBL_End5','En','Cpltd 121-150'),
-('Labels','LBL_End4','En','Cpltd 91-120'),
-('Labels','LBL_End3','En','Cpltd 61-90'),
-('Labels','LBL_End2','En','Cpltd 31-60'),
-('Labels','LBL_End1','En','Cpltd LT 31'),
-('Labels','LBL_Out6','En','Cont 150+'),
-('Labels','LBL_Out5','En','Cont 121-150'),
-('Labels','LBL_Out4','En','Cont 91-120'),
-('Labels','LBL_Out3','En','Cont 61-90'),
-('Labels','LBL_Out2','En','Cont 31-60'),
-('Labels','LBL_Out1','En','Cont LT 31'),
-('Labels','LBL_In6_Long','En','Outstanding > 150 days'),
-('Labels','LBL_In6_Long','Fr','Fr: Outstanding > 150 days'),
-('Labels','LBL_In5_Long','En','Outstanding 121 - 150 days'),
-('Labels','LBL_In5_Long','Fr','Fr: Outstanding 121 - 150 days'),
-('Labels','LBL_In4_Long','En','Outstanding 91 - 120 days'),
-('Labels','LBL_In4_Long','Fr','Fr: Outstanding 91 - 120 days'),
-('Labels','LBL_In3_Long','En','Outstanding 61 - 90 days'),
-('Labels','LBL_In3_Long','Fr','Fr: Outstanding 61 - 90 days'),
-('Labels','LBL_In2_Long','En','Outstanding 31 - 60 days'),
-('Labels','LBL_In2_Long','Fr','Fr: Outstanding 31 - 60 days'),
-('Labels','LBL_In1_Long','En','Outstanding < 31 days'),
-('Labels','LBL_In1_Long','Fr','Fr: Outstanding < 31 days'),
-('Labels','LBL_End6_Long','En','Completed > 150 days'),
-('Labels','LBL_End6_Long','Fr','Fr: Completed > 150 days'),
-('Labels','LBL_End5_Long','En','Completed 121 - 150 days'),
-('Labels','LBL_End5_Long','Fr','Fr: Completed 121 - 150 days'),
-('Labels','LBL_End4_Long','Fr','Fr: Completed 91 - 120 days'),
-('Labels','LBL_End3_Long','En','Completed 61 - 90 days'),
-('Labels','LBL_End3_Long','Fr','Fr: Completed 61 - 90 days'),
-('Labels','LBL_End2_Long','En','Completed 31 - 60 days'),
-('Labels','LBL_End2_Long','Fr','Fr: Completed 31 - 60 days'),
-('Labels','LBL_End1_Long','En','Completed < 31 days'),
-('Labels','LBL_End1_Long','Fr','Fr: Completed < 31 days'),
-('Labels','LBL_New_Long','En','New in last 30 days'),
-('Labels','LBL_New_Long','Fr','Fr: New in last 30 days'),
-('Labels','LBL_Out6_Long','En','Continued In-Process > 150 days'),
-('Labels','LBL_Out6_Long','Fr','Fr: Continued In-Process > 150 days'),
-('Labels','LBL_Out5_Long','En','Continued In-Process 121 - 150 days'),
-('Labels','LBL_Out5_Long','Fr','Fr: Continued In-Process 121 - 150 days'),
-('Labels','LBL_Out4_Long','En','Continued In-Process 91 - 120 days'),
-('Labels','LBL_Out4_Long','Fr','Fr: Continued In-Process 91 - 120 days'),
-('Labels','LBL_Out3_Long','En','Continued In-Process 61 - 90 days'),
-('Labels','LBL_Out3_Long','Fr','Fr: Continued In-Process 61 - 90 days'),
-('Labels','LBL_Out2_Long','En','Continued In-Process 31 - 60 days'),
-('Labels','LBL_Out2_Long','Fr','Fr: Continued In-Process 31 - 60 days'),
-('Labels','LBL_Out1_Long','En','Continued In-Process < 31 days'),
-('Labels','LBL_Out1_Long','Fr','Fr: Continued In-Process < 31 days'),
-('Labels','LBL_End','En','Cpltd'),
-('Labels','LBL_End','Fr','Fr: Cpltd'),
-('Labels','LBL_End_Long','En','Completed'),
-('Labels','LBL_End_Long','Fr','Fr: Completed');
+
+EXEC InsertOPRef @ref_table = 'OPG010', @ref_value = 'LBL_H1', @language = 'Fr', @ref_desc = 'Niveau d''Organisation 1 (Haut)'
+EXEC InsertOPRef @ref_table = 'OPG010', @ref_value = 'LBL_H1', @language = 'En', @ref_desc = 'Organization Level 1 (Top)'
+EXEC InsertOPRef @ref_table = 'OPG010', @ref_value = 'LBL_H2', @language = 'En', @ref_desc = 'Organization Level 2'
+EXEC InsertOPRef @ref_table = 'OPG010', @ref_value = 'LBL_H2', @language = 'Fr', @ref_desc = 'Niveau d''Organisation 2'
+EXEC InsertOPRef @ref_table = 'OPG010', @ref_value = 'LBL_H3', @language = 'En', @ref_desc = 'Organization Level 3'
+EXEC InsertOPRef @ref_table = 'OPG010', @ref_value = 'LBL_H3', @language = 'Fr', @ref_desc = 'Niveau d''Organisation 3'
+EXEC InsertOPRef @ref_table = 'OPG010', @ref_value = 'LBL_H4', @language = 'En', @ref_desc = 'Organization Level 4'
+EXEC InsertOPRef @ref_table = 'OPG010', @ref_value = 'LBL_H4', @language = 'Fr', @ref_desc = 'Niveau d''Organisation 4'
+EXEC InsertOPRef @ref_table = 'OPG010', @ref_value = 'LBL_H5', @language = 'En', @ref_desc = 'Organization Level 5'
+EXEC InsertOPRef @ref_table = 'OPG010', @ref_value = 'LBL_H5', @language = 'Fr', @ref_desc = 'Niveau d''Organisation 5'
+EXEC InsertOPRef @ref_table = 'OPG010', @ref_value = 'LBL_H6', @language = 'En', @ref_desc = 'Organization'
+EXEC InsertOPRef @ref_table = 'OPG010', @ref_value = 'LBL_H6', @language = 'Fr', @ref_desc = 'Organisation'
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_H1', @language = 'Fr', @ref_desc = 'Niveau d''Organisation 1 (Haut)'
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_H1', @language = 'En', @ref_desc = 'Organization Level 1 (Top)'
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_H2', @language = 'En', @ref_desc = 'Organization Level 2'
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_H2', @language = 'Fr', @ref_desc = 'Niveau d''Organisation 2'
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_H3', @language = 'En', @ref_desc = 'Organization Level 3'
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_H3', @language = 'Fr', @ref_desc = 'Niveau d''Organisation 3'
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_H4', @language = 'En', @ref_desc = 'Organization Level 4'
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_H4', @language = 'Fr', @ref_desc = 'Niveau d''Organisation 4'
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_H5', @language = 'En', @ref_desc = 'Organization Level 5'
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_H5', @language = 'Fr', @ref_desc = 'Niveau d''Organisation 5'
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_H6', @language = 'En', @ref_desc = 'Organization'
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_H6', @language = 'Fr', @ref_desc = 'Organisation'
+EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG001', @language = 'En', @ref_desc = 'OPG 001 Time Series Measures'
+EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG001', @language = 'Fr', @ref_desc = 'OPG 001 Mesures de Séries Chronologiques'
+EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG010', @language = 'En', @ref_desc = 'OPG010 SanKey Series'
+EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG010', @language = 'Fr', @ref_desc = 'Série SanKey'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Parameters', @language = 'En', @ref_desc = 'Parameters'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Parameters',@language = 'Fr', @ref_desc = 'Paramètres'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graph', @language = 'En', @ref_desc = 'Graph'
+EXEC InsertOPRef @ref_table  = 'Labels', @ref_value = 'LBL_Graph', @language = 'Fr', @ref_desc = 'Graphique'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graphing_App', @language = 'En', @ref_desc = 'Graphing App'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graphing_App', @language = 'Fr', @ref_desc = 'Application Graphique'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy', @language = 'En', @ref_desc = 'Hierarchy'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy', @language = 'Fr', @ref_desc = 'Hiérarchie'
+Exec InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Level_Filter', @language = 'En', @ref_desc = 'Level Filter'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Level_Filter', @language = 'Fr', @ref_desc = 'Filtre de Niveau'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Specific_Item', @language = 'En', @ref_desc = 'Specific Item'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Specific_Item', @language = 'Fr', @ref_desc = 'Article Spécifique'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Select', @language = 'En', @ref_desc = 'Select'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Select', @language = 'Fr', @ref_desc = 'Sélectionner'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Timeframe', @language = 'En', @ref_desc = 'TimeFrame'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Timeframe', @language = 'Fr', @ref_desc = 'Plage de Temps'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Year', @language = 'En', @ref_desc = 'Year'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Year', @language = 'Fr', @ref_desc = 'Année'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Fiscal_Year',@language = 'En', @ref_desc = 'Fiscal Year'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Fiscal_Year', @language = 'Fr', @ref_desc = 'Exercice fiscal'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Month', @language = 'En', @ref_desc = 'Month'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Month', @language = 'Fr', @ref_desc = 'Mois'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Quarter', @language = 'En', @ref_desc = 'Quarter'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Quarter', @language = 'Fr', @ref_desc = 'Trimestre'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graph_Type', @language = 'En', @ref_desc = 'Graph Type'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graph_Type', @language = 'Fr', @ref_desc = 'Type de Graphique'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Y_Axis', @language = 'En', @ref_desc = 'Y-Axis'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Y_Axis', @language = 'Fr', @ref_desc = 'Axe Y'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Line', @language = 'En', @ref_desc = 'Line'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Line', @language = 'Fr', @ref_desc = 'Linéaire'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Bar', @language = 'En', @ref_desc = 'Bar'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Bar', @language = 'Fr', @ref_desc = 'Barres'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Scatter', @language = 'En', @ref_desc = 'Scatter'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Scatter', @language = 'Fr', @ref_desc = 'Dispersion'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Partial_Period', @language = 'En', @ref_desc = 'Partial Period'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Partial_Period', @language = 'Fr', @ref_desc = 'Période Partielle'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graph_Options', @language = 'En', @ref_desc = 'Graph Options'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graph_Options', @language = 'Fr', @ref_desc = 'Options de Graphique'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Revert', @language = 'En', @ref_desc = 'Revert'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Revert', @language = 'Fr', @ref_desc = 'Revenir'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_To_Top', @language = 'En', @ref_desc = 'To Top'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_To_Top', @language = 'Fr', @ref_desc = 'Au Début'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graph_All_In_Dropdown', @language = 'En', @ref_desc = 'Graph All in Dropdown'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graph_All_In_Dropdown', @language = 'Fr', @ref_desc = 'Graphique Tout dans la Liste Déroulante'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Time', @language = 'En', @ref_desc = 'Time'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Time',@language = 'Fr', @ref_desc = 'Temps'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Variable_Names', @language = 'Fr', @ref_desc = 'Variable Names'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Variable_Names', @language = 'Fr', @ref_desc = 'Noms de Variables'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Children', @language = 'En', @ref_desc = 'Children'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Children', @language = 'Fr', @ref_desc = 'Enfants'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_TRUE',@language = 'En', @ref_desc = 'TRUE'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_TRUE',@language = 'Fr', @ref_desc = 'Vrai'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_FALSE',@language = 'En', @ref_desc = 'FALSE'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_FALSE',@language = 'Fr', @ref_desc = 'Faux'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_New',@language = 'En', @ref_desc = 'New'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_New',@language = 'Fr', @ref_desc = 'Nouveau'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_View',@language = 'En', @ref_desc = 'View'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_View',@language = 'Fr', @ref_desc = 'Vue'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Data',@language = 'En', @ref_desc = 'Data'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Data',@language = 'Fr', @ref_desc = 'Données'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Customize',@language = 'En', @ref_desc = 'Customize'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Customize',@language = 'Fr', @ref_desc = 'Personnaliser'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Enter_Graph_Title',@language = 'En', @ref_desc = 'Enter Graph Title'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Enter_Graph_Title',@language = 'Fr', @ref_desc = 'Entrez le Titre du Graphique'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'En',@ref_desc = 'Hierarchy Selection''s Children'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'Fr',@ref_desc = 'Enfants de la Sélection de Hiérarchie'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Table',@language = 'En', @ref_desc = 'Table'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Table',@language = 'Fr', @ref_desc = 'Tableau'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_One_Name',@language = 'En', @ref_desc = 'Hierarchy One Name'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_One_Name',@language = 'Fr', @ref_desc = 'Hiérarchie un Nom'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Variable_Name',@language = 'En', @ref_desc = 'Variable Name'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Variable_Name',@language = 'Fr', @ref_desc = 'Nom de Variable'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Variable_Name_Qualifier',@language = 'En', @ref_desc = 'Document Type Qualifier'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Variable_Name_Qualifier',@language = 'Fr', @ref_desc = 'Qualificateur de Nom de Variable'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Variable_Name_Sub_Qualifier',@language = 'En', @ref_desc = 'Document Type Sub Qualifier'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Variable_Name_Sub_Qualifier',@language = 'Fr', @ref_desc = 'Sous-Qualificateur de Nom de Variable'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Date_Of_Event',@language = 'En', @ref_desc = 'Date of Event'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Date_Of_Event',@language = 'Fr', @ref_desc = 'Date de l''évènement'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Calendar_Entry_Type',@language = 'En', @ref_desc = 'Calendar Entry Type'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Calendar_Entry_Type',@language = 'Fr', @ref_desc = 'Type d''entrée d''Agenda'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Year_Of_Event',@language = 'En', @ref_desc = 'Year of Event'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Year_Of_Event',@language = 'Fr', @ref_desc = 'Année de l''événement'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Month_Of_Event',@language = 'En', @ref_desc = 'Month of Event'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Month_Of_Event',@language = 'Fr', @ref_desc = 'Mois de l''événement'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Week_Of_Event',@language = 'En', @ref_desc = 'Week of Event'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Week_Of_Event',@language = 'Fr', @ref_desc = 'Semaine d''événement'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Fiscal_Year_Of_Event',@language = 'En', @ref_desc = 'Fiscal Year of Event'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Fiscal_Year_Of_Event',@language = 'Fr', @ref_desc = 'Année Financière de l''événement'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Fiscal_Quarter',@language = 'En', @ref_desc = 'Fiscal Quarter'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Fiscal_Quarter',@language = 'Fr', @ref_desc = 'Trimestre Fiscal'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Fiscal_Month_Of_Event',@language = 'En', @ref_desc = 'Fiscal Month of Event'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Fiscal_Month_Of_Event',@language = 'Fr', @ref_desc = 'Mois Fiscal de l''événement'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Fiscal_Week_Of_Event',@language = 'En', @ref_desc = 'Fiscal Week of Event'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Fiscal_Week_Of_Event',@language = 'Fr', @ref_desc = 'Semaine Fiscale de l''événement'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Julian_Day',@language = 'En', @ref_desc = 'Julian Day'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Julian_Day',@language = 'Fr', @ref_desc = 'Julian Day'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Activity_Event_Id',@language = 'En', @ref_desc = 'Activity Event Id'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Activity_Event_Id',@language = 'Fr', @ref_desc = 'ID d''événement d''Activité'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Measure_Value',@language = 'En', @ref_desc = 'Measure Value'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Measure_Value',@language = 'Fr', @ref_desc = 'Mesurer la Valeur'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Measure_Type',@language = 'En', @ref_desc = 'Measure Type'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Measure_Type',@language = 'Fr', @ref_desc = 'Type de Mesure'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Toggle_Columns',@language = 'En', @ref_desc = 'Toggle Columns'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Toggle_Columns',@language = 'Fr', @ref_desc = 'Basculer les Colonnes'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Box_Plot',@language = 'En', @ref_desc = 'Box Plot'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Box_Plot',@language = 'Fr', @ref_desc = 'Boîte à Moustaches'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Show_Data_Points',@language = 'En', @ref_desc = 'Show Data Points'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Show_Data_Points',@language = 'Fr', @ref_desc = 'Afficher les Points de Données'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Horizontal',@language = 'En', @ref_desc = 'Horizontal'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Horizontal',@language = 'Fr', @ref_desc = 'Horizontal'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Vertical',@language = 'En', @ref_desc = 'Vertical'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Vertical',@language = 'Fr', @ref_desc = 'Vertical'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graphed_Variables',@language = 'En', @ref_desc = 'Graphed Variables'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graphed_Variables',@language = 'Fr', @ref_desc = 'Variables Graphiques'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Median',@language = 'En', @ref_desc = 'Median'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Median',@language = 'Fr', @ref_desc = 'Médiane'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Min',@language = 'En', @ref_desc = 'Min'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Min',@language = 'Fr', @ref_desc = 'Min'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Max',@language = 'En', @ref_desc = 'Max'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Max',@language = 'Fr', @ref_desc = 'Max'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Distribution',@language = 'En', @ref_desc = 'Distribution'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Distribution',@language = 'Fr', @ref_desc = 'Distribution'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Calendar_Type',@language = 'En', @ref_desc = 'Calendar Type'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Calendar_Type',@language = 'Fr', @ref_desc = 'Type de Calendrier'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Gregorian',@language = 'En', @ref_desc = 'Gregorian'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Gregorian',@language = 'Fr', @ref_desc = 'Grégorien'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Fiscal',@language = 'Fr', @ref_desc = 'Fiscal'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_All_Time_Monthly',@language = 'En', @ref_desc = 'All-Time (Monthly)'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Last',@language = 'En', @ref_desc = 'Last'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Last',@language = 'Fr', @ref_desc = 'Dernière'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Select_Range',@language = 'Fr', @ref_desc = 'Sélectionnez la Gamme'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Years',@language = 'En', @ref_desc = 'Year(s)'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Years',@language = 'Fr', @ref_desc = 'Month(s)'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Months',@language = 'Fr', @ref_desc = 'Mois'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Quarters',@language = 'En', @ref_desc = 'Quarter(s)'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Quarters',@language = 'Fr', @ref_desc = 'Trimestre(s)'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Weeks',@language = 'En', @ref_desc = 'Week(s)'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Weeks',@language = 'Fr', @ref_desc = 'Semaine(s)'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Available',@language = 'En', @ref_desc = 'Available'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Root''s_Children',@language = 'En', @ref_desc = 'Root''s Children'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Root''s_Children',@language = 'Fr', @ref_desc = 'Les Enfants de Root'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Back',@language = 'En', @ref_desc = 'Back'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Back',@language = 'Fr', @ref_desc = 'Arrière'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Top',@language = 'En', @ref_desc = 'Top'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Top',@language = 'Fr', @ref_desc = 'Haut'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Axis_Measure',@language = 'En', @ref_desc = 'Axis Measure'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Axis_Measure',@language = 'Fr', @ref_desc = 'Mesure d''Axe'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graph_Orientation',@language = 'En', @ref_desc = 'Graph Orientation'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graph_Orientation',@language = 'Fr', @ref_desc = 'Orientation du Graphique'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Num_Of_Rows',@language = 'Fr', @ref_desc = '# de Ros'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_How_To_Filter_The_Table',@language = 'En', @ref_desc = 'How to Filter the Table'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_How_To_Filter_The_Table',@language = 'Fr', @ref_desc = 'Comment Filtrer le Tableau'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_How_To_Hide_Columns',@language = 'En', @ref_desc = 'How to Hide Columns'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_How_To_Hide_Columns',@language = 'Fr', @ref_desc = 'Comment Masquer les Colonnes'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Date',@language = 'En', @ref_desc = 'Date'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Date',@language = 'Fr', @ref_desc = 'Date'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Root',@language = 'En', @ref_desc = 'Root'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Root',@language = 'Fr', @ref_desc = 'l'' Orine'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Group_By',@language = 'En', @ref_desc = 'Group By'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Group_By',@language = 'Fr', @ref_desc = 'Par Groupe'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Children_Of',@language = 'En', @ref_desc = 'Children '
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Children_Of',@language = 'Fr', @ref_desc = 'Les Enfants de'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Tab',@language = 'En', @ref_desc = 'Tab'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Tab',@language = 'Fr', @ref_desc = 'Onglet'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graphs',@language = 'En', @ref_desc = 'Graphs'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Save_The_Graph',@language = 'Fr', @ref_desc = 'Enregistrer le graphique:'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Select_A_saved_Graph',@language = 'En', @ref_desc = 'Select a saved graph:'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Select_A_saved_Graph',@language = 'Fr', @ref_desc = 'Sélectionnez un graphique enregistré:'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Delete_A_saved_Graph',@language = 'En', @ref_desc = 'Delete a saved graph:'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Delete_A_saved_Graph',@language = 'Fr', @ref_desc = 'Supprimer un graphique enregistré:'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Save_Graph',@language = 'En', @ref_desc = 'Save Graph'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Save_Graph',@language = 'Fr', @ref_desc = 'Enregistrer le graphique'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Confirm_Delete',@language = 'En', @ref_desc = 'Confirm Delete'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Confirm_Delete',@language = 'Fr', @ref_desc = 'Confirmation de la Suppression'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Enter_Dashboard_Title',@language = 'En', @ref_desc = 'Enter Dashboard Title'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Enter_Dashboard_Title',@language = 'Fr', @ref_desc = 'Entrez le titre du tableau de bord'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Save_Dashboard',@language = 'En', @ref_desc = 'Save Dashboard'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Save_Dashboard',@language = 'Fr', @ref_desc = 'Enregistrez le tableau de bord'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Delete_A_Saved_Dashboard',@language = 'En', @ref_desc = 'Delete a saved dashboard'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Delete_A_Saved_Dashboard',@language = 'Fr', @ref_desc = 'Supprimer un tableau de bord enregistré'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Dashboards_Require_A_Title_To_Be_Saved',@language = 'En', @ref_desc = 'Dashboards require a title to be saved'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Dashboards_Require_A_Title_To_Be_Saved',@language = 'Fr', @ref_desc = 'Les tableaux de bord nécessitent un titre pour être enregistrés'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graph_All_Siblings',@language = 'En', @ref_desc = 'Graph All Siblings'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_No_Data_Found',@language = 'En', @ref_desc = 'No Data Found'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_No_Data_Found',@language = 'Fr', @ref_desc = 'Base de Données'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graphs_Require_A_Title_To_Be_Saved',@language = 'En', @ref_desc = 'Graphs require a title to be saved'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graphs_Require_A_Title_To_Be_Saved',@language = 'Fr', @ref_desc = 'Les graphiques nécessitent un titre pour être enregistrés'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_The_Graph_Has_Been_Saved',@language = 'En', @ref_desc = 'The graph has been saved'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_The_Graph_Has_Been_Saved',@language = 'Fr', @ref_desc = 'Le graphique a été enregistré'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_A_Saved_Graph_With_This_Title_Already_Exists',@language = 'En', @ref_desc = 'A saved graph with this title already exists'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_A_Saved_Graph_With_This_Title_Already_Exists',@language = 'Fr', @ref_desc = 'Un graphique enregistré avec ce titre existe déjà'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_The_Dashboard_Has_Been_Saved',@language = 'En', @ref_desc = 'The dashboard has been saved'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_The_Dashboard_Has_Been_Saved',@language = 'Fr', @ref_desc = 'Le tableau de bord a été enregistré'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Dashboard_Must_Not_Be_Empty',@language = 'En', @ref_desc = 'Dashboard must not be empty'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Dashboard_Must_Not_Be_Empty',@language = 'Fr', @ref_desc = 'Le tableau de bord ne doit pas être vide'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_A_Saved_Dashboard_With_This_Title_Already_Exists',@language = 'En', @ref_desc = 'A saved dashboard with this title already exists'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_A_Saved_Dashboard_With_This_Title_Already_Exists',@language = 'Fr', @ref_desc = 'Un tableau de bord enregistré avec ce titre existe déjà'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Saved_Graphs_Already_Exist_For',@language = 'En', @ref_desc = 'Saved graphs already exist for'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Saved_Graphs_Already_Exist_For',@language = 'Fr', @ref_desc = 'Des graphiques enregistrés existent déjà pour'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Select_A_Saved_Dashboard',@language = 'En', @ref_desc = 'Select a saved dashboard'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Select_A_Saved_Dashboard',@language = 'Fr', @ref_desc = 'Sélectionnez un tableau de bord enregistré'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Cancel_Save_Attempt',@language = 'En', @ref_desc = 'Cancel save attempt'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Cancel_Save_Attempt',@language = 'Fr', @ref_desc = 'Annuler la tentative de sauvegarde'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Overwrite_Dashboard',@language = 'En', @ref_desc = 'Overwrite dashboard'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Overwrite_Dashboard',@language = 'Fr', @ref_desc = 'Écraser le tableau de bord'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_And_The_Graph',@language = 'En', @ref_desc = 'and the graph'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_And_The_Graph',@language = 'Fr', @ref_desc = 'et le graphique'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_And_The_Graphs',@language = 'En', @ref_desc = 'and the graphs'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_And_The_Graphs',@language = 'Fr', @ref_desc = 'et les graphiques'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Overwrite_Graphs',@language = 'Fr', @ref_desc = 'Écraser les graphiques'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Reset_dashboard_All_Unsaved_Changes_Will_Be_Lost',@language = 'Fr', @ref_desc = 'Réinitialiser le tableau de bord - toutes les modifications non enregistrées seront perdues'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Cancel_Reset_Attempt',@language = 'En', @ref_desc = 'Cancel reset attempt'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Cancel_Reset_Attempt',@language = 'Fr', @ref_desc = 'Annuler la tentative de réinitialisation'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Sankey',@language = 'En', @ref_desc = 'Sankey'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Sankey',@language = 'Fr', @ref_desc = 'Fr: Saey'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_In6',@language = 'En', @ref_desc = '150+'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_In5',@language = 'En', @ref_desc = '121-150'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_In4',@language = 'En', @ref_desc = '91-120'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_In3',@language = 'En', @ref_desc = '61-90'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_In2',@language = 'En', @ref_desc = '31-60'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_In1',@language = 'En', @ref_desc = 'LT 31'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_End6',@language = 'En', @ref_desc = 'Cpltd 150+'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_End5',@language = 'En', @ref_desc = 'Cpltd 121-150'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_End4',@language = 'En', @ref_desc = 'Cpltd 91-120'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_End3',@language = 'En', @ref_desc = 'Cpltd 61-90'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_End2',@language = 'En', @ref_desc = 'Cpltd 31-60'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_End1',@language = 'En', @ref_desc = 'Cpltd LT 31'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Out6',@language = 'En', @ref_desc = 'Cont 150+'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Out5',@language = 'En', @ref_desc = 'Cont 121-150'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Out4',@language = 'En', @ref_desc = 'Cont 91-120'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Out3',@language = 'En', @ref_desc = 'Cont 61-90'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Out2',@language = 'En', @ref_desc = 'Cont 31-60'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Out1',@language = 'En', @ref_desc = 'Cont LT 31'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_In6_Long',@language = 'En', @ref_desc = 'Outstanding > 150 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_In6_Long',@language = 'Fr', @ref_desc = 'Fr: Outstanding > 150 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_In5_Long',@language = 'En', @ref_desc = 'Outstanding 121 - 150 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_In5_Long',@language = 'Fr', @ref_desc = 'Fr: Outstanding 121 - 150 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_In4_Long',@language = 'En', @ref_desc = 'Outstanding 91 - 120 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_In4_Long',@language = 'Fr', @ref_desc = 'Fr: Outstanding 91 - 120 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_In3_Long',@language = 'En', @ref_desc = 'Outstanding 61 - 90 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_In3_Long',@language = 'Fr', @ref_desc = 'Fr: Outstanding 61 - 90 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_End2_Long',@language = 'En', @ref_desc = 'Completed 31 - 60 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_End2_Long',@language = 'Fr', @ref_desc = 'Fr: Completed 31 - 60 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_End1_Long',@language = 'En', @ref_desc = 'Completed < 31 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_End1_Long',@language = 'Fr', @ref_desc = 'Fr: Completed < 31 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_New_Long',@language = 'En', @ref_desc = 'New in last 30 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_New_Long',@language = 'Fr', @ref_desc = 'Fr: New in last 30 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Out6_Long',@language = 'En', @ref_desc = 'Continued In-Process > 150 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Out6_Long',@language = 'Fr', @ref_desc = 'Fr: Continued In-Process > 150 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Out3_Long',@language = 'En', @ref_desc = 'Continued In-Process 61 - 90 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Out3_Long',@language = 'Fr', @ref_desc = 'Fr: Continued In-Process 61 - 90 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Out2_Long',@language = 'En', @ref_desc = 'Continued In-Process 31 - 60 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Out2_Long',@language = 'Fr', @ref_desc = 'Fr: Continued In-Process 31 - 60 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Out1_Long',@language = 'En', @ref_desc = 'Continued In-Process < 31 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Out1_Long',@language = 'Fr', @ref_desc = 'Fr: Continued In-Process < 31 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_End',@language = 'En', @ref_desc = 'Cpltd'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_End',@language = 'Fr', @ref_desc = 'Fr: Cpltd'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_End_Long',@language = 'En', @ref_desc = 'Completed'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_End_Long',@language = 'Fr', @ref_desc = 'Fr: Completed'
 GO
 
 DROP PROC InsertOPRef
@@ -375,7 +337,3 @@ ELSE
 		END')
 	END
     GO
-
-/*
-exec dbo.reftable
-go*/

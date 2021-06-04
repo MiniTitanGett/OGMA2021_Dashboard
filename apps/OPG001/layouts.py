@@ -13,6 +13,7 @@ import dash_html_components as html
 from dash.exceptions import PreventUpdate
 from flask import session
 import json
+import logging
 
 # Internal Modules
 import config
@@ -238,18 +239,15 @@ def get_layout():
 
 
 def get_layout_graph(report_name):
-    # if config.SESSIONLESS:
-    #     return PreventUpdate
 
     conn = get_conn()
-    # j = json.dumps(saved_layouts[graph_title], sort_keys=True)
-
     query = """\
     declare @p_report_layout varchar(max)
     declare @p_result_status varchar(255)
-    exec dbo.opp_addgeteditdeletefind_extdashboardreports {}, \'{}\', \'{}\', null, null, null, null, @p_result_status output
+    exec dbo.opp_addgeteditdeletefind_extdashboardreports {}, 'Get', \'{}\', null, null, null, null, null,
+    @p_result_status output
     select @p_result_status as result_status
-    """.format(session['sessionID'], 'Get', report_name)
+    """.format(session['sessionID'], report_name)
 
     cursor = conn.cursor()
     cursor.execute(query)
@@ -261,7 +259,7 @@ def get_layout_graph(report_name):
     if results.result_status != 'OK':
         cursor.close()
         del cursor
-        print(results.result_status)
+        logging.error(results.result_status)
         return PreventUpdate
 
     j = json.loads(clob.clob_text)

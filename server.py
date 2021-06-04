@@ -118,7 +118,7 @@ def load_saved_graphs_from_db():
     cursor = conn.cursor()
     query = """\
     declare @p_result_status varchar(255)
-    exec dbo.opp_addgeteditdeletefind_extdashboardreports {}, 'Find', null, null, null, null, null,
+    exec dbo.opp_addgeteditdeletefind_extdashboardreports {}, 'Find', null, null, null, null, null, null,
     @p_result_status output
     select @p_result_status as result_status
     """.format(session["sessionID"])
@@ -144,7 +144,7 @@ def load_saved_dashboards_from_db():
     cursor = conn.cursor()
     query = """\
     declare @p_result_status varchar(255)
-    exec dbo.opp_addgeteditdeletefind_extdashboards {}, 'Find', null, null, null, null, null,
+    exec dbo.opp_addgeteditdeletefind_extdashboards {}, 'Find', null, null, null, null, null, null,
     @p_result_status output
     select @p_result_status as result_status
     """.format(session["sessionID"])

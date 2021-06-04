@@ -536,13 +536,14 @@ def get_label(label, table=None):
     if label is None:
         return None
 
+    lookup = "labels"
+
     if table is None:
         table = "Labels"
-        lookup = "labels"
     elif table.lower != "labels":
-        lookup = "labels_" + table.lower()
+        lookup = lookup + "_" + table.lower()
 
-    language_df = session[lookup]
+    language_df = session.get(lookup)
 
     if language_df is None:
         conn = get_conn()

@@ -16,6 +16,7 @@ import dash_html_components as html
 import dash_core_components as dcc
 from re import search
 import locale
+import logging
 
 # Internal Packages
 from apps.app0003.graphs import get_line_figure, get_scatter_figure, get_bar_figure, get_table_figure, get_box_figure
@@ -284,22 +285,18 @@ for x in range(4):
             display_button = []
             dropdown = generate_dropdown(changed_index)
         elif 'hierarchy_specific_dropdown' in changed_id:
-            print('here1')
-            print(dropdown_val)
+            logging.debug(dropdown_val)
             # If dropdown has been remade, do not modify the history
             # If the node has no data (leaf node) then do not add it to history
             if dropdown_val is None or TREE.get_node(
                     '{}, {}'.format(string_of_names, dropdown_val)).is_leaf():
-                print('test1')
                 display_button = dropdown = no_update
             # If nothing in history return value
             elif not state_of_display:
-                print('test2')
                 display_button = generate_history_button(dropdown_val, 0, changed_index)
                 dropdown = generate_dropdown(changed_index, dropdown_value=dropdown_val)
             # If something is in the history preserve it and add value to it
             else:
-                print('test3')
                 display_button = state_of_display + [
                     (generate_history_button(dropdown_val, len(state_of_display), changed_index))]
                 dropdown = generate_dropdown(changed_index, state_of_display, dropdown_val)

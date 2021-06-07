@@ -109,7 +109,7 @@ for x in range(4):
                       arg_value, graph_type, link_state, hierarchy_options, master_hierarchy_options, df_const):
 
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
-
+        print('Input: ' + changed_id)
         # if not in view tab, or new/delete while the graph already exists, prevent update
         if view_state == 'tile-nav tile-nav--view' or (changed_id == '.' and graph_display):
             raise PreventUpdate
@@ -179,7 +179,7 @@ for x in range(5):
                                                      df_name):
 
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
-
+        print('Input: ' + changed_id)
         # if page loaded - prevent update
         if changed_id == '.':
             raise PreventUpdate
@@ -300,7 +300,7 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                         _month_button_clicks, _week_button_clicks, start_year_selection, end_year_selection,
                         start_secondary_selection, end_secondary_selection, tab, df_name, df_const):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-
+    print('Input: ' + changed_id)
     if changed_id == '.':
         raise PreventUpdate
 

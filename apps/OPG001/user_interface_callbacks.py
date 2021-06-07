@@ -17,6 +17,7 @@ from dash.exceptions import PreventUpdate
 from re import search
 from dash import no_update
 from urllib.parse import parse_qsl
+from flask import url_for
 
 # Internal Packages
 from apps.OPG001.layouts import get_line_graph_menu, get_bar_graph_menu, get_scatter_graph_menu, get_table_graph_menu, \
@@ -67,7 +68,10 @@ def _generate_layout(href, pathname, query_string):
     if 'reportName' in query_params and query_params['reportName']:
         return [get_layout_graph(query_params['reportName'])]
     else:
-        return [get_layout_dashboard()]
+        if session['language'] == 'En':
+            return [get_layout_dashboard()]
+        else:
+            return [html.Div([get_layout_dashboard(), html.Link(rel='stylesheet', href=url_for("static", filename="BBB - french stylesheet1.css"))])]
 
 
 # Handles Resizing of ContentWrapper, uses tab-content-wrapper n-clicks as a throw away output

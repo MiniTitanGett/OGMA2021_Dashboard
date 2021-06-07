@@ -172,11 +172,10 @@ def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Fi
             className='boxclose',
             style={'position': 'relative', 'left': '3px'},
             id={'type': 'data-menu-close', 'index': tile}),
-        dcc.Loading([
         html.Div(get_data_set_picker(tile, df_name)),
         html.Div(
             get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle, nid_path, df_const)),
-        html.Div(get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, period_type, df_const))])]
+        html.Div(get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, period_type, df_const))]
 
     dashboard_loading_wrapper = html.Div(
         content,
@@ -307,7 +306,7 @@ def get_layout_graph(report_name):
     if graph is None:
         raise PreventUpdate
 
-    return html.Div(dcc.Loading([graph]))
+    return graph
 
 
 # get the input box for the dashboard title

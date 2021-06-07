@@ -635,16 +635,6 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
     confirm_button = [no_update] * 5
     refresh_button = [no_update] * 5
 
-    # if there are no constants calculated for the datasets required then calc them
-    for x in [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]:
-        if x:
-            if df_const is None:
-                df_const = {}
-            # check if the dataset is loaded into the session and load it
-            if x not in session:
-                session[x] = dataset_to_df(x)
-            df_const[x] = generate_constants(x)
-
     # if 'data-menu-close' or 'select-dashboard-dropdown' requested, close all data menus
     if 'data-menu-close' in changed_id or 'select-dashboard-dropdown' in changed_id:
         pass
@@ -708,7 +698,8 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
             else:
                 graph_triggers[changed_index] = df_name
         else:
-            confirm_button[changed_index] = {'padding': '10px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
+            confirm_button[changed_index] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
+                                             'position': 'relative',
                                              'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}
             refresh_button[changed_index] = DATA_CONTENT_HIDE
 
@@ -717,8 +708,10 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
         changed_index = int(search(r'\d+', changed_id).group())
         df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
         df_name = df_names[changed_index]
-        if '"type":"confirm-data-set-refresh"}.n_clicks' in changed_id:
-            session[df_names[changed_index]] = dataset_to_df(df_names[changed_index])
+        session[df_name] = dataset_to_df(df_name)
+        if df_const is None:
+            df_const = {}
+        df_const[df_name] = generate_constants(df_name)
         data[changed_index] = get_data_menu(changed_index, df_name, df_const=df_const)
         sidemenu_styles[changed_index] = DATA_CONTENT_SHOW
         # trigger update for all tiles that are linked to the active data menu

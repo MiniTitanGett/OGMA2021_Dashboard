@@ -133,7 +133,7 @@ def get_data_set_picker(tile, df_name):
         html.Div([
             dcc.Dropdown(
                 id={'type': 'data-set', 'index': tile},
-                options=[{'label': i, 'value': i} for i in session['dataset_list']],
+                options=[{'label': get_label(i,'Data_Set'), 'value': i} for i in session['dataset_list']],
                 value=df_name,
                 clearable=False,
                 style={'flex-grow': '1'}),
@@ -368,7 +368,7 @@ def get_layout_dashboard():
                     html.Div([
                         html.I(
                             html.Span(
-                                get_label("LBL_Reset_Dashboard_All_Unsaved_Changes_will_Be-Lost"),
+                                get_label("LBL_Reset_Dashboard_All_Unsaved_Changes_will_Be_Lost"),
                                 className='save-symbols-tooltip'),
                             id='confirm-dashboard-reset',
                             className='fa fa-undo',

@@ -1145,6 +1145,20 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
     # hierarchy specific dropdown selection is last item in list_of_names, otherwise None
     hierarchy_specific_dropdown = list_of_names[-1] if len(list_of_names) > 0 else None
 
+    # if no hierarchy selection made, return a blank graph
+    if (hierarchy_toggle == 'Level Filter' and hierarchy_level_dropdown is None) or (
+            hierarchy_toggle == 'Specific Item' and hierarchy_options is None):
+        blank = px.line(
+            title='<br><sub>{} </sub>'.format(get_label('LBL_No_Data_Specified')))
+        blank.update_layout(
+            plot_bgcolor='rgba(0, 0, 0, 0)',
+            paper_bgcolor='rgba(0, 0, 0, 0)')
+        return dcc.Graph(
+            id='graph-display',
+            className='fill-container',
+            responsive=True,
+            figure=blank)
+
     # If "Last ___ ____" is active and the num_periods is invalid (None), return an empty graph
     if timeframe == 'to-current' and not num_periods:
         filtered_df = pd.DataFrame(columns=df_const[df_name]['COLUMN_NAMES'])

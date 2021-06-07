@@ -120,7 +120,7 @@ def _new_and_delete(new_clicks, _close_clicks, dashboard_reset, input_tiles, num
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     deleted_tile = no_update
     dashboard_reset_trigger = no_update
-    print('Input: ' + changed_id)
+
     # if DELETE button pressed: pop deleted input_tile index and shift following indices left and adjust main layout
     if 'tile-close' in changed_id and num_tiles != 0:
         num_tiles -= 1
@@ -194,7 +194,7 @@ def _unlock_new_button(graph_options, disabled):
 def _change_tab(tab_clicks, tab_close_clicks, _tab_add_nclicks,
                 tab_content, active_tab, data, tab_toggle_children, new_disabled, dashboard_title):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-    print('Info: _change_tab Input: ' + changed_id)
+
     # if page loaded (changed_id == '.') or new button is disabled, prevent update
     if changed_id == '.' or new_disabled:
         raise PreventUpdate
@@ -291,7 +291,7 @@ def _change_tab(tab_clicks, tab_close_clicks, _tab_add_nclicks,
 )
 def _update_num_tiles(input1, input2, input3):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-    print('Info: _update_num_tiles Input: ' + changed_id)
+
     if changed_id == '.':
         raise PreventUpdate
 
@@ -361,7 +361,7 @@ for x in range(0, 4):
         VIEW and CUSTOMIZE buttons as being either selected or unselected
         """
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-        print('Info: _switch_tile_tab Input: ' + changed_id)
+
         # if view button was pressed, display view content and set view button as selected
         if '"type":"tile-view"}.n_clicks' in changed_id:
             # protect against spam clicking
@@ -431,7 +431,7 @@ for x in range(4):
         :return: Graph menu corresponding to selected graph type
         """
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-        print('Info: _update_graph_menu Input: ' + changed_id)
+
         # if link state has changed from linked --> unlinked the data has not changed, prevent update
         if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink':
             raise PreventUpdate
@@ -543,7 +543,7 @@ def _change_link(selected_layout, _link_clicks, link_state):
     :return: New state of the link/unlink icon
     """
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-    print('Info: _change_link Input: ' + changed_id)
+
     # if link button was not pressed and layout was not selected, do not update
     if '.' == changed_id:
         raise PreventUpdate
@@ -619,7 +619,7 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
     """
 
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-    print('Info: _manage_data_sidemenus Input: ' + changed_id)
+
     # if changed id == '.' due to NEW being requested, preserve data menu display.
     if changed_id == '.':
         raise PreventUpdate
@@ -794,7 +794,7 @@ for x in range(4):
         :param link_state: State of the link/unlink icon
         :return: Highlights tiles child to the displayed date side-menu
         """
-        print('Input: highlight')
+
 
         if sidebar_style == DATA_CONTENT_SHOW or (
                 master_sidebar_style == DATA_CONTENT_SHOW and link_state == 'fa fa-link'):

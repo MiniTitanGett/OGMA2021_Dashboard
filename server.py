@@ -184,7 +184,6 @@ def load_dataset_list():
 # WebModuleCreate?
 @server.before_first_request
 def before_first_request_func():
-
     if config.LOG_REQUEST:
         logging.debug(request.method + " " + request.url)
         logging.debug("request=" + dict_to_string(request.values))
@@ -212,6 +211,8 @@ def before_request_func():
     sessionid = request.args.get("sessionID", type=int)
 
     if sessionid:  # and (sessionid != session.get("sessionID")):
+        if config.DEBUG:
+            session.clear()
         session["sessionID"] = 0
         session["externalID"] = 0
         session["language"] = "En"

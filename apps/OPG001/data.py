@@ -52,7 +52,7 @@ from conn import get_ref
 
 # ***********************************************ARBITRARY CONSTANTS*************************************************
 
-GRAPH_OPTIONS = ['Line', 'Bar', 'Scatter', 'Bubble', 'Box_Plot', 'Table', 'Sankey']
+GRAPH_OPTIONS = ['Line', 'Bar', 'Scatter', 'Bubble', 'Box_Plot', 'Table','Sankey']
 
 X_AXIS_OPTIONS = ['Time']
 
@@ -154,7 +154,33 @@ def dataset_to_df(df_name):
             , 'Activity Event Id'
             , 'Measure Value']].apply(pd.to_numeric)
     else:
-        raise Exception('Unknown file type: ', df_name)
+        conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
+        sql_query = pd.read_sql_query(
+            '''
+        SELECT * FROM [OGMA_Test].[dbo].[{}] 
+        '''.format(df_name.split('.')[0]), conn)
+        df = pd.DataFrame(sql_query)
+        df[['Year of Event'
+            , 'Quarter'
+            , 'Month of Event'
+            , 'Week of Event'
+            , 'Fiscal Year of Event'
+            , 'Fiscal Quarter'
+            , 'Fiscal Month of Event'
+            , 'Fiscal Week of Event'
+            , 'Julian Day'
+            , 'Activity Event Id'
+            , 'Measure Value']] = df[['Year of Event'
+            , 'Quarter'
+            , 'Month of Event'
+            , 'Week of Event'
+            , 'Fiscal Year of Event'
+            , 'Fiscal Quarter'
+            , 'Fiscal Month of Event'
+            , 'Fiscal Week of Event'
+            , 'Julian Day'
+            , 'Activity Event Id'
+            , 'Measure Value']].apply(pd.to_numeric)
 
     # add all variable names without qualifiers to col
     col = pd.Series(df['Variable Name'][df['Variable Name Qualifier'].isna()])

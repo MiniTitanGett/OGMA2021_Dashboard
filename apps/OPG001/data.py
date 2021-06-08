@@ -17,7 +17,7 @@ from dateutil.relativedelta import relativedelta
 from flask import session
 
 import config
-from conn import get_conn
+from conn import get_ref
 
 # Contents:
 #   ARBITRARY CONSTANTS
@@ -52,7 +52,7 @@ from conn import get_conn
 
 # ***********************************************ARBITRARY CONSTANTS*************************************************
 
-GRAPH_OPTIONS = ['Line', 'Bar', 'Scatter', 'Bubble', 'Box_Plot', 'Table', 'Sankey']
+GRAPH_OPTIONS = ['Line', 'Bar', 'Scatter', 'Bubble', 'Box_Plot', 'Table','Sankey']
 
 X_AXIS_OPTIONS = ['Time']
 
@@ -154,7 +154,33 @@ def dataset_to_df(df_name):
             , 'Activity Event Id'
             , 'Measure Value']].apply(pd.to_numeric)
     else:
-        raise Exception('Unknown file type: ', df_name)
+        conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
+        sql_query = pd.read_sql_query(
+            '''
+        SELECT * FROM [OGMA_Test].[dbo].[{}] 
+        '''.format(df_name.split('.')[0]), conn)
+        df = pd.DataFrame(sql_query)
+        df[['Year of Event'
+            , 'Quarter'
+            , 'Month of Event'
+            , 'Week of Event'
+            , 'Fiscal Year of Event'
+            , 'Fiscal Quarter'
+            , 'Fiscal Month of Event'
+            , 'Fiscal Week of Event'
+            , 'Julian Day'
+            , 'Activity Event Id'
+            , 'Measure Value']] = df[['Year of Event'
+            , 'Quarter'
+            , 'Month of Event'
+            , 'Week of Event'
+            , 'Fiscal Year of Event'
+            , 'Fiscal Quarter'
+            , 'Fiscal Month of Event'
+            , 'Fiscal Week of Event'
+            , 'Julian Day'
+            , 'Activity Event Id'
+            , 'Measure Value']].apply(pd.to_numeric)
 
     # add all variable names without qualifiers to col
     col = pd.Series(df['Variable Name'][df['Variable Name Qualifier'].isna()])
@@ -546,9 +572,11 @@ def get_label(label, table=None):
     language_df = session.get(lookup)
 
     if language_df is None:
-        conn = get_conn()
-        query = pd.read_sql("exec dbo.spopref_getoprefdata \'{}\', \'{}\'".format(table, session["language"]), conn)
-        language_df = pd.DataFrame(query, columns=["ref_value", "ref_desc"])
+        # # we can't use server.get_ref() from here because of a circular reference
+        # conn = get_conn()
+        # query = pd.read_sql("exec dbo.spopref_getoprefdata \'{}\', \'{}\'".format(table, session["language"]), conn)
+        # language_df = pd.DataFrame(query, columns=["ref_value", "ref_desc"])
+        language_df = get_ref(table, session["language"])
         session[lookup] = language_df
 
     row = language_df[language_df["ref_value"] == label]
@@ -556,7 +584,7 @@ def get_label(label, table=None):
     if len(row) != 1:
         return 'Key Error: {}|{}'.format(table, label)
 
-    return row.iloc[0]["ref_desc"]
+    return row["ref_desc"].iloc[0]
 
 
 # loads labels from language data from database

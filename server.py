@@ -10,7 +10,7 @@ import logging
 import pandas
 import json
 
-from conn import get_conn, close_conn
+from conn import CursorByName, get_conn, close_conn, get_ref
 from apps.OPG001.data import saved_layouts, saved_dashboards
 from flask_session import Session
 
@@ -32,20 +32,6 @@ class PrefixMiddleware(object):
         else:
             start_response('404', [('Content-Type', 'text/plain')])
             return ["This url does not belong to the app.".encode()]
-
-
-# https://kadler.io/2018/01/08/fetching-python-database-cursors-by-column-name.html
-class CursorByName:
-    def __init__(self, cursor):
-        self._cursor = cursor
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        row = self._cursor.__next__()
-
-        return {description[0]: row[col] for col, description in enumerate(self._cursor.description)}
 
 
 # https://pythonise.com/series/learning-flask/python-before-after-request
@@ -83,27 +69,6 @@ def dict_to_string(d):
         s += "('" + key + "', '" + str(d[key]) + "')"
 
     return "[" + s + "]"
-
-
-def get_ref(ref_table, language):
-    """
-    gets a table from OP_Ref
-    """
-    conn = get_conn()
-    # cursor = conn.cursor()
-    # query = "exec dbo.spopref_getoprefdata \'{}\', \'{}\'".format(ref_table, language)
-
-    # cursor.execute(query)
-
-    # results = DataFrame(cursor.fetchall())
-
-    # cursor.close()
-    # del cursor
-
-    query = pandas.read_sql("exec dbo.spopref_getoprefdata \'{}\', \'{}\'".format(ref_table, language), conn)
-    results = pandas.DataFrame(query, columns=["ref_value", "ref_desc"])
-
-    return results
 
 
 def load_labels(language="En"):
@@ -175,8 +140,6 @@ def validate_session(sessionid, externalid):
     select @p_external_id as external_id, @p_session_status as session_status, @p_result_status as result_status
     """.format(sessionid, sessionid, 1)
 
-    # logging.debug("\n" + query)
-
     cursor.execute(query)
 
     results = cursor.fetchone()
@@ -221,7 +184,6 @@ def load_dataset_list():
 # WebModuleCreate?
 @server.before_first_request
 def before_first_request_func():
-
     if config.LOG_REQUEST:
         logging.debug(request.method + " " + request.url)
         logging.debug("request=" + dict_to_string(request.values))
@@ -249,6 +211,8 @@ def before_request_func():
     sessionid = request.args.get("sessionID", type=int)
 
     if sessionid:  # and (sessionid != session.get("sessionID")):
+        if config.DEBUG:
+            session.clear()
         session["sessionID"] = 0
         session["externalID"] = 0
         session["language"] = "En"

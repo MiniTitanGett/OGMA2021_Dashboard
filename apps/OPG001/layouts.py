@@ -11,7 +11,7 @@ import inspect
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.exceptions import PreventUpdate
-from flask import session
+from flask import session, url_for
 import json
 import logging
 
@@ -157,8 +157,8 @@ def get_data_set_picker(tile, df_name):
                 style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
                        'position': 'relative', 'vertical-align': 'top', 'background-color': 'white', 'width': '40px',
                        'border': '1px solid {}'.format(CLR['lightgray']), 'border-radius': '6px'})],
-            style={'display': 'flex'})
-    ]
+            style={'display': 'flex'}),
+        ]
 
 
 # get DATA side-menu

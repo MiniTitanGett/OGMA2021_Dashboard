@@ -71,7 +71,8 @@ def _generate_layout(href, pathname, query_string):
         if session['language'] == 'En':
             return [get_layout_dashboard()]
         else:
-            return [html.Div([get_layout_dashboard(), html.Link(rel='stylesheet', href=url_for("static", filename="BBB - french stylesheet1.css"))])]
+            return [html.Div([get_layout_dashboard(), html.Link(rel='stylesheet', href=url_for("static",
+                                                                                               filename="BBB - french stylesheet1.css"))])]
 
 
 # Handles Resizing of ContentWrapper, uses tab-content-wrapper n-clicks as a throw away output
@@ -561,6 +562,25 @@ def _change_link(selected_layout, _link_clicks, link_state):
     return link_state
 
 
+app.clientside_callback(
+    ClientsideFunction(
+        namespace='clientside',
+        function_name='datasetLoadScreen'
+    ),
+    Output('dataset-confirmation-symbols', 'n_clicks'),
+    [Input({'type': 'confirm-load-data', 'index': ALL}, 'n_clicks'),
+     Input({'type': 'confirm-data-set-refresh', 'index': ALL}, 'n_clicks')]
+)
+
+app.clientside_callback(
+    ClientsideFunction(
+        namespace='clientside',
+        function_name='datasetRemoveLoadScreen'
+    ),
+    Output('df-constants-storage', 'n_clicks'),
+    [Input('df-constants-storage', 'data')]
+)
+
 # manage data sidemenu appearance and content
 @app.callback(
     [Output({'type': 'data-tile', 'index': 0}, 'children'),
@@ -787,7 +807,6 @@ for x in range(4):
         :param link_state: State of the link/unlink icon
         :return: Highlights tiles child to the displayed date side-menu
         """
-
 
         if sidebar_style == DATA_CONTENT_SHOW or (
                 master_sidebar_style == DATA_CONTENT_SHOW and link_state == 'fa fa-link'):

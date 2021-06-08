@@ -19,6 +19,19 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
         resizeContentWrapper: function(x,y,z) {
             resizeContentWrapper();
             return x
+        },
+        datasetLoadScreen: function(n_click_load, n_click_reset) {
+            if (n_click_load != ',,,,' || n_click_reset != ',,,,'){
+                var newDiv = document.createElement('div');
+                newDiv.className = '_data-loading';
+                newDiv.id = 'loading';
+                document.body.appendChild(newDiv, document.getElementById('content'));
+            }
+            return 0;
+        },
+        datasetRemoveLoadScreen: function(data) {
+            document.getElementById('loading').remove();
+            return 0;
         }
     }
 });

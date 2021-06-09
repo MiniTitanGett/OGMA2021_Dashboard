@@ -52,7 +52,9 @@ from conn import get_ref
 
 # ***********************************************ARBITRARY CONSTANTS*************************************************
 
-GRAPH_OPTIONS = ['Line', 'Bar', 'Scatter', 'Bubble', 'Box_Plot', 'Table','Sankey']
+GRAPH_OPTIONS = ['Line', 'Bar', 'Scatter', 'Bubble', 'Box_Plot', 'Table']
+
+Sankey_Graph = ['Sankey']
 
 X_AXIS_OPTIONS = ['Time']
 

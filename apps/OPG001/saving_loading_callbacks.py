@@ -843,7 +843,7 @@ def _load_tile_layout(selected_layout, df_const):
     graph_menu = load_graph_menu(graph_type=graph_type, tile=tile, df_name=df_name, args_list=args_list,
                                  df_const=df_const)
 
-    customize_content = get_customize_content(tile=tile, graph_type=graph_type, graph_menu=graph_menu)
+    customize_content = get_customize_content(tile=tile, graph_type=graph_type, graph_menu=graph_menu,df_name=df_name)
 
     #  --------- create data sidemenu ---------
 

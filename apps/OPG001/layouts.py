@@ -530,6 +530,20 @@ def get_layout_dashboard():
         html.Div(
             id={'type': 'reset-selected-layout', 'index': 3},
             style={'display': 'none'}),
+        # set-graph-options-trigger is used by the _manage_data_sidemenus callback to load graph options based on
+        # the selected dataset
+        html.Div(
+            id={'type': 'set-graph-options-trigger', 'index': 0},
+            style={'display': 'none'}),
+        html.Div(
+            id={'type': 'set-graph-options-trigger', 'index': 1},
+            style={'display': 'none'}),
+        html.Div(
+            id={'type': 'set-graph-options-trigger', 'index': 2},
+            style={'display': 'none'}),
+        html.Div(
+            id={'type': 'set-graph-options-trigger', 'index': 3},
+            style={'display': 'none'}),
         # set-dropdown-options-trigger is used to detect when to update all 'select layout' dropdown options
         html.Div(
             id={'type': 'set-dropdown-options-trigger', 'index': 0},
@@ -585,7 +599,14 @@ def get_layout_dashboard():
 # ****************************************************TILE LAYOUT****************************************************
 
 # create customize content
-def get_customize_content(tile, graph_type, graph_menu):
+def get_customize_content(tile, graph_type, graph_menu,df_name):
+    print("you are here in get customize")
+    if df_name == 'OPG010':
+        Graphs = ['Sankey']
+    elif df_name == 'OPG001':
+        Graphs = GRAPH_OPTIONS
+    else:
+        Graphs = []
     return [
         html.P(
             "{}:".format(get_label('LBL_Graph_Type')),
@@ -594,7 +615,7 @@ def get_customize_content(tile, graph_type, graph_menu):
             dcc.Dropdown(
                 id={'type': 'graph-type-dropdown', 'index': tile},
                 clearable=False,
-                options=[{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in GRAPH_OPTIONS],
+                options=[{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in Graphs],
                 value=graph_type,
                 style={'max-width': '405px', 'width': '100%', 'font-size': '13px'}),
             style={'margin-left': '15px'}),
@@ -604,7 +625,7 @@ def get_customize_content(tile, graph_type, graph_menu):
 
 
 # create default tile
-def get_tile(tile, tile_keys=None, df_const=None):
+def get_tile(tile, tile_keys=None, df_const=None, df_name=None):
     """
     :param tile: Index of the created tile.
     :return: New tile with index values matching the specified tile index.
@@ -656,12 +677,7 @@ def get_tile(tile, tile_keys=None, df_const=None):
                         className='fill-container')]),
             html.Div(
                 tile_keys['Customize Content'] if tile_keys else get_customize_content(
-                    tile=tile, graph_type='Line', graph_menu=get_line_graph_menu(
-                        # tile, X_AXIS_OPTIONS[0], [LOADED_DFS[DATA_SETS[0]].VARIABLE_OPTIONS[0]['value']],
-                        # LOADED_DFS[DATA_SETS[0]].MEASURE_TYPE_OPTIONS[0], DATA_SETS[0])),
-                        # for now, since options may not exist in the data, just pass in blanks
-                        # this will be changed later to be more robust
-                        tile, '', '', '', session['dataset_list'][0], df_const=df_const)),
+                    tile=tile, graph_type=None, graph_menu=None ,df_name=None),
                 style=CUSTOMIZE_CONTENT_HIDE,
                 id={'type': 'tile-customize-content', 'index': tile},
                 className='customize-content'),

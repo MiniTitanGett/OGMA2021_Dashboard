@@ -21,12 +21,12 @@ from urllib.parse import parse_qsl
 # Internal Packages
 from apps.OPG001.layouts import get_line_graph_menu, get_bar_graph_menu, get_scatter_graph_menu, get_table_graph_menu, \
     get_tile_layout, change_index, get_box_plot_menu, get_default_tab_content, get_layout_dashboard, get_layout_graph, \
-    get_data_menu, get_sankey_menu, get_dashboard_title_input, get_bubble_graph_menu
+    get_data_menu, get_sankey_menu, get_dashboard_title_input, get_bubble_graph_menu,get_customize_content
 from apps.OPG001.app import app
 from apps.OPG001.data import VIEW_CONTENT_HIDE, VIEW_CONTENT_SHOW, CUSTOMIZE_CONTENT_HIDE, CUSTOMIZE_CONTENT_SHOW, \
     DATA_CONTENT_HIDE, DATA_CONTENT_SHOW, get_label, LAYOUT_CONTENT_SHOW, LAYOUT_CONTENT_HIDE, X_AXIS_OPTIONS, \
-    session, BAR_X_AXIS_OPTIONS, create_categories, generate_constants, dataset_to_df
-
+    session, BAR_X_AXIS_OPTIONS, create_categories, generate_constants, dataset_to_df,GRAPH_OPTIONS, Sankey_Graph
+from apps.OPG001.saving_functions import load_graph_menu
 
 # Contents:
 #   MAIN LAYOUT
@@ -403,6 +403,44 @@ for x in range(0, 4):
                customize_className
 
 # ************************************************CUSTOMIZE TAB*******************************************************
+#update graph options to match data set
+for x in range(4):
+    @app.callback(
+        [Output({'type': 'graph-type-dropdown', 'index': x}, 'options')],
+        [Input({'type': 'set-graph-options-trigger', 'index': x}, 'options-')],
+        [State({'type': 'data-set', 'index': x}, 'value'),
+         State('df-constants-storage', 'data'),
+         State({'type': 'tile-title', 'index': ALL}, 'value'),
+         #State({'type': 'tile-link', 'index': ALL}, 'className'),
+         State({'type': 'graph-type-dropdown', 'index': ALL}, 'value'),
+         State({'type': 'args-value: {}'.replace("{}", str(0)), 'index': ALL}, 'value'),
+         State({'type': 'data-set', 'index': 4}, 'value'),
+         ]
+    )
+    def _update_graph_type_options(options_trigger,df_name,df_const,tile_index,graph_type,args_list,df_name_parent):
+        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+        print(df_name_parent)
+        print("****options****")
+        print(changed_id)
+        print(df_name)
+        #options = [{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in ['Line']]
+        if (df_name or df_name_parent) == 'OPG001':
+            graph_type='Line'
+            #tile_index, X_AXIS_OPTIONS[0], [LOADED_DFS[DATA_SETS[0]].VARIABLE_OPTIONS[0]['value']],
+            #LOADED_DFS[DATA_SETS[0]].MEASURE_TYPE_OPTIONS[0], DATA_SETS[0])),
+            # for now, since options may not exist in the data, just pass in blanks
+            # this will be changed later to be more robust
+            #tile, '', '', '', session['dataset_list'][0], df_const = df_const
+        elif (df_name or df_name_parent) == 'OPG010':
+                graph_type = 'Sankey'
+        args_list = [None] * 3
+        graph_menu = load_graph_menu(graph_type=graph_type, tile=tile_index, df_name=df_name_parent, args_list=args_list,
+                                     df_const=df_const)
+        customize_content = get_customize_content(tile=tile_index, graph_type=graph_type, graph_menu=graph_menu,df_name=df_name_parent)
+        return customize_content
+
+
+
 
 # update graph menu to match selected graph type
 for x in range(4):
@@ -413,6 +451,7 @@ for x in range(4):
         [Input({'type': 'graph-menu-trigger', 'index': x}, 'data-'),
          Input({'type': 'graph-type-dropdown', 'index': x}, 'value'),
          Input({'type': 'tile-link', 'index': x}, 'className')],
+         #Input({'type': 'graph-type-dropdown', 'index': x}, "options")],
         [State({'type': 'div-graph-options', 'index': x}, 'children'),
          State({'type': 'data-set', 'index': x}, 'value'),
          State({'type': 'data-set', 'index': 4}, 'value'),
@@ -427,7 +466,7 @@ for x in range(4):
         :return: Graph menu corresponding to selected graph type
         """
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-
+        print("****graph menu****")
         # if link state has changed from linked --> unlinked the data has not changed, prevent update
         if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink':
             raise PreventUpdate
@@ -575,7 +614,11 @@ def _change_link(selected_layout, _link_clicks, link_state):
      Output({'type': 'graph-menu-trigger', 'index': 3}, 'data-'),
      Output('df-constants-storage', 'data'),
      Output({'type': 'confirm-load-data', 'index': ALL}, 'style'),
-     Output({'type': 'confirm-data-set-refresh', 'index': ALL}, 'style')],
+     Output({'type': 'confirm-data-set-refresh', 'index': ALL}, 'style'),
+     Output({'type': 'set-graph-options-trigger', 'index': 0}, 'options-'),
+     Output({'type': 'set-graph-options-trigger', 'index': 1}, 'options-'),
+     Output({'type': 'set-graph-options-trigger', 'index': 2}, 'options-'),
+     Output({'type': 'set-graph-options-trigger', 'index': 3}, 'options-')],
     [Input('dashboard-reset-trigger', 'data-'),
      Input('tile-closed-trigger', 'data-'),
      Input('select-dashboard-dropdown', 'value'),
@@ -630,6 +673,7 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
     graph_triggers = [no_update] * 5
     confirm_button = [no_update] * 5
     refresh_button = [no_update] * 5
+    options_triggers = [no_update] * 5
 
     # if 'data-menu-close' or 'select-dashboard-dropdown' requested, close all data menus
     if 'data-menu-close' in changed_id or 'select-dashboard-dropdown' in changed_id:
@@ -705,6 +749,7 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
         df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
         df_name = df_names[changed_index]
         session[df_name] = dataset_to_df(df_name)
+
         if df_const is None:
             df_const = {}
         df_const[df_name] = generate_constants(df_name)
@@ -715,8 +760,24 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
             for i in range(len(links_style)):
                 if links_style[i] == 'fa fa-link':
                     graph_triggers[i] = df_name
+                    options_triggers[i] = df_name
+                #elif df_names[i] == 'OPG001':
+                #    graph_choice[i] = GRAPH_OPTIONS
+                #elif df_names[i] == 'OPG010':
+                #    graph_choice[i] = Sankey_Graph
+                #else:
+                #    graph_choice[i] = no_update
+
         else:
             graph_triggers[changed_index] = df_name
+            options_triggers[i]=df_name
+            #if df_name == 'OPG001':
+            #    graph_choice[changed_index] = GRAPH_OPTIONS
+            #elif df_name == 'OPG010':
+            #    graph_choice[changed_index] = Sankey_Graph
+            #else:
+            #    graph_choice[changed_index] = no_update
+
         confirm_button[changed_index] = DATA_CONTENT_HIDE
         refresh_button[changed_index] = {'padding': '10px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
                                          'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}
@@ -760,10 +821,11 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
             elif sidemenu_styles[4] != DATA_CONTENT_SHOW:
                 sidemenu_styles[4] = no_update
 
+
     return (data[0], data[1], data[2], data[3], data[4],
             sidemenu_styles[0], sidemenu_styles[1], sidemenu_styles[2], sidemenu_styles[3], sidemenu_styles[4],
             graph_triggers[0], graph_triggers[1], graph_triggers[2], graph_triggers[3], df_const, confirm_button,
-            refresh_button)
+            refresh_button, options_triggers[0], options_triggers[1], options_triggers[2], options_triggers[3])
 
 
 # highlight tiles slaved to displayed data sidebar
@@ -790,3 +852,4 @@ for x in range(4):
             tile_class = 'tile-container'
 
         return tile_class
+

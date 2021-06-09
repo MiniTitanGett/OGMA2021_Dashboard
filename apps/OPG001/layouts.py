@@ -17,7 +17,7 @@ import logging
 
 # Internal Modules
 import config
-from conn import get_conn
+from conn import get_conn, exec_storedproc_results
 # from apps.OPG001.app import app
 from apps.OPG001.data import GRAPH_OPTIONS, CLR, DATA_CONTENT_HIDE, VIEW_CONTENT_SHOW, BAR_X_AXIS_OPTIONS, \
     CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LAYOUT_CONTENT_HIDE, \
@@ -239,8 +239,6 @@ def get_layout():
 
 
 def get_layout_graph(report_name):
-
-    conn = get_conn()
     query = """\
     declare @p_report_layout varchar(max)
     declare @p_result_status varchar(255)
@@ -249,6 +247,13 @@ def get_layout_graph(report_name):
     select @p_result_status as result_status
     """.format(session['sessionID'], report_name)
 
+    results = exec_storedproc_results(query)
+
+    j = json.loads(results["clob_text"].iloc[0])
+
+    graph_title = results["ref_desc"].iloc[0]
+    """
+    conn = get_conn()
     cursor = conn.cursor()
     cursor.execute(query)
 
@@ -268,7 +273,7 @@ def get_layout_graph(report_name):
 
     cursor.close()
     del cursor
-
+    """
     # generate state_of_display
     # {'props': {'children': 'Los Angeles Department of Water and Power'}}
     # split on ^||^, ignore 'root', append children
@@ -293,6 +298,7 @@ def get_layout_graph(report_name):
                            j['Hierarchy Toggle'],
                            j['Level Value'],
                            j['Graph All Toggle'],  # [],  # hierarchy_graph_children,
+                           {},  # hierarchy_options - just pass a non-None value
                            json.loads(state_of_display),  # state_of_display,
                            j.get('Date Tab'),  # None,  # secondary_type,
                            j['Timeframe'],

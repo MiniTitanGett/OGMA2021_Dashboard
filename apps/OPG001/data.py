@@ -17,7 +17,7 @@ from dateutil.relativedelta import relativedelta
 from flask import session
 
 import config
-from conn import get_ref
+from conn import get_ref, exec_storedproc_results
 
 # Contents:
 #   ARBITRARY CONSTANTS
@@ -126,12 +126,19 @@ def dataset_to_df(df_name):
                           orient='records',
                           lines=True)
     elif df_name.find('.sql') > -1:  # TODO: This is testing code for connecting to a personal database
-        conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
-        sql_query = pd.read_sql_query(
-            '''
-        SELECT * FROM [OGMA_Test].[dbo].[{}] 
-        '''.format(df_name.split('.')[0]), conn)
-        df = pd.DataFrame(sql_query)
+        # conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
+        # sql_query = pd.read_sql_query(
+        #     '''
+        # SELECT * FROM [OGMA_Test].[dbo].[{}]
+        # '''.format(df_name.split('.')[0]), conn)
+        # df = pd.DataFrame(sql_query)
+        query = """\
+        declare @p_result_status varchar(255)
+        exec dbo.opp_get_dataset {}, \'{}\', \'{}\', @p_result_status output
+        select @p_result_status as result_status 
+        """.format(session["sessionID"], session["language"], df_name.split('.')[0])
+
+        df = exec_storedproc_results(query)
         df[['Year of Event'
             , 'Quarter'
             , 'Month of Event'
@@ -154,12 +161,19 @@ def dataset_to_df(df_name):
             , 'Activity Event Id'
             , 'Measure Value']].apply(pd.to_numeric)
     else:
-        conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
-        sql_query = pd.read_sql_query(
-            '''
-        SELECT * FROM [OGMA_Test].[dbo].[{}] 
-        '''.format(df_name.split('.')[0]), conn)
-        df = pd.DataFrame(sql_query)
+        # conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
+        # sql_query = pd.read_sql_query(
+        #     '''
+        # SELECT * FROM [OGMA_Test].[dbo].[{}]
+        # '''.format(df_name.split('.')[0]), conn)
+        # df = pd.DataFrame(sql_query)
+        query = """\
+        declare @p_result_status varchar(255)
+        exec dbo.opp_get_dataset {}, \'{}\', \'{}\', @p_result_status output
+        select @p_result_status as result_status
+        """.format(session["sessionID"], session["language"], df_name)
+
+        df = exec_storedproc_results(query)
         df[['Year of Event'
             , 'Quarter'
             , 'Month of Event'

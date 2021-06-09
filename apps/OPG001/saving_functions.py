@@ -7,17 +7,17 @@ stores all functions used for saving graph meta data and dashboard meta data
 ######################################################################################################################
 
 # External Packages
-import os
+# import os
 import json
 # import pyodbc
-import logging
-import pymssql
+# import logging
+# import pymssql
 from flask import session
 from dash.exceptions import PreventUpdate
 
 # Internal Packages
 # import config
-from conn import get_conn
+from conn import exec_storedproc
 from apps.OPG001.layouts import get_line_graph_menu, get_bar_graph_menu, get_scatter_graph_menu, get_table_graph_menu, \
     get_box_plot_menu, get_sankey_menu
 from apps.OPG001.data import saved_layouts, saved_dashboards
@@ -100,30 +100,14 @@ def save_dashboard_state(name, attributes):
 
 
 def save_layout_to_db(graph_id, graph_title):
-
-    conn = get_conn()
-    j = json.dumps(saved_layouts[graph_id], sort_keys=True)
-
     query = """\
     declare @p_result_status varchar(255)
     exec dbo.opp_addgeteditdeletefind_extdashboardreports {}, 'Add', \'{}\', \'{}\', 'Dash', \'{}\', 'application/json',
     'json', @p_result_status output
     select @p_result_status as result_status
-    """.format(session['sessionID'], graph_id, graph_title, j)
+    """.format(session['sessionID'], graph_id, graph_title, json.dumps(saved_layouts[graph_id], sort_keys=True))
 
-    cursor = conn.cursor()
-    cursor.execute(query)
-
-    results = cursor.fetchone()
-
-    if results.result_status != 'OK':
-        cursor.close()
-        del cursor
-        logging.error(results.result_status)
-        return PreventUpdate
-
-    cursor.close()
-    del cursor
+    exec_storedproc(query)
 
 
 # # saves the dashboards meta data to the saved layouts file
@@ -139,35 +123,18 @@ def save_layout_to_db(graph_id, graph_title):
 
 
 def save_dashboard_to_db(dashboard_id, dashboard_title):
-
-    conn = get_conn()
-    j = json.dumps(saved_dashboards[dashboard_id], sort_keys=True)
-
     query = """\
     declare @p_result_status varchar(255)
     exec dbo.opp_addgeteditdeletefind_extdashboards {}, 'Add', \'{}\', \'{}\', 'Dash', \'{}\', 'application/json',
     'json', @p_result_status output
     select @p_result_status as result_status
-    """.format(session['sessionID'], dashboard_id, dashboard_title, j)
+    """.format(session['sessionID'], dashboard_id, dashboard_title,
+               json.dumps(saved_dashboards[dashboard_id], sort_keys=True))
 
-    cursor = conn.cursor()
-    cursor.execute(query)
-
-    results = cursor.fetchone()
-
-    if results.result_status != 'OK':
-        cursor.close()
-        del cursor
-        logging.error(results.result_status)
-        return PreventUpdate
-
-    cursor.close()
-    del cursor
+    exec_storedproc(query)
 
 
 def delete_layout(graph_id):
-
-    conn = get_conn()
     query = """\
     declare @p_result_status varchar(255)
     exec dbo.opp_addgeteditdeletefind_extdashboardreports {}, 'Delete', \'{}\', null, null, null, null, null,
@@ -175,26 +142,12 @@ def delete_layout(graph_id):
     select @p_result_status as result_status
     """.format(session['sessionID'], graph_id)
 
-    cursor = conn.cursor()
-    cursor.execute(query)
-
-    results = cursor.fetchone()
-
-    if results.result_status != 'OK':
-        cursor.close()
-        del cursor
-        logging.error(results.result_status)
-        return PreventUpdate
-
-    cursor.close()
-    del cursor
+    exec_storedproc(query)
 
     del saved_layouts[graph_id]
 
 
 def delete_dashboard(dashboard_id):
-
-    conn = get_conn()
     query = """\
     declare @p_result_status varchar(255)
     exec dbo.opp_addgeteditdeletefind_extdashboardrs {}, \'{}\', \'{}\', null, null, null, null, null,
@@ -202,19 +155,7 @@ def delete_dashboard(dashboard_id):
     select @p_result_status as result_status
     """.format(session['sessionID'], 'Delete', dashboard_id)
 
-    cursor = conn.cursor()
-    cursor.execute(query)
-
-    results = cursor.fetchone()
-
-    if results.result_status != 'OK':
-        cursor.close()
-        del cursor
-        logging.error(results.result_status)
-        return PreventUpdate
-
-    cursor.close()
-    del cursor
+    exec_storedproc(query)
 
     del saved_dashboards[dashboard_id]
 

@@ -35,6 +35,57 @@ def close_conn():
         conn.close()
 
 
+def exec_storedproc(query):
+    """
+    This will execute the query, check the result_status, and return the output parameters if result_status is 'OK'
+    """
+    conn = get_conn()
+    cursor = conn.cursor()
+    cursor.execute(query)
+
+    # there should only be the output params as a result set
+    results = cursor.fetchone()
+
+    cursor.close()
+    del cursor
+
+    if results.result_status != "OK":
+        logging.error(results.result_status)
+        raise Exception(results.result_status)
+
+    return results
+
+
+def exec_storedproc_results(query):
+    """
+    This will execute the query, check the result_status, and return the result set if result_status is 'OK'
+    """
+    conn = get_conn()
+    cursor = conn.cursor()
+    cursor.execute(query)
+
+    # this is expecting only 1 or 2 result sets
+    results = pandas.DataFrame(CursorByName(cursor))
+
+    if cursor.nextset():
+        output = pandas.DataFrame(CursorByName(cursor))
+    else:
+        output = results
+        results = None
+
+    cursor.close()
+    del cursor
+
+    result_status = output["result_status"].iloc[0]
+
+    if result_status != "OK":
+        logging.error(result_status)
+        raise Exception(result_status)
+
+    # this will return None for a stored proc that only returns output params
+    return results
+
+
 def get_ref(ref_table, language):
     """
     gets a table from OP_Ref
@@ -45,25 +96,4 @@ def get_ref(ref_table, language):
     select @p_result_status as result_status 
     """.format(session["sessionID"], ref_table, language)
 
-    conn = get_conn()
-    cursor = conn.cursor()
-    cursor.execute(query)
-
-    # we are expecting 2 result sets
-    results = pandas.DataFrame(CursorByName(cursor))
-
-    if cursor.nextset():
-        output = pandas.DataFrame(CursorByName(cursor))
-    else:
-        output = results
-
-    result_status = output["result_status"].iloc[0]
-
-    cursor.close()
-    del cursor
-
-    if result_status != "OK":
-        logging.error(result_status)
-        flask.abort(500)
-
-    return results
+    return exec_storedproc_results(query)

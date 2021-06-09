@@ -626,6 +626,7 @@ tile-nav:hover {
 .fill-container {
     height: 100%;
     width: 100%;
+    position:relative;
 }
 
 .tile-container {
@@ -977,15 +978,9 @@ num-periods:disabled {
     margin-top: 10px;
 }
 
-@keyframes fadein {
-    0% {
-        opacity: 0;
-    }
-    100% {
-        opacity: 0.5;
-    }
-}
 
+}
+/* Loading */
   ._data-loading {
     position: fixed;
     z-index: 100;
@@ -994,7 +989,7 @@ num-periods:disabled {
   ._data-loading::after {
     content: 'Loading';
     font-family: sans-serif;
-    padding-top: 60%;
+    padding-top: 50px;
     color: #000;
 
     -webkit-animation: fadein 0.5s ease-in 0s forwards; /* Safari, Chrome and Opera > 12.1 */
@@ -1009,6 +1004,47 @@ num-periods:disabled {
     /* The banner */
     opacity: 0;
     position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.5);
+    text-align: center;
+    cursor: progress;
+    z-index: 100000;
+
+    background-image: url(http://127.0.0.1:8080/python/OPG001/assets/loading-screen.gif);
+    background-position: center center;
+    background-repeat: no-repeat;
+  }
+
+._graph-data-loading {
+    position: absolute;
+    z-index: 100;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  ._graph-data-loading::after {
+    content: 'Loading';
+    font-family: sans-serif;
+    padding-top: 50px;
+    color: #000;
+
+    -webkit-animation: fadein 0.5s ease-in 0s forwards; /* Safari, Chrome and Opera > 12.1 */
+       -moz-animation: fadein 0.5s ease-in 0s forwards; /* Firefox < 16 */
+        -ms-animation: fadein 0.5s ease-in 0s forwards; /* Internet Explorer */
+         -o-animation: fadein 0.5s ease-in 0s forwards; /* Opera < 12.1 */
+            animation: fadein 0.5s ease-in 0s forwards;
+    /* prevent flickering on every callback */
+    -webkit-animation-delay: 0.5s;
+    animation-delay: 0.5s;
+
+    /* The banner */
+    opacity: 0;
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;

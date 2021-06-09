@@ -407,25 +407,25 @@ for x in range(0, 4):
         return view_content_style, customize_content_style, layouts_content_style, view_className, layouts_className, \
                customize_className
 
+for x in range(0, 4):
+    app.clientside_callback(
+        ClientsideFunction(
+            namespace='clientside',
+            function_name='graphLoadScreen{}'.format(x)
+        ),
+        Output({'type': 'tile-menu-header', 'index': x}, 'n_clicks'),
+        [Input({'type': 'tile-view', 'index': x}, 'n_clicks')],
+        [State({'type': 'tile-view', 'index': x}, 'className')]
+    )
 
-app.clientside_callback(
-    ClientsideFunction(
-        namespace='clientside',
-        function_name='graphLoadScreen'
-    ),
-    Output({'type': 'tile-menu-header', 'index': 0}, 'n_clicks'),
-    [Input({'type': 'tile-view', 'index': 0}, 'n_clicks')],
-    [State({'type': 'tile-view', 'index': 0}, 'className')]
-)
-
-# app.clientside_callback(
-#     ClientsideFunction(
-#         namespace='clientside',
-#         function_name='graphRemoveLoadScreen'
-#     ),
-#     Output({'type': 'graph_display', 'index': 0}, 'n_clicks'),
-#     [Input({'type': 'graph_display', 'index': 0}, 'children'),]
-# )
+    app.clientside_callback(
+        ClientsideFunction(
+            namespace='clientside',
+            function_name='graphRemoveLoadScreen{}'.format(x)
+        ),
+        Output({'type': 'graph_display', 'index': x}, 'n_clicks'),
+        [Input({'type': 'graph_display', 'index': x}, 'children')]
+    )
 
 # ************************************************CUSTOMIZE TAB*******************************************************
 

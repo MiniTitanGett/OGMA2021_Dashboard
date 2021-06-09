@@ -30,20 +30,69 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             return 0;
         },
         datasetRemoveLoadScreen: function(data) {
-            document.getElementById('loading').remove();
+            try{
+                document.getElementById('loading').remove();
+            }catch{ /* Do Nothing */}
             return 0;
         },
-        graphLoadScreen: function(n_click_view, view_content_className) {
+        graphLoadScreen0: function(n_click_view, view_content_className) {
             if (view_content_className != 'tile-nav tile-nav--view tile-nav--selected'){
                 var newDiv = document.createElement('div');
-                newDiv.className = '_data-loading';
-                newDiv.id = 'graph-loading';
-                document.getElementById('{"index":0,"type":"tile-view-content"}').appendChild(newDiv));
+                newDiv.className = '_graph-data-loading';
+                newDiv.id = 'graph-loading0';
+                document.getElementById('{"index":0,"type":"tile-view-content"}').appendChild(newDiv);
             }
             return 0;
         },
-        graphRemoveLoadScreen: function(data) {
-            document.getElementById('graph-loading').remove();
+        graphRemoveLoadScreen0: function(data) {
+            try{
+                document.getElementById('graph-loading0').remove();
+            }catch{ /* Do Nothing */}
+            return 0;
+        },
+        graphLoadScreen1: function(n_click_view, view_content_className) {
+            if (view_content_className != 'tile-nav tile-nav--view tile-nav--selected'){
+                var newDiv = document.createElement('div');
+                newDiv.className = '_graph-data-loading';
+                newDiv.id = 'graph-loading1';
+                document.getElementById('{"index":1,"type":"tile-view-content"}').appendChild(newDiv);
+            }
+            return 0;
+        },
+        graphRemoveLoadScreen1: function(data) {
+            try{
+                document.getElementById('graph-loading1').remove();
+            }catch{ /* Do Nothing */}
+            return 0;
+        },
+        graphLoadScreen2: function(n_click_view, view_content_className) {
+            if (view_content_className != 'tile-nav tile-nav--view tile-nav--selected'){
+                var newDiv = document.createElement('div');
+                newDiv.className = '_graph-data-loading';
+                newDiv.id = 'graph-loading2';
+                document.getElementById('{"index":2,"type":"tile-view-content"}').appendChild(newDiv);
+            }
+            return 0;
+        },
+        graphRemoveLoadScreen2: function(data) {
+            try{
+                document.getElementById('graph-loading2').remove();
+            }catch{ /* Do Nothing */}
+            return 0;
+        },
+        graphLoadScreen3: function(n_click_view, view_content_className) {
+            if (view_content_className != 'tile-nav tile-nav--view tile-nav--selected'){
+                var newDiv = document.createElement('div');
+                newDiv.className = '_graph-data-loading';
+                newDiv.id = 'graph-loading3';
+                document.getElementById('{"index":3,"type":"tile-view-content"}').appendChild(newDiv);
+            }
+            return 0;
+        },
+        graphRemoveLoadScreen3: function(data) {
+            try{
+                document.getElementById('graph-loading3').remove();
+            }catch{ /* Do Nothing */}
             return 0;
         }
     }

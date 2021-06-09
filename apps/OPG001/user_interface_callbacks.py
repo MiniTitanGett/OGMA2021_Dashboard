@@ -53,7 +53,8 @@ from apps.OPG001.data import VIEW_CONTENT_HIDE, VIEW_CONTENT_SHOW, CUSTOMIZE_CON
 # https://community.plotly.com/t/dash-on-multi-page-site-app-route-flask-to-dash/4582/11
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'href')],
-              [State('url', 'pathname'), State('url', 'search')])
+              [State('url', 'pathname'), State('url', 'search')],
+              prevent_initial_call=True)
 def _generate_layout(href, pathname, query_string):
     # print('HREF:', href)
     # print('PATHNAME:', pathname)
@@ -97,7 +98,8 @@ app.clientside_callback(
     [State({'type': 'tile', 'index': ALL}, 'children'),
      State('num-tiles', 'data-num-tiles'),
      State('button-new', 'disabled'),
-     State('df-constants-storage', 'data')]
+     State('df-constants-storage', 'data')],
+    prevent_initial_call=True
 )
 def _new_and_delete(new_clicks, _close_clicks, dashboard_reset, input_tiles, num_tiles, new_disabled, df_const):
     """
@@ -153,7 +155,8 @@ def _new_and_delete(new_clicks, _close_clicks, dashboard_reset, input_tiles, num
 @app.callback(
     Output('button-new', 'disabled'),
     [Input({'type': 'div-graph-options', 'index': ALL}, 'children')],
-    [State('button-new', 'disabled')]
+    [State('button-new', 'disabled')],
+    prevent_initial_call=True
 )
 def _unlock_new_button(graph_options, disabled):
     """
@@ -185,7 +188,8 @@ def _unlock_new_button(graph_options, disabled):
      State('tab-storage', 'data'),
      State('tab-header', 'children'),
      State('button-new', 'disabled'),
-     State('dashboard-title', 'value')]
+     State('dashboard-title', 'value')],
+    prevent_initial_call=True
 )
 def _change_tab(tab_clicks, tab_close_clicks, _tab_add_nclicks,
                 tab_content, active_tab, data, tab_toggle_children, new_disabled, dashboard_title):
@@ -283,7 +287,8 @@ def _change_tab(tab_clicks, tab_close_clicks, _tab_add_nclicks,
     Output('num-tiles', 'data-num-tiles'),
     [Input('num-tiles-2', 'data-num-tiles'),
      Input('num-tiles-3', 'data-num-tiles'),
-     Input('num-tiles-4', 'data-num-tiles')]
+     Input('num-tiles-4', 'data-num-tiles')],
+    prevent_initial_call=True
 )
 def _update_num_tiles(input1, input2, input3):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
@@ -308,7 +313,8 @@ def _update_num_tiles(input1, input2, input3):
     Output({'type': 'dashboard-tab', 'index': ALL}, 'children'),
     [Input('dashboard-title', 'value')],
     [State('tab-content-wrapper', 'data-active-tab'),
-     State({'type': 'dashboard-tab', 'index': ALL}, 'children')]
+     State({'type': 'dashboard-tab', 'index': ALL}, 'children')],
+    prevent_initial_call=True
 )
 def _update_tab_title(title, active_tab, list_of_children):
     if title == '':
@@ -339,7 +345,8 @@ for x in range(0, 4):
          State({'type': 'tile-layouts-content', 'index': x}, 'style'),
          State({'type': 'tile-view', 'index': x}, 'className'),
          State({'type': 'tile-customize', 'index': x}, 'className'),
-         State({'type': 'tile-layouts', 'index': x}, 'className')]
+         State({'type': 'tile-layouts', 'index': x}, 'className')],
+        prevent_initial_call=True
     )
     def _switch_tile_tab(_view_clicks, _customize_clicks, _layouts_clicks, view_content_style_state,
                          customize_content_style_state, layouts_content_style_state, view_state, customize_state,
@@ -416,7 +423,8 @@ for x in range(4):
         [State({'type': 'div-graph-options', 'index': x}, 'children'),
          State({'type': 'data-set', 'index': x}, 'value'),
          State({'type': 'data-set', 'index': 4}, 'value'),
-         State('df-constants-storage', 'data')]
+         State('df-constants-storage', 'data')],
+        prevent_initial_call=True
     )
     def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_options_state, df_name, master_df_name,
                            df_const):
@@ -530,7 +538,8 @@ for x in range(4):
     Output({'type': 'tile-link', 'index': MATCH}, 'className'),
     [Input({'type': 'select-layout-dropdown', 'index': MATCH}, 'value'),
      Input({'type': 'tile-link', 'index': MATCH}, 'n_clicks')],
-    [State({'type': 'tile-link', 'index': MATCH}, 'className')]
+    [State({'type': 'tile-link', 'index': MATCH}, 'className')],
+    prevent_initial_call=True
 )
 def _change_link(selected_layout, _link_clicks, link_state):
     """
@@ -600,7 +609,8 @@ def _change_link(selected_layout, _link_clicks, link_state):
      Input({'type': 'confirm-data-set-refresh', 'index': 4}, 'n_clicks')],
     [State({'type': 'data-tile', 'index': ALL}, 'children'),
      State({'type': 'data-tile', 'index': ALL}, 'style'),
-     State('df-constants-storage', 'data')]
+     State('df-constants-storage', 'data')],
+    prevent_initial_call=True
 )
 def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links_style, selected_layout, data_clicks,
                            data_close_clicks, df_name_0, df_name_1, df_name_2, df_name_3, df_name_4, _confirm_clicks_0,
@@ -773,7 +783,8 @@ for x in range(4):
         [Input({'type': 'data-tile', 'index': ALL}, 'style')],
         [State({'type': 'data-tile', 'index': x}, 'style'),
          State({'type': 'data-tile', 'index': 4}, 'style'),
-         State({'type': 'tile-link', 'index': x}, 'className')]
+         State({'type': 'tile-link', 'index': x}, 'className')],
+        prevent_initial_call=True
     )
     def _highlight_child_tiles(sidebar_styles, sidebar_style, master_sidebar_style, link_state):
         """

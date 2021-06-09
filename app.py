@@ -16,5 +16,6 @@ def get_app(prefix=''):
         external_scripts=external_scripts,
         # assets_ignore='BBB - french stylesheet1.css' if LANGUAGE == 'En' else '',
         server=server,
-        url_base_pathname=config.BASE_PATHNAME + prefix
+        url_base_pathname=config.BASE_PATHNAME + prefix,
+        suppress_callback_exceptions=True  # Used to avoid init errors
     )

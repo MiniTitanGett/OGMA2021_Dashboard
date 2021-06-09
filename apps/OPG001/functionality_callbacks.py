@@ -95,8 +95,8 @@ for x in range(4):
          State({'type': 'hierarchy_specific_dropdown', 'index': x}, 'options'),
          State({'type': 'hierarchy_specific_dropdown', 'index': 4}, 'options'),
          # Constants
-         State('df-constants-storage', 'data')
-         ]
+         State('df-constants-storage', 'data')],
+        prevent_initial_call=True
     )
     def _update_graph(_df_trigger, view_state, tile_title, _datepicker_trigger,
                       num_periods, period_type, _master_datepicker_trigger, master_num_periods,
@@ -172,7 +172,8 @@ for x in range(5):
          Input({'type': 'hierarchy_to_top', 'index': x}, 'n_clicks'),
          Input({'type': 'button: {}'.replace("{}", str(x)), 'index': ALL}, 'n_clicks')],
         [State({'type': 'hierarchy_display_button', 'index': x}, 'children'),
-         State({'type': 'data-set', 'index': x}, 'value')]
+         State({'type': 'data-set', 'index': x}, 'value')],
+        prevent_initial_call=True
     )
     def _print_choice_to_display_and_modify_dropdown(dropdown_val, _n_clicks_r, _n_clicks_tt,
                                                      n_clicks_click_history, state_of_display,
@@ -265,7 +266,8 @@ for x in range(5):
 @app.callback(
     [Output({'type': 'hierarchy_level_filter', 'index': MATCH}, 'style'),
      Output({'type': 'hierarchy_specific_filter', 'index': MATCH}, 'style')],
-    [Input({'type': 'hierarchy-toggle', 'index': MATCH}, 'value')]
+    [Input({'type': 'hierarchy-toggle', 'index': MATCH}, 'value')],
+    prevent_initial_call=True
 )
 def _show_filter_based_on_hierarchy_toggle(hierarchy_toggle):
     if [i['prop_id'] for i in dash.callback_context.triggered][0] == '.':
@@ -294,7 +296,8 @@ def _show_filter_based_on_hierarchy_toggle(hierarchy_toggle):
      Input({'type': 'end-secondary-input', 'index': MATCH}, 'value')],
     [State({'type': 'start-year-input', 'index': MATCH}, 'name'),
      State({'type': 'data-set', 'index': MATCH}, 'value'),
-     State('df-constants-storage', 'data')]
+     State('df-constants-storage', 'data')],
+    prevent_initial_call=True
 )
 def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quarter_button_clicks,
                         _month_button_clicks, _week_button_clicks, start_year_selection, end_year_selection,
@@ -496,7 +499,8 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
 @app.callback(
     [Output({'type': 'num-periods', 'index': MATCH}, 'disabled'),
      Output({'type': 'period-type', 'index': MATCH}, 'disabled')],
-    [Input({'type': 'radio-timeframe', 'index': MATCH}, 'value')]
+    [Input({'type': 'radio-timeframe', 'index': MATCH}, 'value')],
+    prevent_initial_call=True
 )
 def _unlock_past_x_selections(selected_timeframe):
     if [i['prop_id'] for i in dash.callback_context.triggered][0] == '.':
@@ -591,7 +595,8 @@ for x in range(4):
          State({'type': 'hierarchy_specific_dropdown', 'index': 4}, 'options'),
          # Master Data set
          State({'type': 'data-set', 'index': 4}, 'value'),
-         State('df-constants-storage', 'data')]
+         State('df-constants-storage', 'data')],
+        prevent_initial_call=True
     )
     def _update_table(page_current, page_size, sort_by, filter, graph_trigger, table_trigger, link_state, df_name,
                       secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary, end_secondary,

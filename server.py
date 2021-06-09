@@ -1,16 +1,16 @@
 # from datetime import timedelta
 import flask
-from flask import Flask, request, session, g
+from flask import Flask, request, session
 # import pyodbc
 # import pymssql
 from werkzeug.utils import redirect
 import config
 import logging
-from pandas import DataFrame
+# from pandas import DataFrame
 # import pandas
 import json
 
-from conn import CursorByName, get_conn, close_conn, exec_storedproc, exec_storedproc_results, get_ref
+from conn import close_conn, exec_storedproc, exec_storedproc_results, get_ref
 from apps.OPG001.data import saved_layouts, saved_dashboards
 from flask_session import Session
 

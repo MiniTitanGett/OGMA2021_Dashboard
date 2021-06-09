@@ -13,12 +13,12 @@ import dash_html_components as html
 from dash.exceptions import PreventUpdate
 from flask import session
 import json
-import logging
+# import logging
 
 # Internal Modules
-import config
-from conn import get_conn, exec_storedproc_results
-# from apps.OPG001.app import app
+# import config
+from conn import exec_storedproc_results
+# from apps.OPG001.local_app import app
 from apps.OPG001.data import GRAPH_OPTIONS, CLR, DATA_CONTENT_HIDE, VIEW_CONTENT_SHOW, BAR_X_AXIS_OPTIONS, \
     CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LAYOUT_CONTENT_HIDE, \
     saved_layouts, saved_dashboards

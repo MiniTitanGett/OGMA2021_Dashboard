@@ -18,8 +18,8 @@ from re import search
 # Internal Packages
 from apps.OPG001.graphs import __update_graph
 from apps.OPG001.hierarchy_filter import generate_history_button, generate_dropdown
-from apps.OPG001.app import app
-from apps.OPG001.data import session, data_filter, CLR, get_label
+from apps.OPG001.local_app import app
+from apps.OPG001.data import data_filter, CLR, get_label
 from apps.OPG001.datepicker import get_date_box, update_date_columns, get_secondary_data
 
 # Contents:

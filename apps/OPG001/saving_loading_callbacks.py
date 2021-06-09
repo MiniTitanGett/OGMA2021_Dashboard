@@ -14,11 +14,11 @@ from dash.exceptions import PreventUpdate
 from re import search
 from dash import no_update
 import dash_html_components as html
-import regex
+# import regex
 
 # Internal Packages
 from apps.OPG001.layouts import get_data_menu, get_customize_content, get_div_body
-from apps.OPG001.app import app
+from apps.OPG001.local_app import app
 from apps.OPG001.data import get_label, saved_layouts, saved_dashboards, CLR
 from apps.OPG001.saving_functions import delete_layout, save_layout_state, save_layout_to_db, \
     save_dashboard_state, save_dashboard_to_db, delete_dashboard, load_graph_menu

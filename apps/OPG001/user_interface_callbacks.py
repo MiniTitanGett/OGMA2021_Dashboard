@@ -449,7 +449,7 @@ for x in range(4):
             return no_update, no_update, 1
 
         # if changed id == '.' and the graph menu already exists, prevent update
-        if changed_id == '.' and graph_options_state:
+        if changed_id == '.' and graph_options_state or df_const is None or df_name not in df_const :
             raise PreventUpdate
 
         if link_state == 'fa fa-link':
@@ -583,8 +583,16 @@ def _change_link(selected_layout, _link_clicks, link_state):
      Output({'type': 'graph-menu-trigger', 'index': 2}, 'data-'),
      Output({'type': 'graph-menu-trigger', 'index': 3}, 'data-'),
      Output('df-constants-storage', 'data'),
-     Output({'type': 'confirm-load-data', 'index': ALL}, 'style'),
-     Output({'type': 'confirm-data-set-refresh', 'index': ALL}, 'style')],
+     Output({'type': 'confirm-load-data', 'index': 0}, 'style'),
+     Output({'type': 'confirm-load-data', 'index': 1}, 'style'),
+     Output({'type': 'confirm-load-data', 'index': 2}, 'style'),
+     Output({'type': 'confirm-load-data', 'index': 3}, 'style'),
+     Output({'type': 'confirm-load-data', 'index': 4}, 'style'),
+     Output({'type': 'confirm-data-set-refresh', 'index': 0}, 'style'),
+     Output({'type': 'confirm-data-set-refresh', 'index': 1}, 'style'),
+     Output({'type': 'confirm-data-set-refresh', 'index': 2}, 'style'),
+     Output({'type': 'confirm-data-set-refresh', 'index': 3}, 'style'),
+     Output({'type': 'confirm-data-set-refresh', 'index': 4}, 'style')],
     [Input('dashboard-reset-trigger', 'data-'),
      Input('tile-closed-trigger', 'data-'),
      Input('select-dashboard-dropdown', 'value'),
@@ -701,9 +709,21 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
                 for i in range(len(links_style)):
                     if links_style[i] == 'fa fa-link':
                         graph_triggers[i] = df_name
+                        confirm_button[i] = DATA_CONTENT_HIDE
+                        refresh_button[i] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
+                                           'position': 'relative',
+                                           'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}
             else:
                 graph_triggers[changed_index] = df_name
         else:
+            if changed_index == 4:
+                for i in range(len(links_style)):
+                    if links_style[i] == 'fa fa-link':
+                        graph_triggers[i] = df_name
+                        confirm_button[i] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
+                                           'position': 'relative',
+                                           'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}
+                        refresh_button[i] = DATA_CONTENT_HIDE
             confirm_button[changed_index] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
                                              'position': 'relative',
                                              'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}
@@ -772,8 +792,9 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
 
     return (data[0], data[1], data[2], data[3], data[4],
             sidemenu_styles[0], sidemenu_styles[1], sidemenu_styles[2], sidemenu_styles[3], sidemenu_styles[4],
-            graph_triggers[0], graph_triggers[1], graph_triggers[2], graph_triggers[3], df_const, confirm_button,
-            refresh_button)
+            graph_triggers[0], graph_triggers[1], graph_triggers[2], graph_triggers[3], df_const,
+            confirm_button[0], confirm_button[1], confirm_button[2], confirm_button[3], confirm_button[4],
+            refresh_button[0], refresh_button[1], refresh_button[2], refresh_button[3], refresh_button[4])
 
 
 # highlight tiles slaved to displayed data sidebar

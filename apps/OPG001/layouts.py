@@ -141,14 +141,14 @@ def get_data_set_picker(tile, df_name):
                 html.Div([
                     html.I(
                         html.Span(
-                            get_label("LBL_Refresh_Data_Set"),
+                            get_label("LBL_Confirm_Data_Set_Load"),
                             className='save-symbols-tooltip'),
                         id={'type': 'confirm-load-data', 'index': tile},
                         className='fa fa-check',
                         style=DATA_CONTENT_HIDE),
                     html.I(
                         html.Span(
-                            get_label("LBL_Confirm_Data_Set_Load"),
+                            get_label("LBL_Refresh_Data_Set"),
                             className='save-symbols-tooltip'),
                         id={'type': 'confirm-data-set-refresh', 'index': tile},
                         className='fa fa-refresh',

@@ -9,7 +9,7 @@ contains functions to generate graphs
 # External Packages
 from _datetime import datetime
 from flask import session
-# import numpy as np
+import numpy as np
 import plotly.express as px
 import dash_core_components as dcc
 import dash_table

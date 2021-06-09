@@ -981,15 +981,14 @@ num-periods:disabled {
 
 }
 /* Loading */
-  ._data-loading {
+._data-loading {
     position: fixed;
     z-index: 100;
   }
 
-  ._data-loading::after {
-    content: 'Loading';
+._data-loading::after {
+    content: 'Loading, Please Wait...';
     font-family: sans-serif;
-    padding-top: 50px;
     color: #000;
 
     -webkit-animation: fadein 0.5s ease-in 0s forwards; /* Safari, Chrome and Opera > 12.1 */
@@ -1008,6 +1007,7 @@ num-periods:disabled {
     left: 0;
     width: 100%;
     height: 100%;
+    line-height: 135vh;
     background-color: rgba(255, 255, 255, 0.5);
     text-align: center;
     cursor: progress;
@@ -1016,6 +1016,7 @@ num-periods:disabled {
     background-image: url(http://127.0.0.1:8080/python/OPG001/assets/loading-screen.gif);
     background-position: center center;
     background-repeat: no-repeat;
+    background-size: 250px
   }
 
 ._graph-data-loading {
@@ -1027,8 +1028,8 @@ num-periods:disabled {
     height: 100%;
   }
 
-  ._graph-data-loading::after {
-    content: 'Loading';
+._graph-data-loading::after {
+    content: '';
     font-family: sans-serif;
     padding-top: 50px;
     color: #000;
@@ -1057,6 +1058,7 @@ num-periods:disabled {
     background-image: url(http://127.0.0.1:8080/python/OPG001/assets/loading-screen.gif);
     background-position: center center;
     background-repeat: no-repeat;
+    background-size: 100px
   }
 
   @keyframes fadein {

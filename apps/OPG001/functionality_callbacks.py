@@ -19,7 +19,7 @@ from re import search
 from apps.OPG001.graphs import __update_graph
 from apps.OPG001.hierarchy_filter import generate_history_button, generate_dropdown
 from apps.OPG001.app import app
-from apps.OPG001.data import session, data_filter, CLR, get_label
+from apps.OPG001.data import data_filter, CLR, get_label
 from apps.OPG001.datepicker import get_date_box, update_date_columns, get_secondary_data
 
 # Contents:
@@ -186,7 +186,9 @@ for x in range(5):
             raise PreventUpdate
 
         # create a comma delimited string for hierarchy (node id) navigation
-        def get_nid_path(sod=[], dropdown_value=None):
+        def get_nid_path(sod=None, dropdown_value=None):
+            if sod is None:
+                sod = []
             path = "root"
             for i in sod:
                 path += ('^||^{}'.format(i['props']['children']))
@@ -428,7 +430,7 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                 conditions = [tab == 'Quarter', tab == 'Month']
                 quarter_className, quarter_disabled, month_className, month_disabled, week_className, week_disabled, \
                 fringe_min, fringe_max, default_max, max_year, \
-                new_tab = get_secondary_data(conditions, fiscal_toggle, df_name)
+                new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
             # set min_year according to user selected time type (gregorian/fiscal)
             if fiscal_toggle == 'Gregorian':
                 min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']

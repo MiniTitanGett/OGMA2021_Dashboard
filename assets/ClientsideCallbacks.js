@@ -32,6 +32,19 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
         datasetRemoveLoadScreen: function(data) {
             document.getElementById('loading').remove();
             return 0;
+        },
+        graphLoadScreen: function(n_click_view, view_content_className) {
+            if (view_content_className != 'tile-nav tile-nav--view tile-nav--selected'){
+                var newDiv = document.createElement('div');
+                newDiv.className = '_data-loading';
+                newDiv.id = 'graph-loading';
+                document.getElementById('{"index":0,"type":"tile-view-content"}').appendChild(newDiv));
+            }
+            return 0;
+        },
+        graphRemoveLoadScreen: function(data) {
+            document.getElementById('graph-loading').remove();
+            return 0;
         }
     }
 });

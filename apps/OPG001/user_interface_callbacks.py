@@ -407,6 +407,26 @@ for x in range(0, 4):
         return view_content_style, customize_content_style, layouts_content_style, view_className, layouts_className, \
                customize_className
 
+
+app.clientside_callback(
+    ClientsideFunction(
+        namespace='clientside',
+        function_name='graphLoadScreen'
+    ),
+    Output({'type': 'tile-menu-header', 'index': 0}, 'n_clicks'),
+    [Input({'type': 'tile-view', 'index': 0}, 'n_clicks')],
+    [State({'type': 'tile-view', 'index': 0}, 'className')]
+)
+
+# app.clientside_callback(
+#     ClientsideFunction(
+#         namespace='clientside',
+#         function_name='graphRemoveLoadScreen'
+#     ),
+#     Output({'type': 'graph_display', 'index': 0}, 'n_clicks'),
+#     [Input({'type': 'graph_display', 'index': 0}, 'children'),]
+# )
+
 # ************************************************CUSTOMIZE TAB*******************************************************
 
 # update graph menu to match selected graph type

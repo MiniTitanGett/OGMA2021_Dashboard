@@ -640,6 +640,7 @@ def get_tile(tile, tile_keys=None, df_const=None):
                     className=tile_keys['Link'] if tile_keys else 'fa fa-link',
                     id={'type': 'tile-link', 'index': tile},
                     style={'position': 'relative'})],
+                id={'type': 'tile-menu-header', 'index': tile},
                 style={'margin-right': '25px'}),
             html.A(
                 className='boxclose',

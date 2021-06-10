@@ -7,11 +7,11 @@ contains helper functions for, and layout of, the hierarchy filter
 ######################################################################################################################
 
 # External Packages
-import time
+# import time
 
 import dash_core_components as dcc
 import dash_html_components as html
-import pandas as pd
+# import pandas as pd
 
 # Internal Modules
 from apps.OPG001.data import get_label, session, CLR
@@ -33,12 +33,12 @@ def generate_dropdown(tile, df_name, nid_path):
         # using a subset of our dataframe, turn it into a multiindex df, and access unique values for option
         df = session[df_name][['H1', 'H2', 'H3', 'H4', 'H5', 'H6']]
         hierarchy_nid_list = list(nid_path.split("^||^"))[1:]
-        l = len(hierarchy_nid_list)
-        if l == 6:
+        llen = len(hierarchy_nid_list)
+        if llen == 6:
             option_list = []
-        elif l != 0:
-            df = df.set_index(['H{}'.format(i + 1) for i in range(l)])
-            option_list = df.loc[tuple(hierarchy_nid_list)]['H{}'.format(l + 1)].dropna().unique()
+        elif llen != 0:
+            df = df.set_index(['H{}'.format(i + 1) for i in range(llen)])
+            option_list = df.loc[tuple(hierarchy_nid_list)]['H{}'.format(llen + 1)].dropna().unique()
         else:
             option_list = df['H1'].unique()
         options = [{'label': i, 'value': i} for i in option_list]
@@ -94,7 +94,7 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
             html.Div([
                 dcc.Dropdown(
                     id={'type': 'hierarchy_level_dropdown', 'index': tile},
-                    options=[{'label': get_label('LBL_' + x,df_name), 'value': x} for x in
+                    options=[{'label': get_label('LBL_' + x, df_name), 'value': x} for x in
                              df_const[df_name]['HIERARCHY_LEVELS']],
                     multi=False,
                     value=level_value,

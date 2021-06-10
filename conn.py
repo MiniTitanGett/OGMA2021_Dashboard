@@ -1,5 +1,5 @@
 from flask import g, session
-import flask
+# import flask
 import logging
 import pyodbc
 import pandas

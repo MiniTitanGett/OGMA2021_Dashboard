@@ -7,7 +7,7 @@ stores all callbacks for the user interface
 ######################################################################################################################
 
 # External Packages
-from datetime import datetime
+# from datetime import datetime
 
 import dash
 import dash_html_components as html
@@ -25,7 +25,7 @@ from apps.OPG001.layouts import get_line_graph_menu, get_bar_graph_menu, get_sca
 from apps.OPG001.app import app
 from apps.OPG001.data import VIEW_CONTENT_HIDE, VIEW_CONTENT_SHOW, CUSTOMIZE_CONTENT_HIDE, CUSTOMIZE_CONTENT_SHOW, \
     DATA_CONTENT_HIDE, DATA_CONTENT_SHOW, get_label, LAYOUT_CONTENT_SHOW, LAYOUT_CONTENT_HIDE, X_AXIS_OPTIONS, \
-    session, BAR_X_AXIS_OPTIONS, create_categories, generate_constants, dataset_to_df
+    session, BAR_X_AXIS_OPTIONS, generate_constants, dataset_to_df
 
 
 # Contents:
@@ -431,7 +431,6 @@ for x in range(4):
         """
         :param selected_graph_type: Selected graph type, ie. 'bar', 'line', etc.
         :param graph_options_state: State of the current graph options div
-        :param input_tiles: List of the states of the classNames of all existing tiles
         :return: Graph menu corresponding to selected graph type
         """
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
@@ -809,7 +808,7 @@ for x in range(4):
     )
     def _highlight_child_tiles(sidebar_styles, sidebar_style, master_sidebar_style, link_state):
         """
-        :param _sidebar_styles: Detects hiding/showing of data side-menus
+        :param sidebar_styles: Detects hiding/showing of data side-menus
         :param sidebar_style: State of the style of the data side-menu
         :param master_sidebar_style: State of the style of the parent data side-menu
         :param link_state: State of the link/unlink icon

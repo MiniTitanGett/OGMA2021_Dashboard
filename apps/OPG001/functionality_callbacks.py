@@ -332,14 +332,14 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
     # 'Select Range' was selected
     else:
         # tabs are unselected and enabled unless otherwise specified
-        year_className = quarter_className = month_className = week_className = 'date-picker-nav'
+        year_classname = quarter_classname = month_classname = week_classname = 'date-picker-nav'
         year_disabled = quarter_disabled = month_disabled = week_disabled = False
         # secondary input boxes do not exist if inside of year tab - their data is None unless otherwise specified
         fringe_min = fringe_max = selected_secondary_min = selected_secondary_max = default_max = None
         # if tabs do not exist or the 'year' tab was requested or year type changed,
         # generate the tabs with the 'year' tab as active
         if 'radio-timeframe' in changed_id or 'date-picker-year-button' in changed_id:
-            year_className = 'date-picker-nav-selected'
+            year_classname = 'date-picker-nav-selected'
             year_disabled = True
             # use the year scheme (gregorian/fiscal) selected by the user
             if fiscal_toggle == 'Gregorian':
@@ -371,9 +371,9 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
         # if a tab was requested other than 'year', generate the default appearance of the selected tab
         elif 'n_clicks' in changed_id:
             conditions = ['date-picker-quarter-button' in changed_id, 'date-picker-month-button' in changed_id]
-            quarter_className, quarter_disabled, month_className, month_disabled, week_className, week_disabled, \
-            fringe_min, fringe_max, default_max, max_year, \
-            new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
+            quarter_classname, quarter_disabled, month_classname, month_disabled, week_classname, week_disabled, \
+                fringe_min, fringe_max, default_max, max_year, \
+                new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
             # set min_year according to user selected fiscal/gregorian time type
             if fiscal_toggle == 'Gregorian':
                 min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
@@ -417,7 +417,7 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
             selected_max_year = end_year_selection
             # if inside of year tab
             if tab == 'Year':
-                year_className = 'date-picker-nav-selected'
+                year_classname = 'date-picker-nav-selected'
                 year_disabled = True
                 if fiscal_toggle == 'Gregorian':
                     max_year = df_const[df_name]['GREGORIAN_YEAR_MAX']
@@ -428,9 +428,9 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                 selected_secondary_min = start_secondary_selection
                 selected_secondary_max = end_secondary_selection
                 conditions = [tab == 'Quarter', tab == 'Month']
-                quarter_className, quarter_disabled, month_className, month_disabled, week_className, week_disabled, \
-                fringe_min, fringe_max, default_max, max_year, \
-                new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
+                quarter_classname, quarter_disabled, month_classname, month_disabled, week_classname, week_disabled, \
+                    fringe_min, fringe_max, default_max, max_year, \
+                    new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
             # set min_year according to user selected time type (gregorian/fiscal)
             if fiscal_toggle == 'Gregorian':
                 min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
@@ -471,16 +471,16 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
         bottom = '0' if not fringe_min else '17px'
         children = [
             html.Header([
-                html.Button(get_label("LBL_Year"), className=year_className,
+                html.Button(get_label("LBL_Year"), className=year_classname,
                             id={'type': 'date-picker-year-button', 'index': tile},
                             disabled=year_disabled),
-                html.Button(get_label("LBL_Quarter"), className=quarter_className,
+                html.Button(get_label("LBL_Quarter"), className=quarter_classname,
                             id={'type': 'date-picker-quarter-button', 'index': tile},
                             disabled=quarter_disabled),
-                html.Button(get_label("LBL_Month"), className=month_className,
+                html.Button(get_label("LBL_Month"), className=month_classname,
                             id={'type': 'date-picker-month-button', 'index': tile},
                             disabled=month_disabled),
-                html.Button(get_label("LBL_Week"), className=week_className,
+                html.Button(get_label("LBL_Week"), className=week_classname,
                             id={'type': 'date-picker-week-button', 'index': tile},
                             disabled=week_disabled)
             ], style={'display': 'inline-block', 'width': '100%'}),
@@ -687,4 +687,4 @@ for x in range(4):
                 inplace=False)
 
         return dff.iloc[page_current * page_size: (page_current + 1) * page_size].to_dict('records'), \
-               math.ceil(dff.iloc[:, 0].size / page_size)
+            math.ceil(dff.iloc[:, 0].size / page_size)

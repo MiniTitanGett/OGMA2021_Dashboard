@@ -804,7 +804,7 @@ for x in range(4):
         [State({'type': 'data-tile', 'index': x}, 'style'),
          State({'type': 'data-tile', 'index': 4}, 'style'),
          State({'type': 'tile-link', 'index': x}, 'className')],
-        prevent_initial_call=True
+        # prevent_initial_call=True
     )
     def _highlight_child_tiles(sidebar_styles, sidebar_style, master_sidebar_style, link_state):
         """

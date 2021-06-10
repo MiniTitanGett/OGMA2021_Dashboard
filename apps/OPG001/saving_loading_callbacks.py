@@ -827,7 +827,7 @@ def _load_select_range_inputs(tile_tab, dashboard_tab, tile_start_year, tile_end
     [Output({'type': 'set-tile-title-trigger', 'index': MATCH}, 'data-tile_load_title'),
      Output({'type': 'tile-customize-content', 'index': MATCH}, 'children'),
      Output({'type': 'data-menu-tile-loading', 'index': MATCH}, 'children'),
-     Output({'type': 'reset-selected-layout', 'index': MATCH}, 'data-'),
+     Output({'type': 'select-layout-dropdown', 'index': MATCH}, 'value'),
      Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-tab'),
      Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-start_year'),
      Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-end_year'),
@@ -840,7 +840,7 @@ def _load_select_range_inputs(tile_tab, dashboard_tab, tile_start_year, tile_end
 def _load_tile_layout(selected_layout, df_const):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
-    if changed_id == '.' or selected_layout == '' or selected_layout is None:
+    if changed_id == '.' or selected_layout is None:
         raise PreventUpdate
 
     tile = int(search(r'\d+', changed_id).group())
@@ -894,22 +894,7 @@ def _load_tile_layout(selected_layout, df_const):
 
     # UPDATED the first output, previously was selected_layout
     return saved_layouts[selected_layout][
-               'Title'], customize_content, data_content, 1, tab, start_year, end_year, start_secondary, end_secondary
-
-
-# resets selected layout dropdown value to ''
-@app.callback(
-    Output({'type': 'select-layout-dropdown', 'index': MATCH}, 'value'),
-    [Input({'type': 'reset-selected-layout', 'index': MATCH}, 'data-')],
-    prevent_initial_call=True
-)
-def _reset_selected_layout(trigger):
-    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-
-    if changed_id == '.':
-        raise PreventUpdate
-
-    return ''
+               'Title'], customize_content, data_content, None, tab, start_year, end_year, start_secondary, end_secondary
 
 
 # *********************************************DASHBOARD LOADING*****************************************************
@@ -924,41 +909,38 @@ def _reset_selected_layout(trigger):
      Output('div-body-wrapper', 'children'),
      # data tile 0
      Output({'type': 'data-menu-dashboard-loading', 'index': 0}, 'children'),
-     Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-tab'),
      Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-start_year'),
      Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-end_year'),
      Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-start_secondary'),
      Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-end_secondary'),
      # data tile 1
      Output({'type': 'data-menu-dashboard-loading', 'index': 1}, 'children'),
-     Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-tab'),
      Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-start_year'),
      Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-end_year'),
      Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-start_secondary'),
      Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-end_secondary'),
      # data tile 2
      Output({'type': 'data-menu-dashboard-loading', 'index': 2}, 'children'),
-     Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-tab'),
      Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-start_year'),
      Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-end_year'),
      Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-start_secondary'),
      Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-end_secondary'),
      # data tile 3
      Output({'type': 'data-menu-dashboard-loading', 'index': 3}, 'children'),
-     Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-tab'),
      Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-start_year'),
      Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-end_year'),
      Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-start_secondary'),
      Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-end_secondary'),
      # data tile 4
      Output({'type': 'data-menu-dashboard-loading', 'index': 4}, 'children'),
-     Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-tab'),
      Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-start_year'),
      Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-end_year'),
      Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-start_secondary'),
      Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-end_secondary'),
      # num tiles update
-     Output('num-tiles-4', 'data-num-tiles')],
+     Output('num-tiles-4', 'data-num-tiles'),
+     # reset select-dashboard-dropdown
+     Output('select-dashboard-dropdown', 'value')],
     [Input('select-dashboard-dropdown', 'value')],
     [State('df-constants-storage', 'data')],
     prevent_initial_call=True
@@ -1038,9 +1020,6 @@ def _load_dashboard_layout(selected_dashboard, df_const):
             tile_key = {'Tile Title': tile_title, 'Link': link_state, 'Customize Content': customize_content}
             tile_keys[tile_index] = tile_key
 
-            # set date tab selection to '' to trigger _update_datepicker() --> _update_graph()
-            dms[tile_index]['Tab'] = ''
-
             # if tile is unlinked, or linked while the master does not exist, create data menu
             if link_state == 'fa fa-unlink' or (link_state == 'fa fa-link' and dms[4]['Content'] == no_update):
 
@@ -1057,7 +1036,7 @@ def _load_dashboard_layout(selected_dashboard, df_const):
                     tile=data_index, df_name=df_name, mode='dashboard-loading', hierarchy_toggle=hierarchy_toggle,
                     level_value=level_value, nid_path=nid_path,
                     graph_all_toggle=graph_all_toggle, fiscal_toggle=fiscal_toggle, input_method=timeframe,
-                    num_periods=num_periods, period_type=period_type)
+                    num_periods=num_periods, period_type=period_type, df_const=df_const)
 
                 if timeframe == 'select-range':
                     dms[data_index]['Tab'] = tile_data['Date Tab']
@@ -1072,34 +1051,19 @@ def _load_dashboard_layout(selected_dashboard, df_const):
 
             children,
 
-            dms[0]['Content'],
-            dms[0]['Tab'], dms[0]['Start Year'], dms[0]['End Year'], dms[0]['Start Secondary'], dms[0]['End Secondary'],
+            dms[0]['Content'], dms[0]['Start Year'], dms[0]['End Year'], dms[0]['Start Secondary'],
+            dms[0]['End Secondary'],
 
-            dms[1]['Content'],
-            dms[1]['Tab'], dms[1]['Start Year'], dms[1]['End Year'], dms[1]['Start Secondary'], dms[1]['End Secondary'],
+            dms[1]['Content'], dms[1]['Start Year'], dms[1]['End Year'], dms[1]['Start Secondary'],
+            dms[1]['End Secondary'],
 
-            dms[2]['Content'],
-            dms[2]['Tab'], dms[2]['Start Year'], dms[2]['End Year'], dms[2]['Start Secondary'], dms[2]['End Secondary'],
+            dms[2]['Content'], dms[2]['Start Year'], dms[2]['End Year'], dms[2]['Start Secondary'],
+            dms[2]['End Secondary'],
 
-            dms[3]['Content'],
-            dms[3]['Tab'], dms[3]['Start Year'], dms[3]['End Year'], dms[3]['Start Secondary'], dms[3]['End Secondary'],
+            dms[3]['Content'], dms[3]['Start Year'], dms[3]['End Year'], dms[3]['Start Secondary'],
+            dms[3]['End Secondary'],
 
-            dms[4]['Content'],
-            dms[4]['Tab'], dms[4]['Start Year'], dms[4]['End Year'], dms[4]['Start Secondary'], dms[4]['End Secondary'],
+            dms[4]['Content'], dms[4]['Start Year'], dms[4]['End Year'], dms[4]['Start Secondary'],
+            dms[4]['End Secondary'],
 
-            num_tiles)
-
-
-# resets selected dashboard dropdown value to ''
-@app.callback(
-    Output('select-dashboard-dropdown', 'value'),
-    [Input({'type': 'select-range-trigger', 'index': ALL}, 'data-dashboard-tab')],
-    prevent_initial_call=True
-)
-def _reset_selected_dashboard(trigger):
-    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-
-    if changed_id == '.':
-        raise PreventUpdate
-
-    return ''
+            num_tiles, '')

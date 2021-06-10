@@ -347,6 +347,8 @@ EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Animate_Over_Time',@la
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Animate_Over_Time',@language = 'Fr', @ref_desc = 'Animer au fil du temps'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Data_Accessed_On',@language = 'En', @ref_desc = 'Data accessed on'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Data_Accessed_On',@language = 'Fr', @ref_desc = 'Données consultées le'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Refresh_Data_Set',@language = 'En', @ref_desc = 'Refresh Data Set'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Refresh_Data_Set',@language = 'Fr', @ref_desc = 'Actualiser lensemble de données'
 GO
 
 DROP PROC InsertOPRef

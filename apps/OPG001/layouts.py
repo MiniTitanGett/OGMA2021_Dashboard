@@ -133,7 +133,7 @@ def get_data_set_picker(tile, df_name):
         html.Div([
             dcc.Dropdown(
                 id={'type': 'data-set', 'index': tile},
-                options=[{'label': get_label(i,'Data_Set'), 'value': i} for i in session['dataset_list']],
+                options=[{'label': get_label(i, 'Data_Set'), 'value': i} for i in session['dataset_list']],
                 value=df_name,
                 clearable=False,
                 style={'flex-grow': '1'}),
@@ -239,7 +239,6 @@ def get_layout():
 
 
 def get_layout_graph(report_name):
-
     conn = get_conn()
     query = """\
     declare @p_report_layout varchar(max)
@@ -599,7 +598,7 @@ def get_layout_dashboard():
 # ****************************************************TILE LAYOUT****************************************************
 
 # create customize content
-def get_customize_content(tile, graph_type, graph_menu,df_name):
+def get_customize_content(tile, graph_type, graph_menu, df_name):
     print("you are here in get customize")
     if df_name == 'OPG010':
         Graphs = ['Sankey']
@@ -677,7 +676,7 @@ def get_tile(tile, tile_keys=None, df_const=None, df_name=None):
                         className='fill-container')]),
             html.Div(
                 tile_keys['Customize Content'] if tile_keys else get_customize_content(
-                    tile=tile, graph_type=None, graph_menu=None ,df_name=None),
+                    tile=tile, graph_type=None, graph_menu=None, df_name=None),
                 style=CUSTOMIZE_CONTENT_HIDE,
                 id={'type': 'tile-customize-content', 'index': tile},
                 className='customize-content'),
@@ -912,8 +911,9 @@ def get_line_graph_menu(tile, x, y, measure_type, df_name, df_const):
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
-                        options=[] if df_const is None else [{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in
-                                                             X_AXIS_OPTIONS],
+                        options=[] if df_const is None else [
+                            {'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in
+                            X_AXIS_OPTIONS],
                         value=x,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -984,7 +984,8 @@ def get_bar_graph_menu(tile, x, y, measure_type, df_name, df_const):
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
-                        options=[{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in BAR_X_AXIS_OPTIONS],
+                        options=[{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in
+                                 BAR_X_AXIS_OPTIONS],
                         value=x,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -1031,7 +1032,7 @@ def get_bar_graph_menu(tile, x, y, measure_type, df_name, df_const):
                 html.Div([
                     dcc.RadioItems(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
-                        options=[{'label': get_label('LBL_'+i), 'value': i} for i in ['Vertical', 'Horizontal']],
+                        options=[{'label': get_label('LBL_' + i), 'value': i} for i in ['Vertical', 'Horizontal']],
                         value='Vertical',
                         style={'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
@@ -1074,7 +1075,8 @@ def get_scatter_graph_menu(tile, x, y, measure_type, df_name, df_const):
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
-                        options=[{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in X_AXIS_OPTIONS],
+                        options=[{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in
+                                 X_AXIS_OPTIONS],
                         value=x,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -1278,7 +1280,7 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                 html.Div([
                     dcc.RadioItems(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
-                        options=[{'label': get_label('LBL_'+i), 'value': i} for i in ['Vertical', 'Horizontal']],
+                        options=[{'label': get_label('LBL_' + i), 'value': i} for i in ['Vertical', 'Horizontal']],
                         value=graph_orientation,
                         style={'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),

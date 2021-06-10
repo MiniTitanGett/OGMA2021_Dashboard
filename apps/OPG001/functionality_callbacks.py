@@ -597,8 +597,7 @@ for x in range(4):
          State({'type': 'hierarchy_specific_dropdown', 'index': 4}, 'options'),
          # Master Data set
          State({'type': 'data-set', 'index': 4}, 'value'),
-         State('df-constants-storage', 'data')],
-        prevent_initial_call=True
+         State('df-constants-storage', 'data')]
     )
     def _update_table(page_current, page_size, sort_by, filter, graph_trigger, table_trigger, link_state, df_name,
                       secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary, end_secondary,

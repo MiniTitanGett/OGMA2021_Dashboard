@@ -13,11 +13,11 @@ import dash_html_components as html
 from dash.exceptions import PreventUpdate
 from flask import session
 import json
-import logging
+# import logging
 
 # Internal Modules
-import config
-from conn import get_conn, exec_storedproc_results
+# import config
+from conn import exec_storedproc_results
 # from apps.OPG001.app import app
 from apps.OPG001.data import GRAPH_OPTIONS, CLR, DATA_CONTENT_HIDE, VIEW_CONTENT_SHOW, BAR_X_AXIS_OPTIONS, \
     CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LAYOUT_CONTENT_HIDE, \
@@ -124,6 +124,7 @@ def recursive_to_plotly_json(document):
 def get_data_set_picker(tile, df_name):
     """
     :param tile: Index of the created data side-menu.
+    :param df_name: Dataframe name.
     :return: Drop down of the possible data sets.
     """
     return [
@@ -133,7 +134,7 @@ def get_data_set_picker(tile, df_name):
         html.Div([
             dcc.Dropdown(
                 id={'type': 'data-set', 'index': tile},
-                options=[{'label': get_label(i,'Data_Set'), 'value': i} for i in session['dataset_list']],
+                options=[{'label': get_label(i, 'Data_Set'), 'value': i} for i in session['dataset_list']],
                 value=df_name,
                 clearable=False,
                 style={'flex-grow': '1'}),
@@ -397,9 +398,9 @@ def get_layout_dashboard():
                             style={'padding': '7px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
                                    'margin-left': '10px', 'margin-right': '14px', 'display': 'inline-block',
                                    'vertical-align': 'top'})],
-                        id='dashboard-reset-symbols',
-                        style={'width': '71px', 'border': '1px solid {}'.format(CLR['lightgray']), 'margin': '2px 0',
-                               'border-radius': '6px', 'display': 'none'}),
+                             id='dashboard-reset-symbols',
+                             style={'width': '71px', 'border': '1px solid {}'.format(CLR['lightgray']),
+                                    'margin': '2px 0', 'border-radius': '6px', 'display': 'none'}),
                     style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
                            'position': 'relative', 'vertical-align': 'top'}),
                 html.Button(
@@ -611,8 +612,8 @@ def get_customize_content(tile, graph_type, graph_menu):
 
 # create default tile
 def get_tile(tile, tile_keys=None, df_const=None):
+    # :param tile: Index of the created tile.
     """
-    :param tile: Index of the created tile.
     :return: New tile with index values matching the specified tile index.
     """
     return [html.Div([
@@ -728,9 +729,9 @@ def get_tile(tile, tile_keys=None, df_const=None):
 
 # arrange tiles on the page for 1-4 tiles
 def get_tile_layout(num_tiles, input_tiles, tile_keys=None, df_const=None):
+    # :param num_tiles: Desired number of tiles to display.
+    # :param input_tiles: List of children of existing tiles.
     """
-    :param num_tiles: Desired number of tiles to display.
-    :param input_tiles: List of children of existing tiles.
     :raise IndexError: If num_tiles < 0 or num_tiles > 4
     :return: Layout of specified number of tiles.
     """
@@ -875,12 +876,12 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, df_const=None):
 
 # line graph menu layout
 def get_line_graph_menu(tile, x, y, measure_type, df_name, df_const):
+    # :param measure_type: the measure type value
+    # :param y: the y-axis value
+    # :param x: the x-axis value
+    # :param tile: Index of the tile the line graph menu corresponds to.
+    # :param df_name: Name of the data set being used.
     """
-    :param measure_type: the measure type value
-    :param y: the y-axis value
-    :param x: the x-axis value
-    :param tile: Index of the tile the line graph menu corresponds to.
-    :param df_name: Name of the data set being used.
     :return: Menu with options to modify a line graph.
     """
     # (args-value: {})[0] = x-axis
@@ -902,8 +903,8 @@ def get_line_graph_menu(tile, x, y, measure_type, df_name, df_const):
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
-                        options=[] if df_const is None else [{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in
-                                                             X_AXIS_OPTIONS],
+                        options=[] if df_const is None else [{'label': get_label('LBL_' + i.replace(' ', '_')),
+                                                              'value': i} for i in X_AXIS_OPTIONS],
                         value=x,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -945,12 +946,12 @@ def get_line_graph_menu(tile, x, y, measure_type, df_name, df_const):
 
 # bar graph menu layout
 def get_bar_graph_menu(tile, x, y, measure_type, df_name, df_const):
+    # :param measure_type: the measure type value
+    # :param y: the y-axis value
+    # :param x: the x-axis value
+    # :param tile: Index of the tile the bar graph menu corresponds to.
+    # :param df_name: Name of the data set being used.
     """
-    :param measure_type: the measure type value
-    :param y: the y-axis value
-    :param x: the x-axis value
-    :param tile: Index of the tile the bar graph menu corresponds to.
-    :param df_name: Name of the data set being used.
     :return: Menu with options to modify a bar graph.
     """
     # (args-value: {})[0] = x-axis
@@ -974,7 +975,8 @@ def get_bar_graph_menu(tile, x, y, measure_type, df_name, df_const):
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
-                        options=[{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in BAR_X_AXIS_OPTIONS],
+                        options=[{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in
+                                 BAR_X_AXIS_OPTIONS],
                         value=x,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -1037,12 +1039,12 @@ def get_bar_graph_menu(tile, x, y, measure_type, df_name, df_const):
 
 # scatter graph menu layout
 def get_scatter_graph_menu(tile, x, y, measure_type, df_name, df_const):
+    # :param measure_type: the measure type value
+    # :param y: the y-axis value
+    # :param x: the x-axis value
+    # :param tile: Index of the tile the scatter graph menu corresponds to.
+    # :param df_name: Name of the data set being used.
     """
-    :param measure_type: the measure type value
-    :param y: the y-axis value
-    :param x: the x-axis value
-    :param tile: Index of the tile the scatter graph menu corresponds to.
-    :param df_name: Name of the data set being used.
     :return: Menu with options to modify a scatter graph.
     """
     # (args-value: {})[0] = x-axis
@@ -1064,7 +1066,8 @@ def get_scatter_graph_menu(tile, x, y, measure_type, df_name, df_const):
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
-                        options=[{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in X_AXIS_OPTIONS],
+                        options=[{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in
+                                 X_AXIS_OPTIONS],
                         value=x,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -1355,10 +1358,10 @@ def get_table_graph_menu(tile, number_of_columns):
 
 # sankey menu layout
 def get_sankey_menu(tile, graphed_options, df_name, df_const):
+    # :param tile: Index of the tile the line graph menu corresponds to.
+    # :param graphed_options: the variable name
+    # :param df_name: Name of the data set being used.
     """
-    :param tile: Index of the tile the line graph menu corresponds to.
-    :param graphed_options: the variable name
-    :param df_name: Name of the data set being used.
     :return: Menu with options to modify a sankey graph.
     """
     # (args-value: {})[0] = graphed variables

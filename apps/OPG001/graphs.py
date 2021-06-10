@@ -9,7 +9,7 @@ contains functions to generate graphs
 # External Packages
 from _datetime import datetime
 from flask import session
-import numpy as np
+# import numpy as np
 import plotly.express as px
 import dash_core_components as dcc
 import dash_table
@@ -223,9 +223,9 @@ def get_line_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level
         hovertemplate = '<b>%{customdata[0]}</b><br>' if line_group else ''
         fig.update_traces(
             hovertemplate=hovertemplate +
-                          f'<b>{get_label("LBL_Date_Of_Event")}</b>' + ': %{x}<br>' +
-                          f'<b>{get_label("LBL_Measure_Value")}</b>' + ': %{y}<br>' +
-                          '<extra></extra>'
+            f'<b>{get_label("LBL_Date_Of_Event")}</b>' + ': %{x}<br>' +
+            f'<b>{get_label("LBL_Measure_Value")}</b>' + ': %{y}<br>' +
+            '<extra></extra>'
         )
         fig = set_partial_periods(fig, filtered_df, 'Line')
     else:
@@ -325,8 +325,7 @@ def get_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_le
             plot_bgcolor='rgba(0, 0, 0, 0)',
             paper_bgcolor='rgba(0, 0, 0, 0)')
         fig.update_traces(
-            hovertemplate=
-            '<b>%{customdata[0]}</b><br>' +
+            hovertemplate='<b>%{customdata[0]}</b><br>' +
             f'<b>{get_label("LBL_Date_Of_Event")}</b>' + ': %{x}<br>' +
             f'<b>{get_label("LBL_Measure_Value")}</b>' + ': %{y}<br>' +
             '<extra></extra>'
@@ -447,8 +446,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
             plot_bgcolor='rgba(0, 0, 0, 0)',
             paper_bgcolor='rgba(0, 0, 0, 0)')
         fig.update_traces(
-            hovertemplate=
-            f'<b>{arg_value[0]} {arg_value[1]}</b>' + ': %{x}<br>' +
+            hovertemplate=f'<b>{arg_value[0]} {arg_value[1]}</b>' + ': %{x}<br>' +
             f'<b>{arg_value[2]} {arg_value[3]}</b>' + ': %{y}<br>' +
             f'<b>{arg_value[4]} {arg_value[5]}</b>' + ': %{customdata[0]}<br>'
         )
@@ -574,6 +572,9 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             lambda j: get_label('LBL_TRUE') if j else get_label('LBL_FALSE'))
 
         # generate graph
+        lbl_measure_value = get_label("LBL_Measure_Value")
+        lbl_xval = get_label("LBL_" + x_val.replace(" ", "_"))
+
         fig = px.bar(
             title=title,
             data_frame=filtered_df,
@@ -589,11 +590,11 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             overwrite=True,
             plot_bgcolor='rgba(0, 0, 0, 0)',
             paper_bgcolor='rgba(0, 0, 0, 0)')
-        hovertemplate = f'<b>{get_label("LBL_" + x_val.replace(" ", "_")) if arg_value[3] == "Vertical" else get_label("LBL_Measure_Value")}</b>' + ': %{x}<br>'
+        hovertemplate = f'<b>{lbl_xval if arg_value[3] == "Vertical" else lbl_measure_value}</b>' + ': %{x}<br>'
         if hierarchy_type == "Level Filter" or (
                 hierarchy_type == "Specific Item" and hierarchy_graph_children == ["graph_children"]):
             hovertemplate += f'<b>{get_label("LBL_Date_Of_Event")}</b>' + ': %{customdata[0]}<br>'
-        hovertemplate += f'<b>{get_label("LBL_Measure_Value") if arg_value[3] == "Vertical" else get_label("LBL_" + x_val.replace(" ", "_"))}</b>' + ': %{y}<br>'
+        hovertemplate += f'<b>{lbl_measure_value if arg_value[3] == "Vertical" else lbl_xval}</b>' + ': %{y}<br>'
         fig.update_traces(hovertemplate=hovertemplate)
         fig = set_partial_periods(fig, filtered_df, 'Bar')
     # else, filtered is empty, create default empty graph
@@ -732,7 +733,11 @@ def get_animated_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                                 ignore_index=True)
         # fixes shifting indices
         filtered_df = filtered_df.sort_values(by=[x_val])
+
         # generate graph
+        lbl_measure_value = get_label("LBL_Measure_Value")
+        lbl_xval = get_label("LBL_" + x_val.replace(" ", "_"))
+
         fig = px.bar(
             title=title,
             data_frame=filtered_df,
@@ -746,20 +751,20 @@ def get_animated_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
             custom_data=['Date of Event'])
         fig.update_layout(
             yaxis={'title': arg_value[1], 'range': [0, filtered_df['Measure Value'].max()]} if arg_value[
-                                                                                                   3] == 'Vertical' else {
+                                                                                                   3] == 'Vertical'
+            else {
                 'type': 'category'},
-            xaxis={'visible': False, 'type': 'category'} if arg_value[3] == 'Vertical' else {'title': arg_value[1],
-                                                                                             'range': [0, filtered_df[
-                                                                                                 'Measure Value'].max()]},
+            xaxis={'visible': False, 'type': 'category'} if arg_value[3] == 'Vertical'
+            else {'title': arg_value[1], 'range': [0, filtered_df['Measure Value'].max()]},
             legend_title_text=legend_title_text,
             overwrite=True,
             plot_bgcolor='rgba(0, 0, 0, 0)',
             paper_bgcolor='rgba(0, 0, 0, 0)')
-        hovertemplate = f'<b>{get_label("LBL_" + x_val.replace(" ", "_")) if arg_value[3] == "Vertical" else get_label("LBL_Measure_Value")}</b>' + ': %{x}<br>'
+        hovertemplate = f'<b>{lbl_xval if arg_value[3] == "Vertical" else lbl_measure_value}</b>' + ': %{x}<br>'
         if hierarchy_type == "Level Filter" or (
                 hierarchy_type == "Specific Item" and hierarchy_graph_children == ["graph_children"]):
             hovertemplate += f'<b>{get_label("LBL_Date_Of_Event")}</b>' + ': %{customdata[0]}<br>'
-        hovertemplate += f'<b>{get_label("LBL_Measure_Value") if arg_value[3] == "Vertical" else get_label("LBL_" + x_val.replace(" ", "_"))}</b>' + ': %{y}<br>'
+        hovertemplate += f'<b>{lbl_measure_value if arg_value[3] == "Vertical" else lbl_xval}</b>' + ': %{y}<br>'
         fig.update_traces(hovertemplate=hovertemplate)
         fig = set_partial_periods(fig, filtered_df, 'Bar')
     # else, filtered is empty, create default empty graph
@@ -1015,8 +1020,8 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
 
 
 # sankey graph layout
-def get_sankey_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
-                      hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const):
+def get_sankey_figure(arg_value, dff, hierarchy_level_dropdown, hierarchy_path, hierarchy_type,
+                      hierarchy_graph_children, tile_title, df_name, df_const):
     # arg_value[0] = xaxis selector
     # arg_value[1] = measure type selector
     # arg_value[2] = variable names selector
@@ -1096,8 +1101,8 @@ def get_sankey_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
             value=value_numpy,  # value=[8, 4, 2, 8, 4, 2]
             # customdata
             hovertemplate=get_label('Link from node') + ' %{source.customdata}<br />' +  # TODO get label
-                          get_label('to node') + ' %{target.customdata}<br />' +  # TODO get label
-                          get_label('has value') + ' %{value}',  # TODO get label
+            get_label('to node') + ' %{target.customdata}<br />' +  # TODO get label
+            get_label('has value') + ' %{value}',  # TODO get label
             color=link_colour_numpy
             # label
         )
@@ -1214,9 +1219,8 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
 
     # sankey creation
     elif graph_type == 'Sankey':
-        return get_sankey_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
-                                 list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
-                                 df_const)
+        return get_sankey_figure(graph_options, filtered_df, hierarchy_level_dropdown, list_of_names, hierarchy_toggle,
+                                 hierarchy_graph_children, graph_title, df_name, df_const)
 
     # catch all
     else:

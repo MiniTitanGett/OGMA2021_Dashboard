@@ -322,7 +322,8 @@ def get_dashboard_title_input(title=''):
         id='dashboard-title',
         placeholder=get_label('LBL_Enter_Dashboard_Title'),
         value=title,
-        className='dashboard-title')
+        className='dashboard-title',
+        debounce=True)
 
 
 # defines entire dashboard layout
@@ -624,7 +625,8 @@ def get_tile(tile, tile_keys=None, df_const=None):
                     id={'type': 'tile-title', 'index': tile},
                     placeholder=get_label('LBL_Enter_Graph_Title'),
                     value=tile_keys['Tile Title'] if tile_keys else '',
-                    className='tile-title'),
+                    className='tile-title',
+                    debounce=True),
                 html.Button(
                     [get_label('LBL_View')],
                     id={'type': 'tile-view', 'index': tile},
@@ -1315,7 +1317,8 @@ def get_table_graph_menu(tile, number_of_columns):
                         value=number_of_columns,
                         min=10,
                         max=100,
-                        style={'width': '80%', 'max-width': '350px'})],
+                        style={'width': '80%', 'max-width': '350px'},
+                        debounce=True)],
                     style={'display': 'inline-block'})]),
             html.P(
                 "{}:".format(get_label('LBL_How_To_Filter_The_Table')),

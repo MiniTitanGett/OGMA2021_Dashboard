@@ -435,6 +435,9 @@ for x in range(4):
         """
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
+        if link_state == 'fa fa-link':
+            df_name = master_df_name
+
         # if link state has changed from linked --> unlinked the data has not changed, prevent update
         if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink':
             raise PreventUpdate
@@ -450,9 +453,6 @@ for x in range(4):
         # if changed id == '.' and the graph menu already exists, prevent update
         if changed_id == '.' and graph_options_state or df_const is None or df_name not in df_const :
             raise PreventUpdate
-
-        if link_state == 'fa fa-link':
-            df_name = master_df_name
 
         tile = int(dash.callback_context.inputs_list[0]['id']['index'])
 

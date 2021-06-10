@@ -91,9 +91,9 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                            'display': 'inline-block', 'text-align': 'center', 'border-radius': '0', 'color': '#333'})
             ], style={'width': '0', 'height': '0', 'position': 'relative', 'bottom': '55px',
                       'left': '125px' if language == 'En' else '150px'}),
-            html.P( # TODO: MIN_DATE_UNF and etc are strings and need to be treated as such
-                "{}: {} - {}".format(get_label('LBL_Available'), df_const[df_name]['MIN_DATE_UNF'].strftime('%m/%d/%Y'),
-                                     df_const[df_name]['MAX_DATE_UNF'].strftime('%m/%d/%Y')),
+            html.P(
+                "{}: {} - {}".format(get_label('LBL_Available'), df_const[df_name]['MIN_DATE_UNF'],
+                                     df_const[df_name]['MAX_DATE_UNF']),
                 style={'margin-top': '10px', 'text-align': 'center', 'font-size': '85%', 'color': CLR['text1']}),
             html.Div([
                 # placeholders for datepicker inputs to avoid callback errors. Inputs are initialized to 1 so that they are

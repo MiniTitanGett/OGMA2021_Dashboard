@@ -14,7 +14,7 @@ from dash.exceptions import PreventUpdate
 from re import search
 from dash import no_update
 import dash_html_components as html
-import regex
+# import regex
 
 # Internal Packages
 from apps.OPG001.layouts import get_data_menu, get_customize_content, get_div_body
@@ -22,7 +22,6 @@ from apps.OPG001.app import app
 from apps.OPG001.data import get_label, saved_layouts, saved_dashboards, CLR
 from apps.OPG001.saving_functions import delete_layout, save_layout_state, save_layout_to_db, \
     save_dashboard_state, save_dashboard_to_db, delete_dashboard, load_graph_menu
-
 
 #   SAVING
 #       - _save_tile()
@@ -37,13 +36,16 @@ from apps.OPG001.saving_functions import delete_layout, save_layout_state, save_
 REPORT_POINTER_PREFIX = 'Report_Ext_'
 DASHBOARD_POINTER_PREFIX = 'Dashboard_Ext_'
 
+
 # ************************************SHARED TILE LOADING/DASHBOARD SAVING*******************************************
+
 
 # load the tile title
 @app.callback(
     Output({'type': 'tile-title', 'index': MATCH}, 'value'),
     [Input({'type': 'set-tile-title-trigger', 'index': MATCH}, 'data-tile_load_title'),
-     Input({'type': 'set-tile-title-trigger', 'index': MATCH}, 'data-dashboard_load_title')]
+     Input({'type': 'set-tile-title-trigger', 'index': MATCH}, 'data-dashboard_load_title')],
+    prevent_initial_call=True
 )
 def _load_tile_title(tile_load_title, dashboard_load_title):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
@@ -67,7 +69,8 @@ def _load_tile_title(tile_load_title, dashboard_load_title):
      Output({'type': 'delete-layout-dropdown', 'index': ALL}, 'options')],
     [Input({'type': 'set-dropdown-options-trigger', 'index': ALL}, 'data-tile_saving'),
      Input({'type': 'set-dropdown-options-trigger', 'index': 0}, 'data-dashboard_saving')],
-    [State({'type': 'tile-link', 'index': ALL}, 'className')]
+    [State({'type': 'tile-link', 'index': ALL}, 'className')],
+    prevent_initial_call=True
 )
 def _update_tile_loading_dropdown_options(tile_saving_trigger, dashboard_saving_trigger, links):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
@@ -88,7 +91,8 @@ def _update_tile_loading_dropdown_options(tile_saving_trigger, dashboard_saving_
     [Input({'type': 'save-button', 'index': ALL}, 'n_clicks'),
      Input({'type': 'confirm-delete-button', 'index': ALL}, 'n_clicks'),
      Input({'type': 'confirm-tile-overwrite', 'index': ALL}, 'n_clicks'),
-     Input({'type': 'cancel-tile-overwrite', 'index': ALL}, 'n_clicks')]
+     Input({'type': 'cancel-tile-overwrite', 'index': ALL}, 'n_clicks')],
+    prevent_initial_call=True
 )
 def _manage_tile_saves_trigger(save_clicks, delete_clicks, confirm_tile_overwrite, cancel_tile_overwrite):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
@@ -166,7 +170,8 @@ for y in range(0, 4):
          State({'type': 'end-secondary-input', 'index': y}, 'value'),
          State({'type': 'num-periods', 'index': y}, 'value'),
          State({'type': 'period-type', 'index': y}, 'value'),
-         State({'type': 'start-year-input', 'index': y}, 'name')]
+         State({'type': 'start-year-input', 'index': y}, 'name')],
+        prevent_initial_call=True
     )
     def _manage_tile_saves(trigger, remove_layout, graph_title, link_state, graph_type, args_list, df_name,
                            master_df_name, master_year_start, master_year_end, master_hierarchy_toggle,
@@ -210,7 +215,8 @@ for y in range(0, 4):
 
             tile = int(dash.callback_context.inputs_list[0]['id']['index'])
 
-            intermediate_pointer = REPORT_POINTER_PREFIX + graph_title.replace(" ", "")  # regex.sub('[^A-Za-z0-9]+', '', graph_title)
+            intermediate_pointer = REPORT_POINTER_PREFIX + graph_title.replace(" ",
+                                                                               "")  # regex.sub('[^A-Za-z0-9]+', '', graph_title)
 
             graph_titles = []
 
@@ -445,7 +451,8 @@ for y in range(0, 4):
      State({'type': 'start-year-input', 'index': 1}, 'name'),
      State({'type': 'start-year-input', 'index': 2}, 'name'),
      State({'type': 'start-year-input', 'index': 3}, 'name'),
-     State({'type': 'start-year-input', 'index': 4}, 'name')]
+     State({'type': 'start-year-input', 'index': 4}, 'name')],
+    prevent_initial_call=True
 )
 def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
                    remove_dashboard, dashboard_title, tile_titles, links, graph_types,
@@ -478,7 +485,8 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
     # if save requested or the overwrite was confirmed, check for exceptions and save
     if 'button-save-dashboard' in changed_id or '{"index":0,"type":"dashboard-overwrite"}.n_clicks' == changed_id:
 
-        intermediate_dashboard_pointer = DASHBOARD_POINTER_PREFIX + dashboard_title.replace(" ", "")  # regex.sub('[^A-Za-z0-9]+', '', dashboard_title)
+        intermediate_dashboard_pointer = DASHBOARD_POINTER_PREFIX + dashboard_title.replace(" ",
+                                                                                            "")  # regex.sub('[^A-Za-z0-9]+', '', dashboard_title)
 
         while True:
             if intermediate_dashboard_pointer in saved_layouts:
@@ -551,7 +559,8 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
                 # else, just conflicting graph titles
                 else:
                     overwrite_tooltip = "{} {}".format(
-                        get_label('LBL_Overwrite_Graphs' if len(conflicting_graphs_list) > 1 else 'LBL_Overwrite_Graph'),
+                        get_label(
+                            'LBL_Overwrite_Graphs' if len(conflicting_graphs_list) > 1 else 'LBL_Overwrite_Graph'),
                         conflicting_graphs)
 
             # else, just conflicting dashboard title
@@ -658,7 +667,8 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
 
             for i in range(len(links)):
 
-                intermediate_pointer = REPORT_POINTER_PREFIX + tile_titles[i].replace(" ", "")  # regex.sub('[^A-Za-z0-9]+', '', tile_titles[i])
+                intermediate_pointer = REPORT_POINTER_PREFIX + tile_titles[i].replace(" ",
+                                                                                      "")  # regex.sub('[^A-Za-z0-9]+', '', tile_titles[i])
 
                 used_titles = []
 
@@ -780,7 +790,8 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
      State({'type': 'select-range-trigger', 'index': MATCH}, 'data-dashboard-start_year'),
      State({'type': 'select-range-trigger', 'index': MATCH}, 'data-dashboard-end_year'),
      State({'type': 'select-range-trigger', 'index': MATCH}, 'data-dashboard-start_secondary'),
-     State({'type': 'select-range-trigger', 'index': MATCH}, 'data-dashboard-end_secondary')]
+     State({'type': 'select-range-trigger', 'index': MATCH}, 'data-dashboard-end_secondary')],
+    prevent_initial_call=True
 )
 def _load_select_range_inputs(tile_tab, dashboard_tab, tile_start_year, tile_end_year, tile_start_secondary,
                               tile_end_secondary, dashboard_start_year, dashboard_end_year, dashboard_start_secondary,
@@ -816,19 +827,20 @@ def _load_select_range_inputs(tile_tab, dashboard_tab, tile_start_year, tile_end
     [Output({'type': 'set-tile-title-trigger', 'index': MATCH}, 'data-tile_load_title'),
      Output({'type': 'tile-customize-content', 'index': MATCH}, 'children'),
      Output({'type': 'data-menu-tile-loading', 'index': MATCH}, 'children'),
-     Output({'type': 'reset-selected-layout', 'index': MATCH}, 'data-'),
+     Output({'type': 'select-layout-dropdown', 'index': MATCH}, 'value'),
      Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-tab'),
      Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-start_year'),
      Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-end_year'),
      Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-start_secondary'),
      Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-end_secondary')],
     [Input({'type': 'select-layout-dropdown', 'index': MATCH}, 'value')],
-    [State('df-constants-storage', 'data')]
+    [State('df-constants-storage', 'data')],
+    prevent_initial_call=True
 )
 def _load_tile_layout(selected_layout, df_const):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
-    if changed_id == '.' or selected_layout == '' or selected_layout is None:
+    if changed_id == '.' or selected_layout is None or selected_layout is '':
         raise PreventUpdate
 
     tile = int(search(r'\d+', changed_id).group())
@@ -882,21 +894,7 @@ def _load_tile_layout(selected_layout, df_const):
 
     # UPDATED the first output, previously was selected_layout
     return saved_layouts[selected_layout][
-               'Title'], customize_content, data_content, 1, tab, start_year, end_year, start_secondary, end_secondary
-
-
-# resets selected layout dropdown value to ''
-@app.callback(
-    Output({'type': 'select-layout-dropdown', 'index': MATCH}, 'value'),
-    [Input({'type': 'reset-selected-layout', 'index': MATCH}, 'data-')]
-)
-def _reset_selected_layout(trigger):
-    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-
-    if changed_id == '.':
-        raise PreventUpdate
-
-    return ''
+               'Title'], customize_content, data_content, None, tab, start_year, end_year, start_secondary, end_secondary
 
 
 # *********************************************DASHBOARD LOADING*****************************************************
@@ -911,43 +909,41 @@ def _reset_selected_layout(trigger):
      Output('div-body-wrapper', 'children'),
      # data tile 0
      Output({'type': 'data-menu-dashboard-loading', 'index': 0}, 'children'),
-     Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-tab'),
      Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-start_year'),
      Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-end_year'),
      Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-start_secondary'),
      Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-end_secondary'),
      # data tile 1
      Output({'type': 'data-menu-dashboard-loading', 'index': 1}, 'children'),
-     Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-tab'),
      Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-start_year'),
      Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-end_year'),
      Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-start_secondary'),
      Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-end_secondary'),
      # data tile 2
      Output({'type': 'data-menu-dashboard-loading', 'index': 2}, 'children'),
-     Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-tab'),
      Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-start_year'),
      Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-end_year'),
      Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-start_secondary'),
      Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-end_secondary'),
      # data tile 3
      Output({'type': 'data-menu-dashboard-loading', 'index': 3}, 'children'),
-     Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-tab'),
      Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-start_year'),
      Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-end_year'),
      Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-start_secondary'),
      Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-end_secondary'),
      # data tile 4
      Output({'type': 'data-menu-dashboard-loading', 'index': 4}, 'children'),
-     Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-tab'),
      Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-start_year'),
      Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-end_year'),
      Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-start_secondary'),
      Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-end_secondary'),
      # num tiles update
-     Output('num-tiles-4', 'data-num-tiles')],
+     Output('num-tiles-4', 'data-num-tiles'),
+     # reset select-dashboard-dropdown
+     Output('select-dashboard-dropdown', 'value')],
     [Input('select-dashboard-dropdown', 'value')],
-    [State('df-constants-storage', 'data')]
+    [State('df-constants-storage', 'data')],
+    prevent_initial_call=True
 )
 def _load_dashboard_layout(selected_dashboard, df_const):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
@@ -1024,9 +1020,6 @@ def _load_dashboard_layout(selected_dashboard, df_const):
             tile_key = {'Tile Title': tile_title, 'Link': link_state, 'Customize Content': customize_content}
             tile_keys[tile_index] = tile_key
 
-            # set date tab selection to '' to trigger _update_datepicker() --> _update_graph()
-            dms[tile_index]['Tab'] = ''
-
             # if tile is unlinked, or linked while the master does not exist, create data menu
             if link_state == 'fa fa-unlink' or (link_state == 'fa fa-link' and dms[4]['Content'] == no_update):
 
@@ -1043,7 +1036,7 @@ def _load_dashboard_layout(selected_dashboard, df_const):
                     tile=data_index, df_name=df_name, mode='dashboard-loading', hierarchy_toggle=hierarchy_toggle,
                     level_value=level_value, nid_path=nid_path,
                     graph_all_toggle=graph_all_toggle, fiscal_toggle=fiscal_toggle, input_method=timeframe,
-                    num_periods=num_periods, period_type=period_type)
+                    num_periods=num_periods, period_type=period_type, df_const=df_const)
 
                 if timeframe == 'select-range':
                     dms[data_index]['Tab'] = tile_data['Date Tab']
@@ -1058,33 +1051,19 @@ def _load_dashboard_layout(selected_dashboard, df_const):
 
             children,
 
-            dms[0]['Content'],
-            dms[0]['Tab'], dms[0]['Start Year'], dms[0]['End Year'], dms[0]['Start Secondary'], dms[0]['End Secondary'],
+            dms[0]['Content'], dms[0]['Start Year'], dms[0]['End Year'], dms[0]['Start Secondary'],
+            dms[0]['End Secondary'],
 
-            dms[1]['Content'],
-            dms[1]['Tab'], dms[1]['Start Year'], dms[1]['End Year'], dms[1]['Start Secondary'], dms[1]['End Secondary'],
+            dms[1]['Content'], dms[1]['Start Year'], dms[1]['End Year'], dms[1]['Start Secondary'],
+            dms[1]['End Secondary'],
 
-            dms[2]['Content'],
-            dms[2]['Tab'], dms[2]['Start Year'], dms[2]['End Year'], dms[2]['Start Secondary'], dms[2]['End Secondary'],
+            dms[2]['Content'], dms[2]['Start Year'], dms[2]['End Year'], dms[2]['Start Secondary'],
+            dms[2]['End Secondary'],
 
-            dms[3]['Content'],
-            dms[3]['Tab'], dms[3]['Start Year'], dms[3]['End Year'], dms[3]['Start Secondary'], dms[3]['End Secondary'],
+            dms[3]['Content'], dms[3]['Start Year'], dms[3]['End Year'], dms[3]['Start Secondary'],
+            dms[3]['End Secondary'],
 
-            dms[4]['Content'],
-            dms[4]['Tab'], dms[4]['Start Year'], dms[4]['End Year'], dms[4]['Start Secondary'], dms[4]['End Secondary'],
+            dms[4]['Content'], dms[4]['Start Year'], dms[4]['End Year'], dms[4]['Start Secondary'],
+            dms[4]['End Secondary'],
 
-            num_tiles)
-
-
-# resets selected dashboard dropdown value to ''
-@app.callback(
-    Output('select-dashboard-dropdown', 'value'),
-    [Input({'type': 'select-range-trigger', 'index': ALL}, 'data-dashboard-tab')]
-)
-def _reset_selected_dashboard(trigger):
-    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-
-    if changed_id == '.':
-        raise PreventUpdate
-
-    return ''
+            num_tiles, '')

@@ -92,11 +92,12 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
             ], style={'width': '0', 'height': '0', 'position': 'relative', 'bottom': '55px',
                       'left': '125px' if language == 'En' else '150px'}),
             html.P(
-                "{}: {} - {}".format(get_label('LBL_Available'), df_const[df_name]['MIN_DATE_UNF'].strftime('%m/%d/%Y'),
-                                     df_const[df_name]['MAX_DATE_UNF'].strftime('%m/%d/%Y')),
+                "{}: {} - {}".format(get_label('LBL_Available'), df_const[df_name]['MIN_DATE_UNF'],
+                                     df_const[df_name]['MAX_DATE_UNF']),
                 style={'margin-top': '10px', 'text-align': 'center', 'font-size': '85%', 'color': CLR['text1']}),
             html.Div([
-                # placeholders for datepicker inputs to avoid callback errors. Inputs are initialized to 1 so that they are
+                # placeholders for datepicker inputs to avoid callback errors.
+                # Inputs are initialized to 1 so that they are
                 # only 'None' if an invalid date has been entered.
                 html.Div([
                     html.Button(id={'type': 'date-picker-year-button', 'index': tile}),
@@ -294,7 +295,7 @@ def get_secondary_data(conditions, fiscal_toggle, df_name, df_const):
         else:
             fringe_max += 1
     return quarter_class_name, quarter_disabled, month_class_name, month_disabled, week_class_name, week_disabled, \
-           fringe_min, fringe_max, default_max, max_year, new_tab
+        fringe_min, fringe_max, default_max, max_year, new_tab
 
 
 # create left and right columns for tabs with secondary time options (beneath years)

@@ -27,6 +27,7 @@ app = app.get_app('OPG001/')
 app.layout = get_layout
 
 # We import callbacks after setting the layout to avoid callback exception errors w/o suppressing
+# These are used by Dash so ignore the PyCharm warnings
 import apps.OPG001.user_interface_callbacks
 import apps.OPG001.functionality_callbacks
 import apps.OPG001.saving_loading_callbacks

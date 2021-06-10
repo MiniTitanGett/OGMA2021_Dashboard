@@ -11,12 +11,12 @@ from datetime import datetime, timedelta
 import numpy as np
 # External Packages
 import pandas as pd
-import pyodbc
+# import pyodbc
 import logging
 from dateutil.relativedelta import relativedelta
 from flask import session
 
-import config
+# import config
 from conn import get_ref, exec_storedproc_results
 
 # Contents:
@@ -52,7 +52,7 @@ from conn import get_ref, exec_storedproc_results
 
 # ***********************************************ARBITRARY CONSTANTS*************************************************
 
-GRAPH_OPTIONS = ['Line', 'Bar', 'Scatter', 'Bubble', 'Box_Plot', 'Table','Sankey']
+GRAPH_OPTIONS = ['Line', 'Bar', 'Scatter', 'Bubble', 'Box_Plot', 'Table', 'Sankey']
 
 X_AXIS_OPTIONS = ['Time']
 
@@ -139,27 +139,27 @@ def dataset_to_df(df_name):
         """.format(session["sessionID"], session["language"], df_name.split('.')[0])
 
         df = exec_storedproc_results(query)
-        df[['Year of Event'
-            , 'Quarter'
-            , 'Month of Event'
-            , 'Week of Event'
-            , 'Fiscal Year of Event'
-            , 'Fiscal Quarter'
-            , 'Fiscal Month of Event'
-            , 'Fiscal Week of Event'
-            , 'Julian Day'
-            , 'Activity Event Id'
-            , 'Measure Value']] = df[['Year of Event'
-            , 'Quarter'
-            , 'Month of Event'
-            , 'Week of Event'
-            , 'Fiscal Year of Event'
-            , 'Fiscal Quarter'
-            , 'Fiscal Month of Event'
-            , 'Fiscal Week of Event'
-            , 'Julian Day'
-            , 'Activity Event Id'
-            , 'Measure Value']].apply(pd.to_numeric)
+        df[['Year of Event',
+            'Quarter',
+            'Month of Event',
+            'Week of Event',
+            'Fiscal Year of Event',
+            'Fiscal Quarter',
+            'Fiscal Month of Event',
+            'Fiscal Week of Event',
+            'Julian Day',
+            'Activity Event Id',
+            'Measure Value']] = df[['Year of Event',
+                                    'Quarter',
+                                    'Month of Event',
+                                    'Week of Event',
+                                    'Fiscal Year of Event',
+                                    'Fiscal Quarter',
+                                    'Fiscal Month of Event',
+                                    'Fiscal Week of Event',
+                                    'Julian Day',
+                                    'Activity Event Id',
+                                    'Measure Value']].apply(pd.to_numeric)
     else:
         # conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
         # sql_query = pd.read_sql_query(
@@ -174,27 +174,27 @@ def dataset_to_df(df_name):
         """.format(session["sessionID"], session["language"], df_name)
 
         df = exec_storedproc_results(query)
-        df[['Year of Event'
-            , 'Quarter'
-            , 'Month of Event'
-            , 'Week of Event'
-            , 'Fiscal Year of Event'
-            , 'Fiscal Quarter'
-            , 'Fiscal Month of Event'
-            , 'Fiscal Week of Event'
-            , 'Julian Day'
-            , 'Activity Event Id'
-            , 'Measure Value']] = df[['Year of Event'
-            , 'Quarter'
-            , 'Month of Event'
-            , 'Week of Event'
-            , 'Fiscal Year of Event'
-            , 'Fiscal Quarter'
-            , 'Fiscal Month of Event'
-            , 'Fiscal Week of Event'
-            , 'Julian Day'
-            , 'Activity Event Id'
-            , 'Measure Value']].apply(pd.to_numeric)
+        df[['Year of Event',
+            'Quarter',
+            'Month of Event',
+            'Week of Event',
+            'Fiscal Year of Event',
+            'Fiscal Quarter',
+            'Fiscal Month of Event',
+            'Fiscal Week of Event',
+            'Julian Day',
+            'Activity Event Id',
+            'Measure Value']] = df[['Year of Event',
+                                    'Quarter',
+                                    'Month of Event',
+                                    'Week of Event',
+                                    'Fiscal Year of Event',
+                                    'Fiscal Quarter',
+                                    'Fiscal Month of Event',
+                                    'Fiscal Week of Event',
+                                    'Julian Day',
+                                    'Activity Event Id',
+                                    'Measure Value']].apply(pd.to_numeric)
 
     # add all variable names without qualifiers to col
     col = pd.Series(df['Variable Name'][df['Variable Name Qualifier'].isna()])
@@ -312,7 +312,7 @@ def generate_constants(df_name):
         MIN_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(),
                                                 'Date of Event'], '%Y/%m/%d')
     except:
-        MIN_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(), 'Date of Event']
+        MIN_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(), 'Date of Event'].strftime('%m/%d/%Y')
         # MIN_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64').idxmin(),  # at
         #                                            'Date of Event'], '%Y/%m/%d')
 
@@ -320,7 +320,7 @@ def generate_constants(df_name):
         MAX_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64[ns]').idxmax(),
                                                 'Date of Event'], '%Y/%m/%d')
     except:
-        MAX_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmax(), 'Date of Event']
+        MAX_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmax(), 'Date of Event'].strftime('%m/%d/%Y')
         # MAX_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64').idxmax(),  # at
         #                                            'Date of Event'], '%Y/%m/%d')
 

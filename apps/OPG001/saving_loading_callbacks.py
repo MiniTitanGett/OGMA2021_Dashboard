@@ -880,7 +880,7 @@ def _load_tile_layout(selected_layout, df_const):
                                  hierarchy_toggle=hierarchy_toggle, level_value=level_value,
                                  nid_path=nid_path, graph_all_toggle=graph_all_toggle,
                                  fiscal_toggle=fiscal_toggle, input_method=input_method, num_periods=num_periods,
-                                 period_type=period_type)
+                                 period_type=period_type, df_const=df_const)
 
     # show and set 'Select Range' inputs if selected, else leave hidden and unset
     if saved_layouts[selected_layout]['Timeframe'] == 'select-range':

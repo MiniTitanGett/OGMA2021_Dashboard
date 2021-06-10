@@ -713,7 +713,7 @@ tile-nav:hover {
     width: 120px;
     color: white;
     background-color: #9B6072;
-    margin-left: -60px; /* Use half of the width (120/2 = 60), to center the tooltip */
+    margin-left: -100px;
     left: 50%;
 }
 .fa-ban:hover .save-symbols-tooltip,
@@ -727,8 +727,6 @@ tile-nav:hover {
 .fa-ban .save-symbols-tooltip::after,
 .fa-floppy-o .save-symbols-tooltip::after,
 .fa-undo .save-symbols-tooltip::after,
-.fa-check .save-symbols-tooltip::after,
-.fa-refresh .save-symbols-tooltip::after,
 .save-overwrite-symbols .save-symbols-tooltip::after {
   content: "";
   position: absolute;
@@ -739,6 +737,18 @@ tile-nav:hover {
   border-style: solid;
   border-color: transparent transparent #9B6072 transparent;
 }
+.fa-check .save-symbols-tooltip::after,
+.fa-refresh .save-symbols-tooltip::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin-left: 30px; /* border-width + padding */
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent #9B6072 transparent;
+}
+
 
 /* Sidebar
 –––––––––––––––––––––––––––––––––––––––––––––––––– */

@@ -312,7 +312,7 @@ def generate_constants(df_name):
         MIN_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(),
                                                 'Date of Event'], '%Y/%m/%d')
     except:
-        MIN_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(), 'Date of Event']
+        MIN_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(), 'Date of Event'].strftime('%m/%d/%Y')
         # MIN_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64').idxmin(),  # at
         #                                            'Date of Event'], '%Y/%m/%d')
 
@@ -320,7 +320,7 @@ def generate_constants(df_name):
         MAX_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64[ns]').idxmax(),
                                                 'Date of Event'], '%Y/%m/%d')
     except:
-        MAX_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmax(), 'Date of Event']
+        MAX_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmax(), 'Date of Event'].strftime('%m/%d/%Y')
         # MAX_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64').idxmax(),  # at
         #                                            'Date of Event'], '%Y/%m/%d')
 

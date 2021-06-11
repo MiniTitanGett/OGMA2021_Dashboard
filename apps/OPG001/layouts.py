@@ -11,7 +11,7 @@ import inspect
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.exceptions import PreventUpdate
-from flask import session
+from flask import session, url_for
 import json
 # import logging
 
@@ -158,8 +158,8 @@ def get_data_set_picker(tile, df_name):
                 style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
                        'position': 'relative', 'vertical-align': 'top', 'background-color': 'white', 'width': '40px',
                        'border': '1px solid {}'.format(CLR['lightgray']), 'border-radius': '6px'})],
-            style={'display': 'flex'})
-    ]
+            style={'display': 'flex'}),
+        ]
 
 
 # get DATA side-menu
@@ -279,7 +279,7 @@ def get_layout_graph(report_name):
     # {'props': {'children': 'Los Angeles Department of Water and Power'}}
     # split on ^||^, ignore 'root', append children
     state_of_display = ''
-    nid_path = "root^||^Los Angeles Department of Water and Power".split('^||^')  # j['NID Path'].split('^||^')
+    nid_path = "root^||^Los Angeles Department of Water and Power".split('^||^')  # j['NID Path'].split('^||^') TODO: Find why this is hardcoded
     nid_path.remove('root')
     for x in nid_path:
         if state_of_display:
@@ -313,7 +313,7 @@ def get_layout_graph(report_name):
     if graph is None:
         raise PreventUpdate
 
-    return html.Div([graph])
+    return graph
 
 
 # get the input box for the dashboard title
@@ -649,6 +649,7 @@ def get_tile(tile, tile_keys=None, df_const=None):
                     className=tile_keys['Link'] if tile_keys else 'fa fa-link',
                     id={'type': 'tile-link', 'index': tile},
                     style={'position': 'relative'})],
+                id={'type': 'tile-menu-header', 'index': tile},
                 style={'margin-right': '25px'}),
             html.A(
                 className='boxclose',

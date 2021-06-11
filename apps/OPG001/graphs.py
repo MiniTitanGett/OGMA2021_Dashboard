@@ -44,13 +44,13 @@ from apps.OPG001.data import get_label, data_filter, customize_menu_filter
 # mark partial periods on graph
 def set_partial_periods(fig, dataframe, graph_type):
     # Annotate partial data points
-    partial_data_points = dataframe[dataframe[get_label('LBL_Partial_Period')] == get_label('LBL_TRUE')]
+    partial_data_points = dataframe[dataframe['Partial Period'] == get_label('LBL_TRUE')]
     index_vals = list(partial_data_points.index.values)
     partial_pos = {}  # Key: x_val, Value: list of y_vals
     for i in range(len(partial_data_points)):
         # Co-ordinates of marker to be labeled
-        x_val = partial_data_points.loc[index_vals[i], get_label('LBL_Date_Of_Event')]
-        y_val = partial_data_points.loc[index_vals[i], get_label('LBL_Measure_Value')]
+        x_val = partial_data_points.loc[index_vals[i], 'Date of Event']
+        y_val = partial_data_points.loc[index_vals[i], 'Measure Value']
         if x_val in partial_pos:
             # Add y_val to list associated with x_val
             current_y_list = partial_pos[x_val]
@@ -155,12 +155,12 @@ def get_line_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level
             # Generate title if there is no user entered title
             if hierarchy_type == 'Level Filter':
                 # Whole level graph title
-                title = '{}: {} vs {}'.format(get_label('LBL_' + hierarchy_level_dropdown), arg_value[1],
+                title = '{}: {} vs {}'.format(get_label('LBL_' + hierarchy_level_dropdown,df_name), arg_value[1],
                                               get_label('LBL_Time'))  # hierarchy_level_dropdown
             elif len(hierarchy_path) != 0:
                 # Item's children graph title
                 if language == 'En':
-                    title = '{}\'s {}'.format(hierarchy_path[-1], get_label('LBL_Children'))
+                    title = '{}\'s {}'.format(get_label('LBL_' + hierarchy_path[-1],df_name), get_label('LBL_Children'))
                 else:
                     title = '{} {}'.format(get_label('LBL_Children_Of'), hierarchy_path[-1])
                 title = title + ': {} vs {}'.format(arg_value[1], get_label('LBL_Time'))
@@ -194,8 +194,8 @@ def get_line_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level
             color = hierarchy_level_dropdown if hierarchy_type == 'Level Filter' else \
                 df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)]
             line_group = 'Variable Name'
-            legend_title_text = get_label('LBL_' + hierarchy_level_dropdown) if hierarchy_type == 'Level Filter' else \
-                get_label('LBL_' + df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)])
+            legend_title_text = get_label('LBL_' + hierarchy_level_dropdown,df_name) if hierarchy_type == 'Level Filter' else \
+                get_label('LBL_' + df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)],df_name)
         else:
             color = 'Variable Name'
             line_group = None
@@ -263,7 +263,7 @@ def get_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_le
             # Generate title if there is no user entered title
             if hierarchy_type == 'Level Filter':
                 # Whole level graph title
-                title = '{}: {} vs {}'.format(get_label('LBL_' + hierarchy_level_dropdown), arg_value[1],
+                title = '{}: {} vs {}'.format(get_label('LBL_' + hierarchy_level_dropdown,df_name), arg_value[1],
                                               get_label('LBL_Time'))
             elif len(hierarchy_path) != 0:
                 # Specific item's children graph title
@@ -301,7 +301,7 @@ def get_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_le
             color = hierarchy_level_dropdown if hierarchy_type == 'Level Filter' else \
                 df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)]
             legend_title_text = get_label('LBL_' + hierarchy_level_dropdown) if hierarchy_type == 'Level Filter' else \
-                get_label('LBL_' + df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)])
+                get_label('LBL_' + df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)],df_name)
         # else, hierarchy type is specific item while "Graph all in Dropdown" is unselected
         else:
             color = 'Variable Name'
@@ -388,7 +388,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
             # Generate title if there is no user entered title
             if hierarchy_type == 'Level Filter':
                 # Whole level graph title
-                title = '{}: {} vs {}'.format(get_label('LBL_' + hierarchy_level_dropdown), arg_value[2], arg_value[4])
+                title = '{}: {} vs {}'.format(get_label('LBL_' + hierarchy_level_dropdown,df_name), arg_value[2], arg_value[4])
             elif len(hierarchy_path) != 0:
                 # Specific item's children graph title
                 if language == 'En':
@@ -487,11 +487,11 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         else:
             if hierarchy_type == 'Level Filter':
                 if arg_value[0] == 'Variable Names':
-                    title = '{}: {} vs {}'.format(get_label('LBL_' + hierarchy_level_dropdown), arg_value[1],
+                    title = '{}: {} vs {}'.format(get_label('LBL_' + hierarchy_level_dropdown,df_name), arg_value[1],
                                                   get_label('LBL_Variable_Names'))
                 else:
                     # Whole level graph title
-                    title = '{0}: {1} vs {0}'.format(get_label('LBL_' + hierarchy_level_dropdown), arg_value[1])
+                    title = '{0}: {1} vs {0}'.format(get_label('LBL_' + hierarchy_level_dropdown,df_name), arg_value[1])
             elif len(hierarchy_path) != 0:
                 # Specific item's children graph title
                 if language == 'En':
@@ -519,16 +519,16 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         else:
             # Generate title if there is no user entered title
             if arg_value[0] == 'Variable Names':
-                title = '{}: {} vs {}'.format(hierarchy_specific_dropdown, arg_value[1],
+                title = '{}: {} vs {}'.format(get_label(hierarchy_specific_dropdown,df_name), arg_value[1],
                                               get_label('LBL_Variable_Names'))
             else:
                 if hierarchy_specific_dropdown:
-                    title = '{}: {} vs {}'.format(hierarchy_specific_dropdown, arg_value[1], get_label('LBL_Time'))
+                    title = '{}: {} vs {}'.format(get_label(hierarchy_specific_dropdown,df_name), arg_value[1], get_label('LBL_Time'))
                 else:
                     if len(hierarchy_path) == 0:
                         title = ""
                     else:
-                        title = '{}: {} vs {}'.format(hierarchy_path[-1], arg_value[1], get_label('LBL_Time'))
+                        title = '{}: {} vs {}'.format(get_label(hierarchy_path[-1],df_name), arg_value[1], get_label('LBL_Time'))
 
     # if df is not empty, create graph
     if not filtered_df.empty:
@@ -1063,8 +1063,8 @@ def get_sankey_figure(arg_value, dff, hierarchy_level_dropdown, hierarchy_path, 
     node_colour_numpy = []
 
     for index, row in node_df.iterrows():
-        label_numpy.append(get_label(row['Node']))  # TODO get label
-        custom_numpy.append(get_label(row['Node'] + '_Long'))  # TODO get label
+        label_numpy.append(get_label('LBL_'+row['Node']))
+        custom_numpy.append(get_label('LBL_'+row['Node'] + '_Long'))
         x_numpy.append(row['X-Coord'])
         y_numpy.append(row['Y-Coord'])
         node_colour_numpy.append(row['Colour'])
@@ -1092,7 +1092,7 @@ def get_sankey_figure(arg_value, dff, hierarchy_level_dropdown, hierarchy_path, 
             x=x_numpy,
             y=y_numpy,
             customdata=custom_numpy,
-            hovertemplate=get_label('Node ') + ' %{customdata} ' + get_label('has total value ') + ' %{value}',  # TODO
+            hovertemplate=get_label('LBL_Node') + ' %{customdata} ' + get_label('LBL_Has_Total_Value') + ' %{value}',
             color=node_colour_numpy
         ),
         link=dict(
@@ -1100,9 +1100,9 @@ def get_sankey_figure(arg_value, dff, hierarchy_level_dropdown, hierarchy_path, 
             target=target_numpy,  # target=[2, 3, 3, 4, 4, 5],
             value=value_numpy,  # value=[8, 4, 2, 8, 4, 2]
             # customdata
-            hovertemplate=get_label('Link from node') + ' %{source.customdata}<br />' +  # TODO get label
-            get_label('to node') + ' %{target.customdata}<br />' +  # TODO get label
-            get_label('has value') + ' %{value}',  # TODO get label
+            hovertemplate=get_label('LBL_Link_From_Node') + ' %{source.customdata}<br />' +
+            get_label('LBL_To_Node') + ' %{target.customdata}<br />' +
+            get_label('LBL_has_value') + ' %{value}',
             color=link_colour_numpy
             # label
         )

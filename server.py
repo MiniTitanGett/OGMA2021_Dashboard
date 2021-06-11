@@ -111,13 +111,15 @@ def load_saved_dashboards_from_db():
 
 def validate_session(sessionid, externalid):
     query = """\
+    declare @current_lang varchar(64)
     declare @p_external_id int
     declare @p_session_status varchar(64)
     declare @p_result_status varchar(255)
-    exec dbo.OPP_Get_Session2 {}, {}, {}, null, null, null, null, null, null, null, null, null, null, null, null, null,
-    null, null, null, @p_session_status output, null, null, null, null, null, null, null, null, @p_external_id output,
-    @p_result_status output
-    select @p_external_id as external_id, @p_session_status as session_status, @p_result_status as result_status
+    exec dbo.OPP_Get_Session2 {}, {}, {}, null, null, null, null, null, @current_lang output, null, null, null, null,
+    null, null, null, null, null, null, @p_session_status output, null, null, null, null, null, null, null, null,
+    @p_external_id output, @p_result_status output
+    select @current_lang as current_lang, @p_external_id as external_id, @p_session_status as session_status,
+    @p_result_status as result_status
     """.format(sessionid, sessionid, 1)
 
     output = exec_storedproc(query)
@@ -130,6 +132,8 @@ def validate_session(sessionid, externalid):
     elif output.external_id != externalid:
         logging.error("Invalid external_id: {}".format(externalid))
         flask.abort(404)
+
+    return output.current_lang
 
 
 def load_dataset_list():
@@ -189,13 +193,7 @@ def before_request_func():
         session["externalID"] = output.external_id
 
         # validate the session on the first request
-        validate_session(sessionid, output.external_id)
-
-        # set the user's language
-        language = request.args.get("language")
-
-        if language:
-            session["language"] = language
+        session["language"] = validate_session(sessionid, output.external_id)
 
         # load the labels
         load_labels(session["language"])

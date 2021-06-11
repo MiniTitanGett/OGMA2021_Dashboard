@@ -311,6 +311,10 @@ EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_In4_Long',@language = 
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_In4_Long',@language = 'Fr', @ref_desc = 'Fr: Outstanding 91 - 120 days'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_In3_Long',@language = 'En', @ref_desc = 'Outstanding 61 - 90 days'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_In3_Long',@language = 'Fr', @ref_desc = 'Fr: Outstanding 61 - 90 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_In2_Long',@language = 'En', @ref_desc = 'Outstanding 31 - 60 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_In2_Long',@language = 'Fr', @ref_desc = 'Fr: Outstanding 31 - 60 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_In1_Long',@language = 'En', @ref_desc = 'Outstanding < 31 days'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_In1_Long',@language = 'Fr', @ref_desc = 'Fr: Outstanding < 31 days'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_End2_Long',@language = 'En', @ref_desc = 'Completed 31 - 60 days'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_End2_Long',@language = 'Fr', @ref_desc = 'Fr: Completed 31 - 60 days'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_End1_Long',@language = 'En', @ref_desc = 'Completed < 31 days'
@@ -347,6 +351,19 @@ EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Animate_Over_Time',@la
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Animate_Over_Time',@language = 'Fr', @ref_desc = 'Animer au fil du temps'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Data_Accessed_On',@language = 'En', @ref_desc = 'Data accessed on'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Data_Accessed_On',@language = 'Fr', @ref_desc = 'Données consultées le'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_has_value',@language = 'En', @ref_desc = 'has value'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_has_value',@language = 'Fr', @ref_desc = 'A de la valeur'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Node',@language = 'En', @ref_desc = 'Node'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Node',@language = 'Fr', @ref_desc = 'nœud'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_To_Node',@language = 'En', @ref_desc = 'To node'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_To_Node',@language = 'Fr', @ref_desc = 'Et donc'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Link_From_Node',@language = 'En', @ref_desc = 'Link from node'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Link_From_Node',@language = 'Fr', @ref_desc = 'Lien depuis le nœud'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_No_Data_Specified',@language = 'En', @ref_desc = 'No Data Specified'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_No_Data_Specified',@language = 'Fr', @ref_desc = 'Aucune donnée spécifiée'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Has_Total_Value',@language = 'En', @ref_desc = 'has total value'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Has_Total_Value',@language = 'Fr', @ref_desc = 'a une valeur totale'
+
 GO
 
 DROP PROC InsertOPRef

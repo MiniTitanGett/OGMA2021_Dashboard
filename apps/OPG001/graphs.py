@@ -44,13 +44,13 @@ from apps.OPG001.data import get_label, data_filter, customize_menu_filter
 # mark partial periods on graph
 def set_partial_periods(fig, dataframe, graph_type):
     # Annotate partial data points
-    partial_data_points = dataframe[dataframe[get_label('LBL_Partial_Period')] == get_label('LBL_TRUE')]
+    partial_data_points = dataframe[dataframe['Partial Period'] == get_label('LBL_TRUE')]
     index_vals = list(partial_data_points.index.values)
     partial_pos = {}  # Key: x_val, Value: list of y_vals
     for i in range(len(partial_data_points)):
         # Co-ordinates of marker to be labeled
-        x_val = partial_data_points.loc[index_vals[i], get_label('LBL_Date_Of_Event')]
-        y_val = partial_data_points.loc[index_vals[i], get_label('LBL_Measure_Value')]
+        x_val = partial_data_points.loc[index_vals[i], 'Date of Event']
+        y_val = partial_data_points.loc[index_vals[i], 'Measure Value']
         if x_val in partial_pos:
             # Add y_val to list associated with x_val
             current_y_list = partial_pos[x_val]

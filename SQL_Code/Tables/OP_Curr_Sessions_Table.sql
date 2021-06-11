@@ -15,6 +15,7 @@ GO
 
 CREATE TABLE [dbo].[OP_Curr_Sessions](
 	[session_id] [int] NOT NULL,
-	[person_id] [int] NOT NULL
+	[person_id] [int] NOT NULL,
+  [current_lang] varchar(20) NOT NULL,
 ) ON [PRIMARY]
 GO

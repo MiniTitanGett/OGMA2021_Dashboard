@@ -85,7 +85,8 @@ begin
   set @t_now = getdate()
 
   select
-    @POPT_Id_I = cast(person_id as varchar (16))
+    @POPT_Id_I = cast(person_id as varchar (16)),
+    @Current_Lang = current_lang
     from dbo.op_Curr_Sessions with (nolock)
     where session_id = @pr_Session_Id2
 

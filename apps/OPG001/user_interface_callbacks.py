@@ -17,6 +17,7 @@ from dash.exceptions import PreventUpdate
 from re import search
 from dash import no_update
 from urllib.parse import parse_qsl
+from flask import url_for
 
 # Internal Packages
 from apps.OPG001.layouts import get_line_graph_menu, get_bar_graph_menu, get_scatter_graph_menu, get_table_graph_menu, \
@@ -68,7 +69,11 @@ def _generate_layout(href, pathname, query_string):
     if 'reportName' in query_params and query_params['reportName']:
         return [get_layout_graph(query_params['reportName'])]
     else:
-        return [get_layout_dashboard()]
+        if session['language'] == 'En':
+            return [get_layout_dashboard()]
+        else:
+            return [html.Div([get_layout_dashboard(),
+                              html.Link(rel='stylesheet', href=url_for("static",filename="BBB - french stylesheet1.css"))])]
 
 
 # Handles Resizing of ContentWrapper, uses tab-content-wrapper n-clicks as a throw away output
@@ -409,6 +414,26 @@ for x in range(0, 4):
         return view_content_style, customize_content_style, layouts_content_style, view_className, layouts_className, \
                customize_className
 
+for x in range(0, 4):
+    app.clientside_callback(
+        ClientsideFunction(
+            namespace='clientside',
+            function_name='graphLoadScreen{}'.format(x)
+        ),
+        Output({'type': 'tile-menu-header', 'index': x}, 'n_clicks'),
+        [Input({'type': 'tile-view', 'index': x}, 'n_clicks')],
+        [State({'type': 'tile-view', 'index': x}, 'className')]
+    )
+
+    app.clientside_callback(
+        ClientsideFunction(
+            namespace='clientside',
+            function_name='graphRemoveLoadScreen{}'.format(x)
+        ),
+        Output({'type': 'graph_display', 'index': x}, 'n_clicks'),
+        [Input({'type': 'graph_display', 'index': x}, 'children')]
+    )
+
 # ************************************************CUSTOMIZE TAB*******************************************************
 
 # update graph menu to match selected graph type
@@ -564,6 +589,25 @@ def _change_link(selected_layout, _link_clicks, link_state):
 
     return link_state
 
+
+app.clientside_callback(
+    ClientsideFunction(
+        namespace='clientside',
+        function_name='datasetLoadScreen'
+    ),
+    Output('dataset-confirmation-symbols', 'n_clicks'),
+    [Input({'type': 'confirm-load-data', 'index': ALL}, 'n_clicks'),
+     Input({'type': 'confirm-data-set-refresh', 'index': ALL}, 'n_clicks')]
+)
+
+app.clientside_callback(
+    ClientsideFunction(
+        namespace='clientside',
+        function_name='datasetRemoveLoadScreen'
+    ),
+    Output('df-constants-storage', 'n_clicks'),
+    [Input('df-constants-storage', 'data')]
+)
 
 # manage data sidemenu appearance and content
 @app.callback(
@@ -825,6 +869,7 @@ for x in range(4):
         :param link_state: State of the link/unlink icon
         :return: Highlights tiles child to the displayed date side-menu
         """
+
         if sidebar_style == DATA_CONTENT_SHOW or (
                 master_sidebar_style == DATA_CONTENT_SHOW and link_state == 'fa fa-link'):
             tile_class = 'tile-highlight'

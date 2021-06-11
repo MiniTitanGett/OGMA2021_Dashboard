@@ -72,8 +72,8 @@ def _generate_layout(href, pathname, query_string):
         if session['language'] == 'En':
             return [get_layout_dashboard()]
         else:
-            return [html.Div([get_layout_dashboard(), html.Link(rel='stylesheet', href=url_for("static",
-                                                                                               filename="BBB - french stylesheet1.css"))])]
+            return [html.Div([get_layout_dashboard(),
+                              html.Link(rel='stylesheet', href=url_for("static",filename="BBB - french stylesheet1.css"))])]
 
 
 # Handles Resizing of ContentWrapper, uses tab-content-wrapper n-clicks as a throw away output

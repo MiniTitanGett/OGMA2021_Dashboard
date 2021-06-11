@@ -407,7 +407,8 @@ for x in range(0, 4):
 # ************************************************CUSTOMIZE TAB*******************************************************
 # update graph options to match data set
 @app.callback(
-    Output({'type': 'graph-type-dropdown', 'index': MATCH}, 'options'),
+    [Output({'type': 'graph-type-dropdown', 'index': MATCH}, 'options'),
+     Output({'type': 'set-tile-link-trigger', 'index': MATCH}, 'link-')],
     [Input({'type': 'set-graph-options-trigger', 'index': MATCH}, 'options-'),
      ],
     [State({'type': 'data-set', 'index': MATCH}, 'value'),
@@ -433,25 +434,31 @@ def _update_graph_type_options(trigger, df_name, df_name_parent, link_states, gr
     changed_index = int(search(r'\d+', changed_id).group())
     print('changed index:' + str(changed_index))
 
-    if (df_name or df_name_parent) == "OPG001":
-        graph_options = GRAPH_OPTIONS["OPG001"]
-        if graph_type is not None and graph_type not in graph_options:
-            link_states[changed_index] = "fa fa-unlink"
-            print("****HERE 1****")
-    elif (df_name or df_name_parent) == "OPG010":
-        graph_options = GRAPH_OPTIONS["OPG010"]
-        if graph_type is not None and graph_type not in graph_options:
-            link_states[changed_index] = "fa fa-unlink"
-            print("****HERE 2****")
-    else:
-        graph_options = []
-
+    graph_options = no_update
     options = []
 
-    for i in graph_options:
-        options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+    link_trigger = None
 
-    return options
+    if trigger == 'fa fa-unlink':
+        link_trigger = trigger
+    else:
+        if (df_name or df_name_parent) == "OPG001":
+            graph_options = GRAPH_OPTIONS["OPG001"]
+            if graph_type is not None and graph_type not in graph_options:
+                link_states[changed_index] = "fa fa-unlink"
+                print("****HERE 1****")
+        elif (df_name or df_name_parent) == "OPG010":
+            graph_options = GRAPH_OPTIONS["OPG010"]
+            if graph_type is not None and graph_type not in graph_options:
+                link_states[changed_index] = "fa fa-unlink"
+                print("****HERE 2****")
+        else:
+            graph_options = []
+
+        for i in graph_options:
+            options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+
+    return options, link_trigger
 
 
 # update graph menu to match selected graph type
@@ -580,10 +587,11 @@ for x in range(4):
 @app.callback(
     Output({'type': 'tile-link', 'index': MATCH}, 'className'),
     [Input({'type': 'select-layout-dropdown', 'index': MATCH}, 'value'),
-     Input({'type': 'tile-link', 'index': MATCH}, 'n_clicks')],
+     Input({'type': 'tile-link', 'index': MATCH}, 'n_clicks'),
+     Input({'type': 'set-tile-link-trigger', 'index': MATCH}, 'link-')],
     [State({'type': 'tile-link', 'index': MATCH}, 'className')]
 )
-def _change_link(selected_layout, _link_clicks, link_state):
+def _change_link(selected_layout, _link_clicks, link_trigger, link_state):
     """
     :param _link_clicks: Detects the user clicking the link/unlink icon
     :param link_state: State of the link/unlink icon
@@ -592,7 +600,7 @@ def _change_link(selected_layout, _link_clicks, link_state):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     # if link button was not pressed and layout was not selected, do not update
-    if '.' == changed_id:
+    if '.' == changed_id or link_trigger is None:
         raise PreventUpdate
 
     if '"type":"select-layout-dropdown"}.value' in changed_id:
@@ -604,6 +612,9 @@ def _change_link(selected_layout, _link_clicks, link_state):
     if '"type":"tile-link"}.n_clicks' in changed_id:
         # if link button was pressed, toggle the link icon linked <--> unlinked
         link_state = 'fa fa-unlink' if link_state == 'fa fa-link' else 'fa fa-link'
+
+    if link_trigger == 'fa fa-unlink':
+        link_state = 'fa fa-unlink'
 
     return link_state
 
@@ -802,11 +813,15 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
                     else:
                         # UN-link here?
                         links_style[i] = 'fa fa-unlink'
+
+                        for link in links_style:
+                            print(link)
                         # set the dataset of the new menu from unlinking
                         if df_name == "OPG001":
                             df_names[i] = "OPG010"
                         elif df_name == "OPG010":
                             df_names[i] = "OPG001"
+                        options_triggers[i] = 'fa fa-unlink'
 
                 # elif df_names[i] == 'OPG001':
                 #    graph_choice[i] = GRAPH_OPTIONS
@@ -867,8 +882,6 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
             # if master data is SHOWN, do not prevent update to force trigger highlight tiles callback
             elif sidemenu_styles[4] != DATA_CONTENT_SHOW:
                 sidemenu_styles[4] = no_update
-
-    print("****HERE 5****")
 
     return (data[0], data[1], data[2], data[3], data[4],
             sidemenu_styles[0], sidemenu_styles[1], sidemenu_styles[2], sidemenu_styles[3], sidemenu_styles[4],

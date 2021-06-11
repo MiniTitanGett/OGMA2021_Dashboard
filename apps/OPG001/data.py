@@ -54,7 +54,7 @@ from conn import get_ref
 
 GRAPH_OPTIONS = {
     'OPG001': ['Line', 'Bar', 'Scatter', 'Bubble', 'Box_Plot', 'Table'],
-    'OPG010': ['Sankey']
+    'OPG010': ['Sankey', 'Table']
 }
 
 Sankey_Graph = ['Sankey']

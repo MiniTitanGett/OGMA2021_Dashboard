@@ -488,7 +488,11 @@ for x in range(4):
         print("****graph menu****")
         # if link state has changed from linked --> unlinked the data has not changed, prevent update
         if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink':
-            raise PreventUpdate
+            # TODO:needs proper testing
+            if selected_graph_type is None:
+                return None, no_update, no_update
+            else:
+                raise PreventUpdate
 
         # if link state from unlinked --> linked and the data set has not changed, don't update menu, still update graph
         if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name == master_df_name:
@@ -791,6 +795,7 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
         df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
 
         print("****Data Names****")
+        print(changed_index)
 
         for entry in df_names:
             print(entry)
@@ -819,8 +824,12 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
                         # set the dataset of the new menu from unlinking
                         if df_name == "OPG001":
                             df_names[i] = "OPG010"
+                            df_const[df_names[i]] = generate_constants(df_names[i])
+                            data[i] = get_data_menu(i, df_names[i], df_const=df_const)
                         elif df_name == "OPG010":
                             df_names[i] = "OPG001"
+                            df_const[df_names[i]] = generate_constants(df_names[i])
+                            data[i] = get_data_menu(i, df_names[i], df_const=df_const)
                         options_triggers[i] = 'fa fa-unlink'
 
                 # elif df_names[i] == 'OPG001':

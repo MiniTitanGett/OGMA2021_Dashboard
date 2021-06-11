@@ -601,11 +601,11 @@ def get_layout_dashboard():
 def get_customize_content(tile, graph_type, graph_menu, df_name):
     print("you are here in get customize")
     if df_name == 'OPG010':
-        Graphs = ['Sankey']
+        graphs = GRAPH_OPTIONS['OPG010']
     elif df_name == 'OPG001':
-        Graphs = GRAPH_OPTIONS
+        graphs = GRAPH_OPTIONS['OPG001']
     else:
-        Graphs = []
+        graphs = []
     return [
         html.P(
             "{}:".format(get_label('LBL_Graph_Type')),
@@ -614,7 +614,7 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
             dcc.Dropdown(
                 id={'type': 'graph-type-dropdown', 'index': tile},
                 clearable=False,
-                options=[{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in Graphs],
+                options=[{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in graphs],
                 value=graph_type,
                 style={'max-width': '405px', 'width': '100%', 'font-size': '13px'}),
             style={'margin-left': '15px'}),

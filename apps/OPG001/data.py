@@ -52,7 +52,10 @@ from conn import get_ref
 
 # ***********************************************ARBITRARY CONSTANTS*************************************************
 
-GRAPH_OPTIONS = ['Line', 'Bar', 'Scatter', 'Bubble', 'Box_Plot', 'Table']
+GRAPH_OPTIONS = {
+    'OPG001': ['Line', 'Bar', 'Scatter', 'Bubble', 'Box_Plot', 'Table'],
+    'OPG010': ['Sankey']
+}
 
 Sankey_Graph = ['Sankey']
 

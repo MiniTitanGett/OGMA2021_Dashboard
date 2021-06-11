@@ -421,7 +421,7 @@ def _update_graph_type_options(trigger, df_name, df_name_parent, link_states, gr
 
     print(trigger)
 
-    if changed_id == '.' or trigger is None:
+    if changed_id == '.' or trigger is None or link_states is []:
         raise PreventUpdate
 
     print(df_name_parent)
@@ -434,9 +434,15 @@ def _update_graph_type_options(trigger, df_name, df_name_parent, link_states, gr
     print('changed index:' + str(changed_index))
 
     if (df_name or df_name_parent) == "OPG001":
-        graph_options = GRAPH_OPTIONS
+        graph_options = GRAPH_OPTIONS["OPG001"]
+        if graph_type is not None and graph_type not in graph_options:
+            link_states[changed_index] = "fa fa-unlink"
+            print("****HERE 1****")
     elif (df_name or df_name_parent) == "OPG010":
-        graph_options = ['Sankey']
+        graph_options = GRAPH_OPTIONS["OPG010"]
+        if graph_type is not None and graph_type not in graph_options:
+            link_states[changed_index] = "fa fa-unlink"
+            print("****HERE 2****")
     else:
         graph_options = []
 
@@ -649,19 +655,25 @@ def _change_link(selected_layout, _link_clicks, link_state):
      Input({'type': 'confirm-data-set-refresh', 'index': 4}, 'n_clicks')],
     [State({'type': 'data-tile', 'index': ALL}, 'children'),
      State({'type': 'data-tile', 'index': ALL}, 'style'),
-     State('df-constants-storage', 'data')]
+     State('df-constants-storage', 'data'),
+     State({'type': 'graph-type-dropdown', 'index': ALL}, 'value')]
 )
 def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links_style, selected_layout, data_clicks,
                            data_close_clicks, df_name_0, df_name_1, df_name_2, df_name_3, df_name_4, _confirm_clicks_0,
                            _confirm_clicks_1, _confirm_clicks_2, _confirm_clicks_3, _confirm_clicks_4,
                            _refresh_clicks_0, _refresh_clicks_1, _refresh_clicks_2, _refresh_clicks_3,
-                           _refresh_clicks_4, data_states, sidemenu_style_states, df_const):
+                           _refresh_clicks_4, data_states, sidemenu_style_states, df_const, graph_types):
     """
     :param closed_tile: Detects when a tile has been deleted and encodes the index of the deleted tile
     param links_style: State of all link/unlink icons and detects user clicking a link icon
     :param data_states: State of all data side-menus
     :return: Data side-menus for all 5 side-menus
     """
+
+    print("****Manage Data Sidemenus****")
+
+    for entry in graph_types:
+        print(entry)
 
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
@@ -680,6 +692,17 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
     confirm_button = [no_update] * 5
     refresh_button = [no_update] * 5
     options_triggers = [no_update] * 5
+    link_triggers = [no_update] * 5
+
+    """
+    if df_name_4 is not None:
+        print("****HERE 3****")
+        print(df_name_4)
+        for num in range(len(links_style)):
+            if links_style[num] == 'fa fa-link':
+                data[num] = df_name_4
+
+    print("****HERE 4****")"""
 
     # if 'data-menu-close' or 'select-dashboard-dropdown' requested, close all data menus
     if 'data-menu-close' in changed_id or 'select-dashboard-dropdown' in changed_id:
@@ -755,6 +778,12 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
     elif '"type":"confirm-load-data"}.n_clicks' in changed_id or '"type":"confirm-data-set-refresh"}.n_clicks' in changed_id:
         changed_index = int(search(r'\d+', changed_id).group())
         df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
+
+        print("****Data Names****")
+
+        for entry in df_names:
+            print(entry)
+
         df_name = df_names[changed_index]
         session[df_name] = dataset_to_df(df_name)
 
@@ -767,8 +796,18 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
         if changed_index == 4:
             for i in range(len(links_style)):
                 if links_style[i] == 'fa fa-link':
-                    graph_triggers[i] = df_name
-                    options_triggers[i] = df_name
+                    if graph_types[i] is None or graph_types[i] in GRAPH_OPTIONS[df_name]:
+                        graph_triggers[i] = df_name
+                        options_triggers[i] = df_name
+                    else:
+                        # UN-link here?
+                        links_style[i] = 'fa fa-unlink'
+                        # set the dataset of the new menu from unlinking
+                        if df_name == "OPG001":
+                            df_names[i] = "OPG010"
+                        elif df_name == "OPG010":
+                            df_names[i] = "OPG001"
+
                 # elif df_names[i] == 'OPG001':
                 #    graph_choice[i] = GRAPH_OPTIONS
                 # elif df_names[i] == 'OPG010':
@@ -828,6 +867,8 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
             # if master data is SHOWN, do not prevent update to force trigger highlight tiles callback
             elif sidemenu_styles[4] != DATA_CONTENT_SHOW:
                 sidemenu_styles[4] = no_update
+
+    print("****HERE 5****")
 
     return (data[0], data[1], data[2], data[3], data[4],
             sidemenu_styles[0], sidemenu_styles[1], sidemenu_styles[2], sidemenu_styles[3], sidemenu_styles[4],

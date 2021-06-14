@@ -11,7 +11,7 @@ import logging
 import json
 
 from conn import close_conn, exec_storedproc, exec_storedproc_results, get_ref
-from apps.OPG001.data import saved_layouts, saved_dashboards
+from apps.dashboard.data import saved_layouts, saved_dashboards
 from flask_session import Session
 
 

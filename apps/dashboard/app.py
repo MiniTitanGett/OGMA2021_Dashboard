@@ -10,7 +10,7 @@ initializes the app's: server, metadata and external stylesheets
 # import dash
 import app
 # from apps.OPG001.data import LANGUAGE
-from apps.OPG001.layouts import get_layout
+from apps.dashboard.layouts import get_layout
 
 # from apps.OPG001.data import DATA_SETS
 
@@ -23,14 +23,14 @@ from apps.OPG001.layouts import get_layout
 #                 external_stylesheets=external_stylesheets, external_scripts=external_scripts,
 #                 assets_ignore='French Details.css' if LANGUAGE == 'en' else '')
 # server = app.server
-app = app.get_app('OPG001/')
+app = app.get_app('dashboard/')
 app.layout = get_layout
 
 # We import callbacks after setting the layout to avoid callback exception errors w/o suppressing
 # These are used by Dash so ignore the PyCharm warnings
-import apps.OPG001.user_interface_callbacks
-import apps.OPG001.functionality_callbacks
-import apps.OPG001.saving_loading_callbacks
+import apps.dashboard.user_interface_callbacks
+import apps.dashboard.functionality_callbacks
+import apps.dashboard.saving_loading_callbacks
 
 # ****************************************************CHECKLIST*******************************************************
 

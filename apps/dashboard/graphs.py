@@ -23,7 +23,7 @@ from re import search
 import plotly.graph_objects as go
 
 # Internal Modules
-from apps.OPG001.data import get_label, data_filter, customize_menu_filter
+from apps.dashboard.data import get_label, data_filter, customize_menu_filter
 
 
 # Contents:

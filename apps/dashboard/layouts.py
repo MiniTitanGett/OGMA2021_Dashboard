@@ -19,12 +19,12 @@ import json
 # import config
 from conn import exec_storedproc_results
 # from apps.OPG001.app import app
-from apps.OPG001.data import GRAPH_OPTIONS, CLR, DATA_CONTENT_SHOW, DATA_CONTENT_HIDE, VIEW_CONTENT_SHOW, \
+from apps.dashboard.data import GRAPH_OPTIONS, CLR, DATA_CONTENT_SHOW, DATA_CONTENT_HIDE, VIEW_CONTENT_SHOW, \
     BAR_X_AXIS_OPTIONS, CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LAYOUT_CONTENT_HIDE, \
     saved_layouts, saved_dashboards
-from apps.OPG001.hierarchy_filter import get_hierarchy_layout
-from apps.OPG001.datepicker import get_date_picker
-from apps.OPG001.graphs import __update_graph
+from apps.dashboard.hierarchy_filter import get_hierarchy_layout
+from apps.dashboard.datepicker import get_date_picker
+from apps.dashboard.graphs import __update_graph
 
 
 # Contents:

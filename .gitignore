@@ -4,5 +4,5 @@ __pycache__
 .idea
 .env
 web.config
-/apps/OPG001/test_data/
+/apps/dashboard/test_data/
 /flask_session/

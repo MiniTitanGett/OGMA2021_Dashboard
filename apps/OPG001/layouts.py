@@ -11,7 +11,7 @@ import inspect
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.exceptions import PreventUpdate
-from flask import session, url_for
+from flask import session
 import json
 # import logging
 
@@ -146,14 +146,23 @@ def get_data_set_picker(tile, df_name):
                             className='save-symbols-tooltip'),
                         id={'type': 'confirm-load-data', 'index': tile},
                         className='fa fa-check',
-                        style=DATA_CONTENT_HIDE),
+                        style=DATA_CONTENT_HIDE if df_name is None or df_name in session else {'padding': '10px 0',
+                                                                                               'width': '15px',
+                                                                                               'height': '15px',
+                                                                                               'position': 'relative',
+                                                                                               'margin-right': '10px',
+                                                                                               'margin-left': '10px',
+                                                                                               'vertical-align': 'top'}),
                     html.I(
                         html.Span(
                             get_label("LBL_Refresh_Data_Set"),
                             className='save-symbols-tooltip'),
                         id={'type': 'confirm-data-set-refresh', 'index': tile},
                         className='fa fa-refresh',
-                        style=DATA_CONTENT_HIDE)],
+                        style={'padding': '10px 0', 'width': '15px', 'height': '15px',
+                               'position': 'relative',
+                               'margin-right': '10px', 'margin-left': '10px',
+                               'vertical-align': 'top'} if df_name is not None and df_name in session else DATA_CONTENT_HIDE)],
                     id='dataset-confirmation-symbols'),
                 style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
                        'position': 'relative', 'vertical-align': 'top', 'background-color': 'white', 'width': '40px',
@@ -656,10 +665,12 @@ def get_tile(tile, tile_keys=None, df_const=None):
                     [get_label('LBL_Data')],
                     id={'type': 'tile-data', 'index': tile},
                     className='tile-nav tile-nav--data'),
-                html.I(
-                    className=tile_keys['Link'] if tile_keys else 'fa fa-link',
-                    id={'type': 'tile-link', 'index': tile},
-                    style={'position': 'relative'})],
+                html.Div(
+                    html.I(
+                        className=tile_keys['Link'] if tile_keys else 'fa fa-link',
+                        id={'type': 'tile-link', 'index': tile},
+                        style={'position': 'relative'}),
+                    id={'type': 'tile-link-wrapper', 'index': tile})],
                 id={'type': 'tile-menu-header', 'index': tile},
                 style={'margin-right': '25px'}),
             html.A(

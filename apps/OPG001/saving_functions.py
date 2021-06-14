@@ -19,7 +19,7 @@ from dash.exceptions import PreventUpdate
 # import config
 from conn import exec_storedproc
 from apps.OPG001.layouts import get_line_graph_menu, get_bar_graph_menu, get_scatter_graph_menu, get_table_graph_menu, \
-    get_box_plot_menu, get_sankey_menu
+    get_box_plot_menu, get_sankey_menu, get_bubble_graph_menu
 from apps.OPG001.data import saved_layouts, saved_dashboards
 
 
@@ -187,6 +187,8 @@ def load_graph_menu(graph_type, tile, df_name, args_list, df_const):
                                        df_name=df_name, show_data_points=show_data_points, df_const=df_const)
     elif graph_type == 'Sankey':
         graph_menu = get_sankey_menu(tile=tile, graphed_options=args_list[0], df_name=df_name, df_const=df_const)
+    elif graph_type == 'Bubble':
+        graph_menu = get_bubble_graph_menu(tile=tile, x=args_list[0], x_measure=args_list[1], y=args_list[2], y_measure=args_list[3], size=args_list[4], size_measure=args_list[5], df_name=df_name, df_const=df_const)
     else:
         raise PreventUpdate
 

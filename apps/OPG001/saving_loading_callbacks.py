@@ -835,6 +835,7 @@ def _load_select_range_inputs(tile_tab, dashboard_tab, tile_start_year, tile_end
      Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-end_year'),
      Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-start_secondary'),
      Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-end_secondary'),
+     Output({'type': 'tile-link-wrapper', 'index': MATCH}, 'children'),
      Output({'type': 'df-constants-storage-tile-wrapper', 'index': MATCH}, 'children')],
     [Input({'type': 'select-layout-dropdown', 'index': MATCH}, 'value')],
     [State('df-constants-storage', 'data')],
@@ -907,15 +908,20 @@ def _load_tile_layout(selected_layout, df_const):
         id='df-constants-storage',
         storage_type='memory',
         data=df_const)
-    for x in range(changed_index+1):
+    for x in range(changed_index):
         df_const = html.Div(
             df_const,
             id={'type': 'df-constants-storage-tile-wrapper', 'index': x}
         )
 
+    unlink = html.I(
+        className='fa fa-unlink',
+        id={'type': 'tile-link', 'index': tile},
+        style={'position': 'relative'}),
+
     # UPDATED the first output, previously was selected_layout
     return saved_layouts[selected_layout]['Title'], customize_content, data_content, None, tab, start_year, end_year, \
-        start_secondary, end_secondary, df_const
+        start_secondary, end_secondary,unlink, df_const
 
 
 # *********************************************DASHBOARD LOADING*****************************************************

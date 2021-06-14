@@ -840,7 +840,7 @@ def _load_select_range_inputs(tile_tab, dashboard_tab, tile_start_year, tile_end
 def _load_tile_layout(selected_layout, df_const):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
-    if changed_id == '.' or selected_layout is None or selected_layout is '':
+    if changed_id == '.' or selected_layout is None or selected_layout == '':
         raise PreventUpdate
 
     tile = int(search(r'\d+', changed_id).group())

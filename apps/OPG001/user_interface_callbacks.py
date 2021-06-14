@@ -121,11 +121,12 @@ def _new_and_delete(new_clicks, _close_clicks, dashboard_reset, input_tiles, num
         raise PreventUpdate
 
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+    changed_value = [p['value'] for p in dash.callback_context.triggered][0]
     deleted_tile = no_update
     dashboard_reset_trigger = no_update
 
     # if DELETE button pressed: pop deleted input_tile index and shift following indices left and adjust main layout
-    if 'tile-close' in changed_id and num_tiles != 0:
+    if 'tile-close' in changed_id and num_tiles != 0 and changed_value is not None:
         num_tiles -= 1
         flag = False
         for i in range(len(input_tiles)):
@@ -304,10 +305,10 @@ def _update_num_tiles(input1, input2, input3):
     if 'num-tiles-2' in changed_id:
         result = input1
 
-    elif 'num-tiles-3' in changed_id:
+    if 'num-tiles-3' in changed_id:
         result = input2
 
-    else:
+    if 'num-tiles-4' in changed_id:
         result = input3
 
     return result

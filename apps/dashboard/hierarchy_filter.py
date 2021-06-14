@@ -14,7 +14,7 @@ import dash_html_components as html
 # import pandas as pd
 
 # Internal Modules
-from apps.OPG001.data import get_label, session, CLR
+from apps.dashboard.data import get_label, session, CLR
 
 
 # Contents:

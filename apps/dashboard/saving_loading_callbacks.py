@@ -17,12 +17,10 @@ import dash_html_components as html
 # import regex
 
 # Internal Packages
-from flask import session
-
-from apps.OPG001.layouts import get_data_menu, get_customize_content, get_div_body
-from apps.OPG001.app import app
-from apps.OPG001.data import get_label, saved_layouts, saved_dashboards, CLR, dataset_to_df, generate_constants
-from apps.OPG001.saving_functions import delete_layout, save_layout_state, save_layout_to_db, \
+from apps.dashboard.layouts import get_data_menu, get_customize_content, get_div_body
+from apps.dashboard.app import app
+from apps.dashboard.data import get_label, saved_layouts, saved_dashboards, CLR
+from apps.dashboard.saving_functions import delete_layout, save_layout_state, save_layout_to_db, \
     save_dashboard_state, save_dashboard_to_db, delete_dashboard, load_graph_menu
 
 #   SAVING
@@ -366,7 +364,7 @@ for y in range(4):
      State({'type': 'tile-title', 'index': ALL}, 'value'),
      State({'type': 'tile-link', 'index': ALL}, 'className'),
      State({'type': 'graph-type-dropdown', 'index': ALL}, 'value'),
-     State({'type': 'args-value: {}'.replace("{}", str(0)), 'index': ALL}, 'value'),  # TODO: What is this about
+     State({'type': 'args-value: {}'.replace("{}", str(0)), 'index': ALL}, 'value'),
      State({'type': 'args-value: {}'.replace("{}", str(1)), 'index': ALL}, 'value'),
      State({'type': 'args-value: {}'.replace("{}", str(2)), 'index': ALL}, 'value'),
      State({'type': 'args-value: {}'.replace("{}", str(3)), 'index': ALL}, 'value'),
@@ -1013,7 +1011,7 @@ def _load_dashboard_layout(selected_dashboard, df_const):
                 tile_title = "This Graph has been deleted"
                 tile_data = {
                     "Args List": ["", "", ""],
-                    "Data Set": "OPG001_2016-17_Week_v3.csv",
+                    "Data Set": "OPG001",  # "Data Set": "OPG001_2016-17_Week_v3.csv",
                     "Fiscal Toggle": "Gregorian",
                     "Graph All Toggle": [],
                     "Graph Type": "Line",

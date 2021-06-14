@@ -12,7 +12,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 
 # Internal Modules
-from apps.OPG001.data import CLR, get_label
+from apps.dashboard.data import CLR, get_label
 
 
 # Contents:

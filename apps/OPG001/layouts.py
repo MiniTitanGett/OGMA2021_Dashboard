@@ -159,7 +159,7 @@ def get_data_set_picker(tile, df_name):
                        'position': 'relative', 'vertical-align': 'top', 'background-color': 'white', 'width': '40px',
                        'border': '1px solid {}'.format(CLR['lightgray']), 'border-radius': '6px'})],
             style={'display': 'flex'}),
-        ]
+    ]
 
 
 # get DATA side-menu
@@ -279,7 +279,8 @@ def get_layout_graph(report_name):
     # {'props': {'children': 'Los Angeles Department of Water and Power'}}
     # split on ^||^, ignore 'root', append children
     state_of_display = ''
-    nid_path = "root^||^Los Angeles Department of Water and Power".split('^||^')  # j['NID Path'].split('^||^') TODO: Find why this is hardcoded
+    nid_path = "root^||^Los Angeles Department of Water and Power".split(
+        '^||^')  # j['NID Path'].split('^||^') TODO: Find why this is hardcoded
     nid_path.remove('root')
     for x in nid_path:
         if state_of_display:
@@ -399,9 +400,9 @@ def get_layout_dashboard():
                             style={'padding': '7px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
                                    'margin-left': '10px', 'margin-right': '14px', 'display': 'inline-block',
                                    'vertical-align': 'top'})],
-                             id='dashboard-reset-symbols',
-                             style={'width': '71px', 'border': '1px solid {}'.format(CLR['lightgray']),
-                                    'margin': '2px 0', 'border-radius': '6px', 'display': 'none'}),
+                        id='dashboard-reset-symbols',
+                        style={'width': '71px', 'border': '1px solid {}'.format(CLR['lightgray']),
+                               'margin': '2px 0', 'border-radius': '6px', 'display': 'none'}),
                     style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
                            'position': 'relative', 'vertical-align': 'top'}),
                 html.Button(
@@ -582,11 +583,21 @@ def get_layout_dashboard():
             id='tab-storage',
             storage_type='memory',
             data=[{'content': get_default_tab_content(), 'title': ''}]),
-        # memory locations for dataframe constants
-        dcc.Store(
-            id='df-constants-storage',
-            storage_type='memory',
-            data=None)
+        # memory locations for dataframe constants and its triggers
+        html.Div(
+            html.Div(
+                html.Div(
+                    html.Div(
+                        html.Div(
+                            dcc.Store(
+                                id='df-constants-storage',
+                                storage_type='memory',
+                                data=None),
+                            id={'type': 'df-constants-storage-tile-wrapper', 'index': 0}),
+                        id={'type': 'df-constants-storage-tile-wrapper', 'index': 1}),
+                    id={'type': 'df-constants-storage-tile-wrapper', 'index': 2}),
+                id={'type': 'df-constants-storage-tile-wrapper', 'index': 3}),
+            id='df-constants-storage-dashboard-wrapper')
     ], style={'background-color': CLR['lightpink']})
 
 
@@ -1026,7 +1037,7 @@ def get_bar_graph_menu(tile, x, y, measure_type, df_name, df_const):
                 html.Div([
                     dcc.RadioItems(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
-                        options=[{'label': get_label('LBL_'+i), 'value': i} for i in ['Vertical', 'Horizontal']],
+                        options=[{'label': get_label('LBL_' + i), 'value': i} for i in ['Vertical', 'Horizontal']],
                         value='Vertical',
                         style={'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
@@ -1274,7 +1285,7 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                 html.Div([
                     dcc.RadioItems(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
-                        options=[{'label': get_label('LBL_'+i), 'value': i} for i in ['Vertical', 'Horizontal']],
+                        options=[{'label': get_label('LBL_' + i), 'value': i} for i in ['Vertical', 'Horizontal']],
                         value=graph_orientation,
                         style={'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),

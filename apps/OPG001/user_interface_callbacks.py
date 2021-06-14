@@ -334,7 +334,7 @@ def _update_tab_title(title, active_tab, list_of_children):
 # *************************************************TILE LAYOUT********************************************************
 
 # manage VIEW <-> CUSTOMIZE <--> LAYOUTS for each tab
-for x in range(0, 4):
+for x in range(4):
     @app.callback(
         [Output({'type': 'tile-view-content', 'index': x}, 'style'),
          Output({'type': 'tile-customize-content', 'index': x}, 'style'),
@@ -414,7 +414,7 @@ for x in range(0, 4):
         return view_content_style, customize_content_style, layouts_content_style, view_className, layouts_className, \
                customize_className
 
-for x in range(0, 4):
+for x in range(4):
     app.clientside_callback(
         ClientsideFunction(
             namespace='clientside',
@@ -609,6 +609,7 @@ app.clientside_callback(
     [Input('df-constants-storage', 'data')]
 )
 
+
 # manage data sidemenu appearance and content
 @app.callback(
     [Output({'type': 'data-tile', 'index': 0}, 'children'),
@@ -697,6 +698,7 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
     graph_triggers = [no_update] * 5
     confirm_button = [no_update] * 5
     refresh_button = [no_update] * 5
+    store = no_update
 
     # if 'data-menu-close' or 'select-dashboard-dropdown' requested, close all data menus
     if 'data-menu-close' in changed_id or 'select-dashboard-dropdown' in changed_id:
@@ -790,6 +792,7 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
         if df_const is None:
             df_const = {}
         df_const[df_name] = generate_constants(df_name)
+        store = df_const
         data[changed_index] = get_data_menu(changed_index, df_name, df_const=df_const)
         sidemenu_styles[changed_index] = DATA_CONTENT_SHOW
         # trigger update for all tiles that are linked to the active data menu
@@ -846,7 +849,7 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
 
     return (data[0], data[1], data[2], data[3], data[4],
             sidemenu_styles[0], sidemenu_styles[1], sidemenu_styles[2], sidemenu_styles[3], sidemenu_styles[4],
-            graph_triggers[0], graph_triggers[1], graph_triggers[2], graph_triggers[3], df_const,
+            graph_triggers[0], graph_triggers[1], graph_triggers[2], graph_triggers[3], store,
             confirm_button[0], confirm_button[1], confirm_button[2], confirm_button[3], confirm_button[4],
             refresh_button[0], refresh_button[1], refresh_button[2], refresh_button[3], refresh_button[4],
             prev_selection[0], prev_selection[1], prev_selection[2], prev_selection[3], prev_selection[4])

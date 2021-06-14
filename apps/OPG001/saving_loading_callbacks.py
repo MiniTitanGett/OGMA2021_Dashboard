@@ -17,9 +17,11 @@ import dash_html_components as html
 # import regex
 
 # Internal Packages
+from flask import session
+
 from apps.OPG001.layouts import get_data_menu, get_customize_content, get_div_body
 from apps.OPG001.app import app
-from apps.OPG001.data import get_label, saved_layouts, saved_dashboards, CLR
+from apps.OPG001.data import get_label, saved_layouts, saved_dashboards, CLR, dataset_to_df, generate_constants
 from apps.OPG001.saving_functions import delete_layout, save_layout_state, save_layout_to_db, \
     save_dashboard_state, save_dashboard_to_db, delete_dashboard, load_graph_menu
 
@@ -127,7 +129,7 @@ def _manage_tile_saves_trigger(save_clicks, delete_clicks, confirm_tile_overwrit
 
 
 # Tile saving/save deleting
-for y in range(0, 4):
+for y in range(4):
     @app.callback(
         # LAYOUT components
         [Output({'type': 'tile-save-status-symbols', 'index': y}, 'children'),
@@ -832,20 +834,29 @@ def _load_select_range_inputs(tile_tab, dashboard_tab, tile_start_year, tile_end
      Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-start_year'),
      Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-end_year'),
      Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-start_secondary'),
-     Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-end_secondary')],
+     Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-end_secondary'),
+     Output({'type': 'df-constants-storage-tile-wrapper', 'index': MATCH}, 'children')],
     [Input({'type': 'select-layout-dropdown', 'index': MATCH}, 'value')],
     [State('df-constants-storage', 'data')],
     prevent_initial_call=True
 )
 def _load_tile_layout(selected_layout, df_const):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+    changed_index = int(search(r'\d+', changed_id).group())
 
-    if changed_id == '.' or selected_layout is None or selected_layout is '':
+    if changed_id == '.' or selected_layout is None or selected_layout == '':
         raise PreventUpdate
 
     tile = int(search(r'\d+', changed_id).group())
 
     df_name = saved_layouts[selected_layout]['Data Set']
+
+    # check if data is loaded
+    if df_name not in session:
+        session[df_name] = dataset_to_df(df_name)
+        if df_const is None:
+            df_const = {}
+        df_const[df_name] = generate_constants(df_name)
 
     #  --------- create customize menu ---------
 
@@ -892,15 +903,23 @@ def _load_tile_layout(selected_layout, df_const):
     else:
         tab = start_year = end_year = start_secondary = end_secondary = no_update
 
+    df_const = dcc.Store(
+        id='df-constants-storage',
+        storage_type='memory',
+        data=df_const)
+    for x in range(changed_index+1):
+        df_const = html.Div(
+            df_const,
+            id={'type': 'df-constants-storage-tile-wrapper', 'index': x}
+        )
+
     # UPDATED the first output, previously was selected_layout
-    return saved_layouts[selected_layout][
-               'Title'], customize_content, data_content, None, tab, start_year, end_year, start_secondary, end_secondary
+    return saved_layouts[selected_layout]['Title'], customize_content, data_content, None, tab, start_year, end_year, \
+        start_secondary, end_secondary, df_const
 
 
 # *********************************************DASHBOARD LOADING*****************************************************
 
-# TODO: check if dataset exists and if the dataset being called by the load function no longer exists display a message
-#  to the user
 # load dashboard layout
 @app.callback(
     # dashboard title
@@ -940,7 +959,8 @@ def _load_tile_layout(selected_layout, df_const):
      # num tiles update
      Output('num-tiles-4', 'data-num-tiles'),
      # reset select-dashboard-dropdown
-     Output('select-dashboard-dropdown', 'value')],
+     Output('select-dashboard-dropdown', 'value'),
+     Output('df-constants-storage-dashboard-wrapper', 'children')],
     [Input('select-dashboard-dropdown', 'value')],
     [State('df-constants-storage', 'data')],
     prevent_initial_call=True
@@ -1004,6 +1024,13 @@ def _load_dashboard_layout(selected_dashboard, df_const):
             args_list = tile_data.pop('Args List')
             df_name = tile_data['Data Set']
 
+            # check if data is loaded
+            if df_name not in session:
+                session[df_name] = dataset_to_df(df_name)
+                if df_const is None:
+                    df_const = {}
+                df_const[df_name] = generate_constants(df_name)
+
             if link_state == 'fa fa-link':
                 # if tile was linked but it's data menu has changed and no longer matches master data, unlink
                 if tile_data != saved_dashboards[selected_dashboard]['Master Data']:
@@ -1047,6 +1074,19 @@ def _load_dashboard_layout(selected_dashboard, df_const):
 
     children = get_div_body(num_tiles=num_tiles, input_tiles=None, tile_keys=tile_keys)
 
+    df_const = html.Div(
+        html.Div(
+            html.Div(
+                html.Div(
+                    dcc.Store(
+                        id='df-constants-storage',
+                        storage_type='memory',
+                        data=df_const),
+                    id={'type': 'df-constants-storage-tile-wrapper', 'index': 0}),
+                id={'type': 'df-constants-storage-tile-wrapper', 'index': 1}),
+            id={'type': 'df-constants-storage-tile-wrapper', 'index': 2}),
+        id={'type': 'df-constants-storage-tile-wrapper', 'index': 3}),
+
     return (saved_dashboards[selected_dashboard]['Dashboard Title'],
 
             children,
@@ -1066,4 +1106,4 @@ def _load_dashboard_layout(selected_dashboard, df_const):
             dms[4]['Content'], dms[4]['Start Year'], dms[4]['End Year'], dms[4]['Start Secondary'],
             dms[4]['End Secondary'],
 
-            num_tiles, '')
+            num_tiles, '', df_const)

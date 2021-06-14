@@ -57,48 +57,6 @@ def save_dashboard_state(name, attributes):
         saved_dashboards[name] = attributes
 
 
-# # loads the saved graphs into a dictionary
-# def load_saved_graphs():
-#     """
-#     loads the saved layouts into the saved_layouts dictionary upon dashboard startup
-#     """
-#     if os.stat('apps/OPG001/saved_layouts.json').st_size != 0:
-#         with open('apps/OPG001/saved_layouts.json') as json_file:
-#             saved_graphs_temp = json.load(json_file)
-#             for key in saved_graphs_temp:
-#                 save_layout_state(key, saved_graphs_temp[key])
-#         json_file.close()
-
-
-# # loads the saved graphs into a dictionary
-# def load_saved_dashboards():
-#     """
-#     loads the saved dashboards into the saved_dashboards dictionary upon dashboard startup
-#     """
-#     if os.stat('apps/OPG001/saved_dashboards.json').st_size != 0:
-#         with open('apps/OPG001/saved_dashboards.json') as json_file:
-#             saved_dashboards_temp = json.load(json_file)
-#             for key in saved_dashboards_temp:
-#                 save_dashboard_state(key, saved_dashboards_temp[key])
-#         json_file.close()
-
-
-# load_saved_dashboards()
-
-
-# # saves the tiles meta data to the saved layouts file
-# def save_layout_to_file(layouts):
-#     """
-#     saves the layouts to the json file
-#     :param layouts: the dictionary containing all of the saved layouts
-#     """
-#     j = json.dumps(layouts, sort_keys=True)
-#     if j:
-#         with open('apps/OPG001/saved_layouts.json', 'w') as file:
-#             file.write(j)
-#             file.close()
-
-
 def save_layout_to_db(graph_id, graph_title):
     query = """\
     declare @p_result_status varchar(255)
@@ -108,18 +66,6 @@ def save_layout_to_db(graph_id, graph_title):
     """.format(session['sessionID'], graph_id, graph_title, json.dumps(saved_layouts[graph_id], sort_keys=True))
 
     exec_storedproc(query)
-
-
-# # saves the dashboards meta data to the saved layouts file
-# def save_dashboard_to_file(dashboard):
-#     """
-#     saves the dashboards to the json file
-#     :param dashboard: the dictionary containing all of the saved dashboards
-#     """
-#     j = json.dumps(dashboard, sort_keys=True)
-#     with open('apps/OPG001/saved_dashboards.json', 'w') as file:
-#         file.write(j)
-#         file.close()
 
 
 def save_dashboard_to_db(dashboard_id, dashboard_title):

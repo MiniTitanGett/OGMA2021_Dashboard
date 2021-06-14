@@ -100,101 +100,52 @@ DATA_CONTENT_HIDE = {'display': 'none'}
 def dataset_to_df(df_name):
     logging.debug("loading dataset {}...".format(df_name))
 
-    if df_name.find('.csv') > -1:
-        # df = pd.DataFrame(None)
-        df = pd.read_csv('apps/OPG001/test_data/{}'.format(df_name),
-                         #  chunks = pd.read_csv('apps/OPG001/test_data/{}'.format(df_name),
-                         parse_dates=['Date of Event'],
-                         # infer_datetime_format=True,
-                         # chunksize=50_000,
-                         dtype={
-                             "Variable Name": object,
-                             "Variable Name Qualifier": object,
-                             "Variable Name Sub Qualifier": object
-                         })
-        # for chunk in chunks:
-        #    df = df.append(chunk, ignore_index=True)
-    elif df_name.find('.xlsx') > -1:
-        df = pd.read_excel('apps/OPG001/test_data/{}'.format(df_name),
-                           dtype={
-                               "Variable Name": object,
-                               "Variable Name Qualifier": object,
-                               "Variable Name Sub Qualifier": object
-                           })
-    elif df_name.find('.json') > -1:
-        df = pd.read_json('apps/OPG001/test_data/{}'.format(df_name),
-                          orient='records',
-                          lines=True)
-    elif df_name.find('.sql') > -1:  # TODO: This is testing code for connecting to a personal database
-        # conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
-        # sql_query = pd.read_sql_query(
-        #     '''
-        # SELECT * FROM [OGMA_Test].[dbo].[{}]
-        # '''.format(df_name.split('.')[0]), conn)
-        # df = pd.DataFrame(sql_query)
-        query = """\
-        declare @p_result_status varchar(255)
-        exec dbo.opp_get_dataset {}, \'{}\', \'{}\', @p_result_status output
-        select @p_result_status as result_status 
-        """.format(session["sessionID"], session["language"], df_name.split('.')[0])
+    # conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
+    # sql_query = pd.read_sql_query(
+    #     '''
+    # SELECT * FROM [OGMA_Test].[dbo].[{}]
+    # '''.format(df_name.split('.')[0]), conn)
+    # df = pd.DataFrame(sql_query)
+    query = """\
+    declare @p_result_status varchar(255)
+    exec dbo.opp_get_dataset {}, \'{}\', \'{}\', @p_result_status output
+    select @p_result_status as result_status
+    """.format(session["sessionID"], session["language"], df_name)
 
-        df = exec_storedproc_results(query)
-        df[['Year of Event',
-            'Quarter',
-            'Month of Event',
-            'Week of Event',
-            'Fiscal Year of Event',
-            'Fiscal Quarter',
-            'Fiscal Month of Event',
-            'Fiscal Week of Event',
-            'Julian Day',
-            'Activity Event Id',
-            'Measure Value']] = df[['Year of Event',
-                                    'Quarter',
-                                    'Month of Event',
-                                    'Week of Event',
-                                    'Fiscal Year of Event',
-                                    'Fiscal Quarter',
-                                    'Fiscal Month of Event',
-                                    'Fiscal Week of Event',
-                                    'Julian Day',
-                                    'Activity Event Id',
-                                    'Measure Value']].apply(pd.to_numeric)
-    else:
-        # conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
-        # sql_query = pd.read_sql_query(
-        #     '''
-        # SELECT * FROM [OGMA_Test].[dbo].[{}]
-        # '''.format(df_name.split('.')[0]), conn)
-        # df = pd.DataFrame(sql_query)
+    df = exec_storedproc_results(query)
+    df[['Year of Event',
+        'Quarter',
+        'Month of Event',
+        'Week of Event',
+        'Fiscal Year of Event',
+        'Fiscal Quarter',
+        'Fiscal Month of Event',
+        'Fiscal Week of Event',
+        'Julian Day',
+        'Activity Event Id',
+        'Measure Value']] = df[['Year of Event',
+                                'Quarter',
+                                'Month of Event',
+                                'Week of Event',
+                                'Fiscal Year of Event',
+                                'Fiscal Quarter',
+                                'Fiscal Month of Event',
+                                'Fiscal Week of Event',
+                                'Julian Day',
+                                'Activity Event Id',
+                                'Measure Value']].apply(pd.to_numeric)
+
+    if df_name == 'OPG010':
         query = """\
         declare @p_result_status varchar(255)
-        exec dbo.opp_get_dataset {}, \'{}\', \'{}\', @p_result_status output
+        exec dbo.opp_get_dataset_nodedata {}, \'{}\', \'{}\', @p_result_status output
         select @p_result_status as result_status
         """.format(session["sessionID"], session["language"], df_name)
 
-        df = exec_storedproc_results(query)
-        df[['Year of Event',
-            'Quarter',
-            'Month of Event',
-            'Week of Event',
-            'Fiscal Year of Event',
-            'Fiscal Quarter',
-            'Fiscal Month of Event',
-            'Fiscal Week of Event',
-            'Julian Day',
-            'Activity Event Id',
-            'Measure Value']] = df[['Year of Event',
-                                    'Quarter',
-                                    'Month of Event',
-                                    'Week of Event',
-                                    'Fiscal Year of Event',
-                                    'Fiscal Quarter',
-                                    'Fiscal Month of Event',
-                                    'Fiscal Week of Event',
-                                    'Julian Day',
-                                    'Activity Event Id',
-                                    'Measure Value']].apply(pd.to_numeric)
+        node_df = exec_storedproc_results(query)
+        node_df[['x_coord', 'y_coord']] = node_df[['x_coord', 'y_coord']].apply(pd.to_numeric)
+
+        session[df_name + "_NodeData"] = node_df
 
     # add all variable names without qualifiers to col
     col = pd.Series(df['Variable Name'][df['Variable Name Qualifier'].isna()])
@@ -312,7 +263,8 @@ def generate_constants(df_name):
         MIN_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(),
                                                 'Date of Event'], '%Y/%m/%d')
     except:
-        MIN_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(), 'Date of Event'].strftime('%m/%d/%Y')
+        MIN_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(),
+                              'Date of Event'].strftime('%m/%d/%Y')
         # MIN_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64').idxmin(),  # at
         #                                            'Date of Event'], '%Y/%m/%d')
 
@@ -320,7 +272,8 @@ def generate_constants(df_name):
         MAX_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64[ns]').idxmax(),
                                                 'Date of Event'], '%Y/%m/%d')
     except:
-        MAX_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmax(), 'Date of Event'].strftime('%m/%d/%Y')
+        MAX_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmax(),
+                              'Date of Event'].strftime('%m/%d/%Y')
         # MAX_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64').idxmax(),  # at
         #                                            'Date of Event'], '%Y/%m/%d')
 

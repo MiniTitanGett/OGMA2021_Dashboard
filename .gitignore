@@ -4,7 +4,5 @@ __pycache__
 .idea
 .env
 web.config
-saved_layouts.json
-saved_dashboards.json
 /apps/OPG001/test_data/
 /flask_session/

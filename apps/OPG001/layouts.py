@@ -700,7 +700,7 @@ def get_tile(tile, tile_keys=None, df_const=None, df_name=None):
                         className='fill-container')]),
             html.Div(
                 tile_keys['Customize Content'] if tile_keys else get_customize_content(
-                    tile=tile, graph_type=None, graph_menu=None, df_name=None),
+                    tile=tile, graph_type=None, graph_menu=None, df_name=df_name),
                 style=CUSTOMIZE_CONTENT_HIDE,
                 id={'type': 'tile-customize-content', 'index': tile},
                 className='customize-content'),
@@ -760,20 +760,17 @@ def get_tile(tile, tile_keys=None, df_const=None, df_name=None):
 
 
 # arrange tiles on the page for 1-4 tiles
-def get_tile_layout(num_tiles, input_tiles, tile_keys=None, df_const=None):
+def get_tile_layout(num_tiles, input_tiles, tile_keys=None, df_const=None, master_df=None):
     """
     :param num_tiles: Desired number of tiles to display.
     :param input_tiles: List of children of existing tiles.
     :raise IndexError: If num_tiles < 0 or num_tiles > 4
     :return: Layout of specified number of tiles.
     """
-
     tile = [None, None, None, None]
-
     # for each case, prioritize reusing existing input_tiles, otherwise create default tiles where needed
     if num_tiles == 0:
         children = []
-
     elif num_tiles == 1:
         if input_tiles:
             tile[0] = [
@@ -782,9 +779,9 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, df_const=None):
                     className='tile-container',
                     id={'type': 'tile', 'index': 0}, style={'z-index': '0'})]
         elif tile_keys:
-            tile[0] = get_tile(0, tile_keys[0], df_const=df_const)
+            tile[0] = get_tile(0, tile_keys[0], df_const=df_const, df_name=master_df)
         else:
-            tile[0] = get_tile(0, df_const=df_const)
+            tile[0] = get_tile(0, df_const=df_const, df_name=master_df)
         children = [
             html.Div([
                 html.Div(
@@ -793,7 +790,6 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, df_const=None):
                 className='grid-container fill-container',
                 style={'grid-template-rows': '100%', 'grid-template-columns': '100%',
                        '-ms-grid-rows': '100%', '-ms-grid-columns': '100%'})]
-
     elif num_tiles == 2:
         if input_tiles:
             for i in range(len(input_tiles)):
@@ -804,13 +800,13 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, df_const=None):
                         id={'type': 'tile', 'index': i},
                         style={'z-index': '{}'.replace("{}", str(i))})]
             for i in range(len(input_tiles), num_tiles):
-                tile[i] = get_tile(i, df_const=df_const)
+                tile[i] = get_tile(i, df_const=df_const, df_name=master_df)
         elif tile_keys:
             for i in range(num_tiles):
-                tile[i] = get_tile(i, tile_keys[i], df_const=df_const)
+                tile[i] = get_tile(i, tile_keys[i], df_const=df_const, df_name=master_df)
         else:
             for i in range(num_tiles):
-                tile[i] = get_tile(i, df_const=df_const)
+                tile[i] = get_tile(i, df_const=df_const, df_name=master_df)
         children = [
             html.Div([
                 html.Div(
@@ -823,7 +819,6 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, df_const=None):
             ], className='grid-container fill-container',
                 style={'grid-template-rows': '100%', 'grid-template-columns': '50% 50%',
                        '-ms-grid-rows': '100%', '-ms-grid-columns': '50% 50%'})]
-
     elif num_tiles == 3:
         if input_tiles:
             for i in range(len(input_tiles)):
@@ -834,13 +829,13 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, df_const=None):
                         id={'type': 'tile', 'index': i},
                         style={'z-index': '{}'.replace("{}", str(i))})]
             for i in range(len(input_tiles), num_tiles):
-                tile[i] = get_tile(i, df_const=df_const)
+                tile[i] = get_tile(i, df_const=df_const, df_name=master_df)
         elif tile_keys:
             for i in range(num_tiles):
-                tile[i] = get_tile(i, tile_keys[i], df_const=df_const)
+                tile[i] = get_tile(i, tile_keys[i], df_const=df_const, df_name=master_df)
         else:
             for i in range(num_tiles):
-                tile[i] = get_tile(i, df_const=df_const)
+                tile[i] = get_tile(i, df_const=df_const, df_name=master_df)
         children = [
             html.Div([
                 html.Div(
@@ -858,7 +853,6 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, df_const=None):
             ], className='grid-container fill-container',
                 style={'grid-template-rows': '50% 50%', 'grid-template-columns': '50% 50%',
                        '-ms-grid-rows': '50% 50%', '-ms-grid-columns': '50% 50%'})]
-
     elif num_tiles == 4:
         if input_tiles:
             for i in range(len(input_tiles)):
@@ -869,13 +863,13 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, df_const=None):
                         id={'type': 'tile', 'index': i},
                         style={'z-index': '{}'.replace("{}", str(i))})]
             for i in range(len(input_tiles), num_tiles):
-                tile[i] = get_tile(i, df_const=df_const)
+                tile[i] = get_tile(i, df_const=df_const, df_name=master_df)
         elif tile_keys:
             for i in range(num_tiles):
-                tile[i] = get_tile(i, tile_keys[i], df_const=df_const)
+                tile[i] = get_tile(i, tile_keys[i], df_const=df_const, df_name=master_df)
         else:
             for i in range(num_tiles):
-                tile[i] = get_tile(i, df_const=df_const)
+                tile[i] = get_tile(i, df_const=df_const, df_name=master_df)
         children = [
             html.Div([
                 html.Div(
@@ -897,10 +891,8 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, df_const=None):
             ], className='grid-container fill-container',
                 style={'grid-template-rows': '50% 50%', 'grid-template-columns': '50% 50%',
                        '-ms-grid-rows': '50% 50%', '-ms-grid-columns': '50% 50%'})]
-
     else:
         raise IndexError("The number of displayed tiles cannot exceed 4, " + str(num_tiles) + " tiles were requested")
-
     return children
 
 

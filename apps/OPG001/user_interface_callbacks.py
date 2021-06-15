@@ -98,9 +98,10 @@ app.clientside_callback(
     [State({'type': 'tile', 'index': ALL}, 'children'),
      State('num-tiles', 'data-num-tiles'),
      State('button-new', 'disabled'),
-     State('df-constants-storage', 'data'),]
+     State('df-constants-storage', 'data'),
+     State({'type': 'data-set', 'index': 4}, 'value')]
 )
-def _new_and_delete(new_clicks, _close_clicks, dashboard_reset, input_tiles, num_tiles, new_disabled, df_const):
+def _new_and_delete(new_clicks, _close_clicks, dashboard_reset, input_tiles, num_tiles, new_disabled, df_const, master_df):
     """
     :param new_clicks: Detects user clicking 'NEW' button in master navigation bar and encodes the number of tiles to
     display
@@ -129,17 +130,17 @@ def _new_and_delete(new_clicks, _close_clicks, dashboard_reset, input_tiles, num
                 deleted_tile = str(i)
             elif flag:
                 input_tiles[i - 1] = change_index(input_tiles[i - 1], i - 1)
-        children = get_tile_layout(num_tiles, input_tiles, df_const=df_const)
+        children = get_tile_layout(num_tiles, input_tiles, df_const=df_const, master_df=master_df)
     # if NEW button pressed: adjust main layout and disable NEW button until it is unlocked at the end of callback chain
     elif 'button-new' in changed_id:
         if num_tiles == 4:
             raise PreventUpdate
         num_tiles += 1
-        children = get_tile_layout(num_tiles, input_tiles, df_const=df_const)
+        children = get_tile_layout(num_tiles, input_tiles, df_const=df_const, master_df=master_df)
     # if RESET dashboard requested, set dashboard to default appearance
     elif 'dashboard-reset' in changed_id:
         num_tiles = 1
-        children = get_tile_layout(num_tiles, [], df_const=df_const)
+        children = get_tile_layout(num_tiles, [], df_const=df_const, master_df=master_df)
         dashboard_reset_trigger = 'trigger'
     # else, a tab change was made, prevent update
     else:
@@ -414,14 +415,15 @@ for x in range(0, 4):
      ],
     [State({'type': 'data-set', 'index': MATCH}, 'value'),
      State({'type': 'data-set', 'index': 4}, 'value'),
-     # state({'type': 'tile-link', 'index': ALL}, 'className'),
      State({'type': 'graph-type-dropdown', 'index': MATCH}, 'value'),
      ]
 )
-def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, graph_type):
+def _update_graph_type_options(trigger,link_states, df_name, df_name_parent, graph_type):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
-    if changed_id == '.' or link_states is []: # trigger is None
+    print(trigger)
+
+    if changed_id == '.' or trigger is None or link_states is []:
         raise PreventUpdate
 
     print("****options****")
@@ -431,14 +433,14 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
     print("Changed ID:" + str(changed_id))
     print("Graph type:" + str(graph_type))
     for link in link_states:
-        print("update:" + str(link))
+        print("update:" + link)
     changed_index = int(search(r'\d+', changed_id).group())
-    print('Changed index:' + str(changed_index))
+    print('changed index:' + str(changed_index))
 
+    graph_options = no_update
     options = []
 
     link_trigger = None
-    # '"type":"tile-link"}.className'
 
     if trigger == 'fa fa-unlink':  # '"type":"tile-link"}.className' in changed_id:
         link_trigger = "fa fa-unlink"
@@ -612,7 +614,7 @@ def _change_link(selected_layout, _link_clicks, link_trigger, link_state):
     print(changed_id)
 
     # if link button was not pressed and layout was not selected, do not update
-    if '.' == changed_id:
+    if '.' == changed_id or link_trigger is None:
         raise PreventUpdate
 
     if '"type":"select-layout-dropdown"}.value' in changed_id:
@@ -623,7 +625,10 @@ def _change_link(selected_layout, _link_clicks, link_trigger, link_state):
 
     if '"type":"tile-link"}.n_clicks' in changed_id:
         # if link button was pressed, toggle the link icon linked <--> unlinked
-        # link_state = 'fa fa-unlink' if link_state == 'fa fa-link' else 'fa fa-link'
+        #link_state = 'fa fa-unlink' if link_state == 'fa fa-link' else 'fa fa-link'
+
+    #if link_trigger == 'fa fa-unlink':
+    #    link_state = 'fa fa-unlink'
         if link_state == "fa fa-link":
             link_state = 'fa fa-unlink'
         else:
@@ -631,7 +636,6 @@ def _change_link(selected_layout, _link_clicks, link_trigger, link_state):
 
     if '"type":"set-tile-link-trigger"}.link-' in changed_id and link_trigger is not None:
         link_state = 'fa fa-unlink'
-
     return link_state
 
 
@@ -697,7 +701,7 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
     :return: Data side-menus for all 5 side-menus
     """
 
-    print("****Manage Data Side menus****")
+    print("****Manage Data Sidemenus****")
     print("Graph type entry")
     for entry in graph_types:
         print(entry)
@@ -720,6 +724,16 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
     refresh_button = [no_update] * 5
     options_triggers = [no_update] * 5
     link_triggers = [no_update] * 5
+
+    """
+    if df_name_4 is not None:
+        print("****HERE 3****")
+        print(df_name_4)
+        for num in range(len(links_style)):
+            if links_style[num] == 'fa fa-link':
+                data[num] = df_name_4
+
+    print("****HERE 4****")"""
 
     # if 'data-menu-close' or 'select-dashboard-dropdown' requested, close all data menus
     if 'data-menu-close' in changed_id or 'select-dashboard-dropdown' in changed_id:
@@ -814,13 +828,16 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
         if changed_index == 4:
             for i in range(len(links_style)):
                 if links_style[i] == 'fa fa-link':
-                    if graph_types[i] is None or graph_types[i] in GRAPH_OPTIONS[df_name]:
+                    if graph_types[i] is None or df_names[4] in GRAPH_OPTIONS[df_name]:
                         graph_triggers[i] = df_name
                         options_triggers[i] = df_name
                     else:
+                        # UN-link here?
                         links_style[i] = 'fa fa-unlink'
+
                         for link in links_style:
                             print(link)
+                        # set the dataset of the new menu from unlinking
                         if df_name == "OPG001":
                             df_names[i] = "OPG010"
                             df_const[df_names[i]] = generate_constants(df_names[i])

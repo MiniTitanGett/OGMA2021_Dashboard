@@ -14,12 +14,12 @@ from dash.exceptions import PreventUpdate
 from re import search
 from dash import no_update
 import dash_html_components as html
-# import regex
+from flask import session
 
 # Internal Packages
 from apps.dashboard.layouts import get_data_menu, get_customize_content, get_div_body
 from apps.dashboard.app import app
-from apps.dashboard.data import get_label, saved_layouts, saved_dashboards, CLR
+from apps.dashboard.data import get_label, saved_layouts, saved_dashboards, CLR, dataset_to_df, generate_constants
 from apps.dashboard.saving_functions import delete_layout, save_layout_state, save_layout_to_db, \
     save_dashboard_state, save_dashboard_to_db, delete_dashboard, load_graph_menu
 
@@ -919,7 +919,7 @@ def _load_tile_layout(selected_layout, df_const):
 
     # UPDATED the first output, previously was selected_layout
     return saved_layouts[selected_layout]['Title'], customize_content, data_content, None, tab, start_year, end_year, \
-        start_secondary, end_secondary,unlink, df_const
+        start_secondary, end_secondary, unlink, df_const
 
 
 # *********************************************DASHBOARD LOADING*****************************************************
@@ -932,30 +932,35 @@ def _load_tile_layout(selected_layout, df_const):
      Output('div-body-wrapper', 'children'),
      # data tile 0
      Output({'type': 'data-menu-dashboard-loading', 'index': 0}, 'children'),
+     Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-tab'),
      Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-start_year'),
      Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-end_year'),
      Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-start_secondary'),
      Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-end_secondary'),
      # data tile 1
      Output({'type': 'data-menu-dashboard-loading', 'index': 1}, 'children'),
+     Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-tab'),
      Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-start_year'),
      Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-end_year'),
      Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-start_secondary'),
      Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-end_secondary'),
      # data tile 2
      Output({'type': 'data-menu-dashboard-loading', 'index': 2}, 'children'),
+     Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-tab'),
      Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-start_year'),
      Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-end_year'),
      Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-start_secondary'),
      Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-end_secondary'),
      # data tile 3
      Output({'type': 'data-menu-dashboard-loading', 'index': 3}, 'children'),
+     Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-tab'),
      Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-start_year'),
      Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-end_year'),
      Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-start_secondary'),
      Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-end_secondary'),
      # data tile 4
      Output({'type': 'data-menu-dashboard-loading', 'index': 4}, 'children'),
+     Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-tab'),
      Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-start_year'),
      Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-end_year'),
      Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-start_secondary'),
@@ -1095,19 +1100,19 @@ def _load_dashboard_layout(selected_dashboard, df_const):
 
             children,
 
-            dms[0]['Content'], dms[0]['Start Year'], dms[0]['End Year'], dms[0]['Start Secondary'],
+            dms[0]['Content'], dms[0]['Tab'], dms[0]['Start Year'], dms[0]['End Year'], dms[0]['Start Secondary'],
             dms[0]['End Secondary'],
 
-            dms[1]['Content'], dms[1]['Start Year'], dms[1]['End Year'], dms[1]['Start Secondary'],
+            dms[1]['Content'], dms[1]['Tab'], dms[1]['Start Year'], dms[1]['End Year'], dms[1]['Start Secondary'],
             dms[1]['End Secondary'],
 
-            dms[2]['Content'], dms[2]['Start Year'], dms[2]['End Year'], dms[2]['Start Secondary'],
+            dms[2]['Content'], dms[2]['Tab'],  dms[2]['Start Year'], dms[2]['End Year'], dms[2]['Start Secondary'],
             dms[2]['End Secondary'],
 
-            dms[3]['Content'], dms[3]['Start Year'], dms[3]['End Year'], dms[3]['Start Secondary'],
+            dms[3]['Content'], dms[3]['Tab'], dms[3]['Start Year'], dms[3]['End Year'], dms[3]['Start Secondary'],
             dms[3]['End Secondary'],
 
-            dms[4]['Content'], dms[4]['Start Year'], dms[4]['End Year'], dms[4]['Start Secondary'],
+            dms[4]['Content'], dms[4]['Tab'], dms[4]['Start Year'], dms[4]['End Year'], dms[4]['Start Secondary'],
             dms[4]['End Secondary'],
 
             num_tiles, '', df_const)

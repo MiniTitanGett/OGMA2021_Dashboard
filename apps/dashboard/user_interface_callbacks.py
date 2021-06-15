@@ -459,7 +459,11 @@ for x in range(4):
         :param graph_options_state: State of the current graph options div
         :return: Graph menu corresponding to selected graph type
         """
-        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][-1]
+
+        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+        for item in dash.callback_context.triggered:
+            if '"type":"tile-link"}.className' in item['prop_id']:
+                changed_id = item['prop_id']
 
         if link_state == 'fa fa-link':
             df_name = master_df_name

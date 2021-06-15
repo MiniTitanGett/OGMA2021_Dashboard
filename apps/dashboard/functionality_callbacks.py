@@ -108,7 +108,7 @@ for x in range(4):
                       master_start_secondary, master_end_secondary, graph_display, df_name, master_df_name,
                       arg_value, graph_type, link_state, hierarchy_options, master_hierarchy_options, df_const):
 
-        changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
+        changed_id = [i['prop_id'] for i in dash.callback_context.triggered][-1]
 
         # if not in view tab, or new/delete while the graph already exists, prevent update
         if view_state == 'tile-nav tile-nav--view' or (changed_id == '.' and graph_display):

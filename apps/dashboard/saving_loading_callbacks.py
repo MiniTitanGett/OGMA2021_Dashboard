@@ -1009,7 +1009,7 @@ def _load_dashboard_layout(selected_dashboard, df_const):
 
             if tile_pointer in saved_layouts:
                 tile_data = saved_layouts[tile_pointer].copy()
-                tile_title = saved_layouts[tile_pointer]["Title"]
+                tile_title = tile_data.pop("Title")
             # TODO: In 'prod' we will check for pointers and only do a 'virtual' delete for
             #  the single user
             else:

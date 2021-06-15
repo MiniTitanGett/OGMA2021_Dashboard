@@ -468,12 +468,9 @@ for x in range(4):
         if link_state == 'fa fa-link':
             df_name = master_df_name
 
-        # if link state has changed from linked --> unlinked the data has not changed, prevent update
-        if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink':
-            raise PreventUpdate
-
         # if link state from unlinked --> linked and the data set has not changed, don't update menu, still update graph
-        if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name == master_df_name:
+        if ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name == master_df_name)\
+                or ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink'):
             return no_update, 1, no_update
 
         # if graph menu trigger has value 'tile closed' then a tile was closed, don't update menu, still update table

@@ -612,6 +612,7 @@ def get_layout_dashboard():
 
 # create customize content
 def get_customize_content(tile, graph_type, graph_menu, df_name):
+    language = session["language"]
     print("you are here in get customize")
     if df_name == 'OPG010':
         graphs = GRAPH_OPTIONS['OPG010']
@@ -631,9 +632,19 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
                 value=graph_type,
                 style={'max-width': '405px', 'width': '100%', 'font-size': '13px'}),
             style={'margin-left': '15px'}),
+        html.Div([
+            dcc.Markdown(
+                '''
+                If no graph options available. Please select a Data Set!
+                ''' if language == 'En' else
+                '''
+                -If no graph options available. Please select a Data Set!
+                ''')],
+            style = {'margin-left': '15px'}),
         html.Div(
             children=graph_menu,
             id={'type': 'div-graph-options', 'index': tile})]
+
 
 
 # create default tile

@@ -101,7 +101,8 @@ app.clientside_callback(
      State('df-constants-storage', 'data'),
      State({'type': 'data-set', 'index': 4}, 'value')]
 )
-def _new_and_delete(new_clicks, _close_clicks, dashboard_reset, input_tiles, num_tiles, new_disabled, df_const, master_df):
+def _new_and_delete(new_clicks, _close_clicks, dashboard_reset, input_tiles, num_tiles, new_disabled, df_const,
+                    master_df):
     """
     :param new_clicks: Detects user clicking 'NEW' button in master navigation bar and encodes the number of tiles to
     display
@@ -418,7 +419,7 @@ for x in range(0, 4):
      State({'type': 'graph-type-dropdown', 'index': MATCH}, 'value'),
      ]
 )
-def _update_graph_type_options(trigger,link_states, df_name, df_name_parent, graph_type):
+def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, graph_type):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     print(trigger)
@@ -641,10 +642,10 @@ def _change_link(selected_layout, _link_clicks, link_trigger, link_state):
 
     if '"type":"tile-link"}.n_clicks' in changed_id:
         # if link button was pressed, toggle the link icon linked <--> unlinked
-        #link_state = 'fa fa-unlink' if link_state == 'fa fa-link' else 'fa fa-link'
+        # link_state = 'fa fa-unlink' if link_state == 'fa fa-link' else 'fa fa-link'
 
-    #if link_trigger == 'fa fa-unlink':
-    #    link_state = 'fa fa-unlink'
+        # if link_trigger == 'fa fa-unlink':
+        #    link_state = 'fa fa-unlink'
         if link_state == "fa fa-link":
             link_state = 'fa fa-unlink'
         else:
@@ -677,7 +678,12 @@ def _change_link(selected_layout, _link_clicks, link_trigger, link_state):
      Output({'type': 'set-graph-options-trigger', 'index': 0}, 'options-'),
      Output({'type': 'set-graph-options-trigger', 'index': 1}, 'options-'),
      Output({'type': 'set-graph-options-trigger', 'index': 2}, 'options-'),
-     Output({'type': 'set-graph-options-trigger', 'index': 3}, 'options-')],
+     Output({'type': 'set-graph-options-trigger', 'index': 3}, 'options-'),
+     Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-tab'),
+     Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-start_year'),
+     Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-end_year'),
+     Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-start_secondary'),
+     Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-end_secondary'),],
     [Input('dashboard-reset-trigger', 'data-'),
      Input('tile-closed-trigger', 'data-'),
      Input('select-dashboard-dropdown', 'value'),
@@ -703,19 +709,50 @@ def _change_link(selected_layout, _link_clicks, link_trigger, link_state):
     [State({'type': 'data-tile', 'index': ALL}, 'children'),
      State({'type': 'data-tile', 'index': ALL}, 'style'),
      State('df-constants-storage', 'data'),
-     State({'type': 'graph-type-dropdown', 'index': ALL}, 'value')]
+     State({'type': 'graph-type-dropdown', 'index': ALL}, 'value'),
+     # Date picker states for master data menu
+     State({'type': 'start-year-input', 'index': 4}, 'name'),
+     State({'type': 'radio-timeframe', 'index': 4}, 'value'),
+     State({'type': 'fiscal-year-toggle', 'index': 4}, 'value'),
+     State({'type': 'start-year-input', 'index': 4}, 'value'),
+     State({'type': 'end-year-input', 'index': 4}, 'value'),
+     State({'type': 'start-secondary-input', 'index': 4}, 'value'),
+     State({'type': 'end-secondary-input', 'index': 4}, 'value'),
+     State({'type': 'hierarchy-toggle', 'index': 4}, 'value'),
+     State({'type': 'hierarchy_specific_dropdown', 'index': 4}, 'options'),
+     State({'type': 'num-periods', 'index': 4}, 'value'),
+     State({'type': 'period-type', 'index': 4}, 'value'),
+     State({'type': 'graph_children_toggle', 'index': 4}, 'value'),  # graph all toggle
+     State({'type': 'hierarchy_display_button', 'index': 4}, 'children'),
+
+]
 )
 def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links_style, selected_layout, data_clicks,
                            data_close_clicks, df_name_0, df_name_1, df_name_2, df_name_3, df_name_4, _confirm_clicks_0,
                            _confirm_clicks_1, _confirm_clicks_2, _confirm_clicks_3, _confirm_clicks_4,
                            _refresh_clicks_0, _refresh_clicks_1, _refresh_clicks_2, _refresh_clicks_3,
-                           _refresh_clicks_4, data_states, sidemenu_style_states, df_const, graph_types):
+                           _refresh_clicks_4, data_states, sidemenu_style_states, df_const, graph_types,
+                           master_secondary_type, master_timeframe, master_fiscal_toggle, master_start_year,
+                           master_end_year, master_start_secondary, master_end_secondary,master_hierarchy_toggle ,master_hierarchy_drop,
+                           master_num_state,master_period_type,master_graph_child_toggle,state_of_display):
     """
     :param closed_tile: Detects when a tile has been deleted and encodes the index of the deleted tile
     param links_style: State of all link/unlink icons and detects user clicking a link icon
     :param data_states: State of all data side-menus
     :return: Data side-menus for all 5 side-menus
     """
+    print("data menu options")
+    print(master_secondary_type)
+    print(master_timeframe)
+    print(master_fiscal_toggle)
+    print(master_start_year)
+    print(master_end_year)
+    print(master_start_secondary)
+    print(master_end_secondary)
+    print(master_hierarchy_toggle)
+    print(master_hierarchy_drop)
+    print(master_num_state)
+    print(master_period_type)
 
     print("****Manage Data Sidemenus****")
     print("Graph type entry")
@@ -739,7 +776,6 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
     confirm_button = [no_update] * 5
     refresh_button = [no_update] * 5
     options_triggers = [no_update] * 5
-    link_triggers = [no_update] * 5
 
     """
     if df_name_4 is not None:
@@ -854,10 +890,18 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
                         for link in links_style:
                             print(link)
                         # set the dataset of the new menu from unlinking
+                        if type(state_of_display) == dict:
+                            state_of_display = [state_of_display]
+                        nid_path = "root"
+                        for button in state_of_display:
+                            nid_path += '^||^{}'.format(button['props']['children'])
+
                         if df_name == "OPG001":
                             df_names[i] = "OPG010"
                             df_const[df_names[i]] = generate_constants(df_names[i])
-                            data[i] = get_data_menu(i, df_names[i], df_const=df_const)
+                            data[i] = get_data_menu(i, df_names[i],mode='tile-loading', hierarchy_toggle=master_hierarchy_toggle, level_value=master_hierarchy_drop,
+                            nid_path=nid_path, graph_all_toggle=master_graph_child_toggle, fiscal_toggle=master_fiscal_toggle, input_method=master_timeframe,
+                            num_periods=master_num_state, period_type= master_period_type, df_const=df_const)
                             refresh_button[i] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
                                                  'position': 'relative',
                                                  'margin-right': '10px', 'margin-left': '10px',
@@ -865,7 +909,13 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
                         elif df_name == "OPG010":
                             df_names[i] = "OPG001"
                             df_const[df_names[i]] = generate_constants(df_names[i])
-                            data[i] = get_data_menu(i, df_names[i], df_const=df_const)
+                            data[i] = get_data_menu(i, df_names[i],mode='tile-loading', hierarchy_toggle=master_hierarchy_toggle, level_value=master_hierarchy_drop,
+                            nid_path=nid_path, graph_all_toggle=master_graph_child_toggle, fiscal_toggle=master_fiscal_toggle, input_method=master_timeframe,
+                            num_periods=master_num_state, period_type= master_period_type, df_const=df_const)
+
+
+
+
                             refresh_button[i] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
                                                  'position': 'relative',
                                                  'margin-right': '10px', 'margin-left': '10px',

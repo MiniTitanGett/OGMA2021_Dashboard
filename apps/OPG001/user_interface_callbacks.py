@@ -442,7 +442,14 @@ def _update_graph_type_options(trigger,link_states, df_name, df_name_parent, gra
 
     link_trigger = None
 
-    if trigger == 'fa fa-unlink':  # '"type":"tile-link"}.className' in changed_id:
+    if '"type":"tile-link"}.className' in changed_id:
+        if df_name_parent == "OPG001":
+            graph_options = GRAPH_OPTIONS["OPG001"]
+        elif df_name_parent == "OPG010":
+            graph_options = GRAPH_OPTIONS["OPG010"]
+        for i in graph_options:
+            options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+    elif trigger == 'fa fa-unlink':  #
         link_trigger = "fa fa-unlink"
         if df_name is not None:
             graph_options = GRAPH_OPTIONS[df_name]
@@ -496,14 +503,23 @@ for x in range(4):
         # if link state has changed from linked --> unlinked the data has not changed, prevent update
         if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink':
             # TODO:needs proper testing
+            print("****HERE GRAPH MENU****")
+            print("selected graph type: " + str(selected_graph_type))
             if selected_graph_type is None:
                 return None, no_update, no_update
             else:
                 raise PreventUpdate
 
+        print("****HERE GRAPH MENU 2****")
+        print("selected graph type: " + str(selected_graph_type))
+
         # if link state from unlinked --> linked and the data set has not changed, don't update menu, still update graph
         if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name == master_df_name:
             return no_update, 1, no_update
+
+        if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name != master_df_name:
+            print("****HERE GRAPH MENU 3****")
+            return None, 1, no_update
 
         # if graph menu trigger has value 'tile closed' then a tile was closed, don't update menu, still update table
         if 'graph-menu-trigger"}.data-' in changed_id and gm_trigger == 'tile closed':

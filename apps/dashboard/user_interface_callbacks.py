@@ -876,7 +876,8 @@ app.clientside_callback(
     ),
     Output('dataset-confirmation-symbols', 'n_clicks'),
     [Input({'type': 'confirm-load-data', 'index': ALL}, 'n_clicks'),
-     Input({'type': 'confirm-data-set-refresh', 'index': ALL}, 'n_clicks')]
+     Input({'type': 'confirm-data-set-refresh', 'index': ALL}, 'n_clicks'),
+     Input('select-dashboard-dropdown', 'value')]
 )
 
 app.clientside_callback(

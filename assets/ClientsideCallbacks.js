@@ -20,8 +20,8 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             resizeContentWrapper();
             return x
         },
-        datasetLoadScreen: function(n_click_load, n_click_reset) {
-            if (n_click_load != ',,,,' || n_click_reset != ',,,,'){
+        datasetLoadScreen: function(n_click_load, n_click_reset, value_dropdown) {
+            if (n_click_load != ',,,,' || n_click_reset != ',,,,' || value_dropdown != ''){
                 var newDiv = document.createElement('div');
                 newDiv.className = '_data-loading';
                 newDiv.id = 'loading';

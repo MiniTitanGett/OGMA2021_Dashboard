@@ -539,10 +539,6 @@ def get_label(label, table=None):
     language_df = session.get(lookup)
 
     if language_df is None:
-        # # we can't use server.get_ref() from here because of a circular reference
-        # conn = get_conn()
-        # query = pd.read_sql("exec dbo.spopref_getoprefdata \'{}\', \'{}\'".format(table, session["language"]), conn)
-        # language_df = pd.DataFrame(query, columns=["ref_value", "ref_desc"])
         language_df = get_ref(table, session["language"])
         session[lookup] = language_df
 

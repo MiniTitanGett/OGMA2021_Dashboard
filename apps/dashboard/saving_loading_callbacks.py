@@ -827,7 +827,7 @@ def _load_select_range_inputs(tile_tab, dashboard_tab, tile_start_year, tile_end
     [Output({'type': 'set-tile-title-trigger', 'index': MATCH}, 'data-tile_load_title'),
      Output({'type': 'tile-customize-content', 'index': MATCH}, 'children'),
      Output({'type': 'data-menu-tile-loading', 'index': MATCH}, 'children'),
-     Output({'type': 'reset-selected-layout', 'index': MATCH}, 'data-'),
+     Output({'type': 'select-layout-dropdown', 'index': MATCH}, 'value'),
      Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-tab'),
      Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-start_year'),
      Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-end_year'),
@@ -920,21 +920,6 @@ def _load_tile_layout(selected_layout, df_const):
     # UPDATED the first output, previously was selected_layout
     return saved_layouts[selected_layout]['Title'], customize_content, data_content, None, tab, start_year, end_year, \
         start_secondary, end_secondary, unlink, df_const
-
-
-# resets selected layout dropdown value to ''
-@app.callback(
-    Output({'type': 'select-layout-dropdown', 'index': MATCH}, 'value'),
-    [Input({'type': 'reset-selected-layout', 'index': MATCH}, 'data-')],
-    prevent_initial_call=True
-)
-def _reset_selected_layout(trigger):
-    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-
-    if changed_id == '.':
-        raise PreventUpdate
-
-    return ''
 
 # *********************************************DASHBOARD LOADING*****************************************************
 

@@ -20,7 +20,8 @@ from urllib.parse import parse_qsl
 from flask import url_for
 
 # Internal Packages
-from apps.dashboard.layouts import get_line_graph_menu, get_bar_graph_menu, get_scatter_graph_menu, get_table_graph_menu, \
+from apps.dashboard.layouts import get_line_graph_menu, get_bar_graph_menu, get_scatter_graph_menu, \
+    get_table_graph_menu, \
     get_tile_layout, change_index, get_box_plot_menu, get_default_tab_content, get_layout_dashboard, get_layout_graph, \
     get_data_menu, get_sankey_menu, get_dashboard_title_input, get_bubble_graph_menu
 from apps.dashboard.app import app
@@ -73,7 +74,8 @@ def _generate_layout(href, pathname, query_string):
             return [get_layout_dashboard()]
         else:
             return [html.Div([get_layout_dashboard(),
-                              html.Link(rel='stylesheet', href=url_for("static",filename="BBB - french stylesheet1.css"))])]
+                              html.Link(rel='stylesheet',
+                                        href=url_for("static", filename="BBB - french stylesheet1.css"))])]
 
 
 # Handles Resizing of ContentWrapper, uses tab-content-wrapper n-clicks as a throw away output
@@ -415,26 +417,6 @@ for x in range(4):
         return view_content_style, customize_content_style, layouts_content_style, view_className, layouts_className, \
                customize_className
 
-for x in range(4):
-    app.clientside_callback(
-        ClientsideFunction(
-            namespace='clientside',
-            function_name='graphLoadScreen{}'.format(x)
-        ),
-        Output({'type': 'tile-menu-header', 'index': x}, 'n_clicks'),
-        [Input({'type': 'tile-view', 'index': x}, 'n_clicks')],
-        [State({'type': 'tile-view', 'index': x}, 'className')]
-    )
-
-    app.clientside_callback(
-        ClientsideFunction(
-            namespace='clientside',
-            function_name='graphRemoveLoadScreen{}'.format(x)
-        ),
-        Output({'type': 'graph_display', 'index': x}, 'n_clicks'),
-        [Input({'type': 'graph_display', 'index': x}, 'children')]
-    )
-
 # ************************************************CUSTOMIZE TAB*******************************************************
 
 # update graph menu to match selected graph type
@@ -469,7 +451,7 @@ for x in range(4):
             df_name = master_df_name
 
         # if link state from unlinked --> linked and the data set has not changed, don't update menu, still update graph
-        if ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name == master_df_name)\
+        if ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name == master_df_name) \
                 or ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink'):
             return no_update, 1, no_update
 
@@ -478,7 +460,7 @@ for x in range(4):
             return no_update, no_update, 1
 
         # if changed id == '.' and the graph menu already exists, prevent update
-        if changed_id == '.' and graph_options_state or df_const is None or df_name not in df_const :
+        if changed_id == '.' and graph_options_state or df_const is None or df_name not in df_const:
             raise PreventUpdate
 
         tile = int(dash.callback_context.inputs_list[0]['id']['index'])
@@ -590,26 +572,6 @@ def _change_link(selected_layout, _link_clicks, link_state):
         link_state = 'fa fa-unlink' if link_state == 'fa fa-link' else 'fa fa-link'
 
     return link_state
-
-
-app.clientside_callback(
-    ClientsideFunction(
-        namespace='clientside',
-        function_name='datasetLoadScreen'
-    ),
-    Output('dataset-confirmation-symbols', 'n_clicks'),
-    [Input({'type': 'confirm-load-data', 'index': ALL}, 'n_clicks'),
-     Input({'type': 'confirm-data-set-refresh', 'index': ALL}, 'n_clicks')]
-)
-
-app.clientside_callback(
-    ClientsideFunction(
-        namespace='clientside',
-        function_name='datasetRemoveLoadScreen'
-    ),
-    Output('df-constants-storage', 'n_clicks'),
-    [Input('df-constants-storage', 'data')]
-)
 
 
 # manage data sidemenu appearance and content
@@ -766,8 +728,8 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
                         graph_triggers[i] = df_name
                         confirm_button[i] = DATA_CONTENT_HIDE
                         refresh_button[i] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
-                                           'position': 'relative',
-                                           'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}
+                                             'position': 'relative',
+                                             'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}
                         prev_selection[i] = df_name
             else:
                 graph_triggers[changed_index] = df_name
@@ -777,8 +739,8 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
                 for i in range(len(links_style)):
                     if links_style[i] == 'fa fa-link':
                         confirm_button[i] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
-                                           'position': 'relative',
-                                           'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}
+                                             'position': 'relative',
+                                             'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}
                         refresh_button[i] = DATA_CONTENT_HIDE
             confirm_button[changed_index] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
                                              'position': 'relative',
@@ -882,3 +844,47 @@ for x in range(4):
             tile_class = 'tile-container'
 
         return tile_class
+
+# *************************************************LOADSCREEN*********************************************************
+
+for x in range(4):
+    app.clientside_callback(
+        ClientsideFunction(
+            namespace='clientside',
+            function_name='graphLoadScreen{}'.format(x)
+        ),
+        Output({'type': 'tile-menu-header', 'index': x}, 'n_clicks'),
+        [Input({'type': 'tile-view', 'index': x}, 'n_clicks')],
+        [State({'type': 'tile-view', 'index': x}, 'className')]
+    )
+
+    app.clientside_callback(
+        ClientsideFunction(
+            namespace='clientside',
+            function_name='graphRemoveLoadScreen{}'.format(x)
+        ),
+        Output({'type': 'graph_display', 'index': x}, 'n_clicks'),
+        [Input({'type': 'graph_display', 'index': x}, 'children')],
+        State('num-tiles', 'data-num-tiles')
+    )
+
+
+app.clientside_callback(
+    ClientsideFunction(
+        namespace='clientside',
+        function_name='datasetLoadScreen'
+    ),
+    Output('dataset-confirmation-symbols', 'n_clicks'),
+    [Input({'type': 'confirm-load-data', 'index': ALL}, 'n_clicks'),
+     Input({'type': 'confirm-data-set-refresh', 'index': ALL}, 'n_clicks')]
+)
+
+app.clientside_callback(
+    ClientsideFunction(
+        namespace='clientside',
+        function_name='datasetRemoveLoadScreen'
+    ),
+    Output('df-constants-storage', 'n_clicks'),
+    [Input('df-constants-storage', 'data')]
+)
+

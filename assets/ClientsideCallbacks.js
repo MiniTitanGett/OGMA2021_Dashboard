@@ -35,7 +35,7 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
         datasetRemoveLoadScreen: function(data) {
             try{
                 document.getElementById('loading').remove();
-            }catch{ /* Do Nothing */}
+            }catch{ /* Do Nothing */ }
             return 0;
         },
         graphLoadScreen0: function(n_click_view, view_content_className) {
@@ -47,10 +47,15 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             }
             return 0;
         },
-        graphRemoveLoadScreen0: function(data) {
+        graphRemoveLoadScreen0: function(data, num_tiles) {
             try{
                 document.getElementById('graph-loading0').remove();
-            }catch{ /* Do Nothing */}
+            }catch{ /* Do Nothing */ }
+            if (num_tiles == 1){
+                try{
+                    document.getElementById('loading').remove();
+                }catch{ /* Do Nothing */ }
+            }
             return 0;
         },
         graphLoadScreen1: function(n_click_view, view_content_className) {
@@ -62,10 +67,15 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             }
             return 0;
         },
-        graphRemoveLoadScreen1: function(data) {
+        graphRemoveLoadScreen1: function(data, num_tiles) {
             try{
                 document.getElementById('graph-loading1').remove();
-            }catch{ /* Do Nothing */}
+            }catch{ /* Do Nothing */ }
+            if (num_tiles == 2){
+                try{
+                    document.getElementById('loading').remove();
+                }catch{ /* Do Nothing */ }
+            }
             return 0;
         },
         graphLoadScreen2: function(n_click_view, view_content_className) {
@@ -77,10 +87,15 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             }
             return 0;
         },
-        graphRemoveLoadScreen2: function(data) {
+        graphRemoveLoadScreen2: function(data, num_tiles) {
             try{
                 document.getElementById('graph-loading2').remove();
-            }catch{ /* Do Nothing */}
+            }catch{ /* Do Nothing */ }
+            if (num_tiles == 3){
+                try{
+                    document.getElementById('loading').remove();
+                }catch{ /* Do Nothing */ }
+            }
             return 0;
         },
         graphLoadScreen3: function(n_click_view, view_content_className) {
@@ -92,10 +107,15 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             }
             return 0;
         },
-        graphRemoveLoadScreen3: function(data) {
+        graphRemoveLoadScreen3: function(data, num_tiles) {
             try{
                 document.getElementById('graph-loading3').remove();
-            }catch{ /* Do Nothing */}
+            }catch{ /* Do Nothing */ }
+            if (num_tiles == 4){
+                try{
+                    document.getElementById('loading').remove();
+                }catch{ /* Do Nothing */ }
+            }
             return 0;
         }
     }

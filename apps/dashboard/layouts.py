@@ -1140,6 +1140,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
     # (args-value: {})[3] = y-axis measure
     # (args-value: {})[4] = size
     # (args-value: {})[5] = size measure
+    # (args-value: {})[6] = animate graph
 
     return [
         html.P(
@@ -1239,6 +1240,12 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                         clearable=False,
                         style={'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+            dcc.Checklist(
+                id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 6},
+                options=[{'label': get_label('LBL_Animate_Over_Time'),
+                          'value': 'animate'}],
+                value=[],
+                style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
         ], style={'margin-left': '15px'})]
 
 

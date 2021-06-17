@@ -194,6 +194,7 @@ def generate_constants(df_name):
 
     # list of measure type options
     MEASURE_TYPE_OPTIONS = df['Measure Type'].dropna().unique().tolist()
+    MEASURE_TYPE_OPTIONS.sort()
 
     # New date picker values
     GREGORIAN_MIN_YEAR = int(df['Year of Event'].min())

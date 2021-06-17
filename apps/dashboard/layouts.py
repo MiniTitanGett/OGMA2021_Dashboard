@@ -1238,7 +1238,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                         value=size_measure,
                         clearable=False,
                         style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})])
         ], style={'margin-left': '15px'})]
 
 

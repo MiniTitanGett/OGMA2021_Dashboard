@@ -42,7 +42,7 @@ def generate_dropdown(tile, df_name, nid_path):
         else:
             option_list = df['H1'].unique()
         options = [{'label': i, 'value': i} for i in option_list]
-
+        options = sorted(options, key=lambda k: k['label'])
         return dcc.Dropdown(
             id={'type': 'hierarchy_specific_dropdown', 'index': tile},
             options=options,

@@ -1023,7 +1023,7 @@ num-periods:disabled {
     cursor: progress;
     z-index: 100000;
 
-    background-image: url(http://127.0.0.1:8080/python/OPG001/assets/loading-screen.gif);
+    background-image: url(http://127.0.0.1:8080/python/dashboard/assets/loading-screen.gif);
     background-position: center center;
     background-repeat: no-repeat;
     background-size: 250px

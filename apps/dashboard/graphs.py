@@ -205,6 +205,7 @@ def get_line_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level
 
         filtered_df['Partial Period'] = filtered_df['Partial Period'].transform(
             lambda j: get_label('LBL_TRUE') if j else get_label('LBL_FALSE'))
+        filtered_df.sort_values(by=[color, 'Date of Event'], inplace=True)
 
         # generate graph
         fig = px.line(
@@ -225,9 +226,9 @@ def get_line_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level
         hovertemplate = '<b>%{customdata[0]}</b><br>' if line_group else ''
         fig.update_traces(
             hovertemplate=hovertemplate +
-            f'<b>{get_label("LBL_Date_of_Event")}</b>' + ': %{x}<br>' +
-            f'<b>{get_label("LBL_Measure_Value")}</b>' + ': %{y}<br>' +
-            '<extra></extra>'
+                          f'<b>{get_label("LBL_Date_of_Event")}</b>' + ': %{x}<br>' +
+                          f'<b>{get_label("LBL_Measure_Value")}</b>' + ': %{y}<br>' +
+                          '<extra></extra>'
         )
         fig = set_partial_periods(fig, filtered_df, 'Line')
     else:
@@ -311,6 +312,7 @@ def get_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_le
 
         filtered_df['Partial Period'] = filtered_df['Partial Period'].transform(
             lambda j: get_label('LBL_TRUE') if j else get_label('LBL_FALSE'))
+        filtered_df.sort_values(by=[color, 'Date of Event'], inplace=True)
 
         # generate graph
         fig = px.scatter(
@@ -328,9 +330,9 @@ def get_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_le
             paper_bgcolor='rgba(0, 0, 0, 0)')
         fig.update_traces(
             hovertemplate='<b>%{customdata[0]}</b><br>' +
-            f'<b>{get_label("LBL_Date_of_Event")}</b>' + ': %{x}<br>' +
-            f'<b>{get_label("LBL_Measure_Value")}</b>' + ': %{y}<br>' +
-            '<extra></extra>'
+                          f'<b>{get_label("LBL_Date_of_Event")}</b>' + ': %{x}<br>' +
+                          f'<b>{get_label("LBL_Measure_Value")}</b>' + ': %{y}<br>' +
+                          '<extra></extra>'
         )
         fig = set_partial_periods(fig, filtered_df, 'Scatter')
     # else, filtered is empty, create default empty graph
@@ -357,7 +359,6 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
     # (args-value: {})[3] = y-axis measure
     # (args-value: {})[4] = size
     # (args-value: {})[5] = size measure
-    # (args-value: {})[6] = animate graph
     language = session["language"]
 
     # Specialty filtering
@@ -427,6 +428,9 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
 
         filtered_df['Partial Period'] = filtered_df['Partial Period'].transform(
             lambda j: get_label('LBL_TRUE') if j else get_label('LBL_FALSE'))
+        filtered_df.sort_values(by=[color, 'Date of Event'], inplace=True)
+
+        filtered_df['Date of Event'] = filtered_df['Date of Event'].astype(str)
 
         # generate graph
         fig = px.scatter(
@@ -451,8 +455,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
             paper_bgcolor='rgba(0, 0, 0, 0)')
         fig.update_traces(
             hovertemplate=f'<b>{arg_value[0]} {arg_value[1]}</b>' + ': %{x}<br>' +
-            f'<b>{arg_value[2]} {arg_value[3]}</b>' + ': %{y}<br>' +
-            f'<b>{arg_value[4]} {arg_value[5]}</b>' + ': %{customdata[0]}<br>'
+                          f'<b>{arg_value[2]} {arg_value[3]}</b>' + ': %{y}<br>' +
+                          f'<b>{arg_value[4]} {arg_value[5]}</b>' + ': %{customdata[0]}<br>'
         )
     # else, filtered is empty, create default empty graph
     else:
@@ -570,7 +574,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         # else, hierarchy type is specific item while "Graph all in Dropdown" is unselected
         else:
             color = 'Variable Name' if group_by_item else 'Partial Period'
-            x_val = 'Date of Event' if group_by_item and not arg_value(4) else 'Variable Name'
+            x_val = 'Date of Event' if group_by_item and not arg_value[4] else 'Variable Name'
             legend_title_text = get_label('LBL_Variable_Name') if group_by_item else get_label('LBL_Partial_Period')
             if not group_by_item:
                 filtered_df['Date of Event'] = \
@@ -593,8 +597,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                                 filtered_df = filtered_df.append(
                                     {'Date of Event': i, x_val: j, color: k, 'Measure Value': 0},
                                     ignore_index=True)
-            # fixes shifting indices
-            filtered_df = filtered_df.sort_values(by=[x_val])
+        filtered_df.sort_values(by=[x_val, color, 'Date of Event'], inplace=True)
 
         # generate graph
         lbl_measure_value = get_label("LBL_Measure_Value")
@@ -605,13 +608,12 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             data_frame=filtered_df,
             x=x_val if arg_value[3] == 'Vertical' else 'Measure Value',
             y='Measure Value' if arg_value[3] == 'Vertical' else x_val,
-            color=color if arg_value[4] and (hierarchy_type == 'Level Filter' or (hierarchy_type == 'Specific Item' and
-                                                                                  hierarchy_graph_children == [
-                                                                                      'graph_children'])) else None,
-
+            color=color,
             barmode='group',
             animation_frame='Date of Event' if arg_value[4] else None,
             custom_data=['Date of Event'])
+        if arg_value[3] == 'Horizontal':
+            fig.update_yaxes(categoryorder='category descending')
         if arg_value[4]:
             fig.update_layout(
                 yaxis={'title': arg_value[1], 'range': [0, filtered_df['Measure Value'].max()]} if arg_value[
@@ -721,6 +723,7 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                 y = yaxis
                 xaxis = {'title': xaxis}
                 yaxis = {'title': get_label('LBL_' + yaxis.replace(' ', '_'), df_name)}
+                filtered_df.sort_values(by=['Variable Name', y, x], inplace=True)
             else:
                 if hierarchy_type == 'Level Filter':
                     xaxis = hierarchy_level_dropdown
@@ -731,6 +734,7 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                 y = yaxis
                 xaxis = {'title': get_label('LBL_' + xaxis.replace(' ', '_'), df_name)}
                 yaxis = {'title': yaxis}
+                filtered_df.sort_values(by=['Variable Name', x, y], inplace=True)
 
         # else, hierarchy type is specific item while "Graph all in Dropdown" is unselected
         else:
@@ -738,6 +742,7 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             y = 'Measure Value' if arg_value[2] == 'Vertical' else None
             xaxis = {'title': get_label('LBL_Measure_Value')} if arg_value[2] == 'Horizontal' else None
             yaxis = {'title': get_label('LBL_Measure_Value')} if arg_value[2] == 'Vertical' else None
+            filtered_df.sort_values(by=['Variable Name'])
 
         filtered_df['Date of Event'] = filtered_df['Date of Event'].transform(lambda i: i.strftime(format='%Y-%m-%d'))
 
@@ -969,8 +974,8 @@ def get_sankey_figure(arg_value, dff, hierarchy_level_dropdown, hierarchy_path, 
             value=value_numpy,  # value=[8, 4, 2, 8, 4, 2]
             # customdata
             hovertemplate=get_label('LBL_Link_From_Node') + ' %{source.customdata}<br />' +
-            get_label('LBL_To_Node') + ' %{target.customdata}<br />' +
-            get_label('LBL_has_value') + ' %{value}',
+                          get_label('LBL_To_Node') + ' %{target.customdata}<br />' +
+                          get_label('LBL_has_value') + ' %{value}',
             color=link_colour_numpy
             # label
         )

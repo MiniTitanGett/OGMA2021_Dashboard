@@ -678,12 +678,12 @@ def _change_link(selected_layout, _link_clicks, link_trigger, link_state):
      Output({'type': 'set-graph-options-trigger', 'index': 0}, 'options-'),
      Output({'type': 'set-graph-options-trigger', 'index': 1}, 'options-'),
      Output({'type': 'set-graph-options-trigger', 'index': 2}, 'options-'),
-     Output({'type': 'set-graph-options-trigger', 'index': 3}, 'options-'),
-     Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-tab'),
-     Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-start_year'),
-     Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-end_year'),
-     Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-start_secondary'),
-     Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-end_secondary'),],
+     Output({'type': 'set-graph-options-trigger', 'index': 3}, 'options-')],
+     #Output({'type': 'select-range-trigger', 'index': ALL}, 'data-dashboard-tab'),
+     #Output({'type': 'select-range-trigger', 'index': ALL}, 'data-dashboard-start_year'),
+     #Output({'type': 'select-range-trigger', 'index': ALL}, 'data-dashboard-end_year'),
+     #Output({'type': 'select-range-trigger', 'index': ALL}, 'data-dashboard-start_secondary'),
+     #Output({'type': 'select-range-trigger', 'index': ALL}, 'data-dashboard-end_secondary'),],
     [Input('dashboard-reset-trigger', 'data-'),
      Input('tile-closed-trigger', 'data-'),
      Input('select-dashboard-dropdown', 'value'),
@@ -719,7 +719,7 @@ def _change_link(selected_layout, _link_clicks, link_trigger, link_state):
      State({'type': 'start-secondary-input', 'index': 4}, 'value'),
      State({'type': 'end-secondary-input', 'index': 4}, 'value'),
      State({'type': 'hierarchy-toggle', 'index': 4}, 'value'),
-     State({'type': 'hierarchy_specific_dropdown', 'index': 4}, 'options'),
+     State({'type': 'hierarchy_level_dropdown', 'index': 4}, 'value'),
      State({'type': 'num-periods', 'index': 4}, 'value'),
      State({'type': 'period-type', 'index': 4}, 'value'),
      State({'type': 'graph_children_toggle', 'index': 4}, 'value'),  # graph all toggle
@@ -741,19 +741,12 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
     :param data_states: State of all data side-menus
     :return: Data side-menus for all 5 side-menus
     """
-    print("data menu options")
+    print("data")
     print(master_secondary_type)
-    print(master_timeframe)
-    print(master_fiscal_toggle)
     print(master_start_year)
     print(master_end_year)
     print(master_start_secondary)
     print(master_end_secondary)
-    print(master_hierarchy_toggle)
-    print(master_hierarchy_drop)
-    print(master_num_state)
-    print(master_period_type)
-
     print("****Manage Data Sidemenus****")
     print("Graph type entry")
     for entry in graph_types:
@@ -886,7 +879,7 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
                     else:
                         # UN-link here?
                         links_style[i] = 'fa fa-unlink'
-
+                        #[i]= 'fa-fa-unlink'
                         for link in links_style:
                             print(link)
                         # set the dataset of the new menu from unlinking
@@ -902,6 +895,7 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
                             data[i] = get_data_menu(i, df_names[i],mode='tile-loading', hierarchy_toggle=master_hierarchy_toggle, level_value=master_hierarchy_drop,
                             nid_path=nid_path, graph_all_toggle=master_graph_child_toggle, fiscal_toggle=master_fiscal_toggle, input_method=master_timeframe,
                             num_periods=master_num_state, period_type= master_period_type, df_const=df_const)
+                            sidemenu_styles[i] = DATA_CONTENT_HIDE
                             refresh_button[i] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
                                                  'position': 'relative',
                                                  'margin-right': '10px', 'margin-left': '10px',
@@ -912,10 +906,7 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
                             data[i] = get_data_menu(i, df_names[i],mode='tile-loading', hierarchy_toggle=master_hierarchy_toggle, level_value=master_hierarchy_drop,
                             nid_path=nid_path, graph_all_toggle=master_graph_child_toggle, fiscal_toggle=master_fiscal_toggle, input_method=master_timeframe,
                             num_periods=master_num_state, period_type= master_period_type, df_const=df_const)
-
-
-
-
+                            sidemenu_styles[i] = DATA_CONTENT_HIDE
                             refresh_button[i] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
                                                  'position': 'relative',
                                                  'margin-right': '10px', 'margin-left': '10px',

@@ -582,6 +582,20 @@ def get_layout_dashboard():
         html.Div(
             id={'type': 'set-tile-link-trigger', 'index': 3},
             style={'display': 'none'}),
+        # set-date-picker-trigger is used by the update data menu callback to trigger the date picker loading in an
+        # unlinked tile due to a mismatch of graph type
+        html.Div(
+            id={'type': 'set-date-picker-trigger', 'index': 0},
+            style={'display': 'none'}),
+        html.Div(
+            id={'type': 'set-date-picker-trigger', 'index': 1},
+            style={'display': 'none'}),
+        html.Div(
+            id={'type': 'set-date-picker-trigger', 'index': 2},
+            style={'display': 'none'}),
+        html.Div(
+            id={'type': 'set-date-picker-trigger', 'index': 3},
+            style={'display': 'none'}),
         # num-tile-2 / 3 / 4 temporarily store the number of tiles before they are inserted into the primary num-tiles
         html.Div(
             id='num-tiles-2',

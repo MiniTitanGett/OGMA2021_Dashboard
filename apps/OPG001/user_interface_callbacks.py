@@ -631,7 +631,7 @@ def _change_link(selected_layout, _link_clicks, link_trigger, link_state):
     print(changed_id)
 
     # if link button was not pressed and layout was not selected, do not update
-    if '.' == changed_id or link_trigger is None:
+    if '.' == changed_id:  # or link_trigger is None
         raise PreventUpdate
 
     if '"type":"select-layout-dropdown"}.value' in changed_id:
@@ -653,6 +653,7 @@ def _change_link(selected_layout, _link_clicks, link_trigger, link_state):
 
     if '"type":"set-tile-link-trigger"}.link-' in changed_id and link_trigger is not None:
         link_state = 'fa fa-unlink'
+
     return link_state
 
 
@@ -678,12 +679,12 @@ def _change_link(selected_layout, _link_clicks, link_trigger, link_state):
      Output({'type': 'set-graph-options-trigger', 'index': 0}, 'options-'),
      Output({'type': 'set-graph-options-trigger', 'index': 1}, 'options-'),
      Output({'type': 'set-graph-options-trigger', 'index': 2}, 'options-'),
-     Output({'type': 'set-graph-options-trigger', 'index': 3}, 'options-')],
-     #Output({'type': 'select-range-trigger', 'index': ALL}, 'data-dashboard-tab'),
-     #Output({'type': 'select-range-trigger', 'index': ALL}, 'data-dashboard-start_year'),
-     #Output({'type': 'select-range-trigger', 'index': ALL}, 'data-dashboard-end_year'),
-     #Output({'type': 'select-range-trigger', 'index': ALL}, 'data-dashboard-start_secondary'),
-     #Output({'type': 'select-range-trigger', 'index': ALL}, 'data-dashboard-end_secondary'),],
+     Output({'type': 'set-graph-options-trigger', 'index': 3}, 'options-'),
+     Output({'type': 'set-date-picker-trigger', 'index': 0}, 'picker-'),
+     Output({'type': 'set-date-picker-trigger', 'index': 1}, 'picker-'),
+     Output({'type': 'set-date-picker-trigger', 'index': 2}, 'picker-'),
+     Output({'type': 'set-date-picker-trigger', 'index': 3}, 'picker-'),
+     ],
     [Input('dashboard-reset-trigger', 'data-'),
      Input('tile-closed-trigger', 'data-'),
      Input('select-dashboard-dropdown', 'value'),
@@ -724,8 +725,7 @@ def _change_link(selected_layout, _link_clicks, link_trigger, link_state):
      State({'type': 'period-type', 'index': 4}, 'value'),
      State({'type': 'graph_children_toggle', 'index': 4}, 'value'),  # graph all toggle
      State({'type': 'hierarchy_display_button', 'index': 4}, 'children'),
-
-]
+     ]
 )
 def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links_style, selected_layout, data_clicks,
                            data_close_clicks, df_name_0, df_name_1, df_name_2, df_name_3, df_name_4, _confirm_clicks_0,
@@ -733,8 +733,9 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
                            _refresh_clicks_0, _refresh_clicks_1, _refresh_clicks_2, _refresh_clicks_3,
                            _refresh_clicks_4, data_states, sidemenu_style_states, df_const, graph_types,
                            master_secondary_type, master_timeframe, master_fiscal_toggle, master_start_year,
-                           master_end_year, master_start_secondary, master_end_secondary,master_hierarchy_toggle ,master_hierarchy_drop,
-                           master_num_state,master_period_type,master_graph_child_toggle,state_of_display):
+                           master_end_year, master_start_secondary, master_end_secondary, master_hierarchy_toggle,
+                           master_hierarchy_drop, master_num_state, master_period_type, master_graph_child_toggle,
+                           state_of_display):
     """
     :param closed_tile: Detects when a tile has been deleted and encodes the index of the deleted tile
     param links_style: State of all link/unlink icons and detects user clicking a link icon
@@ -769,16 +770,7 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
     confirm_button = [no_update] * 5
     refresh_button = [no_update] * 5
     options_triggers = [no_update] * 5
-
-    """
-    if df_name_4 is not None:
-        print("****HERE 3****")
-        print(df_name_4)
-        for num in range(len(links_style)):
-            if links_style[num] == 'fa fa-link':
-                data[num] = df_name_4
-
-    print("****HERE 4****")"""
+    date_picker_triggers = [no_update] * 5
 
     # if 'data-menu-close' or 'select-dashboard-dropdown' requested, close all data menus
     if 'data-menu-close' in changed_id or 'select-dashboard-dropdown' in changed_id:
@@ -879,7 +871,7 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
                     else:
                         # UN-link here?
                         links_style[i] = 'fa fa-unlink'
-                        #[i]= 'fa-fa-unlink'
+                        # [i]= 'fa-fa-unlink'
                         for link in links_style:
                             print(link)
                         # set the dataset of the new menu from unlinking
@@ -892,25 +884,40 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
                         if df_name == "OPG001":
                             df_names[i] = "OPG010"
                             df_const[df_names[i]] = generate_constants(df_names[i])
-                            data[i] = get_data_menu(i, df_names[i],mode='tile-loading', hierarchy_toggle=master_hierarchy_toggle, level_value=master_hierarchy_drop,
-                            nid_path=nid_path, graph_all_toggle=master_graph_child_toggle, fiscal_toggle=master_fiscal_toggle, input_method=master_timeframe,
-                            num_periods=master_num_state, period_type= master_period_type, df_const=df_const)
-                            sidemenu_styles[i] = DATA_CONTENT_HIDE
+                            data[i] = get_data_menu(i, df_names[i], mode='tile-loading',
+                                                    hierarchy_toggle=master_hierarchy_toggle,
+                                                    level_value=master_hierarchy_drop,
+                                                    nid_path=nid_path, graph_all_toggle=master_graph_child_toggle,
+                                                    fiscal_toggle=master_fiscal_toggle, input_method=master_timeframe,
+                                                    num_periods=master_num_state, period_type=master_period_type,
+                                                    df_const=df_const)
+                            # sidemenu_styles[i] = DATA_CONTENT_SHOW
                             refresh_button[i] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
                                                  'position': 'relative',
                                                  'margin-right': '10px', 'margin-left': '10px',
                                                  'vertical-align': 'top'}
+                            if master_timeframe == "select-range":
+                                date_picker_triggers[i] = "triggered"
+
                         elif df_name == "OPG010":
                             df_names[i] = "OPG001"
                             df_const[df_names[i]] = generate_constants(df_names[i])
-                            data[i] = get_data_menu(i, df_names[i],mode='tile-loading', hierarchy_toggle=master_hierarchy_toggle, level_value=master_hierarchy_drop,
-                            nid_path=nid_path, graph_all_toggle=master_graph_child_toggle, fiscal_toggle=master_fiscal_toggle, input_method=master_timeframe,
-                            num_periods=master_num_state, period_type= master_period_type, df_const=df_const)
-                            sidemenu_styles[i] = DATA_CONTENT_HIDE
+                            data[i] = get_data_menu(i, df_names[i], mode='tile-loading',
+                                                    hierarchy_toggle=master_hierarchy_toggle,
+                                                    level_value=master_hierarchy_drop,
+                                                    nid_path=nid_path, graph_all_toggle=master_graph_child_toggle,
+                                                    fiscal_toggle=master_fiscal_toggle, input_method=master_timeframe,
+                                                    num_periods=master_num_state, period_type=master_period_type,
+                                                    df_const=df_const)
+                            # sidemenu_styles[i] = DATA_CONTENT_SHOW
                             refresh_button[i] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
                                                  'position': 'relative',
                                                  'margin-right': '10px', 'margin-left': '10px',
                                                  'vertical-align': 'top'}
+                            if master_timeframe == "select-range":
+                                date_picker_triggers[i] = "triggered"
+                        print("index: " + str(i))
+                        print("Options triggered")
                         options_triggers[i] = 'fa fa-unlink'
         else:
             graph_triggers[changed_index] = df_name
@@ -962,19 +969,50 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
     return (data[0], data[1], data[2], data[3], data[4],
             sidemenu_styles[0], sidemenu_styles[1], sidemenu_styles[2], sidemenu_styles[3], sidemenu_styles[4],
             graph_triggers[0], graph_triggers[1], graph_triggers[2], graph_triggers[3], df_const, confirm_button,
-            refresh_button, options_triggers[0], options_triggers[1], options_triggers[2], options_triggers[3])
+            refresh_button, options_triggers[0], options_triggers[1], options_triggers[2], options_triggers[3],
+            date_picker_triggers[0], date_picker_triggers[1], date_picker_triggers[2], date_picker_triggers[3])
 
+
+"""
+@app.callback(
+    [Output({'type': 'start-year-input', 'index': MATCH}, 'name'),
+     Output({'type': 'start-year-input', 'index': MATCH}, 'value'),
+     Output({'type': 'end-year-input', 'index': MATCH}, 'value'),
+     Output({'type': 'start-secondary-input', 'index': MATCH}, 'value'),
+     Output({'type': 'end-secondary-input', 'index': MATCH}, 'value')],
+    [Input({'type': 'set-date-picker-trigger', 'index': MATCH}, 'picker-')],
+    [State({'type': 'start-year-input', 'index': 4}, 'name'),
+     State({'type': 'start-year-input', 'index': 4}, 'value'),
+     State({'type': 'end-year-input', 'index': 4}, 'value'),
+     State({'type': 'start-secondary-input', 'index': 4}, 'value'),
+     State({'type': 'end-secondary-input', 'index': 4}, 'value'),
+     ]
+)
+def _date_picker_inputs(trigger, tile_tab, tile_start_year, tile_end_year, tile_start_secondary, tile_end_secondary):
+    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+
+    if changed_id == '.':
+        raise PreventUpdate
+
+    date_tab = tile_tab
+    start_year = tile_start_year
+    end_year = tile_end_year
+    start_secondary = tile_start_secondary
+    end_secondary = tile_end_secondary
+
+    return date_tab, start_year, end_year, start_secondary, end_secondary"""
 
 # highlight tiles slaved to displayed data sidebar
 for x in range(4):
     @app.callback(
         Output({'type': 'tile', 'index': x}, 'className'),
-        [Input({'type': 'data-tile', 'index': ALL}, 'style')],
+        [Input({'type': 'data-tile', 'index': ALL}, 'style'),
+         Input({'type': 'tile-link', 'index': x}, 'className')],
         [State({'type': 'data-tile', 'index': x}, 'style'),
          State({'type': 'data-tile', 'index': 4}, 'style'),
-         State({'type': 'tile-link', 'index': x}, 'className')]
+         ]
     )
-    def _highlight_child_tiles(sidebar_styles, sidebar_style, master_sidebar_style, link_state):
+    def _highlight_child_tiles(sidebar_styles, link_state, sidebar_style, master_sidebar_style):
         """
         :param _sidebar_styles: Detects hiding/showing of data side-menus
         :param sidebar_style: State of the style of the data side-menu
@@ -982,6 +1020,16 @@ for x in range(4):
         :param link_state: State of the link/unlink icon
         :return: Highlights tiles child to the displayed date side-menu
         """
+
+        print("****HIGHLIGHT CHILD****")
+
+        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+        if changed_id != '.':
+            changed_index = int(search(r'\d+', changed_id).group())
+            print("Changed index:" + str(changed_index))
+
+        print("Changed id:" + str(changed_id))
+
         if sidebar_style == DATA_CONTENT_SHOW or (
                 master_sidebar_style == DATA_CONTENT_SHOW and link_state == 'fa fa-link'):
             tile_class = 'tile-highlight'

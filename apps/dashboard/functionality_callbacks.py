@@ -349,20 +349,20 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                 min_year = df_const[df_name]['FISCAL_MIN_YEAR']
                 max_year = df_const[df_name]['FISCAL_YEAR_MAX']
             left_column = html.Div([
-                get_date_box(id={'type': 'start-year-input', 'index': tile},
+                get_date_box(index={'type': 'start-year-input', 'index': tile},
                              value=min_year,
-                             min=min_year,
-                             max=max_year,
+                             minimum=min_year,
+                             maximum=max_year,
                              name='Year'),
                 dcc.Input(
                     id={'type': 'start-secondary-input', 'index': tile},
                     value=1,
                     style={'display': 'none'})])
             right_column = html.Div([
-                get_date_box(id={'type': 'end-year-input', 'index': tile},
+                get_date_box(index={'type': 'end-year-input', 'index': tile},
                              value=max_year + 1,
-                             min=min_year + 1,
-                             max=max_year + 1),
+                             minimum=min_year + 1,
+                             maximum=max_year + 1),
                 dcc.Input(
                     id={'type': 'end-secondary-input', 'index': tile},
                     value=1,
@@ -387,23 +387,23 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
             else:
                 min_max = default_max
                 max_min = 1
-            year_input_min = get_date_box(id={'type': 'start-year-input', 'index': tile},
+            year_input_min = get_date_box(index={'type': 'start-year-input', 'index': tile},
                                           value=min_year,
-                                          min=min_year,
-                                          max=max_year,
+                                          minimum=min_year,
+                                          maximum=max_year,
                                           name=new_tab)
-            year_input_max = get_date_box(id={'type': 'end-year-input', 'index': tile},
+            year_input_max = get_date_box(index={'type': 'end-year-input', 'index': tile},
                                           value=max_year,
-                                          min=min_year,
-                                          max=max_year)
-            secondary_input_min = get_date_box(id={'type': 'start-secondary-input', 'index': tile},
+                                          minimum=min_year,
+                                          maximum=max_year)
+            secondary_input_min = get_date_box(index={'type': 'start-secondary-input', 'index': tile},
                                                value=fringe_min,
-                                               min=fringe_min,
-                                               max=min_max, )
-            secondary_input_max = get_date_box(id={'type': 'end-secondary-input', 'index': tile},
+                                               minimum=fringe_min,
+                                               maximum=min_max, )
+            secondary_input_max = get_date_box(index={'type': 'end-secondary-input', 'index': tile},
                                                value=fringe_max,
-                                               min=max_min,
-                                               max=fringe_max)
+                                               minimum=max_min,
+                                               maximum=fringe_max)
             left_column = [year_input_min, secondary_input_min]
             right_column = [year_input_max, secondary_input_max]
 
@@ -448,20 +448,20 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                     selected_min_year = min_year
                     selected_max_year = max_year + 1
                 left_column = html.Div([
-                    get_date_box(id={'type': 'start-year-input', 'index': tile},
+                    get_date_box(index={'type': 'start-year-input', 'index': tile},
                                  value=selected_min_year,
-                                 min=min_year,
-                                 max=selected_max_year - 1,
+                                 minimum=min_year,
+                                 maximum=selected_max_year - 1,
                                  name='Year'),
                     dcc.Input(
                         id={'type': 'start-secondary-input', 'index': tile},
                         value=1,
                         style={'display': 'none'})])
                 right_column = html.Div([
-                    get_date_box(id={'type': 'end-year-input', 'index': tile},
+                    get_date_box(index={'type': 'end-year-input', 'index': tile},
                                  value=selected_max_year,
-                                 min=selected_min_year + 1,
-                                 max=max_year + 1),
+                                 minimum=selected_min_year + 1,
+                                 maximum=max_year + 1),
                     dcc.Input(
                         id={'type': 'end-secondary-input', 'index': tile},
                         value=1,
@@ -599,15 +599,14 @@ for x in range(4):
          State({'type': 'data-set', 'index': 4}, 'value'),
          State('df-constants-storage', 'data')]
     )
-    def _update_table(page_current, page_size, sort_by, filter, graph_trigger, table_trigger, link_state, df_name,
-                      secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary, end_secondary,
-                      num_periods, period_type, hierarchy_toggle, hierarchy_level_dropdown, state_of_display,
-                      hierarchy_graph_children, hierarchy_options, master_secondary_type, master_timeframe,
-                      master_fiscal_toggle,
-                      master_start_year, master_end_year, master_start_secondary, master_end_secondary,
-                      master_num_periods, master_period_type, master_hierarchy_toggle, master_hierarchy_level_dropdown,
-                      master_state_of_display, master_hierarchy_graph_children, master_hierarchy_options,
-                      master_df_name, df_const):
+    def _update_table(page_current, page_size, sort_by, filter_query, _graph_trigger, _table_trigger, link_state,
+                      df_name, secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
+                      end_secondary, num_periods, period_type, hierarchy_toggle, hierarchy_level_dropdown,
+                      state_of_display, hierarchy_graph_children, hierarchy_options, master_secondary_type,
+                      master_timeframe, master_fiscal_toggle, master_start_year, master_end_year,
+                      master_start_secondary, master_end_secondary, master_num_periods, master_period_type,
+                      master_hierarchy_toggle, master_hierarchy_level_dropdown, master_state_of_display,
+                      master_hierarchy_graph_children, master_hierarchy_options, master_df_name, df_const):
 
         if link_state == 'fa fa-link':
             secondary_type = master_secondary_type
@@ -656,10 +655,10 @@ for x in range(4):
                               hierarchy_level_dropdown, hierarchy_graph_children, df_name, df_const)
 
         # Reformat date column
-        dff['Date of Event'] = dff['Date of Event'].transform(lambda x: x.strftime(format='%Y-%m-%d'))
+        dff['Date of Event'] = dff['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
 
         # Filter based on datatable filters
-        filtering_expressions = filter.split(' && ')
+        filtering_expressions = filter_query.split(' && ')
         for filter_part in filtering_expressions:
             col_name, operator, filter_value = split_filter_part(filter_part)
             if operator in ('eq', 'ne', 'lt', 'le', 'gt', 'ge'):

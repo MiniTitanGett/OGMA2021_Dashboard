@@ -72,7 +72,7 @@ def _load_tile_title(tile_load_title, dashboard_load_title):
     [State({'type': 'tile-link', 'index': ALL}, 'className')],
     prevent_initial_call=True
 )
-def _update_tile_loading_dropdown_options(tile_saving_trigger, dashboard_saving_trigger, links):
+def _update_tile_loading_dropdown_options(_tile_saving_trigger, _dashboard_saving_trigger, links):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':
@@ -94,7 +94,7 @@ def _update_tile_loading_dropdown_options(tile_saving_trigger, dashboard_saving_
      Input({'type': 'cancel-tile-overwrite', 'index': ALL}, 'n_clicks')],
     prevent_initial_call=True
 )
-def _manage_tile_saves_trigger(save_clicks, delete_clicks, confirm_tile_overwrite, cancel_tile_overwrite):
+def _manage_tile_saves_trigger(save_clicks, delete_clicks, _confirm_tile_overwrite, _cancel_tile_overwrite):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':
@@ -215,8 +215,8 @@ for y in range(4):
 
             tile = int(dash.callback_context.inputs_list[0]['id']['index'])
 
-            intermediate_pointer = REPORT_POINTER_PREFIX + graph_title.replace(" ",
-                                                                               "")  # regex.sub('[^A-Za-z0-9]+', '', graph_title)
+            intermediate_pointer = REPORT_POINTER_PREFIX + graph_title.replace(" ", "")
+            # regex.sub('[^A-Za-z0-9]+', '', graph_title)
 
             graph_titles = []
 
@@ -224,13 +224,13 @@ for y in range(4):
                 graph_titles.append(saved_layouts[layout]['Title'])
 
             # get non-overwriting status symbol display (check-mark or ban symbol)
-            def get_status_symbol_display(save_error_tooltip, save_symbol):
+            def get_status_symbol_display(tooltip, symbol):
                 return html.Div(
                     html.I(
                         html.Span(
-                            save_error_tooltip,
+                            tooltip,
                             className='save-symbols-tooltip'),
-                        className=save_symbol,
+                        className=symbol,
                         style={'padding': '11px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
                                'text-align': 'center'}),
                     className='save-symbols-showHide-wrapper-{}'.format(str(tile)))
@@ -454,7 +454,7 @@ for y in range(4):
      State({'type': 'start-year-input', 'index': 4}, 'name')],
     prevent_initial_call=True
 )
-def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
+def save_dashboard(_save_clicks, _delete_clicks, _dashboard_overwrite_inputs,
                    remove_dashboard, dashboard_title, tile_titles, links, graph_types,
                    args_list_0, args_list_1, args_list_2, args_list_3,
                    df_name_0, df_name_1, df_name_2, df_name_3, df_name4,
@@ -485,8 +485,8 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
     # if save requested or the overwrite was confirmed, check for exceptions and save
     if 'button-save-dashboard' in changed_id or '{"index":0,"type":"dashboard-overwrite"}.n_clicks' == changed_id:
 
-        intermediate_dashboard_pointer = DASHBOARD_POINTER_PREFIX + dashboard_title.replace(" ",
-                                                                                            "")  # regex.sub('[^A-Za-z0-9]+', '', dashboard_title)
+        intermediate_dashboard_pointer = DASHBOARD_POINTER_PREFIX + dashboard_title.replace(" ", "")
+        # regex.sub('[^A-Za-z0-9]+', '', dashboard_title)
 
         while True:
             if intermediate_dashboard_pointer in saved_layouts:
@@ -502,12 +502,12 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
             used_dashboard_titles.append(saved_dashboards[dashboard_layout]['Dashboard Title'])
 
         # get non-overwriting status symbol display (check-mark or ban symbol)
-        def get_status_symbol_display(save_error_tooltip, save_symbol):
+        def get_status_symbol_display(tooltip, symbol):
             return html.I(
                 html.Span(
-                    save_error_tooltip,
+                    tooltip,
                     className='save-symbols-tooltip'),
-                className=save_symbol,
+                className=symbol,
                 id='save-status-symbols-inner',
                 style={'padding': '10px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
                        'text-align': 'center'})
@@ -632,9 +632,7 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
 
             date_tabs = [date_tab_0, date_tab_1, date_tab_2, date_tab_3, date_tab_4]
 
-            dashboard_saves = {}
-
-            dashboard_saves['Dashboard Title'] = dashboard_title
+            dashboard_saves = {'Dashboard Title': dashboard_title}
 
             # if any tiles are linked, save the master data menu
             if links.count('fa fa-link') > 0:
@@ -667,8 +665,8 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
 
             for i in range(len(links)):
 
-                intermediate_pointer = REPORT_POINTER_PREFIX + tile_titles[i].replace(" ",
-                                                                                      "")  # regex.sub('[^A-Za-z0-9]+', '', tile_titles[i])
+                intermediate_pointer = REPORT_POINTER_PREFIX + tile_titles[i].replace(" ", "")
+                # regex.sub('[^A-Za-z0-9]+', '', tile_titles[i])
 
                 used_titles = []
 
@@ -769,7 +767,7 @@ def save_dashboard(save_clicks, delete_clicks, dashboard_overwrite_inputs,
         save_status_symbols = []
 
     return save_status_symbols, options, options, delete_dropdown_val, update_graph_options_trigger, \
-           tile_title_returns[0], tile_title_returns[1], tile_title_returns[2], tile_title_returns[3]
+        tile_title_returns[0], tile_title_returns[1], tile_title_returns[2], tile_title_returns[3]
 
 
 # *********************************************SHARED LOADING********************************************************
@@ -920,6 +918,7 @@ def _load_tile_layout(selected_layout, df_const):
     # UPDATED the first output, previously was selected_layout
     return saved_layouts[selected_layout]['Title'], customize_content, data_content, None, tab, start_year, end_year, \
         start_secondary, end_secondary, unlink, df_const
+
 
 # *********************************************DASHBOARD LOADING*****************************************************
 
@@ -1103,7 +1102,7 @@ def _load_dashboard_layout(selected_dashboard, df_const):
             dms[1]['Content'], dms[1]['Tab'], dms[1]['Start Year'], dms[1]['End Year'], dms[1]['Start Secondary'],
             dms[1]['End Secondary'],
 
-            dms[2]['Content'], dms[2]['Tab'],  dms[2]['Start Year'], dms[2]['End Year'], dms[2]['Start Secondary'],
+            dms[2]['Content'], dms[2]['Tab'], dms[2]['Start Year'], dms[2]['End Year'], dms[2]['Start Secondary'],
             dms[2]['End Secondary'],
 
             dms[3]['Content'], dms[3]['Tab'], dms[3]['Start Year'], dms[3]['End Year'], dms[3]['Start Secondary'],
@@ -1121,7 +1120,7 @@ def _load_dashboard_layout(selected_dashboard, df_const):
     [Input({'type': 'select-range-trigger', 'index': ALL}, 'data-dashboard-tab')],
     prevent_initial_call=True
 )
-def _reset_selected_dashboard(trigger):
+def _reset_selected_dashboard(_trigger):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':

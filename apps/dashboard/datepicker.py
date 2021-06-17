@@ -220,12 +220,12 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
 # ********************************************DATE-PICKER FUNCTIONS**************************************************
 
 # get datepicker input box
-def get_date_box(id, value, min, max, name=None):
-    return dcc.Input(id=id,
+def get_date_box(index, value, minimum, maximum, name=None):
+    return dcc.Input(id=index,
                      type='number',
                      value=value,
-                     min=min,
-                     max=max,
+                     min=minimum,
+                     max=maximum,
                      name=name,
                      required=True,
                      style={'width': '100%'})
@@ -389,21 +389,21 @@ def update_date_columns(changed_id, selected_min_year, min_year, fringe_min, sel
         max_value = selected_secondary_max
         max_min += modifier_max
         max_max += 1
-    year_input_min = get_date_box(id={'type': 'start-year-input', 'index': tile},
+    year_input_min = get_date_box(index={'type': 'start-year-input', 'index': tile},
                                   value=selected_min_year,
-                                  min=min_year,
-                                  max=selected_max_year + year_modifier_min - 1,
+                                  minimum=min_year,
+                                  maximum=selected_max_year + year_modifier_min - 1,
                                   name=tab)
-    year_input_max = get_date_box(id={'type': 'end-year-input', 'index': tile},
+    year_input_max = get_date_box(index={'type': 'end-year-input', 'index': tile},
                                   value=selected_max_year,
-                                  min=selected_min_year + year_modifier_max,
-                                  max=max_year)
-    secondary_input_min = get_date_box(id={'type': 'start-secondary-input', 'index': tile},
+                                  minimum=selected_min_year + year_modifier_max,
+                                  maximum=max_year)
+    secondary_input_min = get_date_box(index={'type': 'start-secondary-input', 'index': tile},
                                        value=min_value,
-                                       min=min_min,
-                                       max=min_max - 1)
-    secondary_input_max = get_date_box(id={'type': 'end-secondary-input', 'index': tile},
+                                       minimum=min_min,
+                                       maximum=min_max - 1)
+    secondary_input_max = get_date_box(index={'type': 'end-secondary-input', 'index': tile},
                                        value=max_value,
-                                       min=max_min,
-                                       max=max_max - 1)
+                                       minimum=max_min,
+                                       maximum=max_max - 1)
     return [year_input_min, secondary_input_min], [year_input_max, secondary_input_max]

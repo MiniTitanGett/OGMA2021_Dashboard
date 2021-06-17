@@ -8,10 +8,7 @@ contains functions to generate graphs
 
 # External Packages
 # import re
-import math
 from _datetime import datetime
-
-import numpy as np
 from flask import session
 # import numpy as np
 import plotly.express as px
@@ -231,7 +228,7 @@ def get_line_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level
             hovertemplate=hovertemplate +
             f'<b>{get_label("LBL_Date_of_Event", df_name)}</b>' + ': %{x}<br>' +
             f'<b>{get_label("LBL_Measure_Value", df_name)}</b>' + ': %{y}<br>' +
-            '<extra></extra>'
+            '<extra></extra> '
         )
         fig = set_partial_periods(fig, filtered_df, 'Line')
     else:
@@ -333,9 +330,9 @@ def get_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_le
             paper_bgcolor='rgba(0, 0, 0, 0)')
         fig.update_traces(
             hovertemplate='<b>%{customdata[0]}</b><br>' +
-            f'<b>{get_label("LBL_Date_of_Event", df_name)}</b>' + ': %{x}<br>' +
-            f'<b>{get_label("LBL_Measure_Value", df_name)}</b>' + ': %{y}<br>' +
-            '<extra></extra>'
+                          f'<b>{get_label("LBL_Date_of_Event", df_name)}</b>' + ': %{x}<br>' +
+                          f'<b>{get_label("LBL_Measure_Value", df_name)}</b>' + ': %{y}<br>' +
+                          '<extra></extra>'
         )
         fig = set_partial_periods(fig, filtered_df, 'Scatter')
     # else, filtered is empty, create default empty graph
@@ -572,18 +569,19 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             legend_title_text = get_label('LBL_' + color.replace(' ', '_'))
 
             filtered_df['Date of Event'] = \
-                filtered_df['Date of Event'].transform(lambda i: i.strftime(format='%Y-%m-%d'))
+                filtered_df['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
 
         # else, hierarchy type is specific item while "Graph all in Dropdown" is unselected
         else:
             color = 'Variable Name' if group_by_item else 'Partial Period'
             x_val = 'Date of Event' if group_by_item and not arg_value[4] else 'Variable Name'
-            legend_title_text = get_label('LBL_Variable_Name', df_name) if group_by_item else get_label('LBL_Partial_Period', df_name)
+            legend_title_text = get_label('LBL_Variable_Name', df_name) if group_by_item else get_label(
+                'LBL_Partial_Period', df_name)
             if not group_by_item:
                 filtered_df['Date of Event'] = \
-                    filtered_df['Date of Event'].transform(lambda i: i.strftime(format='%Y-%m-%d'))
+                    filtered_df['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
         filtered_df['Partial Period'] = filtered_df['Partial Period'].astype(str).transform(
-            lambda j: get_label('LBL_TRUE') if j != 'nan' else get_label('LBL_FALSE'))
+            lambda y: get_label('LBL_TRUE') if y != 'nan' else get_label('LBL_FALSE'))
 
         if arg_value[4]:
             filtered_df['Date of Event'] = filtered_df['Date of Event'].astype(str)

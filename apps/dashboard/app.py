@@ -7,22 +7,11 @@ initializes the app's: server, metadata and external stylesheets
 ######################################################################################################################
 
 # External Packages
-# import dash
 import app
-# from apps.OPG001.data import LANGUAGE
 from apps.dashboard.layouts import get_layout
-
-# from apps.OPG001.data import DATA_SETS
 
 # ***********************************************APP INITIATION*******************************************************
 
-# external_stylesheets = ["https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"]
-# external_scripts = ["https://cdn.plot.ly/plotly-locale-fr-latest.js"]
-
-# app = dash.Dash(__name__, meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1.0"}],
-#                 external_stylesheets=external_stylesheets, external_scripts=external_scripts,
-#                 assets_ignore='French Details.css' if LANGUAGE == 'en' else '')
-# server = app.server
 app = app.get_app('dashboard/')
 app.layout = get_layout
 

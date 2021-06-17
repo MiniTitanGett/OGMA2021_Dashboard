@@ -56,10 +56,10 @@ from apps.dashboard.graphs import __update_graph
 # ********************************************HELPER FUNCTION(S)******************************************************
 
 # change index numbers of all id's within tile or data side-menu
-def change_index(document, new_index):
+def change_index(doc, index):
     """
-    :param document: An array of an unknown combination of nested lists/dictionaries.
-    :param new_index: New index integer to replace the old index integer.
+    :param doc: An array of an unknown combination of nested lists/dictionaries.
+    :param index: New index integer to replace the old index integer.
     :return: Pointer to the modified document.
     """
 
@@ -83,7 +83,7 @@ def change_index(document, new_index):
                 )
         return document
 
-    return _change_index(document=document, new_index=new_index)
+    return _change_index(document=doc, new_index=index)
 
 
 def recursive_to_plotly_json(document):
@@ -146,13 +146,9 @@ def get_data_set_picker(tile, df_name):
                             className='save-symbols-tooltip'),
                         id={'type': 'confirm-load-data', 'index': tile},
                         className='fa fa-check',
-                        style=DATA_CONTENT_HIDE if df_name is None or df_name in session else {'padding': '10px 0',
-                                                                                               'width': '15px',
-                                                                                               'height': '15px',
-                                                                                               'position': 'relative',
-                                                                                               'margin-right': '10px',
-                                                                                               'margin-left': '10px',
-                                                                                               'vertical-align': 'top'}),
+                        style=DATA_CONTENT_HIDE if df_name is None or df_name in session else
+                        {'padding': '10px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
+                         'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}),
                     html.I(
                         html.Span(
                             get_label("LBL_Refresh_Data_Set"),
@@ -162,7 +158,8 @@ def get_data_set_picker(tile, df_name):
                         style={'padding': '10px 0', 'width': '15px', 'height': '15px',
                                'position': 'relative',
                                'margin-right': '10px', 'margin-left': '10px',
-                               'vertical-align': 'top'} if df_name is not None and df_name in session else DATA_CONTENT_HIDE)],
+                               'vertical-align': 'top'} if df_name is not None and df_name in session else
+                        DATA_CONTENT_HIDE)],
                     id='dataset-confirmation-symbols'),
                 style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
                        'position': 'relative', 'vertical-align': 'top', 'background-color': 'white', 'width': '40px',
@@ -409,9 +406,11 @@ def get_layout_dashboard():
                             style={'padding': '7px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
                                    'margin-left': '10px', 'margin-right': '14px', 'display': 'inline-block',
                                    'vertical-align': 'top'})],
-                        id='dashboard-reset-symbols',
-                        style={'width': '71px', 'border': '1px solid {}'.format(CLR['lightgray']),
-                               'margin': '2px 0', 'border-radius': '6px', 'display': 'none'}),
+                             id='dashboard-reset-symbols',
+                             style={'width': '71px',
+                                    'border': '1px solid {}'.format(CLR['lightgray']),
+                                    'margin': '2px 0', 'border-radius': '6px',
+                                    'display': 'none'}),
                     style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
                            'position': 'relative', 'vertical-align': 'top'}),
                 html.Button(

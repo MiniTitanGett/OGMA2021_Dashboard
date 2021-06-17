@@ -57,7 +57,7 @@ from apps.dashboard.data import VIEW_CONTENT_HIDE, VIEW_CONTENT_SHOW, CUSTOMIZE_
               [Input('url', 'href')],
               [State('url', 'pathname'), State('url', 'search')],
               prevent_initial_call=True)
-def _generate_layout(href, pathname, query_string):
+def _generate_layout(_href, _pathname, query_string):
     # print('HREF:', href)
     # print('PATHNAME:', pathname)
     # print('SEARCH:', query_string)
@@ -108,9 +108,9 @@ app.clientside_callback(
      State('df-constants-storage', 'data')],
     prevent_initial_call=True
 )
-def _new_and_delete(new_clicks, _close_clicks, dashboard_reset, input_tiles, num_tiles, new_disabled, df_const):
+def _new_and_delete(_new_clicks, _close_clicks, _dashboard_reset, input_tiles, num_tiles, new_disabled, df_const):
     """
-    :param new_clicks: Detects user clicking 'NEW' button in master navigation bar and encodes the number of tiles to
+    :param _new_clicks: Detects user clicking 'NEW' button in master navigation bar and encodes the number of tiles to
     display
     :param _close_clicks: Detects user clicking close ('x') button in top right of tile
     :param input_tiles: State of all currently existing tiles
@@ -166,9 +166,9 @@ def _new_and_delete(new_clicks, _close_clicks, dashboard_reset, input_tiles, num
     [State('button-new', 'disabled')],
     prevent_initial_call=True
 )
-def _unlock_new_button(graph_options, disabled):
+def _unlock_new_button(_graph_options, disabled):
     """
-    :param graph_options: Detects when the last callback, _update_graph_menu, in the UI update order finishes and
+    :param _graph_options: Detects when the last callback, _update_graph_menu, in the UI update order finishes and
     encodes the state of all graph menus
     :return: Enables the NEW button
     """
@@ -199,7 +199,7 @@ def _unlock_new_button(graph_options, disabled):
      State('dashboard-title', 'value')],
     prevent_initial_call=True
 )
-def _change_tab(tab_clicks, tab_close_clicks, _tab_add_nclicks,
+def _change_tab(_tab_clicks, _tab_close_clicks, _tab_add_nclicks,
                 tab_content, active_tab, data, tab_toggle_children, new_disabled, dashboard_title):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
@@ -300,6 +300,7 @@ def _change_tab(tab_clicks, tab_close_clicks, _tab_add_nclicks,
 )
 def _update_num_tiles(input1, input2, input3):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+    result = no_update
 
     if changed_id == '.':
         raise PreventUpdate
@@ -357,8 +358,8 @@ for x in range(4):
         prevent_initial_call=True
     )
     def _switch_tile_tab(_view_clicks, _customize_clicks, _layouts_clicks, view_content_style_state,
-                         customize_content_style_state, layouts_content_style_state, view_state, customize_state,
-                         layouts_state):
+                         customize_content_style_state, layouts_content_style_state, _view_state, _customize_state,
+                         _layouts_state):
         """
         :param _view_clicks: Detects the user clicking the VIEW button
         :param _customize_clicks: Detects the user clicking the CUSTOMIZE button
@@ -366,8 +367,8 @@ for x in range(4):
         VIEW_CONTENT_HIDE
         :param customize_content_style_state: Style of the CUSTOMIZE tab, either CUSTOMIZE_CONTENT_SHOW or
         CUSTOMIZE_CONTENT_HIDE
-        :param view_state: ClassName of the VIEW button, either 'tile-nav-selected' or 'tile-nav'
-        :param customize_state: ClassName of the CUSTOMIZE button, either 'tile-nav-selected' or 'tile-nav'
+        :param _view_state: ClassName of the VIEW button, either 'tile-nav-selected' or 'tile-nav'
+        :param _customize_state: ClassName of the CUSTOMIZE button, either 'tile-nav-selected' or 'tile-nav'
         :return: The styles of the CUSTOMIZE and VIEW tabs as being either hidden or shown, and the classNames of the
         VIEW and CUSTOMIZE buttons as being either selected or unselected
         """
@@ -415,7 +416,7 @@ for x in range(4):
             raise PreventUpdate
 
         return view_content_style, customize_content_style, layouts_content_style, view_className, layouts_className, \
-               customize_className
+            customize_className
 
 # ************************************************CUSTOMIZE TAB*******************************************************
 
@@ -451,7 +452,7 @@ for x in range(4):
             df_name = master_df_name
 
         # if link state from unlinked --> linked and the data set has not changed, don't update menu, still update graph
-        if ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name == master_df_name) \
+        if ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name == master_df_name)\
                 or ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink'):
             return no_update, 1, no_update
 
@@ -549,7 +550,7 @@ for x in range(4):
     [State({'type': 'tile-link', 'index': MATCH}, 'className')],
     prevent_initial_call=True
 )
-def _change_link(selected_layout, _link_clicks, link_state):
+def _change_link(_selected_layout, _link_clicks, link_state):
     """
     :param _link_clicks: Detects the user clicking the link/unlink icon
     :param link_state: State of the link/unlink icon
@@ -634,8 +635,8 @@ def _change_link(selected_layout, _link_clicks, link_state):
      State({'type': 'data-set', 'index': ALL}, 'data-')],
     prevent_initial_call=True
 )
-def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links_style, selected_layout, data_clicks,
-                           data_close_clicks, df_name_0, df_name_1, df_name_2, df_name_3, df_name_4, _confirm_clicks_0,
+def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, links_style, _selected_layout, data_clicks,
+                           _data_close_clicks, df_name_0, df_name_1, df_name_2, df_name_3, df_name_4, _confirm_clicks_0,
                            _confirm_clicks_1, _confirm_clicks_2, _confirm_clicks_3, _confirm_clicks_4,
                            _refresh_clicks_0, _refresh_clicks_1, _refresh_clicks_2, _refresh_clicks_3,
                            _refresh_clicks_4, data_states, sidemenu_style_states, df_const, prev_selection):
@@ -748,7 +749,8 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
             refresh_button[changed_index] = DATA_CONTENT_HIDE
 
     # elif 'data-set' in changed id, reset data tile with new df set as active, keep shown, and trigger graph update
-    elif '"type":"confirm-load-data"}.n_clicks' in changed_id or '"type":"confirm-data-set-refresh"}.n_clicks' in changed_id:
+    elif '"type":"confirm-load-data"}.n_clicks' in changed_id \
+            or '"type":"confirm-data-set-refresh"}.n_clicks' in changed_id:
         changed_index = int(search(r'\d+', changed_id).group())
         df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
         df_name = df_names[changed_index]
@@ -828,9 +830,9 @@ for x in range(4):
          State({'type': 'data-tile', 'index': 4}, 'style'),
          State({'type': 'tile-link', 'index': x}, 'className')]
     )
-    def _highlight_child_tiles(sidebar_styles, sidebar_style, master_sidebar_style, link_state):
+    def _highlight_child_tiles(_sidebar_styles, sidebar_style, master_sidebar_style, link_state):
         """
-        :param sidebar_styles: Detects hiding/showing of data side-menus
+        :param _sidebar_styles: Detects hiding/showing of data side-menus
         :param sidebar_style: State of the style of the data side-menu
         :param master_sidebar_style: State of the style of the parent data side-menu
         :param link_state: State of the link/unlink icon
@@ -888,4 +890,3 @@ app.clientside_callback(
     Output('df-constants-storage', 'n_clicks'),
     [Input('df-constants-storage', 'data')]
 )
-

@@ -8,7 +8,10 @@ contains functions to generate graphs
 
 # External Packages
 # import re
+import math
 from _datetime import datetime
+
+import numpy as np
 from flask import session
 # import numpy as np
 import plotly.express as px
@@ -203,8 +206,8 @@ def get_line_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level
             line_group = None
             legend_title_text = get_label('LBL_Variable_Names')
 
-        filtered_df['Partial Period'] = filtered_df['Partial Period'].transform(
-            lambda j: get_label('LBL_TRUE') if j else get_label('LBL_FALSE'))
+        filtered_df['Partial Period'] = filtered_df['Partial Period'].astype(str).transform(
+            lambda j: get_label('LBL_TRUE') if j != 'nan' else get_label('LBL_FALSE'))
         filtered_df.sort_values(by=[color, 'Date of Event'], inplace=True)
 
         # generate graph
@@ -310,8 +313,8 @@ def get_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_le
             color = 'Variable Name'
             legend_title_text = get_label('LBL_Variable_Names')
 
-        filtered_df['Partial Period'] = filtered_df['Partial Period'].transform(
-            lambda j: get_label('LBL_TRUE') if j else get_label('LBL_FALSE'))
+        filtered_df['Partial Period'] = filtered_df['Partial Period'].astype(str).transform(
+            lambda j: get_label('LBL_TRUE') if j != 'nan' else get_label('LBL_FALSE'))
         filtered_df.sort_values(by=[color, 'Date of Event'], inplace=True)
 
         # generate graph
@@ -426,8 +429,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
         legend_title_text = get_label(
             'LBL_' + hierarchy_level_dropdown, df_name) if hierarchy_type == 'Level Filter' else 'Traces'
 
-        filtered_df['Partial Period'] = filtered_df['Partial Period'].transform(
-            lambda j: get_label('LBL_TRUE') if j else get_label('LBL_FALSE'))
+        filtered_df['Partial Period'] = filtered_df['Partial Period'].astype(str).transform(
+            lambda j: get_label('LBL_TRUE') if j != 'nan' else get_label('LBL_FALSE'))
         filtered_df.sort_values(by=[color, 'Date of Event'], inplace=True)
 
         filtered_df['Date of Event'] = filtered_df['Date of Event'].astype(str)
@@ -473,7 +476,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
     return graph
 
 
-# bar graph layout
+# bar graph layout TODO: VERTICAL TICKS OVERLAPPING WITH THE ANIMATION SLIDER
 def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
                    hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const):
     # arg_value[0] = group by (x axis)
@@ -574,166 +577,13 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         # else, hierarchy type is specific item while "Graph all in Dropdown" is unselected
         else:
             color = 'Variable Name' if group_by_item else 'Partial Period'
-            x_val = 'Date of Event' if group_by_item  and not arg_value[4] else 'Variable Name'
-            legend_title_text = get_label('LBL_Variable_Name', df_name)\
-                if group_by_item else get_label('LBL_Partial_Period', df_name)
-
+            x_val = 'Date of Event' if group_by_item and not arg_value[4] else 'Variable Name'
+            legend_title_text = get_label('LBL_Variable_Name', df_name) if group_by_item else get_label('LBL_Partial_Period', df_name)
             if not group_by_item:
                 filtered_df['Date of Event'] = \
                     filtered_df['Date of Event'].transform(lambda i: i.strftime(format='%Y-%m-%d'))
-
-        filtered_df['Partial Period'] = filtered_df['Partial Period'].transform(
-            lambda j: get_label('LBL_TRUE') if j else get_label('LBL_FALSE'))
-
-        # generate graph
-        lbl_measure_value = get_label("LBL_Measure_Value", df_name)
-        lbl_xval = get_label("LBL_" + x_val.replace(" ", "_"))
-
-        fig = px.bar(
-            title=title,
-            data_frame=filtered_df,
-            x=x_val if arg_value[3] == 'Vertical' else 'Measure Value',
-            y='Measure Value' if arg_value[3] == 'Vertical' else x_val,
-            color=color,
-            barmode='group',
-            custom_data=['Date of Event'])
-        fig.update_layout(
-            yaxis={'title': arg_value[1]} if arg_value[3] == 'Vertical' else {},
-            xaxis={} if arg_value[3] == 'Vertical' else {'title': arg_value[1]},
-            legend_title_text=legend_title_text,
-            overwrite=True,
-            plot_bgcolor='rgba(0, 0, 0, 0)',
-            paper_bgcolor='rgba(0, 0, 0, 0)')
-        hovertemplate = f'<b>{lbl_xval if arg_value[3] == "Vertical" else lbl_measure_value}</b>' + ': %{x}<br>'
-        if hierarchy_type == "Level Filter" or (
-                hierarchy_type == "Specific Item" and hierarchy_graph_children == ["graph_children"]):
-            hovertemplate += f'<b>{get_label("LBL_Date_of_Event", df_name)}</b>' + ': %{customdata[0]}<br>'
-        hovertemplate += f'<b>{lbl_measure_value if arg_value[3] == "Vertical" else lbl_xval}</b>' + ': %{y}<br>'
-        fig.update_traces(hovertemplate=hovertemplate)
-        fig = set_partial_periods(fig, filtered_df, 'Bar')
-    # else, filtered is empty, create default empty graph
-    else:
-        fig = get_blank_figure(tile_title, title, hierarchy_type, hierarchy_level_dropdown,
-                               hierarchy_path, hierarchy_graph_children, arg_value[2])
-
-    graph = dcc.Graph(
-        id='graph-display',
-        className='fill-container',
-        responsive=True,
-        config=dict(locale=language.lower()),
-        figure=fig)
-
-    return graph
-
-
-# bar graph layout TODO: VERTICAL TICKS OVERLAPPING WITH THE ANIMATION SLIDER
-def get_animated_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
-                            hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const):
-    # arg_value[0] = group by (x axis)
-    # arg_value[1] = measure type selector
-    # arg_value[2] = variable names selector
-    # arg_value[3] = orientation
-    # arg_value[4] = animate bool
-    language = session["language"]
-
-    # Specialty filtering
-    filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[2], df_const)
-    # if hierarchy type is "Level Filter", or "Specific Item" while "Graph all in Dropdown" is selected
-    if hierarchy_type == 'Level Filter' or (hierarchy_type == 'Specific Item' and
-                                            hierarchy_graph_children == ['graph_children']):
-        # Title setup
-        if tile_title:
-            title = tile_title
-        else:
-            if hierarchy_type == 'Level Filter':
-
-                if arg_value[0] == 'Variable Names':
-                    title = '{}: {} vs {}'.format(get_label('LBL_' + hierarchy_level_dropdown, df_name), arg_value[1],
-                                                  get_label('LBL_Variable_Names'))
-                else:
-                    # Whole level graph title
-                    title = '{0}: {1} vs {0}'.format(get_label('LBL_' + hierarchy_level_dropdown, df_name),
-                                                     arg_value[1])
-            elif len(hierarchy_path) != 0:
-                # Specific item's children graph title
-                if language == 'En':
-                    title = '{}\'s {}'.format(hierarchy_path[-1], get_label('LBL_Children'))
-                else:
-                    title = '{} {}'.format(get_label('LBL_Children_Of'), hierarchy_path[-1])
-                if arg_value[0] == 'Variable Names':
-                    title = title + ': {} vs {}'.format(arg_value[1], get_label('LBL_Variable_Names'))
-                else:
-                    title = title + ': {} vs {}'.format(arg_value[1], hierarchy_path[-1])
-            else:
-                if arg_value[0] == 'Variable Names':
-                    title = '{}: {} vs {}'.format(get_label('LBL_Roots_Children'), arg_value[1],
-                                                  get_label('LBL_Variable_Names'))
-                else:
-                    # Root's children graph title
-                    title = '{}: {} vs {}'.format(get_label('LBL_Roots_Children'), arg_value[1],
-                                                  get_label('LBL_Root'))
-
-    # else, hierarchy type is specific item while "Graph all in Dropdown" is unselected
-    else:
-        # Title setup
-        if tile_title:
-            title = tile_title
-        else:
-            # Generate title if there is no user entered title
-            if arg_value[0] == 'Variable Names':
-                title = '{}: {} vs {}'.format(hierarchy_specific_dropdown, arg_value[1],
-                                              get_label('LBL_Variable_Names'))
-            else:
-                if hierarchy_specific_dropdown:
-                    title = '{}: {} vs {}'.format(hierarchy_specific_dropdown, arg_value[1], get_label('LBL_Time'))
-                else:
-                    if len(hierarchy_path) == 0:
-                        title = ""
-                    else:
-                        title = '{}: {} vs {}'.format(hierarchy_path[-1], arg_value[1], get_label('LBL_Time'))
-
-    # if df is not empty, create graph
-    if not filtered_df.empty:
-
-        group_by_item = arg_value[0] != 'Variable Names'
-        title += '<br><sub>{} {} </sub>'.format(get_label('LBL_Data_Accessed_On'), datetime.date(datetime.now()))
-
-        # if hierarchy type is "Level Filter", or "Specific Item" while "Graph all in Dropdown" is selected
-        if hierarchy_type == 'Level Filter' or (hierarchy_type == 'Specific Item' and
-                                                hierarchy_graph_children == ['graph_children']):
-            # Axis and color logic
-            if not group_by_item:
-                x_axis = 'Variable Name'
-                if hierarchy_type == 'Level Filter':
-                    color = hierarchy_level_dropdown
-                else:
-                    color = df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)]
-            elif hierarchy_type == 'Level Filter':
-                x_axis = hierarchy_level_dropdown
-                color = 'Variable Name'
-            else:
-                x_axis = df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)]
-                color = 'Variable Name'
-
-            x_val = x_axis
-            legend_title_text = get_label('LBL_' + color.replace(' ', '_'))
-
-            filtered_df['Date of Event'] = \
-                filtered_df['Date of Event'].transform(lambda i: i.strftime(format='%Y-%m-%d'))
-
-        # else, hierarchy type is specific item while "Graph all in Dropdown" is unselected
-        else:
-            color = 'Variable Name' if group_by_item else 'Partial Period'
-            x_val = 'Variable Name'
-            legend_title_text = get_label('LBL_Variable_Name', df_name)\
-                if group_by_item else get_label('LBL_Partial_Period', df_name)
-
-            if not group_by_item:
-                filtered_df['Date of Event'] = \
-                    filtered_df['Date of Event'].transform(lambda i: i.strftime(format='%Y-%m-%d'))
-
-        filtered_df['Partial Period'] = filtered_df['Partial Period'].transform(
-            lambda j: get_label('LBL_TRUE') if j else get_label('LBL_FALSE'))
+        filtered_df['Partial Period'] = filtered_df['Partial Period'].astype(str).transform(
+            lambda j: get_label('LBL_TRUE') if j != 'nan' else get_label('LBL_FALSE'))
 
         if arg_value[4]:
             filtered_df['Date of Event'] = filtered_df['Date of Event'].astype(str)
@@ -898,8 +748,8 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
 
         filtered_df['Date of Event'] = filtered_df['Date of Event'].transform(lambda i: i.strftime(format='%Y-%m-%d'))
 
-        filtered_df['Partial Period'] = filtered_df['Partial Period'].transform(
-            lambda j: get_label('LBL_TRUE') if j else get_label('LBL_FALSE'))
+        filtered_df['Partial Period'] = filtered_df['Partial Period'].astype(str).transform(
+            lambda j: get_label('LBL_TRUE') if j != 'nan' else get_label('LBL_FALSE'))
 
         # generate graph
         fig = px.box(

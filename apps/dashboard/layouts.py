@@ -180,9 +180,13 @@ def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Fi
             style={'position': 'relative', 'left': '3px'},
             id={'type': 'data-menu-close', 'index': tile}),
         html.Div(get_data_set_picker(tile, df_name)),
-        html.Div(
-            get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle, nid_path, df_const)),
-        html.Div(get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, period_type, df_const))]
+        html.Div([
+            html.Div(
+                get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle, nid_path,
+                                     df_const)),
+            html.Div(get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, period_type, df_const))],
+            style=DATA_CONTENT_HIDE,
+            id={'type': 'data-menu-controls', 'index': tile})]
 
     dashboard_loading_wrapper = html.Div(
         content,
@@ -406,11 +410,11 @@ def get_layout_dashboard():
                             style={'padding': '7px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
                                    'margin-left': '10px', 'margin-right': '14px', 'display': 'inline-block',
                                    'vertical-align': 'top'})],
-                             id='dashboard-reset-symbols',
-                             style={'width': '71px',
-                                    'border': '1px solid {}'.format(CLR['lightgray']),
-                                    'margin': '2px 0', 'border-radius': '6px',
-                                    'display': 'none'}),
+                        id='dashboard-reset-symbols',
+                        style={'width': '71px',
+                               'border': '1px solid {}'.format(CLR['lightgray']),
+                               'margin': '2px 0', 'border-radius': '6px',
+                               'display': 'none'}),
                     style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
                            'position': 'relative', 'vertical-align': 'top'}),
                 html.Button(

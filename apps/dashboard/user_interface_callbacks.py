@@ -416,7 +416,7 @@ for x in range(4):
             raise PreventUpdate
 
         return view_content_style, customize_content_style, layouts_content_style, view_className, layouts_className, \
-            customize_className
+               customize_className
 
 # ************************************************CUSTOMIZE TAB*******************************************************
 
@@ -452,7 +452,7 @@ for x in range(4):
             df_name = master_df_name
 
         # if link state from unlinked --> linked and the data set has not changed, don't update menu, still update graph
-        if ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name == master_df_name)\
+        if ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name == master_df_name) \
                 or ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink'):
             return no_update, 1, no_update
 
@@ -821,6 +821,19 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
             prev_selection[0], prev_selection[1], prev_selection[2], prev_selection[3], prev_selection[4])
 
 
+@app.callback(
+    Output({'type': 'data-menu-controls', 'index': MATCH}, 'style'),
+    [Input({'type': 'confirm-load-data', 'index': MATCH}, 'style'),
+     Input({'type': 'confirm-data-set-refresh', 'index': MATCH}, 'style')],
+    prevent_initial_call=True
+)
+def _hide_controls_until_data_is_loaded(load_data_trigger, refresh_data_trigger):
+    if load_data_trigger == DATA_CONTENT_HIDE:
+        return {}
+    else:
+        return DATA_CONTENT_HIDE
+
+
 # highlight tiles slaved to displayed data sidebar
 for x in range(4):
     @app.callback(
@@ -869,7 +882,6 @@ for x in range(4):
         [Input({'type': 'graph_display', 'index': x}, 'children')],
         State('num-tiles', 'data-num-tiles')
     )
-
 
 app.clientside_callback(
     ClientsideFunction(

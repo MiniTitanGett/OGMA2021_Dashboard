@@ -454,7 +454,7 @@ for y in range(4):
      State({'type': 'start-year-input', 'index': 4}, 'name')],
     prevent_initial_call=True
 )
-def save_dashboard(_save_clicks, _delete_clicks, _dashboard_overwrite_inputs,
+def _save_dashboard(_save_clicks, _delete_clicks, _dashboard_overwrite_inputs,
                    remove_dashboard, dashboard_title, tile_titles, links, graph_types,
                    args_list_0, args_list_1, args_list_2, args_list_3,
                    df_name_0, df_name_1, df_name_2, df_name_3, df_name4,

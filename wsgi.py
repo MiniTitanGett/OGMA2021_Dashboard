@@ -2,7 +2,7 @@ import config  # MUST BE THE FIRST IMPORT!!!
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from werkzeug.serving import run_simple
 from server import server
-from apps.OPG001.app import app as opg001
+from apps.dashboard.app import app as dashboard
 # from apps.app0001 import app as app0001
 # from apps.app0002 import app as app0002
 # from apps.app0004 import app as app0004
@@ -16,7 +16,7 @@ from apps.OPG001.app import app as opg001
 # https://stackoverflow.com/questions/30906489/how-to-implement-flask-application-dispatching-by-path-with-wsgi
 
 server.wsgi_app = DispatcherMiddleware(server.wsgi_app, {
-    '/OPG001': opg001.server,
+    '/dashboard': dashboard.server,
     # '/0001': app0001.server,
     # '/0002': app0002.server
     # '/0004': app0004.server,

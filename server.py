@@ -1,17 +1,17 @@
-from datetime import timedelta
+# from datetime import timedelta
 import flask
-from flask import Flask, request, session, g
-import pyodbc
+from flask import Flask, request, session
+# import pyodbc
 # import pymssql
 from werkzeug.utils import redirect
 import config
 import logging
 # from pandas import DataFrame
-import pandas
+# import pandas
 import json
 
-from conn import CursorByName, get_conn, close_conn, get_ref
-from apps.OPG001.data import saved_layouts, saved_dashboards
+from conn import close_conn, exec_storedproc, exec_storedproc_results, get_ref
+from apps.dashboard.data import saved_layouts, saved_dashboards
 from flask_session import Session
 
 
@@ -79,8 +79,6 @@ def load_saved_graphs_from_db():
     """
     loads the saved layouts into the saved_layouts dictionary from the database
     """
-    conn = get_conn()
-    cursor = conn.cursor()
     query = """\
     declare @p_result_status varchar(255)
     exec dbo.opp_addgeteditdeletefind_extdashboardreports {}, 'Find', null, null, null, null, null, null,
@@ -88,25 +86,16 @@ def load_saved_graphs_from_db():
     select @p_result_status as result_status
     """.format(session["sessionID"])
 
-    cursor.execute(query)
+    results = exec_storedproc_results(query)
 
-    results = CursorByName(cursor)  # cursor.fetchall()
-
-    # for now, don't worry about @p_result_status
-
-    for row in results:
+    for i, row in results.iterrows():
         saved_layouts[row["ref_value"]] = json.loads(row["clob_text"])
-
-    cursor.close()
-    del cursor
 
 
 def load_saved_dashboards_from_db():
     """
     loads the saved dashboards into the saved_dashboards dictionary from the database
     """
-    conn = get_conn()
-    cursor = conn.cursor()
     query = """\
     declare @p_result_status varchar(255)
     exec dbo.opp_addgeteditdeletefind_extdashboards {}, 'Find', null, null, null, null, null, null,
@@ -114,71 +103,42 @@ def load_saved_dashboards_from_db():
     select @p_result_status as result_status
     """.format(session["sessionID"])
 
-    cursor.execute(query)
+    results = exec_storedproc_results(query)
 
-    results = CursorByName(cursor)  # cursor.fetchall()
-
-    # for now, don't worry about @p_result_status
-
-    for row in results:
+    for i, row in results.iterrows():
         saved_dashboards[row["ref_value"]] = json.loads(row["clob_text"])
-
-    cursor.close()
-    del cursor
 
 
 def validate_session(sessionid, externalid):
-    conn = get_conn()
-    cursor = conn.cursor()
     query = """\
+    declare @current_lang varchar(64)
     declare @p_external_id int
     declare @p_session_status varchar(64)
     declare @p_result_status varchar(255)
-    exec dbo.OPP_Get_Session2 {}, {}, {}, null, null, null, null, null, null, null, null, null, null, null, null, null,
-    null, null, null, @p_session_status output, null, null, null, null, null, null, null, null, @p_external_id output,
-    @p_result_status output
-    select @p_external_id as external_id, @p_session_status as session_status, @p_result_status as result_status
+    exec dbo.OPP_Get_Session2 {}, {}, {}, null, null, null, null, null, @current_lang output, null, null, null, null,
+    null, null, null, null, null, null, @p_session_status output, null, null, null, null, null, null, null, null,
+    @p_external_id output, @p_result_status output
+    select @current_lang as current_lang, @p_external_id as external_id, @p_session_status as session_status,
+    @p_result_status as result_status
     """.format(sessionid, sessionid, 1)
 
-    cursor.execute(query)
+    output = exec_storedproc(query)
 
-    results = cursor.fetchone()
+    # result_status is checked in exex_storedproc()
 
-    if results.result_status != "OK" or results.external_id != externalid or results.session_status != 'OK':
-        cursor.close()
-        del cursor
-        if results.result_status != "OK":
-            logging.error(results.result_status)
-        elif results.session_status != "OK":
-            logging.error(results.session_status)
-        else:
-            logging.error("Invalid external_id: {}".format(externalid))
+    if output.session_status != "OK":
+        logging.error(output.session_status)
+        flask.abort(404)
+    elif output.external_id != externalid:
+        logging.error("Invalid external_id: {}".format(externalid))
         flask.abort(404)
 
-    cursor.close()
-    del cursor
+    return output.current_lang
 
 
 def load_dataset_list():
     df = get_ref("Data_set", session["language"])
     return df["ref_value"].tolist()
-
-
-# def get_cursor():
-#
-#    if 'cursor' not in g:
-#        conn = get_conn()
-#        g.cursor = conn.cursor()
-#
-#    return g.cursor
-
-
-# def del_cursor():
-#    cursor = g.pop('cursor', None)
-#
-#    if cursor is not None:
-#        cursor.close()
-#        del cursor
 
 
 # WebModuleCreate?
@@ -203,14 +163,12 @@ def before_request_func():
         logging.debug("cookies=" + dict_to_string(request.cookies))
         # logging.debug("session=" + dict_to_string(session))
 
-    conn = get_conn()
-
     # if the sessionid exists in the request, validate the nonce
     # otherwise validate the sessionid/tokenid out of the cookie
 
     sessionid = request.args.get("sessionID", type=int)
 
-    if sessionid:  # and (sessionid != session.get("sessionID")):
+    if sessionid:
         if config.DEBUG:
             session.clear()
         session["sessionID"] = 0
@@ -227,31 +185,15 @@ def before_request_func():
         select @p_external_id as external_id, @p_result_status as result_status
         """.format(sessionid, nonce_key, nonce_value)
 
-        cursor = conn.cursor()
-        cursor.execute(query)
+        output = exec_storedproc(query)
 
-        results = cursor.fetchone()
-
-        if results.result_status != "OK":
-            cursor.close()
-            del cursor
-            logging.error(results.result_status)
-            flask.abort(404)
+        # result_status is checked in exec_storedproc()
 
         session["sessionID"] = sessionid
-        session["externalID"] = results.external_id
-
-        cursor.close()
-        del cursor
+        session["externalID"] = output.external_id
 
         # validate the session on the first request
-        validate_session(sessionid, results.external_id)
-
-        # set the user's language
-        language = request.args.get("language")
-
-        if language:
-            session["language"] = language
+        session["language"] = validate_session(sessionid, output.external_id)
 
         # load the labels
         load_labels(session["language"])

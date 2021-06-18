@@ -16,11 +16,11 @@ import dash_core_components as dcc
 from re import search
 
 # Internal Packages
-from apps.OPG001.graphs import __update_graph
-from apps.OPG001.hierarchy_filter import generate_history_button, generate_dropdown
-from apps.OPG001.app import app
-from apps.OPG001.data import session, data_filter, CLR, get_label
-from apps.OPG001.datepicker import get_date_box, update_date_columns, get_secondary_data
+from apps.dashboard.graphs import __update_graph
+from apps.dashboard.hierarchy_filter import generate_history_button, generate_dropdown
+from apps.dashboard.app import app
+from apps.dashboard.data import data_filter, CLR, get_label
+from apps.dashboard.datepicker import get_date_box, update_date_columns, get_secondary_data
 
 # Contents:
 #   GRAPH
@@ -95,8 +95,8 @@ for x in range(4):
          State({'type': 'hierarchy_specific_dropdown', 'index': x}, 'options'),
          State({'type': 'hierarchy_specific_dropdown', 'index': 4}, 'options'),
          # Constants
-         State('df-constants-storage', 'data')
-         ]
+         State('df-constants-storage', 'data')],
+        prevent_initial_call=True
     )
     def _update_graph(_df_trigger, view_state, tile_title, _datepicker_trigger,
                       num_periods, period_type, _master_datepicker_trigger, master_num_periods,
@@ -108,7 +108,7 @@ for x in range(4):
                       master_start_secondary, master_end_secondary, graph_display, df_name, master_df_name,
                       arg_value, graph_type, link_state, hierarchy_options, master_hierarchy_options, df_const):
 
-        changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
+        changed_id = [i['prop_id'] for i in dash.callback_context.triggered][-1]
 
         # if not in view tab, or new/delete while the graph already exists, prevent update
         if view_state == 'tile-nav tile-nav--view' or (changed_id == '.' and graph_display):
@@ -172,7 +172,8 @@ for x in range(5):
          Input({'type': 'hierarchy_to_top', 'index': x}, 'n_clicks'),
          Input({'type': 'button: {}'.replace("{}", str(x)), 'index': ALL}, 'n_clicks')],
         [State({'type': 'hierarchy_display_button', 'index': x}, 'children'),
-         State({'type': 'data-set', 'index': x}, 'value')]
+         State({'type': 'data-set', 'index': x}, 'value')],
+        prevent_initial_call=True
     )
     def _print_choice_to_display_and_modify_dropdown(dropdown_val, _n_clicks_r, _n_clicks_tt,
                                                      n_clicks_click_history, state_of_display,
@@ -185,7 +186,9 @@ for x in range(5):
             raise PreventUpdate
 
         # create a comma delimited string for hierarchy (node id) navigation
-        def get_nid_path(sod=[], dropdown_value=None):
+        def get_nid_path(sod=None, dropdown_value=None):
+            if sod is None:
+                sod = []
             path = "root"
             for i in sod:
                 path += ('^||^{}'.format(i['props']['children']))
@@ -265,7 +268,8 @@ for x in range(5):
 @app.callback(
     [Output({'type': 'hierarchy_level_filter', 'index': MATCH}, 'style'),
      Output({'type': 'hierarchy_specific_filter', 'index': MATCH}, 'style')],
-    [Input({'type': 'hierarchy-toggle', 'index': MATCH}, 'value')]
+    [Input({'type': 'hierarchy-toggle', 'index': MATCH}, 'value')],
+    prevent_initial_call=True
 )
 def _show_filter_based_on_hierarchy_toggle(hierarchy_toggle):
     if [i['prop_id'] for i in dash.callback_context.triggered][0] == '.':
@@ -294,7 +298,8 @@ def _show_filter_based_on_hierarchy_toggle(hierarchy_toggle):
      Input({'type': 'end-secondary-input', 'index': MATCH}, 'value')],
     [State({'type': 'start-year-input', 'index': MATCH}, 'name'),
      State({'type': 'data-set', 'index': MATCH}, 'value'),
-     State('df-constants-storage', 'data')]
+     State('df-constants-storage', 'data')],
+    prevent_initial_call=True
 )
 def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quarter_button_clicks,
                         _month_button_clicks, _week_button_clicks, start_year_selection, end_year_selection,
@@ -327,14 +332,14 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
     # 'Select Range' was selected
     else:
         # tabs are unselected and enabled unless otherwise specified
-        year_className = quarter_className = month_className = week_className = 'date-picker-nav'
+        year_classname = quarter_classname = month_classname = week_classname = 'date-picker-nav'
         year_disabled = quarter_disabled = month_disabled = week_disabled = False
         # secondary input boxes do not exist if inside of year tab - their data is None unless otherwise specified
         fringe_min = fringe_max = selected_secondary_min = selected_secondary_max = default_max = None
         # if tabs do not exist or the 'year' tab was requested or year type changed,
         # generate the tabs with the 'year' tab as active
         if 'radio-timeframe' in changed_id or 'date-picker-year-button' in changed_id:
-            year_className = 'date-picker-nav-selected'
+            year_classname = 'date-picker-nav-selected'
             year_disabled = True
             # use the year scheme (gregorian/fiscal) selected by the user
             if fiscal_toggle == 'Gregorian':
@@ -344,20 +349,20 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                 min_year = df_const[df_name]['FISCAL_MIN_YEAR']
                 max_year = df_const[df_name]['FISCAL_YEAR_MAX']
             left_column = html.Div([
-                get_date_box(id={'type': 'start-year-input', 'index': tile},
+                get_date_box(index={'type': 'start-year-input', 'index': tile},
                              value=min_year,
-                             min=min_year,
-                             max=max_year,
+                             minimum=min_year,
+                             maximum=max_year,
                              name='Year'),
                 dcc.Input(
                     id={'type': 'start-secondary-input', 'index': tile},
                     value=1,
                     style={'display': 'none'})])
             right_column = html.Div([
-                get_date_box(id={'type': 'end-year-input', 'index': tile},
+                get_date_box(index={'type': 'end-year-input', 'index': tile},
                              value=max_year + 1,
-                             min=min_year + 1,
-                             max=max_year + 1),
+                             minimum=min_year + 1,
+                             maximum=max_year + 1),
                 dcc.Input(
                     id={'type': 'end-secondary-input', 'index': tile},
                     value=1,
@@ -366,9 +371,9 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
         # if a tab was requested other than 'year', generate the default appearance of the selected tab
         elif 'n_clicks' in changed_id:
             conditions = ['date-picker-quarter-button' in changed_id, 'date-picker-month-button' in changed_id]
-            quarter_className, quarter_disabled, month_className, month_disabled, week_className, week_disabled, \
-            fringe_min, fringe_max, default_max, max_year, \
-            new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
+            quarter_classname, quarter_disabled, month_classname, month_disabled, week_classname, week_disabled, \
+                fringe_min, fringe_max, default_max, max_year, \
+                new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
             # set min_year according to user selected fiscal/gregorian time type
             if fiscal_toggle == 'Gregorian':
                 min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
@@ -382,23 +387,23 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
             else:
                 min_max = default_max
                 max_min = 1
-            year_input_min = get_date_box(id={'type': 'start-year-input', 'index': tile},
+            year_input_min = get_date_box(index={'type': 'start-year-input', 'index': tile},
                                           value=min_year,
-                                          min=min_year,
-                                          max=max_year,
+                                          minimum=min_year,
+                                          maximum=max_year,
                                           name=new_tab)
-            year_input_max = get_date_box(id={'type': 'end-year-input', 'index': tile},
+            year_input_max = get_date_box(index={'type': 'end-year-input', 'index': tile},
                                           value=max_year,
-                                          min=min_year,
-                                          max=max_year)
-            secondary_input_min = get_date_box(id={'type': 'start-secondary-input', 'index': tile},
+                                          minimum=min_year,
+                                          maximum=max_year)
+            secondary_input_min = get_date_box(index={'type': 'start-secondary-input', 'index': tile},
                                                value=fringe_min,
-                                               min=fringe_min,
-                                               max=min_max, )
-            secondary_input_max = get_date_box(id={'type': 'end-secondary-input', 'index': tile},
+                                               minimum=fringe_min,
+                                               maximum=min_max, )
+            secondary_input_max = get_date_box(index={'type': 'end-secondary-input', 'index': tile},
                                                value=fringe_max,
-                                               min=max_min,
-                                               max=fringe_max)
+                                               minimum=max_min,
+                                               maximum=fringe_max)
             left_column = [year_input_min, secondary_input_min]
             right_column = [year_input_max, secondary_input_max]
 
@@ -412,7 +417,7 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
             selected_max_year = end_year_selection
             # if inside of year tab
             if tab == 'Year':
-                year_className = 'date-picker-nav-selected'
+                year_classname = 'date-picker-nav-selected'
                 year_disabled = True
                 if fiscal_toggle == 'Gregorian':
                     max_year = df_const[df_name]['GREGORIAN_YEAR_MAX']
@@ -423,9 +428,9 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                 selected_secondary_min = start_secondary_selection
                 selected_secondary_max = end_secondary_selection
                 conditions = [tab == 'Quarter', tab == 'Month']
-                quarter_className, quarter_disabled, month_className, month_disabled, week_className, week_disabled, \
-                fringe_min, fringe_max, default_max, max_year, \
-                new_tab = get_secondary_data(conditions, fiscal_toggle, df_name)
+                quarter_classname, quarter_disabled, month_classname, month_disabled, week_classname, week_disabled, \
+                    fringe_min, fringe_max, default_max, max_year, \
+                    new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
             # set min_year according to user selected time type (gregorian/fiscal)
             if fiscal_toggle == 'Gregorian':
                 min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
@@ -443,20 +448,20 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                     selected_min_year = min_year
                     selected_max_year = max_year + 1
                 left_column = html.Div([
-                    get_date_box(id={'type': 'start-year-input', 'index': tile},
+                    get_date_box(index={'type': 'start-year-input', 'index': tile},
                                  value=selected_min_year,
-                                 min=min_year,
-                                 max=selected_max_year - 1,
+                                 minimum=min_year,
+                                 maximum=selected_max_year - 1,
                                  name='Year'),
                     dcc.Input(
                         id={'type': 'start-secondary-input', 'index': tile},
                         value=1,
                         style={'display': 'none'})])
                 right_column = html.Div([
-                    get_date_box(id={'type': 'end-year-input', 'index': tile},
+                    get_date_box(index={'type': 'end-year-input', 'index': tile},
                                  value=selected_max_year,
-                                 min=selected_min_year + 1,
-                                 max=max_year + 1),
+                                 minimum=selected_min_year + 1,
+                                 maximum=max_year + 1),
                     dcc.Input(
                         id={'type': 'end-secondary-input', 'index': tile},
                         value=1,
@@ -466,16 +471,16 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
         bottom = '0' if not fringe_min else '17px'
         children = [
             html.Header([
-                html.Button(get_label("LBL_Year"), className=year_className,
+                html.Button(get_label("LBL_Year"), className=year_classname,
                             id={'type': 'date-picker-year-button', 'index': tile},
                             disabled=year_disabled),
-                html.Button(get_label("LBL_Quarter"), className=quarter_className,
+                html.Button(get_label("LBL_Quarter"), className=quarter_classname,
                             id={'type': 'date-picker-quarter-button', 'index': tile},
                             disabled=quarter_disabled),
-                html.Button(get_label("LBL_Month"), className=month_className,
+                html.Button(get_label("LBL_Month"), className=month_classname,
                             id={'type': 'date-picker-month-button', 'index': tile},
                             disabled=month_disabled),
-                html.Button(get_label("LBL_Week"), className=week_className,
+                html.Button(get_label("LBL_Week"), className=week_classname,
                             id={'type': 'date-picker-week-button', 'index': tile},
                             disabled=week_disabled)
             ], style={'display': 'inline-block', 'width': '100%'}),
@@ -496,7 +501,8 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
 @app.callback(
     [Output({'type': 'num-periods', 'index': MATCH}, 'disabled'),
      Output({'type': 'period-type', 'index': MATCH}, 'disabled')],
-    [Input({'type': 'radio-timeframe', 'index': MATCH}, 'value')]
+    [Input({'type': 'radio-timeframe', 'index': MATCH}, 'value')],
+    prevent_initial_call=True
 )
 def _unlock_past_x_selections(selected_timeframe):
     if [i['prop_id'] for i in dash.callback_context.triggered][0] == '.':
@@ -593,15 +599,14 @@ for x in range(4):
          State({'type': 'data-set', 'index': 4}, 'value'),
          State('df-constants-storage', 'data')]
     )
-    def _update_table(page_current, page_size, sort_by, filter, graph_trigger, table_trigger, link_state, df_name,
-                      secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary, end_secondary,
-                      num_periods, period_type, hierarchy_toggle, hierarchy_level_dropdown, state_of_display,
-                      hierarchy_graph_children, hierarchy_options, master_secondary_type, master_timeframe,
-                      master_fiscal_toggle,
-                      master_start_year, master_end_year, master_start_secondary, master_end_secondary,
-                      master_num_periods, master_period_type, master_hierarchy_toggle, master_hierarchy_level_dropdown,
-                      master_state_of_display, master_hierarchy_graph_children, master_hierarchy_options,
-                      master_df_name, df_const):
+    def _update_table(page_current, page_size, sort_by, filter_query, _graph_trigger, _table_trigger, link_state,
+                      df_name, secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
+                      end_secondary, num_periods, period_type, hierarchy_toggle, hierarchy_level_dropdown,
+                      state_of_display, hierarchy_graph_children, hierarchy_options, master_secondary_type,
+                      master_timeframe, master_fiscal_toggle, master_start_year, master_end_year,
+                      master_start_secondary, master_end_secondary, master_num_periods, master_period_type,
+                      master_hierarchy_toggle, master_hierarchy_level_dropdown, master_state_of_display,
+                      master_hierarchy_graph_children, master_hierarchy_options, master_df_name, df_const):
 
         if link_state == 'fa fa-link':
             secondary_type = master_secondary_type
@@ -650,10 +655,10 @@ for x in range(4):
                               hierarchy_level_dropdown, hierarchy_graph_children, df_name, df_const)
 
         # Reformat date column
-        dff['Date of Event'] = dff['Date of Event'].transform(lambda x: x.strftime(format='%Y-%m-%d'))
+        dff['Date of Event'] = dff['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
 
         # Filter based on datatable filters
-        filtering_expressions = filter.split(' && ')
+        filtering_expressions = filter_query.split(' && ')
         for filter_part in filtering_expressions:
             col_name, operator, filter_value = split_filter_part(filter_part)
             if operator in ('eq', 'ne', 'lt', 'le', 'gt', 'ge'):
@@ -680,4 +685,4 @@ for x in range(4):
                 inplace=False)
 
         return dff.iloc[page_current * page_size: (page_current + 1) * page_size].to_dict('records'), \
-               math.ceil(dff.iloc[:, 0].size / page_size)
+            math.ceil(dff.iloc[:, 0].size / page_size)

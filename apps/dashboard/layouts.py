@@ -13,18 +13,18 @@ import dash_html_components as html
 from dash.exceptions import PreventUpdate
 from flask import session
 import json
-import logging
+# import logging
 
 # Internal Modules
-import config
-from conn import get_conn
+# import config
+from conn import exec_storedproc_results
 # from apps.OPG001.app import app
-from apps.OPG001.data import GRAPH_OPTIONS, CLR, DATA_CONTENT_HIDE, VIEW_CONTENT_SHOW, BAR_X_AXIS_OPTIONS, \
-    CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LAYOUT_CONTENT_HIDE, \
+from apps.dashboard.data import GRAPH_OPTIONS, CLR, DATA_CONTENT_SHOW, DATA_CONTENT_HIDE, VIEW_CONTENT_SHOW, \
+    BAR_X_AXIS_OPTIONS, CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LAYOUT_CONTENT_HIDE, \
     saved_layouts, saved_dashboards
-from apps.OPG001.hierarchy_filter import get_hierarchy_layout
-from apps.OPG001.datepicker import get_date_picker
-from apps.OPG001.graphs import __update_graph
+from apps.dashboard.hierarchy_filter import get_hierarchy_layout
+from apps.dashboard.datepicker import get_date_picker
+from apps.dashboard.graphs import __update_graph
 
 
 # Contents:
@@ -56,10 +56,10 @@ from apps.OPG001.graphs import __update_graph
 # ********************************************HELPER FUNCTION(S)******************************************************
 
 # change index numbers of all id's within tile or data side-menu
-def change_index(document, new_index):
+def change_index(doc, index):
     """
-    :param document: An array of an unknown combination of nested lists/dictionaries.
-    :param new_index: New index integer to replace the old index integer.
+    :param doc: An array of an unknown combination of nested lists/dictionaries.
+    :param index: New index integer to replace the old index integer.
     :return: Pointer to the modified document.
     """
 
@@ -83,7 +83,7 @@ def change_index(document, new_index):
                 )
         return document
 
-    return _change_index(document=document, new_index=new_index)
+    return _change_index(document=doc, new_index=index)
 
 
 def recursive_to_plotly_json(document):
@@ -124,6 +124,7 @@ def recursive_to_plotly_json(document):
 def get_data_set_picker(tile, df_name):
     """
     :param tile: Index of the created data side-menu.
+    :param df_name: Dataframe name.
     :return: Drop down of the possible data sets.
     """
     return [
@@ -141,23 +142,29 @@ def get_data_set_picker(tile, df_name):
                 html.Div([
                     html.I(
                         html.Span(
-                            get_label("LBL_Refresh_Data_Set"),
+                            get_label("LBL_Confirm_Data_Set_Load"),
                             className='save-symbols-tooltip'),
                         id={'type': 'confirm-load-data', 'index': tile},
                         className='fa fa-check',
-                        style=DATA_CONTENT_HIDE),
+                        style=DATA_CONTENT_HIDE if df_name is None or df_name in session else
+                        {'padding': '10px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
+                         'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}),
                     html.I(
                         html.Span(
-                            get_label("LBL_Confirm_Data_Set_Load"),
+                            get_label("LBL_Refresh_Data_Set"),
                             className='save-symbols-tooltip'),
                         id={'type': 'confirm-data-set-refresh', 'index': tile},
                         className='fa fa-refresh',
-                        style=DATA_CONTENT_HIDE)],
+                        style={'padding': '10px 0', 'width': '15px', 'height': '15px',
+                               'position': 'relative',
+                               'margin-right': '10px', 'margin-left': '10px',
+                               'vertical-align': 'top'} if df_name is not None and df_name in session else
+                        DATA_CONTENT_HIDE)],
                     id='dataset-confirmation-symbols'),
                 style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
                        'position': 'relative', 'vertical-align': 'top', 'background-color': 'white', 'width': '40px',
                        'border': '1px solid {}'.format(CLR['lightgray']), 'border-radius': '6px'})],
-            style={'display': 'flex'})
+            style={'display': 'flex'}),
     ]
 
 
@@ -221,7 +228,7 @@ def get_default_tab_content():
         html.Div(get_data_menu(1), id={'type': 'data-tile', 'index': 1}, style=DATA_CONTENT_HIDE),
         html.Div(get_data_menu(2), id={'type': 'data-tile', 'index': 2}, style=DATA_CONTENT_HIDE),
         html.Div(get_data_menu(3), id={'type': 'data-tile', 'index': 3}, style=DATA_CONTENT_HIDE),
-        html.Div(get_data_menu(4), id={'type': 'data-tile', 'index': 4}, style=DATA_CONTENT_HIDE),
+        html.Div(get_data_menu(4), id={'type': 'data-tile', 'index': 4}, style=DATA_CONTENT_SHOW),
         # div wrapper for body content
         html.Div(
             get_div_body(),
@@ -239,7 +246,6 @@ def get_layout():
 
 
 def get_layout_graph(report_name):
-    conn = get_conn()
     query = """\
     declare @p_report_layout varchar(max)
     declare @p_result_status varchar(255)
@@ -248,6 +254,13 @@ def get_layout_graph(report_name):
     select @p_result_status as result_status
     """.format(session['sessionID'], report_name)
 
+    results = exec_storedproc_results(query)
+
+    j = json.loads(results["clob_text"].iloc[0])
+
+    graph_title = results["ref_desc"].iloc[0]
+    """
+    conn = get_conn()
     cursor = conn.cursor()
     cursor.execute(query)
 
@@ -267,12 +280,13 @@ def get_layout_graph(report_name):
 
     cursor.close()
     del cursor
-
+    """
     # generate state_of_display
     # {'props': {'children': 'Los Angeles Department of Water and Power'}}
     # split on ^||^, ignore 'root', append children
     state_of_display = ''
-    nid_path = "root^||^Los Angeles Department of Water and Power".split('^||^')  # j['NID Path'].split('^||^')
+    nid_path = "root^||^Los Angeles Department of Water and Power".split(
+        '^||^')  # j['NID Path'].split('^||^') TODO: Find why this is hardcoded
     nid_path.remove('root')
     for x in nid_path:
         if state_of_display:
@@ -292,6 +306,7 @@ def get_layout_graph(report_name):
                            j['Hierarchy Toggle'],
                            j['Level Value'],
                            j['Graph All Toggle'],  # [],  # hierarchy_graph_children,
+                           {},  # hierarchy_options - just pass a non-None value
                            json.loads(state_of_display),  # state_of_display,
                            j.get('Date Tab'),  # None,  # secondary_type,
                            j['Timeframe'],
@@ -305,7 +320,7 @@ def get_layout_graph(report_name):
     if graph is None:
         raise PreventUpdate
 
-    return html.Div([graph])
+    return graph
 
 
 # get the input box for the dashboard title
@@ -314,7 +329,8 @@ def get_dashboard_title_input(title=''):
         id='dashboard-title',
         placeholder=get_label('LBL_Enter_Dashboard_Title'),
         value=title,
-        className='dashboard-title')
+        className='dashboard-title',
+        debounce=True)
 
 
 # defines entire dashboard layout
@@ -390,9 +406,11 @@ def get_layout_dashboard():
                             style={'padding': '7px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
                                    'margin-left': '10px', 'margin-right': '14px', 'display': 'inline-block',
                                    'vertical-align': 'top'})],
-                        id='dashboard-reset-symbols',
-                        style={'width': '71px', 'border': '1px solid {}'.format(CLR['lightgray']), 'margin': '2px 0',
-                               'border-radius': '6px', 'display': 'none'}),
+                             id='dashboard-reset-symbols',
+                             style={'width': '71px',
+                                    'border': '1px solid {}'.format(CLR['lightgray']),
+                                    'margin': '2px 0', 'border-radius': '6px',
+                                    'display': 'none'}),
                     style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
                            'position': 'relative', 'vertical-align': 'top'}),
                 html.Button(
@@ -614,11 +632,21 @@ def get_layout_dashboard():
             id='tab-storage',
             storage_type='memory',
             data=[{'content': get_default_tab_content(), 'title': ''}]),
-        # memory locations for dataframe constants
-        dcc.Store(
-            id='df-constants-storage',
-            storage_type='memory',
-            data=None)
+        # memory locations for dataframe constants and its triggers
+        html.Div(
+            html.Div(
+                html.Div(
+                    html.Div(
+                        html.Div(
+                            dcc.Store(
+                                id='df-constants-storage',
+                                storage_type='memory',
+                                data=None),
+                            id={'type': 'df-constants-storage-tile-wrapper', 'index': 0}),
+                        id={'type': 'df-constants-storage-tile-wrapper', 'index': 1}),
+                    id={'type': 'df-constants-storage-tile-wrapper', 'index': 2}),
+                id={'type': 'df-constants-storage-tile-wrapper', 'index': 3}),
+            id='df-constants-storage-dashboard-wrapper')
     ], style={'background-color': CLR['lightpink']})
 
 
@@ -660,7 +688,6 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
             id={'type': 'div-graph-options', 'index': tile})]
 
 
-
 # create default tile
 def get_tile(tile, tile_keys=None, df_const=None, df_name=None):
     """
@@ -675,7 +702,8 @@ def get_tile(tile, tile_keys=None, df_const=None, df_name=None):
                     id={'type': 'tile-title', 'index': tile},
                     placeholder=get_label('LBL_Enter_Graph_Title'),
                     value=tile_keys['Tile Title'] if tile_keys else '',
-                    className='tile-title'),
+                    className='tile-title',
+                    debounce=True),
                 html.Button(
                     [get_label('LBL_View')],
                     id={'type': 'tile-view', 'index': tile},
@@ -694,10 +722,13 @@ def get_tile(tile, tile_keys=None, df_const=None, df_name=None):
                     [get_label('LBL_Data')],
                     id={'type': 'tile-data', 'index': tile},
                     className='tile-nav tile-nav--data'),
-                html.I(
-                    className=tile_keys['Link'] if tile_keys else 'fa fa-link',
-                    id={'type': 'tile-link', 'index': tile},
-                    style={'position': 'relative'})],
+                html.Div(
+                    html.I(
+                        className=tile_keys['Link'] if tile_keys else 'fa fa-link',
+                        id={'type': 'tile-link', 'index': tile},
+                        style={'position': 'relative'}),
+                    id={'type': 'tile-link-wrapper', 'index': tile})],
+                id={'type': 'tile-menu-header', 'index': tile},
                 style={'margin-right': '25px'}),
             html.A(
                 className='boxclose',
@@ -941,9 +972,8 @@ def get_line_graph_menu(tile, x, y, measure_type, df_name, df_const):
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
-                        options=[] if df_const is None else [
-                            {'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in
-                            X_AXIS_OPTIONS],
+                        options=[] if df_const is None else [{'label': get_label('LBL_' + i.replace(' ', '_')),
+                                                              'value': i} for i in X_AXIS_OPTIONS],
                         value=x,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -1252,7 +1282,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                         value=size_measure,
                         clearable=False,
                         style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})])
         ], style={'margin-left': '15px'})]
 
 
@@ -1354,7 +1384,8 @@ def get_table_graph_menu(tile, number_of_columns):
                         value=number_of_columns,
                         min=10,
                         max=100,
-                        style={'width': '80%', 'max-width': '350px'})],
+                        style={'width': '80%', 'max-width': '350px'},
+                        debounce=True)],
                     style={'display': 'inline-block'})]),
             html.P(
                 "{}:".format(get_label('LBL_How_To_Filter_The_Table')),

@@ -422,21 +422,10 @@ for x in range(0, 4):
 def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, graph_type):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
-    print(trigger)
-
     if changed_id == '.' or trigger is None or link_states is []:
         raise PreventUpdate
 
-    print("****options****")
-    print("Master Data set:" + str(df_name_parent))
-    print("Tile Data set:" + str(df_name))
-    print("Trigger:" + str(trigger))
-    print("Changed ID:" + str(changed_id))
-    print("Graph type:" + str(graph_type))
-    for link in link_states:
-        print("update:" + link)
     changed_index = int(search(r'\d+', changed_id).group())
-    print('changed index:' + str(changed_index))
 
     graph_options = no_update
     options = []
@@ -461,12 +450,10 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
             graph_options = GRAPH_OPTIONS["OPG001"]
             if graph_type is not None and graph_type not in graph_options:
                 link_states[changed_index] = "fa fa-unlink"
-                print("****HERE 1****")
         elif (df_name or df_name_parent) == "OPG010":
             graph_options = GRAPH_OPTIONS["OPG010"]
             if graph_type is not None and graph_type not in graph_options:
                 link_states[changed_index] = "fa fa-unlink"
-                print("****HERE 2****")
         else:
             graph_options = []
 
@@ -500,26 +487,18 @@ for x in range(4):
         :return: Graph menu corresponding to selected graph type
         """
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-        print("****graph menu****")
         # if link state has changed from linked --> unlinked the data has not changed, prevent update
         if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink':
-            # TODO:needs proper testing
-            print("****HERE GRAPH MENU****")
-            print("selected graph type: " + str(selected_graph_type))
             if selected_graph_type is None:
                 return None, no_update, no_update
             else:
                 raise PreventUpdate
-
-        print("****HERE GRAPH MENU 2****")
-        print("selected graph type: " + str(selected_graph_type))
 
         # if link state from unlinked --> linked and the data set has not changed, don't update menu, still update graph
         if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name == master_df_name:
             return no_update, 1, no_update
 
         if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name != master_df_name:
-            print("****HERE GRAPH MENU 3****")
             return None, 1, no_update
 
         # if graph menu trigger has value 'tile closed' then a tile was closed, don't update menu, still update table
@@ -626,9 +605,6 @@ def _change_link(selected_layout, _link_clicks, link_trigger, link_state):
     :return: New state of the link/unlink icon
     """
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-
-    print("****Tile Link Change****")
-    print(changed_id)
 
     # if link button was not pressed and layout was not selected, do not update
     if '.' == changed_id:  # or link_trigger is None
@@ -742,16 +718,6 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
     :param data_states: State of all data side-menus
     :return: Data side-menus for all 5 side-menus
     """
-    print("data")
-    print(master_secondary_type)
-    print(master_start_year)
-    print(master_end_year)
-    print(master_start_secondary)
-    print(master_end_secondary)
-    print("****Manage Data Sidemenus****")
-    print("Graph type entry")
-    for entry in graph_types:
-        print(entry)
 
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
@@ -847,12 +813,6 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
         changed_index = int(search(r'\d+', changed_id).group())
         df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
 
-        print("****Data Names****")
-        print(changed_index)
-
-        for entry in df_names:
-            print(entry)
-
         df_name = df_names[changed_index]
         session[df_name] = dataset_to_df(df_name)
 
@@ -865,15 +825,12 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
         if changed_index == 4:
             for i in range(len(links_style)):
                 if links_style[i] == 'fa fa-link':
-                    if graph_types[i] is None or df_names[4] in GRAPH_OPTIONS[df_name]:
+                    if graph_types[i] is None or graph_types[i] in GRAPH_OPTIONS[df_name]:
                         graph_triggers[i] = df_name
                         options_triggers[i] = df_name
                     else:
-                        # UN-link here?
                         links_style[i] = 'fa fa-unlink'
                         # [i]= 'fa-fa-unlink'
-                        for link in links_style:
-                            print(link)
                         # set the dataset of the new menu from unlinking
                         if type(state_of_display) == dict:
                             state_of_display = [state_of_display]
@@ -916,8 +873,6 @@ def _manage_data_sidemenus(dashboard_reset, closed_tile, loaded_dashboard, links
                                                  'vertical-align': 'top'}
                             if master_timeframe == "select-range":
                                 date_picker_triggers[i] = "triggered"
-                        print("index: " + str(i))
-                        print("Options triggered")
                         options_triggers[i] = 'fa fa-unlink'
         else:
             graph_triggers[changed_index] = df_name
@@ -1021,14 +976,7 @@ for x in range(4):
         :return: Highlights tiles child to the displayed date side-menu
         """
 
-        print("****HIGHLIGHT CHILD****")
-
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-        if changed_id != '.':
-            changed_index = int(search(r'\d+', changed_id).group())
-            print("Changed index:" + str(changed_index))
-
-        print("Changed id:" + str(changed_id))
 
         if sidebar_style == DATA_CONTENT_SHOW or (
                 master_sidebar_style == DATA_CONTENT_SHOW and link_state == 'fa fa-link'):

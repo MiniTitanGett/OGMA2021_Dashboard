@@ -19,7 +19,7 @@ from flask import session
 # Internal Packages
 from apps.dashboard.layouts import get_data_menu, get_customize_content, get_div_body
 from apps.dashboard.app import app
-from apps.dashboard.data import get_label, saved_layouts, saved_dashboards, CLR, dataset_to_df, generate_constants
+from apps.dashboard.data import get_label, CLR, dataset_to_df, generate_constants
 from apps.dashboard.saving_functions import delete_layout, save_layout_state, save_layout_to_db, \
     save_dashboard_state, save_dashboard_to_db, delete_dashboard, load_graph_menu
 
@@ -78,9 +78,9 @@ def _update_tile_loading_dropdown_options(_tile_saving_trigger, _dashboard_savin
     if changed_id == '.':
         raise PreventUpdate
 
-    # graph titles was previously saved_layouts
-    return [[{'label': saved_layouts[key]['Title'], 'value': key} for key in saved_layouts]] * len(links), [
-        [{'label': saved_layouts[key]['Title'], 'value': key} for key in saved_layouts]] * len(links)
+    # graph titles was previously session['saved_layouts']
+    return [[{'label': session['saved_layouts'][key]['Title'], 'value': key} for key in session['saved_layouts']]] * len(links), [
+        [{'label': session['saved_layouts'][key]['Title'], 'value': key} for key in session['saved_layouts']]] * len(links)
 
 
 # *************************************************TILE SAVING********************************************************
@@ -220,8 +220,8 @@ for y in range(4):
 
             graph_titles = []
 
-            for layout in saved_layouts:
-                graph_titles.append(saved_layouts[layout]['Title'])
+            for layout in session['saved_layouts']:
+                graph_titles.append(session['saved_layouts'][layout]['Title'])
 
             # get non-overwriting status symbol display (check-mark or ban symbol)
             def get_status_symbol_display(tooltip, symbol):
@@ -242,12 +242,12 @@ for y in range(4):
                 save_status_symbols = get_status_symbol_display(save_error_tooltip, save_symbol)
 
             # if conflicting tiles and overwrite not requested, prompt overwrite
-            elif intermediate_pointer in saved_layouts and saved_layouts[intermediate_pointer]['Title'] == graph_title \
+            elif intermediate_pointer in session['saved_layouts'] and session['saved_layouts'][intermediate_pointer]['Title'] == graph_title \
                     and 'confirm-overwrite' != trigger:
 
                 # was graph_title, changed to intermediate_pointer
                 overwrite_tooltip = "{} \'{}\'".format(get_label('LBL_Overwrite_Graph'),
-                                                       saved_layouts[intermediate_pointer]['Title'])
+                                                       session['saved_layouts'][intermediate_pointer]['Title'])
 
                 save_status_symbols = html.Div([
                     html.I(
@@ -283,7 +283,7 @@ for y in range(4):
             # else, title is valid to be saved
             else:
                 while True:
-                    if intermediate_pointer in saved_layouts and trigger != "confirm-overwrite":
+                    if intermediate_pointer in session['saved_layouts'] and trigger != "confirm-overwrite":
                         layout_pointer = intermediate_pointer + "_"
                         intermediate_pointer = layout_pointer
                     else:
@@ -314,7 +314,7 @@ for y in range(4):
                 # calls the save_graph_state function to save the graph to the sessions dictionary
                 save_layout_state(layout_pointer, elements_to_save)
                 # saves the graph title and layout to the file where you are storing all of the saved layouts
-                # save_layout_to_file(saved_layouts)
+                # save_layout_to_file(session['saved_layouts'])
                 # saves the graph layout to the database
                 save_layout_to_db(layout_pointer, graph_title)
 
@@ -489,7 +489,7 @@ def _save_dashboard(_save_clicks, _delete_clicks, _dashboard_overwrite_inputs,
         # regex.sub('[^A-Za-z0-9]+', '', dashboard_title)
 
         while True:
-            if intermediate_dashboard_pointer in saved_layouts:
+            if intermediate_dashboard_pointer in session['saved_layouts']:
                 dashboard_pointer = intermediate_dashboard_pointer + "_"
                 intermediate_dashboard_pointer = dashboard_pointer
             else:
@@ -498,8 +498,8 @@ def _save_dashboard(_save_clicks, _delete_clicks, _dashboard_overwrite_inputs,
 
         used_dashboard_titles = []
 
-        for dashboard_layout in saved_dashboards:
-            used_dashboard_titles.append(saved_dashboards[dashboard_layout]['Dashboard Title'])
+        for dashboard_layout in session['saved_dashboards']:
+            used_dashboard_titles.append(session['saved_dashboards'][dashboard_layout]['Dashboard Title'])
 
         # get non-overwriting status symbol display (check-mark or ban symbol)
         def get_status_symbol_display(tooltip, symbol):
@@ -519,8 +519,8 @@ def _save_dashboard(_save_clicks, _delete_clicks, _dashboard_overwrite_inputs,
 
         used_titles = []
 
-        for key in saved_layouts:
-            used_titles.append(saved_layouts[key]["Title"])
+        for key in session['saved_layouts']:
+            used_titles.append(session['saved_layouts'][key]["Title"])
 
         # check if the dashboard title is blank
         if dashboard_title == '':
@@ -544,13 +544,13 @@ def _save_dashboard(_save_clicks, _delete_clicks, _dashboard_overwrite_inputs,
 
             if any(x in used_titles for x in tile_titles):
                 conflicting_graphs = ''
-                conflicting_graphs_list = [i for i in tile_titles if i in used_titles]  # was saved_layouts
+                conflicting_graphs_list = [i for i in tile_titles if i in used_titles]  # was session['saved_layouts']
                 for idx, conflicting_graph in enumerate(conflicting_graphs_list):
                     conflicting_graphs += '\'' + conflicting_graph + '\''
                     if idx != (len(conflicting_graphs_list) - 1):
                         conflicting_graphs += ', '
                 # if conflicting graph titles and dashboard title
-                if dashboard_title in used_dashboard_titles:  # was saved_dashboards
+                if dashboard_title in used_dashboard_titles:  # was session['saved_dashboards']
                     overwrite_tooltip = "{} \'{}\', {} {}".format(
                         get_label('LBL_Overwrite_Dashboard'),
                         dashboard_title,
@@ -670,12 +670,12 @@ def _save_dashboard(_save_clicks, _delete_clicks, _dashboard_overwrite_inputs,
 
                 used_titles = []
 
-                for key in saved_layouts:
-                    used_titles.append(saved_layouts[key]["Title"])
+                for key in session['saved_layouts']:
+                    used_titles.append(session['saved_layouts'][key]["Title"])
 
                 while True:
-                    if intermediate_pointer in saved_layouts \
-                            and saved_layouts[intermediate_pointer]["Title"] not in used_titles:
+                    if intermediate_pointer in session['saved_layouts'] \
+                            and session['saved_layouts'][intermediate_pointer]["Title"] not in used_titles:
                         tile_pointer = intermediate_pointer + "_"
                         intermediate_pointer = tile_pointer
                     else:
@@ -735,20 +735,20 @@ def _save_dashboard(_save_clicks, _delete_clicks, _dashboard_overwrite_inputs,
                 # save tile to file
                 save_layout_state(tile_pointer, {'Graph Type': graph_types[i], 'Args List': args_list, **tile_data,
                                                  'Title': tile_titles[i]})
-                # save_layout_to_file(saved_layouts)
+                # save_layout_to_file(session['saved_layouts'])
                 save_layout_to_db(tile_pointer, tile_titles[i])
 
             # save dashboard to file
             # Change to a dashboard pointer from dashboard_title
             save_dashboard_state(dashboard_pointer, dashboard_saves)
-            # save_dashboard_to_file(saved_dashboards)
+            # save_dashboard_to_file(session['saved_dashboards'])
             save_dashboard_to_db(dashboard_pointer, dashboard_title)
 
             save_error_tooltip = ''
             update_graph_options_trigger = 'trigger'
             save_symbol = 'fa fa-check'
             tile_title_returns = auto_named_titles
-            options = [{'label': saved_dashboards[key]['Dashboard Title'], 'value': key} for key in saved_dashboards]
+            options = [{'label': session['saved_dashboards'][key]['Dashboard Title'], 'value': key} for key in session['saved_dashboards']]
             save_status_symbols = get_status_symbol_display(save_error_tooltip, save_symbol)
 
     # elif the overwrite was cancelled, clear displayed symbols
@@ -761,7 +761,7 @@ def _save_dashboard(_save_clicks, _delete_clicks, _dashboard_overwrite_inputs,
         if remove_dashboard != '':
             delete_dashboard(remove_dashboard)
             update_graph_options_trigger = 'trigger'
-            options = [{'label': saved_dashboards[key]["Dashboard Title"], 'value': key} for key in saved_dashboards]
+            options = [{'label': session['saved_dashboards'][key]["Dashboard Title"], 'value': key} for key in session['saved_dashboards']]
             delete_dropdown_val = ''
 
         save_status_symbols = []
@@ -846,7 +846,7 @@ def _load_tile_layout(selected_layout, df_const):
 
     tile = int(search(r'\d+', changed_id).group())
 
-    df_name = saved_layouts[selected_layout]['Data Set']
+    df_name = session['saved_layouts'][selected_layout]['Data Set']
 
     # check if data is loaded
     if df_name not in session:
@@ -857,8 +857,8 @@ def _load_tile_layout(selected_layout, df_const):
 
     #  --------- create customize menu ---------
 
-    graph_type = saved_layouts[selected_layout]['Graph Type']
-    args_list = saved_layouts[selected_layout]['Args List']
+    graph_type = session['saved_layouts'][selected_layout]['Graph Type']
+    args_list = session['saved_layouts'][selected_layout]['Args List']
 
     graph_menu = load_graph_menu(graph_type=graph_type, tile=tile, df_name=df_name, args_list=args_list,
                                  df_const=df_const)
@@ -868,21 +868,21 @@ def _load_tile_layout(selected_layout, df_const):
     #  --------- create data sidemenu ---------
 
     # set hierarchy toggle value (level vs specific)
-    hierarchy_toggle = saved_layouts[selected_layout]['Hierarchy Toggle']
+    hierarchy_toggle = session['saved_layouts'][selected_layout]['Hierarchy Toggle']
     # set level value selection
-    level_value = saved_layouts[selected_layout]['Level Value']
+    level_value = session['saved_layouts'][selected_layout]['Level Value']
     # retrieve nid string
-    nid_path = saved_layouts[selected_layout]['NID Path']
+    nid_path = session['saved_layouts'][selected_layout]['NID Path']
     # set the value of "Graph All" checkbox
-    graph_all_toggle = saved_layouts[selected_layout]['Graph All Toggle']
+    graph_all_toggle = session['saved_layouts'][selected_layout]['Graph All Toggle']
     # set gregorian/fiscal toggle value
-    fiscal_toggle = saved_layouts[selected_layout]['Fiscal Toggle']
+    fiscal_toggle = session['saved_layouts'][selected_layout]['Fiscal Toggle']
     # set timeframe radio buttons selection
-    input_method = saved_layouts[selected_layout]['Timeframe']
+    input_method = session['saved_layouts'][selected_layout]['Timeframe']
     # set num periods
-    num_periods = saved_layouts[selected_layout]['Num Periods']
+    num_periods = session['saved_layouts'][selected_layout]['Num Periods']
     # set period type
-    period_type = saved_layouts[selected_layout]['Period Type']
+    period_type = session['saved_layouts'][selected_layout]['Period Type']
 
     data_content = get_data_menu(tile=tile, df_name=df_name, mode='tile-loading',
                                  hierarchy_toggle=hierarchy_toggle, level_value=level_value,
@@ -891,12 +891,12 @@ def _load_tile_layout(selected_layout, df_const):
                                  period_type=period_type, df_const=df_const)
 
     # show and set 'Select Range' inputs if selected, else leave hidden and unset
-    if saved_layouts[selected_layout]['Timeframe'] == 'select-range':
-        tab = saved_layouts[selected_layout]['Date Tab']
-        start_year = saved_layouts[selected_layout]['Start Year']
-        end_year = saved_layouts[selected_layout]['End Year']
-        start_secondary = saved_layouts[selected_layout]['Start Secondary']
-        end_secondary = saved_layouts[selected_layout]['End Secondary']
+    if session['saved_layouts'][selected_layout]['Timeframe'] == 'select-range':
+        tab = session['saved_layouts'][selected_layout]['Date Tab']
+        start_year = session['saved_layouts'][selected_layout]['Start Year']
+        end_year = session['saved_layouts'][selected_layout]['End Year']
+        start_secondary = session['saved_layouts'][selected_layout]['Start Secondary']
+        end_secondary = session['saved_layouts'][selected_layout]['End Secondary']
     else:
         tab = start_year = end_year = start_secondary = end_secondary = no_update
 
@@ -916,7 +916,7 @@ def _load_tile_layout(selected_layout, df_const):
         style={'position': 'relative'}),
 
     # UPDATED the first output, previously was selected_layout
-    return saved_layouts[selected_layout]['Title'], customize_content, data_content, None, tab, start_year, end_year, \
+    return session['saved_layouts'][selected_layout]['Title'], customize_content, data_content, None, tab, start_year, end_year, \
         start_secondary, end_secondary, unlink, df_const
 
 
@@ -991,7 +991,7 @@ def _load_dashboard_layout(selected_dashboard, df_const):
 
     num_tiles = 0
 
-    for dict_key, dict_value in saved_dashboards[selected_dashboard].items():
+    for dict_key, dict_value in session['saved_dashboards'][selected_dashboard].items():
 
         if 'Tile' in dict_key:
 
@@ -1003,8 +1003,8 @@ def _load_dashboard_layout(selected_dashboard, df_const):
             tile_pointer = dict_value['Tile Pointer']
             link_state = dict_value['Link']
 
-            if tile_pointer in saved_layouts:
-                tile_data = saved_layouts[tile_pointer].copy()
+            if tile_pointer in session['saved_layouts']:
+                tile_data = session['saved_layouts'][tile_pointer].copy()
                 tile_title = tile_data.pop("Title")
             # TODO: In 'prod' we will check for pointers and only do a 'virtual' delete for
             #  the single user
@@ -1038,7 +1038,7 @@ def _load_dashboard_layout(selected_dashboard, df_const):
 
             if link_state == 'fa fa-link':
                 # if tile was linked but it's data menu has changed and no longer matches master data, unlink
-                if tile_data != saved_dashboards[selected_dashboard]['Master Data']:
+                if tile_data != session['saved_dashboards'][selected_dashboard]['Master Data']:
                     link_state = 'fa fa-unlink'
 
                 # else, the tile is valid to be linked, generate master menu if it has not been created yet
@@ -1092,7 +1092,7 @@ def _load_dashboard_layout(selected_dashboard, df_const):
             id={'type': 'df-constants-storage-tile-wrapper', 'index': 2}),
         id={'type': 'df-constants-storage-tile-wrapper', 'index': 3}),
 
-    return (saved_dashboards[selected_dashboard]['Dashboard Title'],
+    return (session['saved_dashboards'][selected_dashboard]['Dashboard Title'],
 
             children,
 

@@ -71,13 +71,6 @@ CLR = {'text1': 'black',
        'sidebar-final': '#fffafa',
        'sidebar-initial': '#9B6072'}
 
-# TODO : replace with session memory
-# dict to save all of the saved graphs
-saved_layouts = {}
-
-# dict to save all of the saved dashboards
-saved_dashboards = {}
-
 # ******************************************STYLE RETURNS FOR CALLBACKS***********************************************
 
 VIEW_CONTENT_SHOW = {'min-height': '0', 'overflow': 'hidden'}

@@ -11,7 +11,6 @@ import logging
 import json
 
 from conn import close_conn, exec_storedproc, exec_storedproc_results, get_ref
-from apps.dashboard.data import saved_layouts, saved_dashboards
 from flask_session import Session
 
 
@@ -89,7 +88,7 @@ def load_saved_graphs_from_db():
     results = exec_storedproc_results(query)
 
     for i, row in results.iterrows():
-        saved_layouts[row["ref_value"]] = json.loads(row["clob_text"])
+        session['saved_layouts'][row["ref_value"]] = json.loads(row["clob_text"])
 
 
 def load_saved_dashboards_from_db():
@@ -106,7 +105,7 @@ def load_saved_dashboards_from_db():
     results = exec_storedproc_results(query)
 
     for i, row in results.iterrows():
-        saved_dashboards[row["ref_value"]] = json.loads(row["clob_text"])
+        session['saved_dashboards'][row["ref_value"]] = json.loads(row["clob_text"])
 
 
 def validate_session(sessionid, externalid):
@@ -200,6 +199,10 @@ def before_request_func():
 
         # load the available datasets
         session["dataset_list"] = load_dataset_list()  # get_ref("Data_set", session["language"])
+
+        # setup session variables
+        session['saved_layouts'] = {}
+        session['saved_dashboards'] = {}
 
         # load the available graphs/layouts
         load_saved_graphs_from_db()

@@ -288,8 +288,8 @@ def get_layout_graph(report_name):
     # {'props': {'children': 'Los Angeles Department of Water and Power'}}
     # split on ^||^, ignore 'root', append children
     state_of_display = ''
-    nid_path = "root^||^Los Angeles Department of Water and Power".split(
-        '^||^')  # j['NID Path'].split('^||^') TODO: Find why this is hardcoded
+    nid_path = "root^||^Los Angeles Department of Water and Power".split('^||^')
+    # j['NID Path'].split('^||^') TODO: Find why this is hardcoded
     nid_path.remove('root')
     for x in nid_path:
         if state_of_display:

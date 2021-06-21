@@ -434,7 +434,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
 
         filtered_df['Partial Period'] = filtered_df['Partial Period'].astype(str).transform(
             lambda j: get_label('LBL_TRUE') if j != 'nan' else get_label('LBL_FALSE'))
-        filtered_df.sort_values(by=[color, 'Date of Event'], inplace=True)
+        filtered_df.sort_values(by=['Date of Event', color], inplace=True)
 
         filtered_df['Date of Event'] = filtered_df['Date of Event'].astype(str)
 
@@ -596,14 +596,14 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             if hierarchy_type == 'Level Filter' or (hierarchy_type == 'Specific Item' and
                                                     hierarchy_graph_children == ['graph_children']):
                 for i in filtered_df['Date of Event'].unique():
-                    for j in filtered_df[x_val].unique():
+                    for j in filtered_df[hierarchy_col].unique():
                         for k in filtered_df[color].unique():
                             if filtered_df.query(
                                     "`Date of Event` == @i and `{}` == @j and `{}` == @k".format(x_val, color)).empty:
                                 filtered_df = filtered_df.append(
-                                    {'Date of Event': i, x_val: j, color: k, 'Measure Value': 0},
+                                    {'Date of Event': i, hierarchy_col: j, color: k, 'Measure Value': 0},
                                     ignore_index=True)
-        filtered_df.sort_values(by=[x_val, color, 'Date of Event'], inplace=True)
+        filtered_df.sort_values(by=['Date of Event', hierarchy_col, color], inplace=True)
 
         # generate graph
         fig = px.bar(
@@ -619,9 +619,8 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             fig.update_layout(
                 yaxis={'title': arg_value[1], 'range': [0, filtered_df['Measure Value'].max()]} if arg_value[
                                                                                                        3] == 'Vertical'
-                else {
-                    'type': 'category'},
-                xaxis={'visible': False, 'type': 'category'} if arg_value[3] == 'Vertical'
+                else {'type': 'category'},
+                xaxis={'type': 'category'} if arg_value[3] == 'Vertical'
                 else {'title': arg_value[1], 'range': [0, filtered_df['Measure Value'].max()]},
                 legend_title_text=legend_title_text,
                 overwrite=True,

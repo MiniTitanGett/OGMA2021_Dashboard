@@ -474,11 +474,12 @@ for x in range(4):
          Input({'type': 'tile-link', 'index': x}, 'className')],
         # Input({'type': 'graph-type-dropdown', 'index': x}, "options")],
         [State({'type': 'div-graph-options', 'index': x}, 'children'),
+         State({'type': 'graph-type-dropdown', 'index': ALL}, 'value'),
          State({'type': 'data-set', 'index': x}, 'value'),
          State({'type': 'data-set', 'index': 4}, 'value'),
          State('df-constants-storage', 'data')]
     )
-    def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_options_state, df_name, master_df_name,
+    def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_options_state,graph_option, df_name, master_df_name,
                            df_const):
         """
         :param selected_graph_type: Selected graph type, ie. 'bar', 'line', etc.
@@ -498,7 +499,7 @@ for x in range(4):
         if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name == master_df_name:
             return no_update, 1, no_update
 
-        if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name != master_df_name:
+        if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name != master_df_name and df_name != None:
             return None, 1, no_update
 
         # if graph menu trigger has value 'tile closed' then a tile was closed, don't update menu, still update table

@@ -113,7 +113,7 @@ def dataset_to_df(df_name):
     # df = pd.DataFrame(sql_query)
     query = """\
     declare @p_result_status varchar(255)
-    exec dbo.opp_get_dataset {}, \'{}\', \'{}\', @p_result_status output
+    exec dbo.OPP_Get_DataSet {}, \'{}\', \'{}\', @p_result_status output
     select @p_result_status as result_status
     """.format(session["sessionID"], session["language"], df_name)
 

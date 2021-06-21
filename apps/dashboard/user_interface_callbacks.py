@@ -747,7 +747,7 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                            _confirm_clicks_1, _confirm_clicks_2, _confirm_clicks_3, _confirm_clicks_4,
                            _refresh_clicks_0, _refresh_clicks_1, _refresh_clicks_2, _refresh_clicks_3,
                            _refresh_clicks_4, data_states, sidemenu_style_states, df_const, prev_selection,
-                           , graph_types, master_secondary_type, master_timeframe, master_fiscal_toggle, master_start_year,
+                           graph_types, master_secondary_type, master_timeframe, master_fiscal_toggle, master_start_year,
                            master_end_year, master_start_secondary, master_end_secondary, master_hierarchy_toggle,
                            master_hierarchy_drop, master_num_state, master_period_type, master_graph_child_toggle,
                            state_of_display):

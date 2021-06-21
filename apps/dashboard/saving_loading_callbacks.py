@@ -79,8 +79,10 @@ def _update_tile_loading_dropdown_options(_tile_saving_trigger, _dashboard_savin
         raise PreventUpdate
 
     # graph titles was previously session['saved_layouts']
-    return [[{'label': session['saved_layouts'][key]['Title'], 'value': key} for key in session['saved_layouts']]] * len(links), [
-        [{'label': session['saved_layouts'][key]['Title'], 'value': key} for key in session['saved_layouts']]] * len(links)
+    return [[{'label': session['saved_layouts'][key]['Title'], 'value': key} for key in
+             session['saved_layouts']]] * len(links), [
+               [{'label': session['saved_layouts'][key]['Title'], 'value': key} for key in
+                session['saved_layouts']]] * len(links)
 
 
 # *************************************************TILE SAVING********************************************************
@@ -242,7 +244,8 @@ for y in range(4):
                 save_status_symbols = get_status_symbol_display(save_error_tooltip, save_symbol)
 
             # if conflicting tiles and overwrite not requested, prompt overwrite
-            elif intermediate_pointer in session['saved_layouts'] and session['saved_layouts'][intermediate_pointer]['Title'] == graph_title \
+            elif intermediate_pointer in session['saved_layouts'] and session['saved_layouts'][intermediate_pointer][
+                'Title'] == graph_title \
                     and 'confirm-overwrite' != trigger:
 
                 # was graph_title, changed to intermediate_pointer
@@ -455,22 +458,22 @@ for y in range(4):
     prevent_initial_call=True
 )
 def _save_dashboard(_save_clicks, _delete_clicks, _dashboard_overwrite_inputs,
-                   remove_dashboard, dashboard_title, tile_titles, links, graph_types,
-                   args_list_0, args_list_1, args_list_2, args_list_3,
-                   df_name_0, df_name_1, df_name_2, df_name_3, df_name4,
-                   start_year_0, start_year_1, start_year_2, start_year_3, start_year_4,
-                   end_year_0, end_year_1, end_year_2, end_year_3, end_year_4,
-                   hierarchy_toggle_0, hierarchy_toggle_1, hierarchy_toggle_2, hierarchy_toggle_3, hierarchy_toggle_4,
-                   graph_all_toggle_0, graph_all_toggle_1, graph_all_toggle_2, graph_all_toggle_3, graph_all_toggle_4,
-                   level_value_0, level_value_1, level_value_2, level_value_3, level_value_4,
-                   button_path_0, button_path_1, button_path_2, button_path_3, button_path_4,
-                   fiscal_toggle_0, fiscal_toggle_1, fiscal_toggle_2, fiscal_toggle_3, fiscal_toggle_4,
-                   timeframe_0, timeframe_1, timeframe_2, timeframe_3, timeframe_4,
-                   start_secondary_0, start_secondary_1, start_secondary_2, start_secondary_3, start_secondary_4,
-                   end_secondary_0, end_secondary_1, end_secondary_2, end_secondary_3, end_secondary_4,
-                   num_periods_0, num_periods_1, num_periods_2, num_periods_3, num_periods_4,
-                   period_type_0, period_type_1, period_type_2, period_type_3, period_type_4,
-                   date_tab_0, date_tab_1, date_tab_2, date_tab_3, date_tab_4):
+                    remove_dashboard, dashboard_title, tile_titles, links, graph_types,
+                    args_list_0, args_list_1, args_list_2, args_list_3,
+                    df_name_0, df_name_1, df_name_2, df_name_3, df_name4,
+                    start_year_0, start_year_1, start_year_2, start_year_3, start_year_4,
+                    end_year_0, end_year_1, end_year_2, end_year_3, end_year_4,
+                    hierarchy_toggle_0, hierarchy_toggle_1, hierarchy_toggle_2, hierarchy_toggle_3, hierarchy_toggle_4,
+                    graph_all_toggle_0, graph_all_toggle_1, graph_all_toggle_2, graph_all_toggle_3, graph_all_toggle_4,
+                    level_value_0, level_value_1, level_value_2, level_value_3, level_value_4,
+                    button_path_0, button_path_1, button_path_2, button_path_3, button_path_4,
+                    fiscal_toggle_0, fiscal_toggle_1, fiscal_toggle_2, fiscal_toggle_3, fiscal_toggle_4,
+                    timeframe_0, timeframe_1, timeframe_2, timeframe_3, timeframe_4,
+                    start_secondary_0, start_secondary_1, start_secondary_2, start_secondary_3, start_secondary_4,
+                    end_secondary_0, end_secondary_1, end_secondary_2, end_secondary_3, end_secondary_4,
+                    num_periods_0, num_periods_1, num_periods_2, num_periods_3, num_periods_4,
+                    period_type_0, period_type_1, period_type_2, period_type_3, period_type_4,
+                    date_tab_0, date_tab_1, date_tab_2, date_tab_3, date_tab_4):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':
@@ -748,7 +751,8 @@ def _save_dashboard(_save_clicks, _delete_clicks, _dashboard_overwrite_inputs,
             update_graph_options_trigger = 'trigger'
             save_symbol = 'fa fa-check'
             tile_title_returns = auto_named_titles
-            options = [{'label': session['saved_dashboards'][key]['Dashboard Title'], 'value': key} for key in session['saved_dashboards']]
+            options = [{'label': session['saved_dashboards'][key]['Dashboard Title'], 'value': key} for key in
+                       session['saved_dashboards']]
             save_status_symbols = get_status_symbol_display(save_error_tooltip, save_symbol)
 
     # elif the overwrite was cancelled, clear displayed symbols
@@ -761,7 +765,8 @@ def _save_dashboard(_save_clicks, _delete_clicks, _dashboard_overwrite_inputs,
         if remove_dashboard != '':
             delete_dashboard(remove_dashboard)
             update_graph_options_trigger = 'trigger'
-            options = [{'label': session['saved_dashboards'][key]["Dashboard Title"], 'value': key} for key in session['saved_dashboards']]
+            options = [{'label': session['saved_dashboards'][key]["Dashboard Title"], 'value': key} for key in
+                       session['saved_dashboards']]
             delete_dropdown_val = ''
 
         save_status_symbols = []
@@ -916,8 +921,8 @@ def _load_tile_layout(selected_layout, df_const):
         style={'position': 'relative'}),
 
     # UPDATED the first output, previously was selected_layout
-    return session['saved_layouts'][selected_layout]['Title'], customize_content, data_content, None, tab, start_year, end_year, \
-        start_secondary, end_secondary, unlink, df_const
+    return session['saved_layouts'][selected_layout]['Title'], customize_content, data_content, None, tab, start_year, \
+        end_year, start_secondary, end_secondary, unlink, df_const
 
 
 # *********************************************DASHBOARD LOADING*****************************************************

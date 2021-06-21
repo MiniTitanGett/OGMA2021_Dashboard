@@ -62,7 +62,8 @@ def save_layout_to_db(graph_id, graph_title):
     exec dbo.opp_addgeteditdeletefind_extdashboardreports {}, 'Add', \'{}\', \'{}\', 'Dash', \'{}\', 'application/json',
     'json', @p_result_status output
     select @p_result_status as result_status
-    """.format(session['sessionID'], graph_id, graph_title, json.dumps(session['saved_layouts'][graph_id], sort_keys=True))
+    """.format(session['sessionID'], graph_id, graph_title,
+               json.dumps(session['saved_layouts'][graph_id], sort_keys=True))
 
     exec_storedproc(query)
 

@@ -621,7 +621,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                                                                                                        3] == 'Vertical'
                 else {
                     'type': 'category'},
-                xaxis={'visible': False, 'type': 'category'} if arg_value[3] == 'Vertical'
+                xaxis={'tickfort': ''} if arg_value[3] == 'Vertical'
                 else {'title': arg_value[1], 'range': [0, filtered_df['Measure Value'].max()]},
                 legend_title_text=legend_title_text,
                 overwrite=True,

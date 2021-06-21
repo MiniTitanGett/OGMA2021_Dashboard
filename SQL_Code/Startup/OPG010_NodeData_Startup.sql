@@ -30,7 +30,7 @@ go
 exec dbo.opp_opg010_nodedata_startup 'In6', 0.05, 0.05, 'rgba(230,38,0,0.8)'
 exec dbo.opp_opg010_nodedata_startup 'In5', 0.1, 0.125, 'rgba(230,115,0,0.8)'
 exec dbo.opp_opg010_nodedata_startup 'In4', 0.15, 0.25, 'rgba(230,191,0,0.8)'
-exec dbo.opp_opg010_nodedata_startup 'In3', 0.2, 0.4, '(255,255,51,0.8)'
+exec dbo.opp_opg010_nodedata_startup 'In3', 0.2, 0.4, 'rgba(255,255,51,0.8)'
 exec dbo.opp_opg010_nodedata_startup 'In2', 0.25, 0.575, 'rgba(191,230,0,0.8)'
 exec dbo.opp_opg010_nodedata_startup 'In1', 0.3, 0.775, 'rgba(115,230,0,0.8)'
 exec dbo.opp_opg010_nodedata_startup 'New', 0.35, 1, 'rgba(38,230,0,0.8)'

@@ -824,44 +824,105 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
             prev_selection[0], prev_selection[1], prev_selection[2], prev_selection[3], prev_selection[4])
 
 
-@app.callback(
+# http://adripofjavascript.com/blog/drips/object-equality-in-javascript.html#:~:text=Here%20is%20a%20very%20basic,are%20not%20equivalent%20if%20(aProps.
+app.clientside_callback(
+    """
+       function(load_data_trigger, refresh_data_trigger){
+            function isEquivalent(a, b) {
+                // Create arrays of property names
+                var aProps = Object.getOwnPropertyNames(a);
+                var bProps = Object.getOwnPropertyNames(b);
+            
+                // If number of properties is different,
+                // objects are not equivalent
+                if (aProps.length != bProps.length) {
+                    return false;
+                }
+            
+                for (var i = 0; i < aProps.length; i++) {
+                    var propName = aProps[i];
+            
+                    // If values of same property are not equal,
+                    // objects are not equivalent
+                    if (a[propName] !== b[propName]) {
+                        return false;
+                    }
+                }
+            
+                // If we made it this far, objects
+                // are considered equivalent
+                return true;
+            }
+            var DATA_CONTENT_HIDE = {'display': 'none'};    
+            if (isEquivalent(load_data_trigger, DATA_CONTENT_HIDE)){
+                return {};
+            }
+            else{
+                return DATA_CONTENT_HIDE;
+            }
+        }
+    """,
     Output({'type': 'data-menu-controls', 'index': MATCH}, 'style'),
     [Input({'type': 'confirm-load-data', 'index': MATCH}, 'style'),
      Input({'type': 'confirm-data-set-refresh', 'index': MATCH}, 'style')],
     prevent_initial_call=True
 )
-def _hide_controls_until_data_is_loaded(load_data_trigger, refresh_data_trigger):
-    if load_data_trigger == DATA_CONTENT_HIDE:
-        return {}
-    else:
-        return DATA_CONTENT_HIDE
-
 
 # highlight tiles slaved to displayed data sidebar
 for x in range(4):
-    @app.callback(
+    app.clientside_callback(
+        """
+        function(sidebar_styles, sidebar_style, master_sidebar_style, link_state){
+            function isEquivalent(a, b) {
+                // Create arrays of property names
+                var aProps = Object.getOwnPropertyNames(a);
+                var bProps = Object.getOwnPropertyNames(b);
+    
+                // If number of properties is different,
+                // objects are not equivalent
+                if (aProps.length != bProps.length) {
+                    return false;
+                }
+    
+                for (var i = 0; i < aProps.length; i++) {
+                    var propName = aProps[i];
+    
+                    // If values of same property are not equal,
+                    // objects are not equivalent
+                    if (a[propName] !== b[propName]) {
+                        return false;
+                    }
+                }
+    
+                // If we made it this far, objects
+                // are considered equivalent
+                return true;
+            }
+    
+            var DATA_CONTENT_SHOW = {
+                'max-width': '300px', 
+                'min-width': '300px',
+                'background-color':'#fffafa',
+                'border-right': '1px solid #c7c7c7',
+                'flex-grow': '1', 
+                'display': 'inline', 
+                'overflow-y': 'auto'};
+                     
+            if (isEquivalent(sidebar_style, DATA_CONTENT_SHOW) || (isEquivalent(master_sidebar_style, DATA_CONTENT_SHOW) && link_state == 'fa fa-link')){
+                var tile_class = 'tile-highlight';
+            }
+            else{
+                var tile_class = 'tile-container';
+            }
+            return tile_class;
+        }
+        """,
         Output({'type': 'tile', 'index': x}, 'className'),
         [Input({'type': 'data-tile', 'index': ALL}, 'style')],
         [State({'type': 'data-tile', 'index': x}, 'style'),
          State({'type': 'data-tile', 'index': 4}, 'style'),
          State({'type': 'tile-link', 'index': x}, 'className')]
     )
-    def _highlight_child_tiles(_sidebar_styles, sidebar_style, master_sidebar_style, link_state):
-        """
-        :param _sidebar_styles: Detects hiding/showing of data side-menus
-        :param sidebar_style: State of the style of the data side-menu
-        :param master_sidebar_style: State of the style of the parent data side-menu
-        :param link_state: State of the link/unlink icon
-        :return: Highlights tiles child to the displayed date side-menu
-        """
-
-        if sidebar_style == DATA_CONTENT_SHOW or (
-                master_sidebar_style == DATA_CONTENT_SHOW and link_state == 'fa fa-link'):
-            tile_class = 'tile-highlight'
-        else:
-            tile_class = 'tile-container'
-
-        return tile_class
 
 # *************************************************LOADSCREEN*********************************************************
 

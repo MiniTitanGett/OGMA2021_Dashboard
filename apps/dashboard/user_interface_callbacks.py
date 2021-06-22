@@ -27,8 +27,8 @@ from apps.dashboard.layouts import get_line_graph_menu, get_bar_graph_menu, get_
 from apps.dashboard.app import app
 from apps.dashboard.data import VIEW_CONTENT_HIDE, VIEW_CONTENT_SHOW, CUSTOMIZE_CONTENT_HIDE, CUSTOMIZE_CONTENT_SHOW, \
     DATA_CONTENT_HIDE, DATA_CONTENT_SHOW, get_label, LAYOUT_CONTENT_SHOW, LAYOUT_CONTENT_HIDE, X_AXIS_OPTIONS, \
-    session, BAR_X_AXIS_OPTIONS, generate_constants, dataset_to_df, GRAPH_OPTIONS, Sankey_Graph
-from apps.dashboard.saving_functions import load_graph_menu
+    session, BAR_X_AXIS_OPTIONS, generate_constants, dataset_to_df, GRAPH_OPTIONS
+
 
 # Contents:
 #   MAIN LAYOUT
@@ -109,7 +109,7 @@ app.clientside_callback(
      State({'type': 'data-set', 'index': 4}, 'value')],
     prevent_initial_call=True
 )
-def _new_and_delete(new_clicks, _close_clicks, dashboard_reset, input_tiles, num_tiles, new_disabled, df_const,
+def _new_and_delete(_new_clicks, _close_clicks, _dashboard_reset, input_tiles, num_tiles, new_disabled, _df_const,
                     master_df):
     """
     :param _new_clicks: Detects user clicking 'NEW' button in master navigation bar and encodes the number of tiles to
@@ -140,17 +140,17 @@ def _new_and_delete(new_clicks, _close_clicks, dashboard_reset, input_tiles, num
                 deleted_tile = str(i)
             elif flag:
                 input_tiles[i - 1] = change_index(input_tiles[i - 1], i - 1)
-        children = get_tile_layout(num_tiles, input_tiles, df_const=df_const, master_df=master_df)
+        children = get_tile_layout(num_tiles, input_tiles, master_df=master_df)
     # if NEW button pressed: adjust main layout and disable NEW button until it is unlocked at the end of callback chain
     elif 'button-new' in changed_id:
         if num_tiles == 4:
             raise PreventUpdate
         num_tiles += 1
-        children = get_tile_layout(num_tiles, input_tiles, df_const=df_const, master_df=master_df)
+        children = get_tile_layout(num_tiles, input_tiles, master_df=master_df)
     # if RESET dashboard requested, set dashboard to default appearance
     elif 'dashboard-reset' in changed_id:
         num_tiles = 1
-        children = get_tile_layout(num_tiles, [], df_const=df_const, master_df=master_df)
+        children = get_tile_layout(num_tiles, [], master_df=master_df)
         dashboard_reset_trigger = 'trigger'
     # else, a tab change was made, prevent update
     else:
@@ -420,6 +420,7 @@ for x in range(4):
         return view_content_style, customize_content_style, layouts_content_style, view_className, layouts_className, \
             customize_className
 
+
 # ************************************************CUSTOMIZE TAB*******************************************************
 # update graph options to match data set
 @app.callback(
@@ -493,7 +494,8 @@ for x in range(4):
          State('df-constants-storage', 'data')],
         prevent_initial_call=True
     )
-    def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_options_state,graph_option, df_name, master_df_name,
+    def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_options_state, _graph_option, df_name,
+                           master_df_name,
                            df_const):
         """
         :param selected_graph_type: Selected graph type, ie. 'bar', 'line', etc.
@@ -515,7 +517,6 @@ for x in range(4):
                 return None, 1, no_update
             else:
                 raise PreventUpdate
-
 
         for item in dash.callback_context.triggered:
             if '"type":"tile-link"}.className' in item['prop_id']:
@@ -750,9 +751,9 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                            _data_close_clicks, df_name_0, df_name_1, df_name_2, df_name_3, df_name_4, _confirm_clicks_0,
                            _confirm_clicks_1, _confirm_clicks_2, _confirm_clicks_3, _confirm_clicks_4,
                            _refresh_clicks_0, _refresh_clicks_1, _refresh_clicks_2, _refresh_clicks_3,
-                           _refresh_clicks_4, data_states, sidemenu_style_states, df_const, prev_selection,
-                           graph_types, master_secondary_type, master_timeframe, master_fiscal_toggle, master_start_year,
-                           master_end_year, master_start_secondary, master_end_secondary, master_hierarchy_toggle,
+                           _refresh_clicks_4, data_states, sidemenu_style_states, df_const, prev_selection, graph_types,
+                           _master_secondary_type, master_timeframe, master_fiscal_toggle, _master_start_year,
+                           _master_end_year, _master_start_secondary, _master_end_secondary, master_hierarchy_toggle,
                            master_hierarchy_drop, master_num_state, master_period_type, master_graph_child_toggle,
                            state_of_display):
     """
@@ -891,7 +892,7 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                     if graph_types[i] is None or graph_types[i] in GRAPH_OPTIONS[df_name]:
                         graph_triggers[i] = df_name
                         options_triggers[i] = df_name
-                        df_names[i]=df_name
+                        df_names[i] = df_name
                     else:
                         links_style[i] = 'fa fa-unlink'
                         # [i]= 'fa-fa-unlink'
@@ -993,6 +994,7 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
             prev_selection[0], prev_selection[1], prev_selection[2], prev_selection[3], prev_selection[4],
             options_triggers[0], options_triggers[1], options_triggers[2], options_triggers[3])
 
+
 """
 @app.callback(
     [Output({'type': 'start-year-input', 'index': MATCH}, 'name'),
@@ -1021,7 +1023,6 @@ def _date_picker_inputs(trigger, tile_tab, tile_start_year, tile_end_year, tile_
     end_secondary = tile_end_secondary
 
     return date_tab, start_year, end_year, start_secondary, end_secondary"""
-
 
 # http://adripofjavascript.com/blog/drips/object-equality-in-javascript.html#:~:text=Here%20is%20a%20very%20basic,are%20not%20equivalent%20if%20(aProps.
 app.clientside_callback(

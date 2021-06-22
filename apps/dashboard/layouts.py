@@ -409,11 +409,11 @@ def get_layout_dashboard():
                             style={'padding': '7px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
                                    'margin-left': '10px', 'margin-right': '14px', 'display': 'inline-block',
                                    'vertical-align': 'top'})],
-                             id='dashboard-reset-symbols',
-                             style={'width': '71px',
-                                    'border': '1px solid {}'.format(CLR['lightgray']),
-                                    'margin': '2px 0', 'border-radius': '6px',
-                                    'display': 'none'}),
+                               id='dashboard-reset-symbols',
+                               style={'width': '71px',
+                                      'border': '1px solid {}'.format(CLR['lightgray']),
+                                      'margin': '2px 0', 'border-radius': '6px',
+                                      'display': 'none'}),
                     style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
                            'position': 'relative', 'vertical-align': 'top'}),
                 html.Button(
@@ -685,16 +685,18 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
                 '''
                 -If no graph options available. Please select a Data Set!
                 ''')],
-            style = {'margin-left': '15px'}),
+            style={'margin-left': '15px'}),
         html.Div(
             children=graph_menu,
             id={'type': 'div-graph-options', 'index': tile})]
 
 
 # create default tile
-def get_tile(tile, tile_keys=None, df_const=None, df_name=None):
+def get_tile(tile, tile_keys=None, df_name=None):
     """
     :param tile: Index of the created tile.
+    :param tile_keys: Holds information regarding tile values
+    :param df_name: Name of the data set being used.
     :return: New tile with index values matching the specified tile index.
     """
     return [html.Div([
@@ -809,10 +811,12 @@ def get_tile(tile, tile_keys=None, df_const=None, df_name=None):
 
 
 # arrange tiles on the page for 1-4 tiles
-def get_tile_layout(num_tiles, input_tiles, tile_keys=None, df_const=None, master_df=None):
+def get_tile_layout(num_tiles, input_tiles, tile_keys=None, master_df=None):
     """
     :param num_tiles: Desired number of tiles to display.
     :param input_tiles: List of children of existing tiles.
+    :param tile_keys: Holds information regarding tile values
+    :param master_df: Name of the master data set being used.
     :raise IndexError: If num_tiles < 0 or num_tiles > 4
     :return: Layout of specified number of tiles.
     """
@@ -828,9 +832,9 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, df_const=None, maste
                     className='tile-container',
                     id={'type': 'tile', 'index': 0}, style={'z-index': '0'})]
         elif tile_keys:
-            tile[0] = get_tile(0, tile_keys[0], df_const=df_const, df_name=master_df)
+            tile[0] = get_tile(0, tile_keys[0], df_name=master_df)
         else:
-            tile[0] = get_tile(0, df_const=df_const, df_name=master_df)
+            tile[0] = get_tile(0, df_name=master_df)
         children = [
             html.Div([
                 html.Div(
@@ -849,13 +853,13 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, df_const=None, maste
                         id={'type': 'tile', 'index': i},
                         style={'z-index': '{}'.replace("{}", str(i))})]
             for i in range(len(input_tiles), num_tiles):
-                tile[i] = get_tile(i, df_const=df_const, df_name=master_df)
+                tile[i] = get_tile(i, df_name=master_df)
         elif tile_keys:
             for i in range(num_tiles):
-                tile[i] = get_tile(i, tile_keys[i], df_const=df_const, df_name=master_df)
+                tile[i] = get_tile(i, tile_keys[i], df_name=master_df)
         else:
             for i in range(num_tiles):
-                tile[i] = get_tile(i, df_const=df_const, df_name=master_df)
+                tile[i] = get_tile(i, df_name=master_df)
         children = [
             html.Div([
                 html.Div(
@@ -878,13 +882,13 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, df_const=None, maste
                         id={'type': 'tile', 'index': i},
                         style={'z-index': '{}'.replace("{}", str(i))})]
             for i in range(len(input_tiles), num_tiles):
-                tile[i] = get_tile(i, df_const=df_const, df_name=master_df)
+                tile[i] = get_tile(i, df_name=master_df)
         elif tile_keys:
             for i in range(num_tiles):
-                tile[i] = get_tile(i, tile_keys[i], df_const=df_const, df_name=master_df)
+                tile[i] = get_tile(i, tile_keys[i], df_name=master_df)
         else:
             for i in range(num_tiles):
-                tile[i] = get_tile(i, df_const=df_const, df_name=master_df)
+                tile[i] = get_tile(i, df_name=master_df)
         children = [
             html.Div([
                 html.Div(
@@ -912,13 +916,13 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, df_const=None, maste
                         id={'type': 'tile', 'index': i},
                         style={'z-index': '{}'.replace("{}", str(i))})]
             for i in range(len(input_tiles), num_tiles):
-                tile[i] = get_tile(i, df_const=df_const, df_name=master_df)
+                tile[i] = get_tile(i, df_name=master_df)
         elif tile_keys:
             for i in range(num_tiles):
-                tile[i] = get_tile(i, tile_keys[i], df_const=df_const, df_name=master_df)
+                tile[i] = get_tile(i, tile_keys[i], df_name=master_df)
         else:
             for i in range(num_tiles):
-                tile[i] = get_tile(i, df_const=df_const, df_name=master_df)
+                tile[i] = get_tile(i, df_name=master_df)
         children = [
             html.Div([
                 html.Div(
@@ -955,6 +959,7 @@ def get_line_graph_menu(tile, x, y, measure_type, df_name, df_const):
     :param x: the x-axis value
     :param tile: Index of the tile the line graph menu corresponds to.
     :param df_name: Name of the data set being used.
+    :param df_const: Dataframe constants
     :return: Menu with options to modify a line graph.
     """
     # (args-value: {})[0] = x-axis
@@ -1025,6 +1030,7 @@ def get_bar_graph_menu(tile, x, y, measure_type, df_name, df_const):
     :param x: the x-axis value
     :param tile: Index of the tile the bar graph menu corresponds to.
     :param df_name: Name of the data set being used.
+    :param df_const: Dataframe constants
     :return: Menu with options to modify a bar graph.
     """
     # (args-value: {})[0] = x-axis
@@ -1118,6 +1124,7 @@ def get_scatter_graph_menu(tile, x, y, measure_type, df_name, df_const):
     :param x: the x-axis value
     :param tile: Index of the tile the scatter graph menu corresponds to.
     :param df_name: Name of the data set being used.
+    :param df_const: Dataframe constants
     :return: Menu with options to modify a scatter graph.
     """
     # (args-value: {})[0] = x-axis
@@ -1436,6 +1443,7 @@ def get_sankey_menu(tile, graphed_options, df_name, df_const):
     :param tile: Index of the tile the line graph menu corresponds to.
     :param graphed_options: the variable name
     :param df_name: Name of the data set being used.
+    :param df_const: Dataframe constants
     :return: Menu with options to modify a sankey graph.
     """
     # (args-value: {})[0] = graphed variables

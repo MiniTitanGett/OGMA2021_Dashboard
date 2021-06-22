@@ -512,7 +512,7 @@ for x in range(4):
 
         if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link':
             if selected_graph_type not in GRAPH_OPTIONS[master_df_name]:
-                return None, no_update, no_update
+                return None, 1, no_update
             else:
                 raise PreventUpdate
 

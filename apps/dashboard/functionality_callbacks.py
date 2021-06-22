@@ -19,7 +19,7 @@ from re import search
 from apps.dashboard.graphs import __update_graph
 from apps.dashboard.hierarchy_filter import generate_history_button, generate_dropdown
 from apps.dashboard.app import app
-from apps.dashboard.data import data_filter, CLR, get_label
+from apps.dashboard.data import data_filter, CLR, get_label, GRAPH_OPTIONS
 from apps.dashboard.datepicker import get_date_box, update_date_columns, get_secondary_data
 
 # Contents:
@@ -135,6 +135,9 @@ for x in range(4):
 
         # if linked --> unlinked prevent update
         if link_state == 'fa fa-unlink' and '"type":"tile-link"}.className' in changed_id:
+            raise PreventUpdate
+
+        if df_name != None and graph_type in GRAPH_OPTIONS[df_name]:
             raise PreventUpdate
 
         # account for tile being linked or not

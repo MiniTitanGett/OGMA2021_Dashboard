@@ -423,8 +423,8 @@ for x in range(4):
 # ************************************************CUSTOMIZE TAB*******************************************************
 # update graph options to match data set
 @app.callback(
-    [Output({'type': 'graph-type-dropdown', 'index': MATCH}, 'options'),
-     Output({'type': 'set-tile-link-trigger', 'index': MATCH}, 'link-')],
+    [Output({'type': 'set-tile-link-trigger', 'index': MATCH}, 'link-'),
+     Output({'type': 'graph-type-dropdown', 'index': MATCH}, 'options')],
     [Input({'type': 'set-graph-options-trigger', 'index': MATCH}, 'options-'),
      Input({'type': 'tile-link', 'index': ALL}, 'className'),
      ],
@@ -474,7 +474,7 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
 
-    return options, link_trigger
+    return link_trigger, options
 
 
 # update graph menu to match selected graph type
@@ -601,7 +601,7 @@ for x in range(4):
         else:
             raise PreventUpdate
 
-        if '"type":"tile-link"}.className' in changed_id or 'graph-menu-trigger"}.data-' in changed_id or '"type":"graph-type-dropdown"}.value'in changed_id:
+        if '"type":"tile-link"}.className' in changed_id or 'graph-menu-trigger"}.data-' in changed_id:
             update_graph_trigger = 1
         else:
             update_graph_trigger = no_update
@@ -691,10 +691,6 @@ def _change_link(_selected_layout, _link_clicks, link_trigger, link_state):
      Output({'type': 'set-graph-options-trigger', 'index': 1}, 'options-'),
      Output({'type': 'set-graph-options-trigger', 'index': 2}, 'options-'),
      Output({'type': 'set-graph-options-trigger', 'index': 3}, 'options-'),
-     Output({'type': 'set-date-picker-trigger', 'index': 0}, 'picker-'),
-     Output({'type': 'set-date-picker-trigger', 'index': 1}, 'picker-'),
-     Output({'type': 'set-date-picker-trigger', 'index': 2}, 'picker-'),
-     Output({'type': 'set-date-picker-trigger', 'index': 3}, 'picker-'),
      ],
     [Input('dashboard-reset-trigger', 'data-'),
      Input('tile-closed-trigger', 'data-'),
@@ -885,6 +881,7 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                     if graph_types[i] is None or graph_types[i] in GRAPH_OPTIONS[df_name]:
                         graph_triggers[i] = df_name
                         options_triggers[i] = df_name
+                        df_names[i]=df_name
                     else:
                         links_style[i] = 'fa fa-unlink'
                         # [i]= 'fa-fa-unlink'
@@ -984,8 +981,7 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
             confirm_button[0], confirm_button[1], confirm_button[2], confirm_button[3], confirm_button[4],
             refresh_button[0], refresh_button[1], refresh_button[2], refresh_button[3], refresh_button[4],
             prev_selection[0], prev_selection[1], prev_selection[2], prev_selection[3], prev_selection[4],
-            options_triggers[0], options_triggers[1], options_triggers[2], options_triggers[3],
-            date_picker_triggers[0], date_picker_triggers[1], date_picker_triggers[2], date_picker_triggers[3])
+            options_triggers[0], options_triggers[1], options_triggers[2], options_triggers[3])
 
 """
 @app.callback(

@@ -27,8 +27,8 @@ from apps.dashboard.layouts import get_line_graph_menu, get_bar_graph_menu, get_
 from apps.dashboard.app import app
 from apps.dashboard.data import VIEW_CONTENT_HIDE, VIEW_CONTENT_SHOW, CUSTOMIZE_CONTENT_HIDE, CUSTOMIZE_CONTENT_SHOW, \
     DATA_CONTENT_HIDE, DATA_CONTENT_SHOW, get_label, LAYOUT_CONTENT_SHOW, LAYOUT_CONTENT_HIDE, X_AXIS_OPTIONS, \
-    session, BAR_X_AXIS_OPTIONS, generate_constants, dataset_to_df
-
+    session, BAR_X_AXIS_OPTIONS, generate_constants, dataset_to_df, GRAPH_OPTIONS, Sankey_Graph
+from apps.dashboard.saving_functions import load_graph_menu
 
 # Contents:
 #   MAIN LAYOUT
@@ -105,10 +105,12 @@ app.clientside_callback(
     [State({'type': 'tile', 'index': ALL}, 'children'),
      State('num-tiles', 'data-num-tiles'),
      State('button-new', 'disabled'),
-     State('df-constants-storage', 'data')],
+     State('df-constants-storage', 'data'),
+     State({'type': 'data-set', 'index': 4}, 'value')],
     prevent_initial_call=True
 )
-def _new_and_delete(_new_clicks, _close_clicks, _dashboard_reset, input_tiles, num_tiles, new_disabled, df_const):
+def _new_and_delete(new_clicks, _close_clicks, dashboard_reset, input_tiles, num_tiles, new_disabled, df_const,
+                    master_df):
     """
     :param _new_clicks: Detects user clicking 'NEW' button in master navigation bar and encodes the number of tiles to
     display
@@ -138,17 +140,17 @@ def _new_and_delete(_new_clicks, _close_clicks, _dashboard_reset, input_tiles, n
                 deleted_tile = str(i)
             elif flag:
                 input_tiles[i - 1] = change_index(input_tiles[i - 1], i - 1)
-        children = get_tile_layout(num_tiles, input_tiles, df_const=df_const)
+        children = get_tile_layout(num_tiles, input_tiles, df_const=df_const, master_df=master_df)
     # if NEW button pressed: adjust main layout and disable NEW button until it is unlocked at the end of callback chain
     elif 'button-new' in changed_id:
         if num_tiles == 4:
             raise PreventUpdate
         num_tiles += 1
-        children = get_tile_layout(num_tiles, input_tiles, df_const=df_const)
+        children = get_tile_layout(num_tiles, input_tiles, df_const=df_const, master_df=master_df)
     # if RESET dashboard requested, set dashboard to default appearance
     elif 'dashboard-reset' in changed_id:
         num_tiles = 1
-        children = get_tile_layout(num_tiles, [], df_const=df_const)
+        children = get_tile_layout(num_tiles, [], df_const=df_const, master_df=master_df)
         dashboard_reset_trigger = 'trigger'
     # else, a tab change was made, prevent update
     else:
@@ -419,6 +421,61 @@ for x in range(4):
             customize_className
 
 # ************************************************CUSTOMIZE TAB*******************************************************
+# update graph options to match data set
+@app.callback(
+    [Output({'type': 'set-tile-link-trigger', 'index': MATCH}, 'link-'),
+     Output({'type': 'graph-type-dropdown', 'index': MATCH}, 'options')],
+    [Input({'type': 'set-graph-options-trigger', 'index': MATCH}, 'options-'),
+     Input({'type': 'tile-link', 'index': ALL}, 'className'),
+     ],
+    [State({'type': 'data-set', 'index': MATCH}, 'value'),
+     State({'type': 'data-set', 'index': 4}, 'value'),
+     State({'type': 'graph-type-dropdown', 'index': MATCH}, 'value'),
+     ]
+)
+def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, graph_type):
+    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+
+    if changed_id == '.' or trigger is None or link_states is []:
+        raise PreventUpdate
+
+    changed_index = int(search(r'\d+', changed_id).group())
+
+    graph_options = no_update
+    options = []
+
+    link_trigger = None
+
+    if '"type":"tile-link"}.className' in changed_id:
+        if df_name_parent == "OPG001":
+            graph_options = GRAPH_OPTIONS["OPG001"]
+        elif df_name_parent == "OPG010":
+            graph_options = GRAPH_OPTIONS["OPG010"]
+        for i in graph_options:
+            options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+    elif trigger == 'fa fa-unlink':  #
+        link_trigger = "fa fa-unlink"
+        if df_name is not None:
+            graph_options = GRAPH_OPTIONS[df_name]
+            for i in graph_options:
+                options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+    else:
+        if (df_name or df_name_parent) == "OPG001":
+            graph_options = GRAPH_OPTIONS["OPG001"]
+            if graph_type is not None and graph_type not in graph_options:
+                link_states[changed_index] = "fa fa-unlink"
+        elif (df_name or df_name_parent) == "OPG010":
+            graph_options = GRAPH_OPTIONS["OPG010"]
+            if graph_type is not None and graph_type not in graph_options:
+                link_states[changed_index] = "fa fa-unlink"
+        else:
+            graph_options = []
+
+        for i in graph_options:
+            options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+
+    return link_trigger, options
+
 
 # update graph menu to match selected graph type
 for x in range(4):
@@ -430,12 +487,13 @@ for x in range(4):
          Input({'type': 'graph-type-dropdown', 'index': x}, 'value'),
          Input({'type': 'tile-link', 'index': x}, 'className')],
         [State({'type': 'div-graph-options', 'index': x}, 'children'),
+         State({'type': 'graph-type-dropdown', 'index': ALL}, 'value'),
          State({'type': 'data-set', 'index': x}, 'value'),
          State({'type': 'data-set', 'index': 4}, 'value'),
          State('df-constants-storage', 'data')],
         prevent_initial_call=True
     )
-    def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_options_state, df_name, master_df_name,
+    def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_options_state,graph_option, df_name, master_df_name,
                            df_const):
         """
         :param selected_graph_type: Selected graph type, ie. 'bar', 'line', etc.
@@ -444,6 +502,21 @@ for x in range(4):
         """
 
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+
+        # if link state has changed from linked --> unlinked the data has not changed, prevent update
+        if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink':
+            if selected_graph_type is None:
+                return None, no_update, no_update
+            else:
+                raise PreventUpdate
+
+        if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link':
+            if selected_graph_type not in GRAPH_OPTIONS[master_df_name]:
+                return None, 1, no_update
+            else:
+                raise PreventUpdate
+
+
         for item in dash.callback_context.triggered:
             if '"type":"tile-link"}.className' in item['prop_id']:
                 changed_id = item['prop_id']
@@ -455,6 +528,9 @@ for x in range(4):
         if ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name == master_df_name)\
                 or ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink'):
             return no_update, 1, no_update
+
+        if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name != master_df_name:
+            return None, 1, no_update
 
         # if graph menu trigger has value 'tile closed' then a tile was closed, don't update menu, still update table
         if 'graph-menu-trigger"}.data-' in changed_id and gm_trigger == 'tile closed':
@@ -549,11 +625,12 @@ for x in range(4):
 @app.callback(
     Output({'type': 'tile-link', 'index': MATCH}, 'className'),
     [Input({'type': 'select-layout-dropdown', 'index': MATCH}, 'value'),
-     Input({'type': 'tile-link', 'index': MATCH}, 'n_clicks')],
+     Input({'type': 'tile-link', 'index': MATCH}, 'n_clicks'),
+     Input({'type': 'set-tile-link-trigger', 'index': MATCH}, 'link-')],
     [State({'type': 'tile-link', 'index': MATCH}, 'className')],
     prevent_initial_call=True
 )
-def _change_link(_selected_layout, _link_clicks, link_state):
+def _change_link(_selected_layout, _link_clicks, link_trigger, link_state):
     """
     :param _link_clicks: Detects the user clicking the link/unlink icon
     :param link_state: State of the link/unlink icon
@@ -562,7 +639,7 @@ def _change_link(_selected_layout, _link_clicks, link_state):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     # if link button was not pressed and layout was not selected, do not update
-    if '.' == changed_id:
+    if '.' == changed_id:  # or link_trigger is None
         raise PreventUpdate
 
     if '"type":"select-layout-dropdown"}.value' in changed_id:
@@ -573,7 +650,17 @@ def _change_link(_selected_layout, _link_clicks, link_state):
 
     if '"type":"tile-link"}.n_clicks' in changed_id:
         # if link button was pressed, toggle the link icon linked <--> unlinked
-        link_state = 'fa fa-unlink' if link_state == 'fa fa-link' else 'fa fa-link'
+        # link_state = 'fa fa-unlink' if link_state == 'fa fa-link' else 'fa fa-link'
+
+        # if link_trigger == 'fa fa-unlink':
+        #    link_state = 'fa fa-unlink'
+        if link_state == "fa fa-link":
+            link_state = 'fa fa-unlink'
+        else:
+            link_state = 'fa fa-link'
+
+    if '"type":"set-tile-link-trigger"}.link-' in changed_id and link_trigger is not None:
+        link_state = 'fa fa-unlink'
 
     return link_state
 
@@ -609,7 +696,12 @@ def _change_link(_selected_layout, _link_clicks, link_state):
      Output({'type': 'data-set', 'index': 1}, 'data-'),
      Output({'type': 'data-set', 'index': 2}, 'data-'),
      Output({'type': 'data-set', 'index': 3}, 'data-'),
-     Output({'type': 'data-set', 'index': 4}, 'data-')],
+     Output({'type': 'data-set', 'index': 4}, 'data-'),
+     Output({'type': 'set-graph-options-trigger', 'index': 0}, 'options-'),
+     Output({'type': 'set-graph-options-trigger', 'index': 1}, 'options-'),
+     Output({'type': 'set-graph-options-trigger', 'index': 2}, 'options-'),
+     Output({'type': 'set-graph-options-trigger', 'index': 3}, 'options-'),
+     ],
     [Input('dashboard-reset-trigger', 'data-'),
      Input('tile-closed-trigger', 'data-'),
      Input('select-dashboard-dropdown', 'value'),
@@ -635,14 +727,34 @@ def _change_link(_selected_layout, _link_clicks, link_state):
     [State({'type': 'data-tile', 'index': ALL}, 'children'),
      State({'type': 'data-tile', 'index': ALL}, 'style'),
      State('df-constants-storage', 'data'),
-     State({'type': 'data-set', 'index': ALL}, 'data-')],
+     State({'type': 'data-set', 'index': ALL}, 'data-'),
+     State({'type': 'graph-type-dropdown', 'index': ALL}, 'value'),
+     # Date picker states for master data menu
+     State({'type': 'start-year-input', 'index': 4}, 'name'),
+     State({'type': 'radio-timeframe', 'index': 4}, 'value'),
+     State({'type': 'fiscal-year-toggle', 'index': 4}, 'value'),
+     State({'type': 'start-year-input', 'index': 4}, 'value'),
+     State({'type': 'end-year-input', 'index': 4}, 'value'),
+     State({'type': 'start-secondary-input', 'index': 4}, 'value'),
+     State({'type': 'end-secondary-input', 'index': 4}, 'value'),
+     State({'type': 'hierarchy-toggle', 'index': 4}, 'value'),
+     State({'type': 'hierarchy_level_dropdown', 'index': 4}, 'value'),
+     State({'type': 'num-periods', 'index': 4}, 'value'),
+     State({'type': 'period-type', 'index': 4}, 'value'),
+     State({'type': 'graph_children_toggle', 'index': 4}, 'value'),  # graph all toggle
+     State({'type': 'hierarchy_display_button', 'index': 4}, 'children'),
+     ],
     prevent_initial_call=True
 )
 def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, links_style, _selected_layout, data_clicks,
                            _data_close_clicks, df_name_0, df_name_1, df_name_2, df_name_3, df_name_4, _confirm_clicks_0,
                            _confirm_clicks_1, _confirm_clicks_2, _confirm_clicks_3, _confirm_clicks_4,
                            _refresh_clicks_0, _refresh_clicks_1, _refresh_clicks_2, _refresh_clicks_3,
-                           _refresh_clicks_4, data_states, sidemenu_style_states, df_const, prev_selection):
+                           _refresh_clicks_4, data_states, sidemenu_style_states, df_const, prev_selection,
+                           graph_types, master_secondary_type, master_timeframe, master_fiscal_toggle, master_start_year,
+                           master_end_year, master_start_secondary, master_end_secondary, master_hierarchy_toggle,
+                           master_hierarchy_drop, master_num_state, master_period_type, master_graph_child_toggle,
+                           state_of_display):
     """
     :param closed_tile: Detects when a tile has been deleted and encodes the index of the deleted tile
     param links_style: State of all link/unlink icons and detects user clicking a link icon
@@ -667,6 +779,8 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
     confirm_button = [no_update] * 5
     refresh_button = [no_update] * 5
     store = no_update
+    options_triggers = [no_update] * 5
+    date_picker_triggers = [no_update] * 5
 
     # if 'data-menu-close' or 'select-dashboard-dropdown' requested, close all data menus
     if 'data-menu-close' in changed_id or 'select-dashboard-dropdown' in changed_id:
@@ -735,9 +849,11 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                                              'position': 'relative',
                                              'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}
                         prev_selection[i] = df_name
+                        options_triggers[i] = df_name
             else:
                 graph_triggers[changed_index] = df_name
                 prev_selection[changed_index] = df_name
+                options_triggers[changed_index] = df_name
         else:
             if changed_index == 4:
                 for i in range(len(links_style)):
@@ -756,8 +872,10 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
             or '"type":"confirm-data-set-refresh"}.n_clicks' in changed_id:
         changed_index = int(search(r'\d+', changed_id).group())
         df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
+
         df_name = df_names[changed_index]
         session[df_name] = dataset_to_df(df_name)
+
         if df_const is None:
             df_const = {}
         df_const[df_name] = generate_constants(df_name)
@@ -766,12 +884,63 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
         sidemenu_styles[changed_index] = DATA_CONTENT_SHOW
         # trigger update for all tiles that are linked to the active data menu
         if changed_index == 4:
+            prev_selection[changed_index] = df_name
             for i in range(len(links_style)):
                 if links_style[i] == 'fa fa-link':
-                    graph_triggers[i] = df_name
                     prev_selection[i] = df_name
+                    if graph_types[i] is None or graph_types[i] in GRAPH_OPTIONS[df_name]:
+                        graph_triggers[i] = df_name
+                        options_triggers[i] = df_name
+                        df_names[i]=df_name
+                    else:
+                        links_style[i] = 'fa fa-unlink'
+                        # [i]= 'fa-fa-unlink'
+                        # set the dataset of the new menu from unlinking
+                        if type(state_of_display) == dict:
+                            state_of_display = [state_of_display]
+                        nid_path = "root"
+                        for button in state_of_display:
+                            nid_path += '^||^{}'.format(button['props']['children'])
+
+                        if df_name == "OPG001":
+                            df_names[i] = "OPG010"
+                            df_const[df_names[i]] = generate_constants(df_names[i])
+                            data[i] = get_data_menu(i, df_names[i], mode='tile-loading',
+                                                    hierarchy_toggle=master_hierarchy_toggle,
+                                                    level_value=master_hierarchy_drop,
+                                                    nid_path=nid_path, graph_all_toggle=master_graph_child_toggle,
+                                                    fiscal_toggle=master_fiscal_toggle, input_method=master_timeframe,
+                                                    num_periods=master_num_state, period_type=master_period_type,
+                                                    df_const=df_const)
+                            # sidemenu_styles[i] = DATA_CONTENT_SHOW
+                            refresh_button[i] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
+                                                 'position': 'relative',
+                                                 'margin-right': '10px', 'margin-left': '10px',
+                                                 'vertical-align': 'top'}
+                            if master_timeframe == "select-range":
+                                date_picker_triggers[i] = "triggered"
+
+                        elif df_name == "OPG010":
+                            df_names[i] = "OPG001"
+                            df_const[df_names[i]] = generate_constants(df_names[i])
+                            data[i] = get_data_menu(i, df_names[i], mode='tile-loading',
+                                                    hierarchy_toggle=master_hierarchy_toggle,
+                                                    level_value=master_hierarchy_drop,
+                                                    nid_path=nid_path, graph_all_toggle=master_graph_child_toggle,
+                                                    fiscal_toggle=master_fiscal_toggle, input_method=master_timeframe,
+                                                    num_periods=master_num_state, period_type=master_period_type,
+                                                    df_const=df_const)
+                            # sidemenu_styles[i] = DATA_CONTENT_SHOW
+                            refresh_button[i] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
+                                                 'position': 'relative',
+                                                 'margin-right': '10px', 'margin-left': '10px',
+                                                 'vertical-align': 'top'}
+                            if master_timeframe == "select-range":
+                                date_picker_triggers[i] = "triggered"
+                        options_triggers[i] = 'fa fa-unlink'
         else:
             graph_triggers[changed_index] = df_name
+            options_triggers[changed_index] = df_name
         prev_selection[changed_index] = df_name
         confirm_button[changed_index] = DATA_CONTENT_HIDE
         refresh_button[changed_index] = {'padding': '10px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
@@ -821,7 +990,37 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
             graph_triggers[0], graph_triggers[1], graph_triggers[2], graph_triggers[3], store,
             confirm_button[0], confirm_button[1], confirm_button[2], confirm_button[3], confirm_button[4],
             refresh_button[0], refresh_button[1], refresh_button[2], refresh_button[3], refresh_button[4],
-            prev_selection[0], prev_selection[1], prev_selection[2], prev_selection[3], prev_selection[4])
+            prev_selection[0], prev_selection[1], prev_selection[2], prev_selection[3], prev_selection[4],
+            options_triggers[0], options_triggers[1], options_triggers[2], options_triggers[3])
+
+"""
+@app.callback(
+    [Output({'type': 'start-year-input', 'index': MATCH}, 'name'),
+     Output({'type': 'start-year-input', 'index': MATCH}, 'value'),
+     Output({'type': 'end-year-input', 'index': MATCH}, 'value'),
+     Output({'type': 'start-secondary-input', 'index': MATCH}, 'value'),
+     Output({'type': 'end-secondary-input', 'index': MATCH}, 'value')],
+    [Input({'type': 'set-date-picker-trigger', 'index': MATCH}, 'picker-')],
+    [State({'type': 'start-year-input', 'index': 4}, 'name'),
+     State({'type': 'start-year-input', 'index': 4}, 'value'),
+     State({'type': 'end-year-input', 'index': 4}, 'value'),
+     State({'type': 'start-secondary-input', 'index': 4}, 'value'),
+     State({'type': 'end-secondary-input', 'index': 4}, 'value'),
+     ]
+)
+def _date_picker_inputs(trigger, tile_tab, tile_start_year, tile_end_year, tile_start_secondary, tile_end_secondary):
+    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+
+    if changed_id == '.':
+        raise PreventUpdate
+
+    date_tab = tile_tab
+    start_year = tile_start_year
+    end_year = tile_end_year
+    start_secondary = tile_start_secondary
+    end_secondary = tile_end_secondary
+
+    return date_tab, start_year, end_year, start_secondary, end_secondary"""
 
 
 # http://adripofjavascript.com/blog/drips/object-equality-in-javascript.html#:~:text=Here%20is%20a%20very%20basic,are%20not%20equivalent%20if%20(aProps.
@@ -872,7 +1071,7 @@ app.clientside_callback(
 for x in range(4):
     app.clientside_callback(
         """
-        function(sidebar_styles, sidebar_style, master_sidebar_style, link_state){
+        function(_sidebar_styles, link_state, sidebar_style, master_sidebar_style){
             function isEquivalent(a, b) {
                 // Create arrays of property names
                 var aProps = Object.getOwnPropertyNames(a);
@@ -919,10 +1118,10 @@ for x in range(4):
         }
         """,
         Output({'type': 'tile', 'index': x}, 'className'),
-        [Input({'type': 'data-tile', 'index': ALL}, 'style')],
+        [Input({'type': 'data-tile', 'index': ALL}, 'style'),
+         Input({'type': 'tile-link', 'index': x}, 'className')],
         [State({'type': 'data-tile', 'index': x}, 'style'),
-         State({'type': 'data-tile', 'index': 4}, 'style'),
-         State({'type': 'tile-link', 'index': x}, 'className')]
+         State({'type': 'data-tile', 'index': 4}, 'style')]
     )
 
 # *************************************************LOADSCREEN*********************************************************

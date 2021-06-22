@@ -107,6 +107,7 @@ def delete_dashboard(dashboard_id):
 
 
 def load_graph_menu(graph_type, tile, df_name, args_list, df_const):
+    print('In load graph menu')
     if graph_type == 'Line' or graph_type == 'Scatter' or graph_type == 'Bar':
         x = args_list[0]
         measure_type = args_list[1]

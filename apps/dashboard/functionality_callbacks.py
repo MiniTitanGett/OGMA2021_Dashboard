@@ -14,12 +14,13 @@ from dash.exceptions import PreventUpdate
 import dash_html_components as html
 import dash_core_components as dcc
 from re import search
+from dash import no_update
 
 # Internal Packages
 from apps.dashboard.graphs import __update_graph
 from apps.dashboard.hierarchy_filter import generate_history_button, generate_dropdown
 from apps.dashboard.app import app
-from apps.dashboard.data import data_filter, CLR, get_label
+from apps.dashboard.data import data_filter, CLR, get_label, GRAPH_OPTIONS
 from apps.dashboard.datepicker import get_date_box, update_date_columns, get_secondary_data
 
 # Contents:
@@ -110,11 +111,19 @@ for x in range(4):
 
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][-1]
 
+        changed_index = int(search(r'\d+', changed_id).group())
+        print(changed_index)
+
+        if '"type":"tile-view"}.className' in changed_id and df_name is None and master_df_name is None:
+            return None
+
         # if not in view tab, or new/delete while the graph already exists, prevent update
         if view_state == 'tile-nav tile-nav--view' or (changed_id == '.' and graph_display):
             raise PreventUpdate
 
-        # checks if graph menu has been loaded yet - prevents update if not
+        if len(arg_value) == 0 and '"type":"update-graph-trigger"}.data-graph_menu_trigger' in changed_id:
+            return None
+
         if len(arg_value) == 0:
             raise PreventUpdate
 
@@ -125,6 +134,15 @@ for x in range(4):
         # if linked --> unlinked prevent update
         if link_state == 'fa fa-unlink' and '"type":"tile-link"}.className' in changed_id:
             raise PreventUpdate
+
+        if link_state == 'fa fa-link' and df_name is not None and graph_type in GRAPH_OPTIONS[df_name]:
+            graph = __update_graph(df_name, arg_value, graph_type, tile_title, num_periods, period_type,
+                                   hierarchy_toggle,
+                                   hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options,
+                                   state_of_display,
+                                   secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
+                                   end_secondary, df_const)
+            return graph
 
         # account for tile being linked or not
         if link_state == 'fa fa-link':
@@ -372,8 +390,8 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
         elif 'n_clicks' in changed_id:
             conditions = ['date-picker-quarter-button' in changed_id, 'date-picker-month-button' in changed_id]
             quarter_classname, quarter_disabled, month_classname, month_disabled, week_classname, week_disabled, \
-                fringe_min, fringe_max, default_max, max_year, \
-                new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
+            fringe_min, fringe_max, default_max, max_year, \
+            new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
             # set min_year according to user selected fiscal/gregorian time type
             if fiscal_toggle == 'Gregorian':
                 min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
@@ -429,8 +447,8 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                 selected_secondary_max = end_secondary_selection
                 conditions = [tab == 'Quarter', tab == 'Month']
                 quarter_classname, quarter_disabled, month_classname, month_disabled, week_classname, week_disabled, \
-                    fringe_min, fringe_max, default_max, max_year, \
-                    new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
+                fringe_min, fringe_max, default_max, max_year, \
+                new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
             # set min_year according to user selected time type (gregorian/fiscal)
             if fiscal_toggle == 'Gregorian':
                 min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
@@ -685,4 +703,4 @@ for x in range(4):
                 inplace=False)
 
         return dff.iloc[page_current * page_size: (page_current + 1) * page_size].to_dict('records'), \
-            math.ceil(dff.iloc[:, 0].size / page_size)
+               math.ceil(dff.iloc[:, 0].size / page_size)

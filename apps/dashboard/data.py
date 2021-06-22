@@ -52,7 +52,12 @@ from conn import get_ref, exec_storedproc_results
 
 # ***********************************************ARBITRARY CONSTANTS*************************************************
 
-GRAPH_OPTIONS = ['Line', 'Bar', 'Scatter', 'Bubble', 'Box_Plot', 'Table', 'Sankey']
+GRAPH_OPTIONS = {
+    'OPG001': ['Line', 'Bar', 'Scatter', 'Bubble', 'Box_Plot', 'Table'],
+    'OPG010': ['Sankey', 'Table']
+}
+
+Sankey_Graph = ['Sankey']
 
 X_AXIS_OPTIONS = ['Time']
 
@@ -101,7 +106,7 @@ def dataset_to_df(df_name):
     # df = pd.DataFrame(sql_query)
     query = """\
     declare @p_result_status varchar(255)
-    exec dbo.opp_get_dataset {}, \'{}\', \'{}\', @p_result_status output
+    exec dbo.OPP_Get_DataSet {}, \'{}\', \'{}\', @p_result_status output
     select @p_result_status as result_status
     """.format(session["sessionID"], session["language"], df_name)
 

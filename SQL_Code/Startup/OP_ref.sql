@@ -426,6 +426,10 @@ EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Data_Accessed_On',@lan
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Data_Accessed_On',@language = 'Fr', @ref_desc = 'Données consultées le'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_No_Data_Specified',@language = 'En', @ref_desc = 'No Data Specified'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_No_Data_Specified',@language = 'Fr', @ref_desc = 'Aucune donnée spécifiée'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Make_A_Hierarchy_Selection',@language = 'En', @ref_desc = 'Make a Hierarchy Selection'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Make_A_Hierarchy_Selection',@language = 'Fr', @ref_desc = 'Fr: Make a Hierarchy Selection'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Make_A_Variable_Selection',@language = 'En', @ref_desc = 'Make a Variable Selection'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Make_A_Variable_Selection',@language = 'Fr', @ref_desc = 'Fr: Make a Variable Selection'
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'En',@ref_desc = 'Hierarchy Selection''s Children'
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'Fr',@ref_desc = 'Enfants de la Sélection de Hiérarchie'
 

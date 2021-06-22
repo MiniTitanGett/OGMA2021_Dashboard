@@ -114,17 +114,17 @@ for x in range(4):
         if view_state == 'tile-nav tile-nav--view' or (changed_id == '.' and graph_display):
             raise PreventUpdate
 
-        if(_df_trigger == 1 and df_name is not None != master_df_name and link_state == 'fa fa-link'):
-            print('link blank graph')
-
-            graph = __update_graph(df_name, arg_value, None, tile_title, num_periods, period_type,
-                                   hierarchy_toggle,
-                                   None, hierarchy_graph_children, None,
-                                   state_of_display,
-                                   secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
-                                   end_secondary, df_const)
-
-            return graph
+        # if(_df_trigger == 1 and df_name is not None and df_name != master_df_name and link_state == 'fa fa-link'):
+        #     print('link blank graph')
+        #
+        #     graph = __update_graph(df_name, arg_value, None, tile_title, num_periods, period_type,
+        #                            hierarchy_toggle,
+        #                            None, hierarchy_graph_children, None,
+        #                            state_of_display,
+        #                            secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
+        #                            end_secondary, df_const)
+        #
+        #     raise PreventUpdate
         # checks if graph menu has been loaded yet - prevents update if not
         if len(arg_value) == 0:
             raise PreventUpdate

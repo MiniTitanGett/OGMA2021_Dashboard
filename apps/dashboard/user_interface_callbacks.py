@@ -504,7 +504,7 @@ for x in range(4):
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
         # if link state has changed from linked --> unlinked the data has not changed, prevent update
-        if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink':
+        if '"type":"tile-link"}.className' in changed_id and (link_state == 'fa fa-unlink' or link_state == 'fa fa=link'):
             if selected_graph_type is None:
                 return None, no_update, no_update
             else:
@@ -522,7 +522,7 @@ for x in range(4):
                 or ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink'):
             return no_update, 1, no_update
 
-        if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name != master_df_name and df_name != None:
+        if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name != master_df_name:
             return None, 1, no_update
 
         # if graph menu trigger has value 'tile closed' then a tile was closed, don't update menu, still update table
@@ -532,9 +532,6 @@ for x in range(4):
         # if changed id == '.' and the graph menu already exists, prevent update
         if changed_id == '.' and graph_options_state or df_const is None or df_name not in df_const:
             raise PreventUpdate
-
-        if link_state == 'fa fa-link':
-            df_name = master_df_name
 
         tile = int(dash.callback_context.inputs_list[0]['id']['index'])
 
@@ -604,7 +601,7 @@ for x in range(4):
         else:
             raise PreventUpdate
 
-        if '"type":"tile-link"}.className' in changed_id or 'graph-menu-trigger"}.data-' in changed_id:
+        if '"type":"tile-link"}.className' in changed_id or 'graph-menu-trigger"}.data-' in changed_id or '"type":"graph-type-dropdown"}.value'in changed_id:
             update_graph_trigger = 1
         else:
             update_graph_trigger = no_update
@@ -881,9 +878,9 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
         sidemenu_styles[changed_index] = DATA_CONTENT_SHOW
         # trigger update for all tiles that are linked to the active data menu
         if changed_index == 4:
+            prev_selection[changed_index] = df_name
             for i in range(len(links_style)):
                 if links_style[i] == 'fa fa-link':
-                    graph_triggers[i] = df_name
                     prev_selection[i] = df_name
                     if graph_types[i] is None or graph_types[i] in GRAPH_OPTIONS[df_name]:
                         graph_triggers[i] = df_name

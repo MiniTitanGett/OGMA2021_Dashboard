@@ -201,7 +201,9 @@ EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Measure_Type',        
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Hierarchy_One_Name',      @language = 'En', @ref_desc = 'Hierarchy One Name'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Hierarchy_One_Name',      @language = 'Fr', @ref_desc = 'Hiérarchie un Nom'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Gen_Hover_Data',          @language = 'En', @ref_desc = '<b>%{customdata[0]}</b><br><b>%{customdata[1]}</b><br><b>%AXIS-TITLE-A%</b>: %AXIS-A%<br><b>%AXIS-TITLE-B%</b>: %AXIS-B%<extra></extra>'
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Gen_Hover_Data',          @language = 'Fr', @ref_desc = '<b>%{customdata[0]}</b><br><b>%{customdata[1]}</b><br><b>%AXIS-TITLE-A%</b>: %AXIS-A%<br><b>%AXIS-TITLE-B%</b>: %AXIS-B%<extra></extra>'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Bubble_Hover_Data',       @language = 'En', @ref_desc = '<b>%{customdata[0]}</b><br><b>%{customdata[1]}</b><br><b>%AXIS-X-A% %AXIS-X-B%</b>: %X-AXIS% <br><b>%AXIS-Y-A% %AXIS-Y-B%</b>: %Y-AXIS% <br><b>%AXIS-Z-A% %AXIS-Z-B%</b>: %Z-AXIS% <extra></extra>'
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Bubble_Hover_Data',       @language = 'Fr', @ref_desc = '<b>%{customdata[0]}</b><br><b>%{customdata[1]}</b><br><b>%AXIS-X-A% %AXIS-X-B%</b>: %X-AXIS% <br><b>%AXIS-Y-A% %AXIS-Y-B%</b>: %Y-AXIS% <br><b>%AXIS-Z-A% %AXIS-Z-B%</b>: %Z-AXIS% <extra></extra>'
 
 EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG001', @language = 'En', @ref_desc = 'OPG 001 Time Series Measures'
 EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG001', @language = 'Fr', @ref_desc = 'OPG 001 Mesures de Séries Chronologiques'

@@ -496,13 +496,16 @@ for x in range(4):
 
         elif selected_graph_type == 'Bubble':
             menu = get_bubble_graph_menu(tile=tile,
-                                         x=X_AXIS_OPTIONS[0],
+                                         x=None if df_const is None else
+                                         df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
                                          x_measure=None if df_const is None else
                                          df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
-                                         y=X_AXIS_OPTIONS[0],
+                                         y=None if df_const is None else
+                                         df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
                                          y_measure=None if df_const is None else
                                          df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
-                                         size=X_AXIS_OPTIONS[0],
+                                         size=None if df_const is None else
+                                         df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
                                          size_measure=None if df_const is None else
                                          df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
                                          df_name=df_name,
@@ -862,6 +865,7 @@ for x in range(4):
 
 # *************************************************LOADSCREEN*********************************************************
 
+# All clientside callback functions referred to are stored in /assets/ClientsideCallbacks.js
 for x in range(4):
     app.clientside_callback(
         ClientsideFunction(

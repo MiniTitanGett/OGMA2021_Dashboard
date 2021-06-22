@@ -200,6 +200,10 @@ EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Measure_Value',       
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Measure_Type',            @language = 'Fr', @ref_desc = 'Type de Mesure'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Hierarchy_One_Name',      @language = 'En', @ref_desc = 'Hierarchy One Name'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Hierarchy_One_Name',      @language = 'Fr', @ref_desc = 'Hiérarchie un Nom'
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Gen_Hover_Data',          @language = 'En', @ref_desc = '<b>%{customdata[0]}</b><br><b>%{customdata[1]}</b><br><b>%AXIS-TITLE-A%</b>: %AXIS-A%<br><b>%AXIS-TITLE-B%</b>: %AXIS-B%<extra></extra>'
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Gen_Hover_Data',          @language = 'Fr', @ref_desc = '<b>%{customdata[0]}</b><br><b>%{customdata[1]}</b><br><b>%AXIS-TITLE-A%</b>: %AXIS-A%<br><b>%AXIS-TITLE-B%</b>: %AXIS-B%<extra></extra>'
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Bubble_Hover_Data',       @language = 'En', @ref_desc = '<b>%{customdata[0]}</b><br><b>%{customdata[1]}</b><br><b>%AXIS-X-A% %AXIS-X-B%</b>: %X-AXIS% <br><b>%AXIS-Y-A% %AXIS-Y-B%</b>: %Y-AXIS% <br><b>%AXIS-Z-A% %AXIS-Z-B%</b>: %Z-AXIS% <extra></extra>'
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Bubble_Hover_Data',       @language = 'Fr', @ref_desc = '<b>%{customdata[0]}</b><br><b>%{customdata[1]}</b><br><b>%AXIS-X-A% %AXIS-X-B%</b>: %X-AXIS% <br><b>%AXIS-Y-A% %AXIS-Y-B%</b>: %Y-AXIS% <br><b>%AXIS-Z-A% %AXIS-Z-B%</b>: %Z-AXIS% <extra></extra>'
 
 EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG001', @language = 'En', @ref_desc = 'OPG 001 Time Series Measures'
 EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG001', @language = 'Fr', @ref_desc = 'OPG 001 Mesures de Séries Chronologiques'
@@ -422,6 +426,10 @@ EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Data_Accessed_On',@lan
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Data_Accessed_On',@language = 'Fr', @ref_desc = 'Données consultées le'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_No_Data_Specified',@language = 'En', @ref_desc = 'No Data Specified'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_No_Data_Specified',@language = 'Fr', @ref_desc = 'Aucune donnée spécifiée'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Make_A_Hierarchy_Selection',@language = 'En', @ref_desc = 'Make a Hierarchy Selection'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Make_A_Hierarchy_Selection',@language = 'Fr', @ref_desc = 'Fr: Make a Hierarchy Selection'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Make_A_Variable_Selection',@language = 'En', @ref_desc = 'Make a Variable Selection'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Make_A_Variable_Selection',@language = 'Fr', @ref_desc = 'Fr: Make a Variable Selection'
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'En',@ref_desc = 'Hierarchy Selection''s Children'
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'Fr',@ref_desc = 'Enfants de la Sélection de Hiérarchie'
 

@@ -25,8 +25,6 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
                 var newDiv = document.createElement('div');
                 newDiv.className = '_data-loading';
                 newDiv.id = 'loading';
-                var divContent = document.createTextNode('Loading, Please Wait...');
-                newDiv.appendChild(divContent);
                 document.body.appendChild(newDiv, document.getElementById('content'));
 
             }

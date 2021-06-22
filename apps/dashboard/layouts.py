@@ -20,8 +20,7 @@ import json
 from conn import exec_storedproc_results
 # from apps.OPG001.app import app
 from apps.dashboard.data import GRAPH_OPTIONS, CLR, DATA_CONTENT_SHOW, DATA_CONTENT_HIDE, VIEW_CONTENT_SHOW, \
-    BAR_X_AXIS_OPTIONS, CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LAYOUT_CONTENT_HIDE, \
-    saved_layouts, saved_dashboards
+    BAR_X_AXIS_OPTIONS, CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LAYOUT_CONTENT_HIDE
 from apps.dashboard.hierarchy_filter import get_hierarchy_layout
 from apps.dashboard.datepicker import get_date_picker
 from apps.dashboard.graphs import __update_graph
@@ -180,9 +179,13 @@ def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Fi
             style={'position': 'relative', 'left': '3px'},
             id={'type': 'data-menu-close', 'index': tile}),
         html.Div(get_data_set_picker(tile, df_name)),
-        html.Div(
-            get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle, nid_path, df_const)),
-        html.Div(get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, period_type, df_const))]
+        html.Div([
+            html.Div(
+                get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle, nid_path,
+                                     df_const)),
+            html.Div(get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, period_type, df_const))],
+            style=DATA_CONTENT_HIDE,
+            id={'type': 'data-menu-controls', 'index': tile})]
 
     dashboard_loading_wrapper = html.Div(
         content,
@@ -285,8 +288,8 @@ def get_layout_graph(report_name):
     # {'props': {'children': 'Los Angeles Department of Water and Power'}}
     # split on ^||^, ignore 'root', append children
     state_of_display = ''
-    nid_path = "root^||^Los Angeles Department of Water and Power".split(
-        '^||^')  # j['NID Path'].split('^||^') TODO: Find why this is hardcoded
+    nid_path = "root^||^Los Angeles Department of Water and Power".split('^||^')
+    # j['NID Path'].split('^||^') TODO: Find why this is hardcoded
     nid_path.remove('root')
     for x in nid_path:
         if state_of_display:
@@ -421,8 +424,8 @@ def get_layout_dashboard():
                     id='confirm-delete-dashboard'),
                 dcc.Dropdown(
                     id='delete-dashboard',
-                    options=[{'label': saved_dashboards[key]['Dashboard Title'], 'value': key} for key in
-                             saved_dashboards],
+                    options=[{'label': session['saved_dashboards'][key]['Dashboard Title'], 'value': key} for key in
+                             session['saved_dashboards']],
                     clearable=False,
                     style={'width': '250px', 'font-size': '13px', 'box-sizing': 'border-box', 'height': '35px',
                            'display': 'inline-block', 'vertical-align': 'bottom', 'float': 'right',
@@ -431,8 +434,8 @@ def get_layout_dashboard():
                     placeholder=get_label('LBL_Delete_A_Saved_Dashboard')),
                 dcc.Dropdown(
                     id='select-dashboard-dropdown',
-                    options=[{'label': saved_dashboards[key]['Dashboard Title'], 'value': key} for key in
-                             saved_dashboards],
+                    options=[{'label': session['saved_dashboards'][key]['Dashboard Title'], 'value': key} for key in
+                             session['saved_dashboards']],
                     clearable=False,
                     style={'width': '250px', 'font-size': '13px', 'box-sizing': 'border-box', 'height': '35px',
                            'display': 'inline-block', 'vertical-align': 'bottom', 'float': 'right',
@@ -770,8 +773,8 @@ def get_tile(tile, tile_keys=None, df_const=None, df_name=None):
                     id={'type': 'select-layout-dropdown-div', 'index': tile},
                     children=[
                         dcc.Dropdown(id={'type': 'select-layout-dropdown', 'index': tile},
-                                     options=[{'label': saved_layouts[key]['Title'], 'value': key} for key in
-                                              saved_layouts],
+                                     options=[{'label': session['saved_layouts'][key]['Title'], 'value': key} for key in
+                                              session['saved_layouts']],
                                      style={'width': '400px', 'font-size': '13px'},
                                      clearable=True,
                                      value='',
@@ -784,8 +787,9 @@ def get_tile(tile, tile_keys=None, df_const=None, df_name=None):
                         id={'type': 'delete-layout-dropdown-div', 'index': tile},
                         children=[
                             dcc.Dropdown(id={'type': 'delete-layout-dropdown', 'index': tile},
-                                         options=[{'label': saved_layouts[key]['Title'], 'value': key} for key in
-                                                  saved_layouts],
+                                         options=[{'label': session['saved_layouts'][key]['Title'], 'value': key} for
+                                                  key in
+                                                  session['saved_layouts']],
                                          style={'width': '400px', 'font-size': '13px'},
                                          value='',
                                          placeholder='{}...'.format(get_label('LBL_Select')))

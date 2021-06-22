@@ -20,7 +20,6 @@ from dash.exceptions import PreventUpdate
 from conn import exec_storedproc
 from apps.dashboard.layouts import get_line_graph_menu, get_bar_graph_menu, get_scatter_graph_menu, \
     get_table_graph_menu, get_box_plot_menu, get_sankey_menu, get_bubble_graph_menu
-from apps.dashboard.data import saved_layouts, saved_dashboards
 
 
 # Contents:
@@ -44,7 +43,7 @@ def save_layout_state(name, attributes):
     :param name: the title of the layout (graph title)
     """
     if attributes:
-        saved_layouts[name] = attributes
+        session['saved_layouts'][name] = attributes
 
 
 # maps the name of the dashboard to the dashboard attributes you want to store
@@ -54,7 +53,7 @@ def save_dashboard_state(name, attributes):
     :param name: the title of the layout (graph title)
     """
     if attributes:
-        saved_dashboards[name] = attributes
+        session['saved_dashboards'][name] = attributes
 
 
 def save_layout_to_db(graph_id, graph_title):
@@ -63,7 +62,8 @@ def save_layout_to_db(graph_id, graph_title):
     exec dbo.opp_addgeteditdeletefind_extdashboardreports {}, 'Add', \'{}\', \'{}\', 'Dash', \'{}\', 'application/json',
     'json', @p_result_status output
     select @p_result_status as result_status
-    """.format(session['sessionID'], graph_id, graph_title, json.dumps(saved_layouts[graph_id], sort_keys=True))
+    """.format(session['sessionID'], graph_id, graph_title,
+               json.dumps(session['saved_layouts'][graph_id], sort_keys=True))
 
     exec_storedproc(query)
 
@@ -75,7 +75,7 @@ def save_dashboard_to_db(dashboard_id, dashboard_title):
     'json', @p_result_status output
     select @p_result_status as result_status
     """.format(session['sessionID'], dashboard_id, dashboard_title,
-               json.dumps(saved_dashboards[dashboard_id], sort_keys=True))
+               json.dumps(session['saved_dashboards'][dashboard_id], sort_keys=True))
 
     exec_storedproc(query)
 
@@ -90,7 +90,7 @@ def delete_layout(graph_id):
 
     exec_storedproc(query)
 
-    del saved_layouts[graph_id]
+    del session['saved_layouts'][graph_id]
 
 
 def delete_dashboard(dashboard_id):
@@ -103,7 +103,7 @@ def delete_dashboard(dashboard_id):
 
     exec_storedproc(query)
 
-    del saved_dashboards[dashboard_id]
+    del session['saved_dashboards'][dashboard_id]
 
 
 def load_graph_menu(graph_type, tile, df_name, args_list, df_const):

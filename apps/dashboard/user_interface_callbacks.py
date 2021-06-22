@@ -418,7 +418,7 @@ for x in range(4):
             raise PreventUpdate
 
         return view_content_style, customize_content_style, layouts_content_style, view_className, layouts_className, \
-            customize_className
+               customize_className
 
 # ************************************************CUSTOMIZE TAB*******************************************************
 # update graph options to match data set
@@ -525,7 +525,7 @@ for x in range(4):
             df_name = master_df_name
 
         # if link state from unlinked --> linked and the data set has not changed, don't update menu, still update graph
-        if ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name == master_df_name)\
+        if ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name == master_df_name) \
                 or ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink'):
             return no_update, 1, no_update
 
@@ -572,13 +572,16 @@ for x in range(4):
 
         elif selected_graph_type == 'Bubble':
             menu = get_bubble_graph_menu(tile=tile,
-                                         x=X_AXIS_OPTIONS[0],
+                                         x=None if df_const is None else
+                                         df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
                                          x_measure=None if df_const is None else
                                          df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
-                                         y=X_AXIS_OPTIONS[0],
+                                         y=None if df_const is None else
+                                         df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
                                          y_measure=None if df_const is None else
                                          df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
-                                         size=X_AXIS_OPTIONS[0],
+                                         size=None if df_const is None else
+                                         df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
                                          size_measure=None if df_const is None else
                                          df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
                                          df_name=df_name,
@@ -1020,6 +1023,19 @@ def _date_picker_inputs(trigger, tile_tab, tile_start_year, tile_end_year, tile_
     return date_tab, start_year, end_year, start_secondary, end_secondary"""
 
 
+@app.callback(
+    Output({'type': 'data-menu-controls', 'index': MATCH}, 'style'),
+    [Input({'type': 'confirm-load-data', 'index': MATCH}, 'style'),
+     Input({'type': 'confirm-data-set-refresh', 'index': MATCH}, 'style')],
+    prevent_initial_call=True
+)
+def _hide_controls_until_data_is_loaded(load_data_trigger, refresh_data_trigger):
+    if load_data_trigger == DATA_CONTENT_HIDE:
+        return {}
+    else:
+        return DATA_CONTENT_HIDE
+
+
 # highlight tiles slaved to displayed data sidebar
 for x in range(4):
     @app.callback(
@@ -1050,6 +1066,7 @@ for x in range(4):
 
 # *************************************************LOADSCREEN*********************************************************
 
+# All clientside callback functions referred to are stored in /assets/ClientsideCallbacks.js
 for x in range(4):
     app.clientside_callback(
         ClientsideFunction(
@@ -1070,7 +1087,6 @@ for x in range(4):
         [Input({'type': 'graph_display', 'index': x}, 'children')],
         State('num-tiles', 'data-num-tiles')
     )
-
 
 app.clientside_callback(
     ClientsideFunction(

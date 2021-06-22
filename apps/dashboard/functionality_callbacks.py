@@ -137,7 +137,7 @@ for x in range(4):
         if link_state == 'fa fa-unlink' and '"type":"tile-link"}.className' in changed_id:
             raise PreventUpdate
 
-        if df_name != None and graph_type in GRAPH_OPTIONS[df_name]:
+        if link_state == 'fa fa-link' and df_name != None and graph_type in GRAPH_OPTIONS[df_name]:
             raise PreventUpdate
 
         # account for tile being linked or not

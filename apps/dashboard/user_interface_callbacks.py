@@ -504,11 +504,18 @@ for x in range(4):
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
         # if link state has changed from linked --> unlinked the data has not changed, prevent update
-        if '"type":"tile-link"}.className' in changed_id and (link_state == 'fa fa-unlink' or link_state == 'fa fa=link'):
+        if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink':
             if selected_graph_type is None:
                 return None, no_update, no_update
             else:
                 raise PreventUpdate
+
+        if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link':
+            if selected_graph_type not in GRAPH_OPTIONS[master_df_name]:
+                return None, no_update, no_update
+            else:
+                raise PreventUpdate
+
 
         for item in dash.callback_context.triggered:
             if '"type":"tile-link"}.className' in item['prop_id']:

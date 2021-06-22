@@ -416,7 +416,7 @@ for x in range(4):
             raise PreventUpdate
 
         return view_content_style, customize_content_style, layouts_content_style, view_className, layouts_className, \
-               customize_className
+            customize_className
 
 # ************************************************CUSTOMIZE TAB*******************************************************
 
@@ -452,7 +452,7 @@ for x in range(4):
             df_name = master_df_name
 
         # if link state from unlinked --> linked and the data set has not changed, don't update menu, still update graph
-        if ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name == master_df_name) \
+        if ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name == master_df_name)\
                 or ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink'):
             return no_update, 1, no_update
 
@@ -908,7 +908,8 @@ for x in range(4):
                 'display': 'inline', 
                 'overflow-y': 'auto'};
                      
-            if (isEquivalent(sidebar_style, DATA_CONTENT_SHOW) || (isEquivalent(master_sidebar_style, DATA_CONTENT_SHOW) && link_state == 'fa fa-link')){
+            if (isEquivalent(sidebar_style, DATA_CONTENT_SHOW) || 
+                (isEquivalent(master_sidebar_style, DATA_CONTENT_SHOW) && link_state == 'fa fa-link')){
                 var tile_class = 'tile-highlight';
             }
             else{

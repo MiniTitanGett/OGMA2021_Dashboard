@@ -429,8 +429,7 @@ for x in range(4):
      Output({'type': 'graph-type-dropdown', 'index': MATCH}, 'options'),
      Output({'type': 'graph-type-dropdown', 'index': MATCH}, 'value')],
     [Input({'type': 'set-graph-options-trigger', 'index': MATCH}, 'options-'),
-     Input({'type': 'tile-link', 'index': ALL}, 'className'),
-     ],
+     Input({'type': 'tile-link', 'index': ALL}, 'className')],
     [State({'type': 'data-set', 'index': MATCH}, 'value'),
      State({'type': 'data-set', 'index': 4}, 'value'),
      State({'type': 'graph-type-dropdown', 'index': MATCH}, 'value')]
@@ -475,8 +474,12 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
 
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+        graph_value = options[0]['value']
 
-    return link_trigger, options, options[0]['value']
+    if graph_type is not None and graph_type in graph_options:
+        graph_value = no_update
+
+    return link_trigger, options, graph_value
 
 
 # update graph menu to match selected graph type
@@ -610,7 +613,7 @@ for x in range(4):
         else:
             raise PreventUpdate
 
-        if '"type":"tile-link"}.className' in changed_id or 'graph-menu-trigger"}.data-' in changed_id:
+        if '"type":"tile-link"}.className' in changed_id or 'graph-menu-trigger"}.data-' in changed_id or '"type":"graph-type-dropdown"}.value' in changed_id:
             update_graph_trigger = 1
         else:
             update_graph_trigger = no_update
@@ -882,7 +885,7 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                 if links_style[i] == 'fa fa-link':
                     prev_selection[i] = df_name
                     if graph_types[i] is None or graph_types[i] in GRAPH_OPTIONS[df_name]:
-                       #graph_triggers[i] = df_name
+                        graph_triggers[i] = df_name
                         options_triggers[i] = df_name
                         df_names[i] = df_name
 
@@ -933,7 +936,7 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                                 date_picker_triggers[i] = "triggered"
                         options_triggers[i] = 'fa fa-unlink'
         else:
-            #graph_triggers[changed_index] = df_name
+            graph_triggers[changed_index] = df_name
             options_triggers[changed_index] = df_name
         prev_selection[changed_index] = df_name
         confirm_button[changed_index] = DATA_CONTENT_HIDE

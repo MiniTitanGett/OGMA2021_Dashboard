@@ -117,11 +117,8 @@ for x in range(4):
         if view_state == 'tile-nav tile-nav--view' or (changed_id == '.' and graph_display):
             raise PreventUpdate
 
-        if len(arg_value) == 0 and '"type":"update-graph-trigger"}.data-graph_menu_trigger' in changed_id:
-            return None
-
         if len(arg_value) == 0:
-            raise PreventUpdate
+            return None
 
         # if unlinked and master changes, prevent update
         if link_state == 'fa fa-unlink' and '"index":4' in changed_id:

@@ -869,7 +869,7 @@ def _load_tile_layout(selected_layout, df_const):
                                  df_const=df_const)
 
     # TODO: Need to add df name
-    customize_content = get_customize_content(tile=tile, graph_type=graph_type, graph_menu=graph_menu,df_name=df_name)
+    customize_content = get_customize_content(tile=tile, graph_type=graph_type, graph_menu=graph_menu, df_name=df_name)
 
     #  --------- create data sidemenu ---------
 
@@ -1055,7 +1055,8 @@ def _load_dashboard_layout(selected_dashboard, df_const):
             graph_menu = load_graph_menu(graph_type=graph_type, tile=tile_index, df_name=df_name, args_list=args_list,
                                          df_const=df_const)
             # TODO: Need to add df name
-            customize_content = get_customize_content(tile=tile_index, graph_type=graph_type, graph_menu=graph_menu,df_name=df_name)
+            customize_content = get_customize_content(tile=tile_index, graph_type=graph_type, graph_menu=graph_menu,
+                                                      df_name=df_name)
             tile_key = {'Tile Title': tile_title, 'Link': link_state, 'Customize Content': customize_content}
             tile_keys[tile_index] = tile_key
 

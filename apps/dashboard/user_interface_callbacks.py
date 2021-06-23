@@ -902,7 +902,7 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                         if df_name == "OPG001":
                             df_names[i] = "OPG010"
                             df_const[df_names[i]] = generate_constants(df_names[i])
-                            data[i] = get_data_menu(i, df_names[i], mode='tile-loading',
+                            data[i] = get_data_menu(i, df_names[i],
                                                     hierarchy_toggle=master_hierarchy_toggle,
                                                     level_value=master_hierarchy_drop,
                                                     nid_path=nid_path, graph_all_toggle=master_graph_child_toggle,

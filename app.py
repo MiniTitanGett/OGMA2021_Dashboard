@@ -1,5 +1,4 @@
 from server import server
-# from apps.OPG001.data import LANGUAGE
 import config
 import dash
 
@@ -17,5 +16,6 @@ def get_app(prefix=''):
         # assets_ignore='BBB - french stylesheet1.css' if LANGUAGE == 'En' else '',
         server=server,
         url_base_pathname=config.BASE_PATHNAME + prefix,
-        suppress_callback_exceptions=True  # Used to avoid init errors
+        suppress_callback_exceptions=True,  # Used to avoid init errors
+        update_title=config.UPDATING_MSG
     )

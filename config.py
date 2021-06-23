@@ -48,6 +48,11 @@ if LOG_REQUEST is None:
 else:
     LOG_REQUEST = (LOG_REQUEST.lower() == 'true')
 
+UPDATING_MSG = os.getenv("UPDATING_MSG")
+
+if UPDATING_MSG is None:
+    UPDATING_MSG = "Updating..."
+
 # logging setup ########################################################################################################
 
 LOG_FORMAT = "[%(asctime)s] %(levelname)s in %(filename)s (fn:%(funcName)s ln:%(lineno)d): %(message)s"

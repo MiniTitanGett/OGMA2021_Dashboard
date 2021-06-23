@@ -56,4 +56,8 @@
   content:'BASCULER LES COLONNES';
 }
 
+._data-loading::after {
+    content: 'Chargement en cours, Veuillez patienter... ';
+}
+
 

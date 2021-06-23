@@ -684,7 +684,7 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
                 '''
                 -If no graph options available. Please select a Data Set!
                 ''')],
-            style = {'margin-left': '15px'}),
+            style={'margin-left': '15px'}),
         html.Div(
             children=graph_menu,
             id={'type': 'div-graph-options', 'index': tile})]
@@ -814,6 +814,8 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, master_df=None):
     """
     :param num_tiles: Desired number of tiles to display.
     :param input_tiles: List of children of existing tiles.
+    :param tile_keys:
+    :param master_df: Name of the master data set being used
     :raise IndexError: If num_tiles < 0 or num_tiles > 4
     :return: Layout of specified number of tiles.
     """

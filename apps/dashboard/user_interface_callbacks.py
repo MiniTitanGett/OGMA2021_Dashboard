@@ -42,11 +42,14 @@ from apps.dashboard.saving_functions import load_graph_menu
 #   TILE LAYOUT
 #       - _switch_tile_tab()
 #   CUSTOMIZE TAB
+#       - _update_graph_type_options()
 #       - _update_graph_menu()
 #   DATA SIDE-MENU
 #       - _change_link()
 #       - _manage_data_sidemenus()
 #       - _highlight_slaved_tiles()
+#   Load Screen
+#       - client side callbacks
 
 
 # *************************************************MAIN LAYOUT********************************************************
@@ -249,7 +252,7 @@ def _change_tab(_tab_clicks, _tab_close_clicks, _tab_add_nclicks,
         del data[deleted_tab_index]
         # shift all tab button indices down one following deleted tab
         for i in tab_toggle_children[deleted_tab_index:]:
-            # decremement close button index
+            # decrement close button index
             i['props']['children'][0]['props']['id']['index'] -= 1
             # decrement tab button index
             i['props']['children'][1]['props']['id']['index'] -= 1
@@ -509,10 +512,14 @@ for x in range(4):
                 return None, no_update, no_update
             else:
                 raise PreventUpdate
-
+        # if link state from unlinked --> linked and the data set has not changed, don't update menu, still update graph
         if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link':
+            if selected_graph_type is None:
+                return None, no_update, no_update
             if selected_graph_type not in GRAPH_OPTIONS[master_df_name]:
                 return None, 1, no_update
+            elif selected_graph_type in GRAPH_OPTIONS[master_df_name]:
+                return no_update, 1, no_update
             else:
                 raise PreventUpdate
 
@@ -523,14 +530,6 @@ for x in range(4):
 
         if link_state == 'fa fa-link':
             df_name = master_df_name
-
-        # if link state from unlinked --> linked and the data set has not changed, don't update menu, still update graph
-        if ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name == master_df_name) \
-                or ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink'):
-            return no_update, 1, no_update
-
-        if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link' and df_name != master_df_name:
-            return None, 1, no_update
 
         # if graph menu trigger has value 'tile closed' then a tile was closed, don't update menu, still update table
         if 'graph-menu-trigger"}.data-' in changed_id and gm_trigger == 'tile closed':
@@ -650,10 +649,6 @@ def _change_link(_selected_layout, _link_clicks, link_trigger, link_state):
 
     if '"type":"tile-link"}.n_clicks' in changed_id:
         # if link button was pressed, toggle the link icon linked <--> unlinked
-        # link_state = 'fa fa-unlink' if link_state == 'fa fa-link' else 'fa fa-link'
-
-        # if link_trigger == 'fa fa-unlink':
-        #    link_state = 'fa fa-unlink'
         if link_state == "fa fa-link":
             link_state = 'fa fa-unlink'
         else:
@@ -891,7 +886,8 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                     if graph_types[i] is None or graph_types[i] in GRAPH_OPTIONS[df_name]:
                         graph_triggers[i] = df_name
                         options_triggers[i] = df_name
-                        df_names[i]=df_name
+                        df_names[i] = df_name
+
                     else:
                         links_style[i] = 'fa fa-unlink'
                         # [i]= 'fa-fa-unlink'

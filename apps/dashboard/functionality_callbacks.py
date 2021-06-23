@@ -111,9 +111,6 @@ for x in range(4):
 
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][-1]
 
-        changed_index = int(search(r'\d+', changed_id).group())
-        print(changed_index)
-
         if '"type":"tile-view"}.className' in changed_id and df_name is None and master_df_name is None:
             return None
 

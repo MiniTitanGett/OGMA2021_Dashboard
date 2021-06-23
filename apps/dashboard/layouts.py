@@ -658,7 +658,7 @@ def get_layout_dashboard():
 # create customize content
 def get_customize_content(tile, graph_type, graph_menu, df_name):
     language = session["language"]
-    print("you are here in get customize")
+
     if df_name == 'OPG010':
         graphs = GRAPH_OPTIONS['OPG010']
     elif df_name == 'OPG001':

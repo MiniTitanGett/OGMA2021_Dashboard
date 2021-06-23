@@ -502,7 +502,7 @@ for x in range(4):
         :return: Graph menu corresponding to selected graph type
         """
 
-        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][-1]
 
         # if link state has changed from linked --> unlinked the data has not changed, prevent update
         if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink':
@@ -516,10 +516,6 @@ for x in range(4):
                 return None, 1, no_update
             else:
                 raise PreventUpdate
-
-        for item in dash.callback_context.triggered:
-            if '"type":"tile-link"}.className' in item['prop_id']:
-                changed_id = item['prop_id']
 
         if link_state == 'fa fa-link':
             df_name = master_df_name

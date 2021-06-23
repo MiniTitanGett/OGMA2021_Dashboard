@@ -658,13 +658,17 @@ def get_layout_dashboard():
 # create customize content
 def get_customize_content(tile, graph_type, graph_menu, df_name):
     language = session["language"]
-    print("you are here in get customize")
     if df_name == 'OPG010':
         graphs = GRAPH_OPTIONS['OPG010']
+        if not graph_type:
+            graph_type = graphs[0]
     elif df_name == 'OPG001':
         graphs = GRAPH_OPTIONS['OPG001']
+        if not graph_type:
+            graph_type = graphs[0]
     else:
         graphs = []
+        graph_type = None
     return [
         html.P(
             "{}:".format(get_label('LBL_Graph_Type')),

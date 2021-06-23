@@ -409,11 +409,11 @@ def get_layout_dashboard():
                             style={'padding': '7px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
                                    'margin-left': '10px', 'margin-right': '14px', 'display': 'inline-block',
                                    'vertical-align': 'top'})],
-                               id='dashboard-reset-symbols',
-                               style={'width': '71px',
-                                      'border': '1px solid {}'.format(CLR['lightgray']),
-                                      'margin': '2px 0', 'border-radius': '6px',
-                                      'display': 'none'}),
+                             id='dashboard-reset-symbols',
+                             style={'width': '71px',
+                                    'border': '1px solid {}'.format(CLR['lightgray']),
+                                    'margin': '2px 0', 'border-radius': '6px',
+                                    'display': 'none'}),
                     style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
                            'position': 'relative', 'vertical-align': 'top'}),
                 html.Button(
@@ -660,15 +660,10 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
     language = session["language"]
     if df_name == 'OPG010':
         graphs = GRAPH_OPTIONS['OPG010']
-        if not graph_type:
-            graph_type = graphs[0]
     elif df_name == 'OPG001':
         graphs = GRAPH_OPTIONS['OPG001']
-        if not graph_type:
-            graph_type = graphs[0]
     else:
         graphs = []
-        graph_type = None
     return [
         html.P(
             "{}:".format(get_label('LBL_Graph_Type')),
@@ -689,7 +684,7 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
                 '''
                 -If no graph options available. Please select a Data Set!
                 ''')],
-            style={'margin-left': '15px'}),
+            style = {'margin-left': '15px'}),
         html.Div(
             children=graph_menu,
             id={'type': 'div-graph-options', 'index': tile})]
@@ -819,8 +814,6 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, master_df=None):
     """
     :param num_tiles: Desired number of tiles to display.
     :param input_tiles: List of children of existing tiles.
-    :param tile_keys: Holds information regarding tile values
-    :param master_df: Name of the master data set being used.
     :raise IndexError: If num_tiles < 0 or num_tiles > 4
     :return: Layout of specified number of tiles.
     """

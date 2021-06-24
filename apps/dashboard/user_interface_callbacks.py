@@ -1051,7 +1051,8 @@ app.clientside_callback(
                 // are considered equivalent
                 return true;
             }
-            var DATA_CONTENT_HIDE = {'display': 'none'};    
+            var DATA_CONTENT_HIDE = {'display': 'none'};  
+            alert("pineapple");  
             if (isEquivalent(load_data_trigger, DATA_CONTENT_HIDE)){
                 return {};
             }
@@ -1062,7 +1063,8 @@ app.clientside_callback(
     """,
     Output({'type': 'data-menu-controls', 'index': MATCH}, 'style'),
     [Input({'type': 'confirm-load-data', 'index': MATCH}, 'style'),
-     Input({'type': 'confirm-data-set-refresh', 'index': MATCH}, 'style')],
+     Input({'type': 'confirm-data-set-refresh', 'index': MATCH}, 'style'),
+     Input({'type': 'tile-data', 'index': MATCH}, 'n_clicks')],
     prevent_initial_call=True
 )
 # def _hide_controls_until_data_is_loaded(load_data_trigger, refresh_data_trigger):
@@ -1127,26 +1129,8 @@ for x in range(4):
         [Input({'type': 'data-tile', 'index': ALL}, 'style'),
          Input({'type': 'tile-link', 'index': x}, 'className')],
         [State({'type': 'data-tile', 'index': x}, 'style'),
-         State({'type': 'data-tile', 'index': 4}, 'style'),
-         ]
+         State({'type': 'data-tile', 'index': 4}, 'style')]
     )
-#    def _highlight_child_tiles(_sidebar_styles, link_state, sidebar_style, master_sidebar_style):
-#
-#        """
-#        :param _sidebar_styles: Detects hiding/showing of data side-menus
-#        :param sidebar_style: State of the style of the data side-menu
-#        :param master_sidebar_style: State of the style of the parent data side-menu
-#        :param link_state: State of the link/unlink icon
-#        :return: Highlights tiles child to the displayed date side-menu
-#        """
-#
-#        if sidebar_style == DATA_CONTENT_SHOW or (
-#                master_sidebar_style == DATA_CONTENT_SHOW and link_state == 'fa fa-link'):
-#            tile_class = 'tile-highlight'
-#        else:
-#            tile_class = 'tile-container'
-#
-#        return tile_class
 
 # *************************************************LOADSCREEN*********************************************************
 
@@ -1159,7 +1143,8 @@ for x in range(4):
         ),
         Output({'type': 'tile-menu-header', 'index': x}, 'n_clicks'),
         [Input({'type': 'tile-view', 'index': x}, 'n_clicks')],
-        [State({'type': 'tile-view', 'index': x}, 'className')]
+        [State({'type': 'tile-view', 'index': x}, 'className')],
+        prevent_initial_call=True
     )
 
     app.clientside_callback(
@@ -1169,7 +1154,8 @@ for x in range(4):
         ),
         Output({'type': 'graph_display', 'index': x}, 'n_clicks'),
         [Input({'type': 'graph_display', 'index': x}, 'children')],
-        State('num-tiles', 'data-num-tiles')
+        State('num-tiles', 'data-num-tiles'),
+        prevent_initial_call=True
     )
 
 app.clientside_callback(
@@ -1180,7 +1166,8 @@ app.clientside_callback(
     Output('dataset-confirmation-symbols', 'n_clicks'),
     [Input({'type': 'confirm-load-data', 'index': ALL}, 'n_clicks'),
      Input({'type': 'confirm-data-set-refresh', 'index': ALL}, 'n_clicks'),
-     Input('select-dashboard-dropdown', 'value')]
+     Input('select-dashboard-dropdown', 'value')],
+    prevent_initial_call=True
 )
 
 app.clientside_callback(
@@ -1189,5 +1176,6 @@ app.clientside_callback(
         function_name='datasetRemoveLoadScreen'
     ),
     Output('df-constants-storage', 'n_clicks'),
-    [Input('df-constants-storage', 'data')]
+    [Input('df-constants-storage', 'data')],
+    prevent_initial_call=True
 )

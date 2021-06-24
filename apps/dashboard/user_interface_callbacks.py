@@ -446,7 +446,7 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
 
     graph_options = no_update
     options = []
-    graph_value = None
+    graph_value = no_update
     link_trigger = no_update
 
     if '"type":"tile-link"}.className' in changed_id:

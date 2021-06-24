@@ -1052,7 +1052,6 @@ app.clientside_callback(
                 return true;
             }
             var DATA_CONTENT_HIDE = {'display': 'none'};  
-            alert("pineapple");  
             if (isEquivalent(load_data_trigger, DATA_CONTENT_HIDE)){
                 return {};
             }

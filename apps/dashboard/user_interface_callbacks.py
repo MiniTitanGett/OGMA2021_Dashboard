@@ -38,7 +38,7 @@ from apps.dashboard.data import VIEW_CONTENT_HIDE, VIEW_CONTENT_SHOW, CUSTOMIZE_
 #   TAB LAYOUT
 #       - _change_tab()
 #       - _update_num_tiles()
-#       - _update_tab_tile()
+#       - _update_tab_title()
 #   TILE LAYOUT
 #       - _switch_tile_tab()
 #   CUSTOMIZE TAB
@@ -165,22 +165,22 @@ def _new_and_delete(_new_clicks, _close_clicks, _dashboard_reset, input_tiles, n
 
 
 # unlock NEW button after end of callback chain
-@app.callback(
+app.clientside_callback(
+    """
+    function(_graph_options, disabled){
+        if (!disabled) {
+            // Do Nothing
+        }
+        else{
+            return false;
+        }
+    }
+    """,
     Output('button-new', 'disabled'),
     [Input({'type': 'div-graph-options', 'index': ALL}, 'children')],
     [State('button-new', 'disabled')],
     prevent_initial_call=True
 )
-def _unlock_new_button(_graph_options, disabled):
-    """
-    :param _graph_options: Detects when the last callback, _update_graph_menu, in the UI update order finishes and
-    encodes the state of all graph menus
-    :return: Enables the NEW button
-    """
-    # do not unlock NEW button if already unlocked
-    if not disabled:
-        raise PreventUpdate
-    return False
 
 
 # *************************************************TAB LAYOUT********************************************************

@@ -1123,15 +1123,13 @@ def _load_dashboard_layout(selected_dashboard, df_const):
 
 
 # resets selected dashboard dropdown value to ''
-@app.callback(
+app.clientside_callback(
+    """
+    function(_trigger){
+        return '';
+    }
+    """,
     Output('select-dashboard-dropdown', 'value'),
     [Input({'type': 'select-range-trigger', 'index': ALL}, 'data-dashboard-tab')],
     prevent_initial_call=True
 )
-def _reset_selected_dashboard(_trigger):
-    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-
-    if changed_id == '.':
-        raise PreventUpdate
-
-    return ''

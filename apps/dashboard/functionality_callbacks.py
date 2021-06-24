@@ -276,19 +276,22 @@ for x in range(5):
 
 
 # swaps between displaying the SPECIFIC and LEVEL hierarchy menus
-@app.callback(
+app.clientside_callback(
+    """
+    function(hierarchy_toggle){
+        if (hierarchy_toggle == 'Level Filter'){
+            return [{}, {'display': 'none'}];
+        }
+        else{
+            return [{'display': 'none'}, {}];
+        }
+    }
+    """,
     [Output({'type': 'hierarchy_level_filter', 'index': MATCH}, 'style'),
      Output({'type': 'hierarchy_specific_filter', 'index': MATCH}, 'style')],
     [Input({'type': 'hierarchy-toggle', 'index': MATCH}, 'value')],
     prevent_initial_call=True
 )
-def _show_filter_based_on_hierarchy_toggle(hierarchy_toggle):
-    if [i['prop_id'] for i in dash.callback_context.triggered][0] == '.':
-        raise PreventUpdate
-    if hierarchy_toggle == 'Level Filter':
-        return {}, {'display': 'none'}
-    else:
-        return {'display': 'none'}, {}
 
 
 # ***************************************************DATE PICKER****************************************************
@@ -509,17 +512,22 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
 
 
 # enable past __ ___ selections
-@app.callback(
+app.clientside_callback(
+    """
+    function(selected_timeframe){
+        if (selected_timeframe == 'to-current'){
+            return [false, false];
+        }
+        else{
+            return [true, true];
+        }
+    }
+    """,
     [Output({'type': 'num-periods', 'index': MATCH}, 'disabled'),
      Output({'type': 'period-type', 'index': MATCH}, 'disabled')],
     [Input({'type': 'radio-timeframe', 'index': MATCH}, 'value')],
     prevent_initial_call=True
 )
-def _unlock_past_x_selections(selected_timeframe):
-    if [i['prop_id'] for i in dash.callback_context.triggered][0] == '.':
-        raise PreventUpdate
-    disabled = False if selected_timeframe == 'to-current' else True
-    return disabled, disabled
 
 
 # *************************************************DATA-TABLE*********************************************************

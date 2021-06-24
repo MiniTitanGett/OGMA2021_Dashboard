@@ -1052,7 +1052,8 @@ app.clientside_callback(
                 return true;
             }
             var DATA_CONTENT_HIDE = {'display': 'none'};  
-            if (isEquivalent(load_data_trigger, DATA_CONTENT_HIDE)){
+            if (isEquivalent(load_data_trigger, DATA_CONTENT_HIDE) 
+                || !isEquivalent(refresh_data_trigger, DATA_CONTENT_HIDE)){
                 return {};
             }
             else{
@@ -1062,9 +1063,7 @@ app.clientside_callback(
     """,
     Output({'type': 'data-menu-controls', 'index': MATCH}, 'style'),
     [Input({'type': 'confirm-load-data', 'index': MATCH}, 'style'),
-     Input({'type': 'confirm-data-set-refresh', 'index': MATCH}, 'style'),
-     Input({'type': 'tile-data', 'index': MATCH}, 'n_clicks')],
-    prevent_initial_call=True
+     Input({'type': 'confirm-data-set-refresh', 'index': MATCH}, 'style')]
 )
 # def _hide_controls_until_data_is_loaded(load_data_trigger, refresh_data_trigger):
 #    if load_data_trigger == DATA_CONTENT_HIDE:

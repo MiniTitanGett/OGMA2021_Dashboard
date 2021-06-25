@@ -129,7 +129,7 @@ def get_data_set_picker(tile, df_name):
     return [
         html.H6(
             "{}:".format(get_label('LBL_Data_Set')),
-            style={'color': CLR['text1'], 'margin-top': '25px', 'display': 'inline-block','cursor':'pointer'}),
+            style={'color': CLR['text1'], 'margin-top': '25px', 'display': 'inline-block', 'cursor':'pointer'}),
         html.Div([
             dcc.Dropdown(
                 id={'type': 'data-set', 'index': tile},
@@ -146,23 +146,23 @@ def get_data_set_picker(tile, df_name):
                         id={'type': 'confirm-load-data', 'index': tile},
                         className='fa fa-check',
                         style=DATA_CONTENT_HIDE if df_name is None or df_name in session else
-                        {'padding': '10px 0', 'cursor' : 'pointer', 'width': '15px', 'height': '15px', 'position': 'relative',
-                         'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}),
+                        {'padding': '10px 0', 'cursor': 'pointer', 'width': '15px', 'height': '15px',
+                         'position': 'relative', 'margin-right': '10px', 'margin-left': '10px',
+                         'vertical-align': 'top'}),
                     html.I(
                         html.Span(
                             get_label("LBL_Refresh_Data_Set"),
                             className='save-symbols-tooltip'),
                         id={'type': 'confirm-data-set-refresh', 'index': tile},
                         className='fa fa-refresh',
-                        style={'padding': '10px 0','cursor':'pointer', 'width': '15px', 'height': '15px',
-                               'position': 'relative',
-                               'margin-right': '10px', 'margin-left': '10px',
+                        style={'padding': '10px 0', 'cursor': 'pointer', 'width': '15px', 'height': '15px',
+                               'position': 'relative', 'margin-right': '10px', 'margin-left': '10px',
                                'vertical-align': 'top'} if df_name is not None and df_name in session else
                         DATA_CONTENT_HIDE)],
                     id='dataset-confirmation-symbols'),
                 style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
                        'position': 'relative', 'vertical-align': 'top', 'background-color': 'white', 'width': '40px',
-                       'border': '1px solid {}'.format(CLR['lightgray']), 'border-radius': '6px','cursor':'pointer'})],
+                       'border': '1px solid {}'.format(CLR['lightgray']), 'border-radius': '6px', 'cursor':'pointer'})],
             style={'display': 'flex'})
     ]
 
@@ -409,11 +409,11 @@ def get_layout_dashboard():
                             style={'padding': '7px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
                                    'margin-left': '10px', 'margin-right': '14px', 'display': 'inline-block',
                                    'vertical-align': 'top'})],
-                        id='dashboard-reset-symbols',
-                        style={'width': '71px',
-                               'border': '1px solid {}'.format(CLR['lightgray']),
-                               'margin': '2px 0', 'border-radius': '6px',
-                               'display': 'none'}),
+                             id='dashboard-reset-symbols',
+                             style={'width': '71px',
+                                    'border': '1px solid {}'.format(CLR['lightgray']),
+                                    'margin': '2px 0', 'border-radius': '6px',
+                                    'display': 'none'}),
                     style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
                            'position': 'relative', 'vertical-align': 'top'}),
                 html.Button(

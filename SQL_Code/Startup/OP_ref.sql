@@ -430,6 +430,8 @@ EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Make_A_Hierarchy_Selec
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Make_A_Hierarchy_Selection',@language = 'Fr', @ref_desc = 'Fr: Make a Hierarchy Selection'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Make_A_Variable_Selection',@language = 'En', @ref_desc = 'Make a Variable Selection'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Make_A_Variable_Selection',@language = 'Fr', @ref_desc = 'Fr: Make a Variable Selection'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Please_Select_A_Data_Set_To_View_Customization_Options',@language = 'En', @ref_desc = 'Please select a data set to view customization options'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Please_Select_A_Data_Set_To_View_Customization_Options',@language = 'Fr', @ref_desc = 'Please select a data set to view customization options'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Lines',@language = 'En', @ref_desc = 'Lines'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Lines',@language = 'Fr', @ref_desc = 'Fr: Lines'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Points',@language = 'En', @ref_desc = 'Points'

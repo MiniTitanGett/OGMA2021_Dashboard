@@ -657,34 +657,44 @@ def get_layout_dashboard():
 
 # create customize content
 def get_customize_content(tile, graph_type, graph_menu, df_name):
-    language = session["language"]
     if df_name == 'OPG010':
         graphs = GRAPH_OPTIONS['OPG010']
     elif df_name == 'OPG001':
         graphs = GRAPH_OPTIONS['OPG001']
     else:
         graphs = []
+
+    options = []
+    for i in graphs:
+        options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+
     return [
-        html.P(
-            "{}:".format(get_label('LBL_Graph_Type')),
-            style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
         html.Div(
-            dcc.Dropdown(
-                id={'type': 'graph-type-dropdown', 'index': tile},
-                clearable=False,
-                options=[{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in graphs],
-                value=graph_type,
-                style={'max-width': '405px', 'width': '100%', 'font-size': '13px'}),
-            style={'margin-left': '15px'}),
-        html.Div([
-            dcc.Markdown(
-                '''
-                If no graph options available. Please select a Data Set!
-                ''' if language == 'En' else
-                '''
-                -If no graph options available. Please select a Data Set!
-                ''')],
-            style={'margin-left': '15px'}),
+            id={'type': 'div-customize-warning-message', 'index': tile},
+            children=[
+                dcc.Markdown(
+                    get_label("LBL_Please_Select_A_Data_Set_To_View_Customization_Options")
+                )],
+            style={'margin-left': '15px'} if df_name is None else
+            DATA_CONTENT_HIDE),
+        html.Div(
+            id={'type': 'div-graph-type', 'index': tile},
+            children=[
+                html.P(
+                    "{}:".format(get_label('LBL_Graph_Type')),
+                    style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
+                html.Div(
+                    dcc.Dropdown(
+                        id={'type': 'graph-type-dropdown', 'index': tile},
+                        clearable=False,
+                        options=[{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in graphs],
+                        value=graph_type if graph_type is not None else options[0]['value'] if len(options) != 0 else
+                        None,  # graph_type,
+                        style={'max-width': '405px', 'width': '100%', 'font-size': '13px'}),
+                ),
+            ],
+            style=DATA_CONTENT_HIDE if df_name is None else
+            {'margin-left': '15px'}),
         html.Div(
             children=graph_menu,
             id={'type': 'div-graph-options', 'index': tile})]

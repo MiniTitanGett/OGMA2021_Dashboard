@@ -420,7 +420,7 @@ for x in range(4):
             raise PreventUpdate
 
         return view_content_style, customize_content_style, layouts_content_style, view_className, layouts_className, \
-               customize_className
+            customize_className
 
 
 # ************************************************CUSTOMIZE TAB*******************************************************
@@ -439,7 +439,7 @@ for x in range(4):
      State({'type': 'graph-type-dropdown', 'index': MATCH}, 'value'),
      State({'type': 'graph-type-dropdown', 'index': MATCH}, 'options')]
 )
-def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, graph_type, type_options):
+def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, graph_type, _type_options):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.' or trigger is None or link_states is []:
@@ -492,7 +492,9 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
     else:
         graph_value = graph_type
 
-    return link_trigger, options, graph_value, type_style, message_style # options[0]['value'] if graph_type is None else graph_type
+    return link_trigger, options, graph_value, type_style, message_style
+    # options[0]['value'] if graph_type is None else graph_type
+
 
 # update graph menu to match selected graph type
 for x in range(4):
@@ -528,8 +530,9 @@ for x in range(4):
                 raise PreventUpdate
 
         # if link state from unlinked --> linked and the data set has not changed, don't update menu, still update graph
-        if ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link') or \
-                ('type":"graph-type-dropdown"}.value' in changed_id and link_state == 'fa fa-link' and selected_graph_type is None):
+        if ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link') \
+                or ('type":"graph-type-dropdown"}.value' in changed_id and link_state == 'fa fa-link'
+                    and selected_graph_type is None):
             if selected_graph_type not in GRAPH_OPTIONS[master_df_name] or selected_graph_type is None:
                 return None, 1, no_update
             elif selected_graph_type in GRAPH_OPTIONS[master_df_name]:

@@ -107,8 +107,8 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
                 html.Div(
                     children=hierarchy_button_path if hierarchy_button_path else [],
                     id={'type': 'hierarchy_display_button', 'index': tile},
-                    style={'display': '', 'overflow': 'scroll', 'width': '100%',
-                           'height': '100px','padding left': '5px'}),
+                    style={'display': '', 'overflow': 'scroll', 'width': '100%', 'height': '100px',
+                           'padding left': '5px'}),
                 dcc.Checklist(
                     id={'type': 'graph_children_toggle', 'index': tile},
                     options=[{'label': get_label('LBL_Graph_All_In_Dropdown'),

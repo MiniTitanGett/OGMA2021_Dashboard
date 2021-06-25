@@ -421,7 +421,7 @@ for x in range(4):
             raise PreventUpdate
 
         return view_content_style, customize_content_style, layouts_content_style, view_className, layouts_className, \
-            customize_className
+               customize_className
 
 
 # ************************************************CUSTOMIZE TAB*******************************************************
@@ -429,14 +429,18 @@ for x in range(4):
 @app.callback(
     [Output({'type': 'set-tile-link-trigger', 'index': MATCH}, 'link-'),
      Output({'type': 'graph-type-dropdown', 'index': MATCH}, 'options'),
-     Output({'type': 'graph-type-dropdown', 'index': MATCH}, 'value')],
+     Output({'type': 'graph-type-dropdown', 'index': MATCH}, 'value'),
+     Output({'type': 'div-graph-type', 'index': MATCH}, 'style'),
+     Output({'type': 'div-customize-warning-message', 'index': MATCH}, 'style')],
     [Input({'type': 'set-graph-options-trigger', 'index': MATCH}, 'options-'),
-     Input({'type': 'tile-link', 'index': ALL}, 'className')],
+     Input({'type': 'tile-link', 'index': ALL}, 'className'),
+     ],
     [State({'type': 'data-set', 'index': MATCH}, 'value'),
      State({'type': 'data-set', 'index': 4}, 'value'),
-     State({'type': 'graph-type-dropdown', 'index': MATCH}, 'value')]
+     State({'type': 'graph-type-dropdown', 'index': MATCH}, 'value'),
+     State({'type': 'graph-type-dropdown', 'index': MATCH}, 'options')]
 )
-def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, graph_type):
+def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, graph_type, type_options):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.' or trigger is None or link_states is []:
@@ -446,8 +450,11 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
 
     graph_options = no_update
     options = []
-    graph_value = no_update
-    link_trigger = no_update
+
+    link_trigger = no_update  # None
+
+    type_style = {'margin-left': '15px'}
+    message_style = DATA_CONTENT_HIDE
 
     if '"type":"tile-link"}.className' in changed_id:
         if df_name_parent == "OPG001":
@@ -478,13 +485,15 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
         graph_options.sort()
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+
+    if '"type":"tile-link"}.className' not in changed_id and graph_type is None:
         graph_value = options[0]['value']
+    elif '"type":"tile-link"}.className' in changed_id and graph_type is not None:
+        graph_value = None
+    else:
+        graph_value = graph_type
 
-    if graph_type is not None and graph_type in graph_options:
-        graph_value = no_update
-
-    return link_trigger, options, graph_value
-
+    return link_trigger, options, graph_value, type_style, message_style # options[0]['value'] if graph_type is None else graph_type
 
 # update graph menu to match selected graph type
 for x in range(4):
@@ -520,10 +529,9 @@ for x in range(4):
                 raise PreventUpdate
 
         # if link state from unlinked --> linked and the data set has not changed, don't update menu, still update graph
-        if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link':
-            if selected_graph_type is None:
-                return None, no_update, no_update
-            if selected_graph_type not in GRAPH_OPTIONS[master_df_name]:
+        if ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link') or \
+                ('type":"graph-type-dropdown"}.value' in changed_id and link_state == 'fa fa-link' and selected_graph_type is None):
+            if selected_graph_type not in GRAPH_OPTIONS[master_df_name] or selected_graph_type is None:
                 return None, 1, no_update
             elif selected_graph_type in GRAPH_OPTIONS[master_df_name]:
                 return no_update, 1, no_update

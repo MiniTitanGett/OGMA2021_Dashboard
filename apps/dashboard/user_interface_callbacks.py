@@ -454,12 +454,14 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
             graph_options = GRAPH_OPTIONS["OPG001"]
         elif df_name_parent == "OPG010":
             graph_options = GRAPH_OPTIONS["OPG010"]
+        graph_options.sort()
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
     elif trigger == 'fa fa-unlink':
         link_trigger = "fa fa-unlink"
         if df_name is not None:
             graph_options = GRAPH_OPTIONS[df_name]
+            graph_options.sort()
             for i in graph_options:
                 options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
     else:
@@ -473,7 +475,7 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
                 link_states[changed_index] = "fa fa-unlink"
         else:
             graph_options = []
-
+        graph_options.sort()
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
         graph_value = options[0]['value']

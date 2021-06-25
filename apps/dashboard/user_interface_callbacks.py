@@ -20,8 +20,7 @@ from urllib.parse import parse_qsl
 from flask import url_for
 
 # Internal Packages
-from apps.dashboard.layouts import get_line_graph_menu, get_bar_graph_menu, get_scatter_graph_menu, \
-    get_table_graph_menu, \
+from apps.dashboard.layouts import get_line_scatter_graph_menu, get_bar_graph_menu, get_table_graph_menu, \
     get_tile_layout, change_index, get_box_plot_menu, get_default_tab_content, get_layout_dashboard, get_layout_graph, \
     get_data_menu, get_sankey_menu, get_dashboard_title_input, get_bubble_graph_menu
 from apps.dashboard.app import app
@@ -548,13 +547,15 @@ for x in range(4):
         tile = int(dash.callback_context.inputs_list[0]['id']['index'])
 
         # apply graph selection and generate menu
-        if selected_graph_type == 'Line':
-            menu = get_line_graph_menu(tile=tile,
-                                       x=X_AXIS_OPTIONS[0],
-                                       y=df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
-                                       measure_type=df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
-                                       df_name=df_name,
-                                       df_const=df_const)
+        if selected_graph_type == 'Line' or selected_graph_type == 'Scatter':
+            menu = get_line_scatter_graph_menu(tile=tile,
+                                               x=X_AXIS_OPTIONS[0],
+                                               y=None if df_const is None else
+                                               df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
+                                               mode=selected_graph_type,
+                                               measure_type=None if df_const is None else
+                                               df_const[df_name]['MEASURE_TYPE_OPTIONS'][0], df_name=df_name,
+                                               df_const=df_const)
 
         elif selected_graph_type == 'Bar':
             menu = get_bar_graph_menu(tile=tile,
@@ -562,18 +563,10 @@ for x in range(4):
                                       y=None if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
                                       measure_type=None if df_const is None else
                                       df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
+                                      orientation=None,
+                                      animate=None,
                                       df_name=df_name,
                                       df_const=df_const)
-
-        elif selected_graph_type == 'Scatter':
-            menu = get_scatter_graph_menu(tile=tile,
-                                          x=X_AXIS_OPTIONS[0],
-                                          y=None if df_const is None else
-                                          df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
-                                          measure_type=None if df_const is None else
-                                          df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
-                                          df_name=df_name,
-                                          df_const=df_const)
 
         elif selected_graph_type == 'Bubble':
             menu = get_bubble_graph_menu(tile=tile,
@@ -1055,7 +1048,7 @@ app.clientside_callback(
             }
             var DATA_CONTENT_HIDE = {'display': 'none'};  
             if (isEquivalent(load_data_trigger, DATA_CONTENT_HIDE) 
-                || !isEquivalent(refresh_data_trigger, DATA_CONTENT_HIDE)){
+                && !isEquivalent(refresh_data_trigger, DATA_CONTENT_HIDE)){
                 return {};
             }
             else{

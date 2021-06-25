@@ -951,11 +951,12 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, master_df=None):
 # ***************************************************GRAPH MENUS*****************************************************
 
 # line graph menu layout
-def get_line_graph_menu(tile, x, y, measure_type, df_name, df_const):
+def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, df_const):
     """
     :param measure_type: the measure type value
     :param y: the y-axis value
     :param x: the x-axis value
+    :param mode: the mode for the graph
     :param tile: Index of the tile the line graph menu corresponds to.
     :param df_name: Name of the data set being used.
     :param df_const: Dataframe constants
@@ -964,6 +965,7 @@ def get_line_graph_menu(tile, x, y, measure_type, df_name, df_const):
     # (args-value: {})[0] = x-axis
     # (args-value: {})[1] = y-axis (measure type)
     # (args-value: {})[2] = graphed variables
+    # (args-value: {})[3] = mode
 
     return [
         html.P(
@@ -1017,16 +1019,34 @@ def get_line_graph_menu(tile, x, y, measure_type, df_name, df_const):
                         multi=True,
                         clearable=False,
                         style={'font-size': '13px'})],
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})]),
+            html.Div([
+                html.Div([
+                    html.P(
+                        "{}:".format(get_label('LBL_Display')),
+                        style={'color': CLR['text1'], 'font-size': '13px'})],
+                    style={'display': 'inline-block', 'width': '60px', 'position': 'relative', 'top': '-3px',
+                           'margin-right': '15px'}),
+                html.Div([
+                    dcc.RadioItems(
+                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
+                        options=[{'label': get_label('LBL_Lines'), 'value': 'Line'},
+                                 {'label': get_label('LBL_Points'), 'value': 'Scatter'},
+                                 {'label': get_label('LBL_Lines_And_Points'), 'value': 'Lines and Points'}],
+                        value=mode if mode else 'Lines',
+                        style={'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})])
         ], style={'margin-left': '15px'})]
 
 
 # bar graph menu layout
-def get_bar_graph_menu(tile, x, y, measure_type, df_name, df_const):
+def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, df_name, df_const):
     """
     :param measure_type: the measure type value
     :param y: the y-axis value
     :param x: the x-axis value
+    :param orientation: the orientation value
+    :param animate: the animate graph value
     :param tile: Index of the tile the bar graph menu corresponds to.
     :param df_name: Name of the data set being used.
     :param df_const: Dataframe constants
@@ -1102,87 +1122,16 @@ def get_bar_graph_menu(tile, x, y, measure_type, df_name, df_const):
                     dcc.RadioItems(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
                         options=[{'label': get_label('LBL_' + i), 'value': i} for i in ['Vertical', 'Horizontal']],
-                        value='Vertical',
+                        value=orientation if orientation else 'Vertical',
                         style={'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
             dcc.Checklist(
                 id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
                 options=[{'label': get_label('LBL_Animate_Over_Time'),
                           'value': 'animate'}],
-                value=[],
+                value=animate if animate else [],
                 style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
 
-        ], style={'margin-left': '15px'})]
-
-
-# scatter graph menu layout
-def get_scatter_graph_menu(tile, x, y, measure_type, df_name, df_const):
-    """
-    :param measure_type: the measure type value
-    :param y: the y-axis value
-    :param x: the x-axis value
-    :param tile: Index of the tile the scatter graph menu corresponds to.
-    :param df_name: Name of the data set being used.
-    :param df_const: Dataframe constants
-    :return: Menu with options to modify a scatter graph.
-    """
-    # (args-value: {})[0] = x-axis
-    # (args-value: {})[1] = y-axis (measure type)
-    # (args-value: {})[2] = graphed variables
-
-    return [
-        html.P(
-            "{}:".format(get_label('LBL_Graph_Options')),
-            style={'margin-top': '10px', 'color': CLR['text1'], 'font-size': '15px'}),
-        html.Div([
-            html.Div([
-                html.Div([
-                    html.P(
-                        "{}:".format(get_label('LBL_X_Axis')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
-                           'margin-right': '5px'}),
-                html.Div([
-                    dcc.Dropdown(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
-                        options=[{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in
-                                 X_AXIS_OPTIONS],
-                        value=x,
-                        clearable=False,
-                        style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
-            html.Div([
-                html.Div([
-                    html.P(
-                        "{}:".format(get_label('LBL_Y_Axis')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
-                           'margin-right': '5px'}),
-                html.Div([
-                    dcc.Dropdown(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
-                        options=[] if df_const is None else [{'label': i, 'value': i} for i in
-                                                             df_const[df_name]['MEASURE_TYPE_OPTIONS']],
-                        value=measure_type,
-                        clearable=False,
-                        style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
-            html.Div([
-                html.Div([
-                    html.P(
-                        "{}:".format(get_label('LBL_Graphed_Variables')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '60px', 'position': 'relative', 'top': '-3px',
-                           'margin-right': '15px'}),
-                html.Div([
-                    dcc.Dropdown(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
-                        options=[] if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
-                        value=y,
-                        multi=True,
-                        clearable=False,
-                        style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})])
         ], style={'margin-left': '15px'})]
 
 

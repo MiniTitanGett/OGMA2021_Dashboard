@@ -993,7 +993,8 @@ num-periods:disabled {
 
 
 }
-/* Loading */
+/* Loading
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
 ._data-loading {
     position: fixed;
     z-index: 100;
@@ -1101,4 +1102,17 @@ num-periods:disabled {
   @-o-keyframes fadein {
       from { opacity: 0; }
       to   { opacity: 1; }
+  }
+
+
+/* Popup
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+
+.prompt-box {
+    position: fixed;
+    z-index: 1000;
+    top: 10%;
+    left: 0;
+    width: 100%;
+    height: 100%;
   }

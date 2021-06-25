@@ -116,11 +116,12 @@ def get_hierarchy_col(hierarchy_type, hierarchy_level_dropdown, hierarchy_graph_
 
 # ************************************************GRAPH FUNCTIONS**************************************************
 # line graph layout
-def get_line_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
-                    hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const):
+def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
+                            hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const):
     # arg_value[0] = xaxis selector
     # arg_value[1] = measure type selector
     # arg_value[2] = variable names selector
+    # arg_value[3] = mode
     language = session["language"]
 
     # Check on whether we have enough information to attempt to get data for a graph
@@ -197,6 +198,13 @@ def get_line_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level
                 custom_data=[hierarchy_col, 'Variable Name'])
             fig.update_layout(legend_title_text=legend_title_text)
 
+            if arg_value[3] == 'Line':
+                fig.update_traces(mode='lines')
+            elif arg_value[3] == 'Scatter':
+                fig.update_traces(mode='markers')
+            else:
+                fig.update_traces(mode='lines+markers')
+
             hovertemplate = get_label('LBL_Gen_Hover_Data', df_name)
             hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event')).replace('%AXIS-A%',
                                                                                                             '%{x}')
@@ -209,121 +217,6 @@ def get_line_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level
                                                        arg_value[2], df_name, df_const))
     else:
         fig = px.line(
-            title=get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, arg_value[2],
-                                           df_name, df_const))
-    fig.update_layout(
-        yaxis={'title': arg_value[1]},
-        xaxis={'title': 'Date of Event', 'type': 'date'},
-        overwrite=True,
-        plot_bgcolor='rgba(0, 0, 0, 0)',
-        paper_bgcolor='rgba(0, 0, 0, 0)')
-    graph = dcc.Graph(
-        id='graph-display',
-        className='fill-container',
-        responsive=True,
-        config=dict(locale=language.lower()),
-        figure=fig)
-
-    return graph
-
-
-# scatter graph layout
-def get_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
-                       hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const):
-    # arg_value[0] = xaxis selector
-    # arg_value[1] = measure type selector
-    # arg_value[2] = variable names selector
-    language = session["language"]
-
-    # Check whether we have enough information to attempt getting data for a graph
-    if hierarchy_type == 'Level Filter' and None not in [arg_value, hierarchy_level_dropdown, hierarchy_type,
-                                                         hierarchy_graph_children, df_name, df_const] \
-            or hierarchy_type == 'Specific Item' and None not in [arg_value, hierarchy_path, hierarchy_type,
-                                                                  hierarchy_graph_children, df_name, df_const]:
-        # Specialty filtering
-        filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[2], df_const)
-        hierarchy_col = get_hierarchy_col(hierarchy_type, hierarchy_level_dropdown, hierarchy_graph_children,
-                                          hierarchy_path, df_name, df_const)
-
-        # if hierarchy type is "Level Filter", or "Specific Item" while "Graph all in Dropdown" is selected
-        if hierarchy_type == 'Level Filter' or (hierarchy_type == 'Specific Item' and
-                                                hierarchy_graph_children == ['graph_children']):
-            # Title setup
-            if tile_title:
-                title = tile_title
-            else:
-                # Generate title if there is no user entered title
-                if hierarchy_type == 'Level Filter':
-                    # Whole level graph title
-                    title = '{}: {} vs {}'.format(get_label('LBL_' + hierarchy_level_dropdown, df_name), arg_value[1],
-                                                  get_label('LBL_Time'))
-                elif len(hierarchy_path) != 0:
-                    # Specific item's children graph title
-                    if language == 'En':
-                        title = '{}\'s {}'.format(hierarchy_path[-1], get_label('LBL_Children'))
-                    else:
-                        title = '{} {}'.format(get_label('LBL_Children_Of'), hierarchy_path[-1])
-                    title = title + ': {} vs {}'.format(arg_value[1], get_label('LBL_Time'))
-                else:
-                    # Root's children graph title
-                    title = '{}: {} vs {}'.format(get_label("LBL_Roots_Children"), arg_value[1], get_label('LBL_Time'))
-
-        # else, hierarchy type is specific item while "Graph all in Dropdown" is unselected
-        else:
-            # Title setup
-            if tile_title:
-                title = tile_title
-            else:
-                if hierarchy_specific_dropdown:
-                    title = '{}: {} vs {}'.format(hierarchy_specific_dropdown, arg_value[1], get_label('LBL_Time'))
-                else:
-                    if len(hierarchy_path) == 0:
-                        title = ""
-                    else:
-                        title = '{}: {} vs {}'.format(hierarchy_path[-1], arg_value[1], get_label('LBL_Time'))
-
-        # if df is not empty, create graph
-        if not filtered_df.empty:
-
-            title += '<br><sub>{} {} </sub>'.format(get_label('LBL_Data_Accessed_On'), datetime.date(datetime.now()))
-
-            # if hierarchy type is "Level Filter", or "Specific Item" while "Graph all in Dropdown" is selected
-            if hierarchy_type == 'Level Filter' or (hierarchy_type == 'Specific Item' and
-                                                    hierarchy_graph_children == ['graph_children']):
-                color = hierarchy_col
-                legend_title_text = get_label('LBL_' + hierarchy_col, df_name)
-            # else, hierarchy type is specific item while "Graph all in Dropdown" is unselected
-            else:
-                color = 'Variable Name'
-                legend_title_text = get_label('LBL_Variable_Names')
-
-            filtered_df['Partial Period'] = filtered_df['Partial Period'].astype(str).transform(
-                lambda j: get_label('LBL_TRUE') if j != 'nan' else get_label('LBL_FALSE'))
-            filtered_df.sort_values(by=[color, 'Date of Event'], inplace=True)
-
-            # generate graph
-            fig = px.scatter(
-                title=title,
-                data_frame=filtered_df,
-                x='Date of Event',
-                y='Measure Value',
-                color=color,
-                custom_data=[hierarchy_col, 'Variable Name'])
-            fig.update_layout(legend_title_text=legend_title_text)
-
-            hovertemplate = get_label('LBL_Gen_Hover_Data', df_name)
-            hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event')).replace('%AXIS-A%',
-                                                                                                            '%{x}')
-            hovertemplate = hovertemplate.replace('%AXIS-TITLE-B%', arg_value[1]).replace('%AXIS-B%', '%{y}')
-            fig.update_traces(hovertemplate=hovertemplate)
-            fig = set_partial_periods(fig, filtered_df, 'Scatter')
-        # else, filtered is empty, create default empty graph
-        else:
-            fig = px.scatter(
-                title=title + get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path,
-                                                       arg_value[2], df_name, df_const))
-    else:
-        fig = px.scatter(
             title=get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, arg_value[2],
                                            df_name, df_const))
     fig.update_layout(
@@ -1026,16 +919,11 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
                                   hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children,
                                   df_name, df_const)
 
-    # line graph creation
-    if graph_type == 'Line':
-        return get_line_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
-                               list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
-                               df_const)
-    # scatter graph creation
-    elif graph_type == 'Scatter':
-        return get_scatter_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
-                                  list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
-                                  df_const)
+    # line and scatter graph creation
+    if graph_type == 'Line' or graph_type == 'Scatter':
+        return get_line_scatter_figure(graph_options, filtered_df, hierarchy_specific_dropdown,
+                                       hierarchy_level_dropdown, list_of_names, hierarchy_toggle,
+                                       hierarchy_graph_children, graph_title, df_name, df_const)
 
     # bubble graph creation
     elif graph_type == 'Bubble':

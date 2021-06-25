@@ -18,8 +18,8 @@ from dash.exceptions import PreventUpdate
 # Internal Packages
 # import config
 from conn import exec_storedproc
-from apps.dashboard.layouts import get_line_graph_menu, get_bar_graph_menu, get_scatter_graph_menu, \
-    get_table_graph_menu, get_box_plot_menu, get_sankey_menu, get_bubble_graph_menu
+from apps.dashboard.layouts import get_line_scatter_graph_menu, get_bar_graph_menu, get_table_graph_menu, \
+    get_box_plot_menu, get_sankey_menu, get_bubble_graph_menu
 
 
 # Contents:
@@ -107,31 +107,19 @@ def delete_dashboard(dashboard_id):
 
 
 def load_graph_menu(graph_type, tile, df_name, args_list, df_const):
-    print('In load graph menu')
-    if graph_type == 'Line' or graph_type == 'Scatter' or graph_type == 'Bar':
-        x = args_list[0]
-        measure_type = args_list[1]
-        y = args_list[2]
-        if graph_type == 'Line':
-            graph_menu = get_line_graph_menu(tile=tile, x=x, y=y, measure_type=measure_type, df_name=df_name,
-                                             df_const=df_const)
-        elif graph_type == 'Scatter':
-            graph_menu = get_scatter_graph_menu(tile=tile, x=x, y=y, measure_type=measure_type, df_name=df_name,
-                                                df_const=df_const)
-        else:
-            graph_menu = get_bar_graph_menu(tile=tile, x=x, y=y, measure_type=measure_type, df_name=df_name,
-                                            df_const=df_const)
+    if graph_type == 'Line' or graph_type == 'Scatter':
+        graph_menu = get_line_scatter_graph_menu(tile=tile, x=args_list[0], y=args_list[1], measure_type=args_list[2],
+                                                 mode=args_list[3],  df_name=df_name, df_const=df_const)
+    elif graph_type == 'Bar':
+        graph_menu = get_bar_graph_menu(tile=tile, x=args_list[0], y=args_list[1], measure_type=args_list[2],
+                                        orientation=args_list[3], animate=args_list[4], df_name=df_name,
+                                        df_const=df_const)
     elif graph_type == 'Table':
-        number_of_columns = args_list[1]
-        graph_menu = get_table_graph_menu(tile=tile, number_of_columns=number_of_columns)
+        graph_menu = get_table_graph_menu(tile=tile, number_of_columns=args_list[1])
     elif graph_type == 'Box_Plot':
-        axis_measure = args_list[0]
-        graphed_variables = args_list[1]
-        graph_orientation = args_list[2]
-        show_data_points = args_list[3]
-        graph_menu = get_box_plot_menu(tile=tile, axis_measure=axis_measure,
-                                       graphed_variables=graphed_variables, graph_orientation=graph_orientation,
-                                       df_name=df_name, show_data_points=show_data_points, df_const=df_const)
+        graph_menu = get_box_plot_menu(tile=tile, axis_measure=args_list[0], graphed_variables=args_list[1],
+                                       graph_orientation=args_list[2], show_data_points=args_list[3], df_name=df_name,
+                                       df_const=df_const)
     elif graph_type == 'Sankey':
         graph_menu = get_sankey_menu(tile=tile, graphed_options=args_list[0], df_name=df_name, df_const=df_const)
     elif graph_type == 'Bubble':

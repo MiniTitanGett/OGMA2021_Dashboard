@@ -479,7 +479,7 @@ def get_layout_dashboard():
             # To hide footer: calc(100vh)
         ], style={'display': 'flex', 'flex-direction': 'column', 'height': 'calc(100vh - 15px)', 'overflow': 'hidden',
                   'border-bottom': '1px solid {}'.format(CLR['lightgray'])}),
-        # Prompt
+        # Prompt TODO: Link with menu
         html.Div(
             html.Div([
                 html.Div([
@@ -505,7 +505,7 @@ def get_layout_dashboard():
             id='prompt-obscure',
             className='prompt-obscure'
         ),
-        # Floating Menu
+        # Floating Menu TODO: Link with menu
         html.Div(
             html.Div([
                 html.Div([

@@ -1116,9 +1116,10 @@ num-periods:disabled {
     left: 0;
     right: 0;
     width: 500px;
-    height: 100%;
     margin-left: auto;
     margin-right: auto;
+    background: #fffafa;
+    box-shadow: rgb(20, 20, 20) 0px 10px 20px;
   }
 .prompt-obscure {
     position: fixed;
@@ -1126,4 +1127,41 @@ num-periods:disabled {
     z-index: 1050;
     background-color: rgba(0, 0, 0, 0.45);
     backdrop-filter: blur(1px);
+    -webkit-animation: fadein 0.25s ease-in 0s forwards; /* Safari, Chrome and Opera > 12.1 */
+       -moz-animation: fadein 0.25s ease-in 0s forwards; /* Firefox < 16 */
+        -ms-animation: fadein 0.25s ease-in 0s forwards; /* Internet Explorer */
+         -o-animation: fadein 0.25s ease-in 0s forwards; /* Opera < 12.1 */
+            animation: fadein 0.25s ease-in 0s forwards;
+}
+.prompt-header {
+    height: 50px;
+    border-bottom: 1px solid rgb(199, 199, 199);
+    margin-top: 8px;
+    margin-right: 16px;
+    margin-left: 16px;
+}
+.prompt-text {
+    padding: 24px;
+}
+
+.prompt-button-wrapper {
+    display: flex;
+    flex-flow: row nowrap;
+    width: 100%;
+    height: 100%;
+    padding-top: 24px;
+    justify-content: flex-end;
+}
+
+.float-menu-box {
+    position: fixed;
+    z-index: 1060;
+    top: 10%;
+    left: 0;
+    right: 0;
+    width: 60%;
+    margin-left: auto;
+    margin-right: auto;
+    background: #fffafa;
+    box-shadow: rgb(20, 20, 20) 0px 10px 20px;
 }

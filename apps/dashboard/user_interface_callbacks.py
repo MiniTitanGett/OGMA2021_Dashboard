@@ -540,10 +540,6 @@ for x in range(4):
             else:
                 raise PreventUpdate
 
-        # for item in dash.callback_context.triggered:
-        #    if '"type":"tile-link"}.className' in item['prop_id']:
-        #        changed_id = item['prop_id']
-
         if link_state == 'fa fa-link':
             df_name = master_df_name
 

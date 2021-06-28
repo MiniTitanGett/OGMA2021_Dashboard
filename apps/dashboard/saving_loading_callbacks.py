@@ -91,35 +91,33 @@ def _update_tile_loading_dropdown_options(_tile_saving_trigger, _dashboard_savin
 @app.callback(
     Output('tile-save-trigger-wrapper', 'children'),
     [Input({'type': 'save-button', 'index': ALL}, 'n_clicks'),
-     Input({'type': 'confirm-delete-button', 'index': ALL}, 'n_clicks'),
-     Input({'type': 'confirm-tile-overwrite', 'index': ALL}, 'n_clicks'),
-     Input({'type': 'cancel-tile-overwrite', 'index': ALL}, 'n_clicks')],
+     Input('prompt-result', 'children')],
+    State('prompt-title', 'data-'),
     prevent_initial_call=True
 )
-def _manage_tile_saves_trigger(save_clicks, delete_clicks, _confirm_tile_overwrite, _cancel_tile_overwrite):
+def _manage_tile_saves_trigger(save_clicks, prompt_result, prompt_data):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':
         raise PreventUpdate
 
-    changed_index = int(search(r'\d+', changed_id).group())
+    if 'prompt-result' in changed_id:
+        changed_index = prompt_data[1]
+    else:
+        changed_index = int(search(r'\d+', changed_id).group())
 
     # if 'save-button' in changed id while its n_clicks == 0, do not update
     if '"type":"save-button"}.n_clicks' in changed_id and save_clicks[changed_index] == 0:
         raise PreventUpdate
 
-    # if 'delete-button' in changed id while its n_clicks == 0, do not update
-    if '"type":"confirm-delete-button"}.n_clicks' in changed_id and delete_clicks[changed_index] == 0:
-        raise PreventUpdate
-
     if 'save-button' in changed_id:
         mode = "save"
-    elif 'confirm-delete-button' in changed_id:
+    elif prompt_data[0] == 'delete' and prompt_result == 'ok':
         mode = "delete"
-    elif '"type":"confirm-tile-overwrite"}.n_clicks' in changed_id:
+    elif prompt_data[0] == 'overwrite' and prompt_result == 'ok':
         mode = "confirm-overwrite"
     else:
-        mode = "cancel-overwrite"
+        mode = "cancel"
 
     children = dcc.Dropdown(
         id={'type': 'tile-save-trigger', 'index': changed_index},
@@ -132,7 +130,7 @@ def _manage_tile_saves_trigger(save_clicks, delete_clicks, _confirm_tile_overwri
 for y in range(4):
     @app.callback(
         # LAYOUT components
-        [Output({'type': 'tile-save-status-symbols', 'index': y}, 'children'),
+        [Output({'type': 'prompt-trigger', 'index': y}, 'data-'),
          Output({'type': 'set-dropdown-options-trigger', 'index': y}, 'data-tile_saving'),
          Output({'type': 'delete-layout-dropdown', 'index': y}, 'value')],
         [Input({'type': 'tile-save-trigger', 'index': y}, 'value')],
@@ -225,23 +223,9 @@ for y in range(4):
             for layout in session['saved_layouts']:
                 graph_titles.append(session['saved_layouts'][layout]['Title'])
 
-            # get non-overwriting status symbol display (check-mark or ban symbol)
-            def get_status_symbol_display(tooltip, symbol):
-                return html.Div(
-                    html.I(
-                        html.Span(
-                            tooltip,
-                            className='save-symbols-tooltip'),
-                        className=symbol,
-                        style={'padding': '11px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
-                               'text-align': 'center'}),
-                    className='save-symbols-showHide-wrapper-{}'.format(str(tile)))
-
             # if tile is untitled, prevent updates but return save message
             if graph_title == '':
-                save_error_tooltip = get_label('LBL_Graphs_Require_A_Title_To_Be_Saved')
-                save_symbol = 'fa fa-ban'
-                save_status_symbols = get_status_symbol_display(save_error_tooltip, save_symbol)
+                save_status_symbols = [['empty_title', tile], {}, get_label('LBL_Untitled_Graph'), get_label('LBL_Graphs_Require_A_Title_To_Be_Saved')]
 
             # if conflicting tiles and overwrite not requested, prompt overwrite
             elif intermediate_pointer in session['saved_layouts'] and session['saved_layouts'][intermediate_pointer][
@@ -252,36 +236,7 @@ for y in range(4):
                 overwrite_tooltip = "{} \'{}\'".format(get_label('LBL_Overwrite_Graph'),
                                                        session['saved_layouts'][intermediate_pointer]['Title'])
 
-                save_status_symbols = html.Div([
-                    html.I(
-                        html.Span(
-                            overwrite_tooltip,
-                            className='save-symbols-tooltip'),
-                        id={'type': 'confirm-tile-overwrite', 'index': tile},
-                        className='fa fa-floppy-o',
-                        style={'padding': '7px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
-                               'margin-right': '10px', 'margin-left': '7px', 'vertical-align': 'top'}),
-                    html.Span([
-                        html.I(
-                            [],
-                            className='fa fa-floppy-o',
-                            style={'position': 'absolute', 'left': '0', 'width': '15px'}),
-                        html.I(
-                            [],
-                            className='fa fa-ban fa-2x',
-                            style={'position': 'absolute', 'top': '50%', 'margin-left': '-13px', 'width': '26px',
-                                   'margin-top': '-15px', 'color': CLR['background1']}),
-                        html.Span(
-                            get_label("LBL_Cancel_Save_Attempt"),
-                            className='save-symbols-tooltip')],
-                        id={'type': 'cancel-tile-overwrite', 'index': tile},
-                        className='save-overwrite-symbols',
-                        style={'padding': '7px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
-                               'margin-left': '10px', 'margin-right': '14px', 'display': 'inline-block',
-                               'vertical-align': 'top'})],
-                    className='save-symbols-showHide-wrapper-{}'.format(str(tile)),
-                    style={'width': '71px', 'border': '1px solid {}'.format(CLR['lightgray']), 'border-radius': '6px',
-                           'position': 'relative', 'margin': '3.5px 0'})
+                save_status_symbols = [['overwrite', tile], {}, get_label('LBL_Overwrite_Graph'), get_label('LBL_Overwrite_Graph_Prompt')]
 
             # else, title is valid to be saved
             else:
@@ -304,8 +259,7 @@ for y in range(4):
                                     'Data Set': df_name,
                                     'Graph All Toggle': graph_children_toggle,
                                     'NID Path': nid_path,
-                                    'Title': graph_title
-                                    }
+                                    'Title': graph_title}
                 # if input method is 'select-range', add the states of the select range inputs
                 if input_method == 'select-range':
                     elements_to_save['Date Tab'] = tab
@@ -321,14 +275,12 @@ for y in range(4):
                 # saves the graph layout to the database
                 save_layout_to_db(layout_pointer, graph_title)
 
-                save_error_tooltip = ''
-                save_symbol = 'fa fa-check'
-                save_status_symbols = get_status_symbol_display(save_error_tooltip, save_symbol)
+                save_status_symbols = [None, {'display': 'hide'}, None, None]
                 update_options_trigger = 'trigger'
 
         # if overwrite was cancelled, clear displayed symbols
-        elif 'cancel-overwrite' == trigger:
-            save_status_symbols = []
+        elif 'cancel' == trigger:
+            save_status_symbols = [None, {'display': 'hide'}, None, None]
 
         # If confirm delete button has been pressed
         else:
@@ -338,7 +290,7 @@ for y in range(4):
                 update_options_trigger = 'trigger'
                 delete_dropdown_val = ''
 
-            save_status_symbols = []
+            save_status_symbols = [None, {'display': 'hide'}, None, None]
 
         return save_status_symbols, update_options_trigger, delete_dropdown_val
 

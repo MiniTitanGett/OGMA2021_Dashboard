@@ -33,21 +33,24 @@
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 
 .tile-nav--view {
-    width: 44px;
+    width: 80px;
 }
 
 .tile-nav--customize {
-    width: 118px;
+    width: 80px;
 }
 
 .tile-nav--layout {
-    width: 97px;
+    width: 80px;
 }
 
 .tile-nav--data {
-    width: 77px;
+    width: 80px;
 }
 
+.tile-nav--save {
+    width: 80px;
+}
 
 /* Table
 –––––––––––––––––––––––––––––––––––––––––––––––––– */

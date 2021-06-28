@@ -519,13 +519,14 @@ there.
 .tile-nav,
 tile-nav {
     border: 0;
-    margin: 0 0 0 20px;
+    margin: 0 0 0 10px;
     padding: 0;
     height: 30px;
     border-radius: 0;
     font-size: 10px;
     font-weight: 500;
     color: #555;
+    width: 50px;
 }
 .tile-nav:focus,
 tile-nav:focus {
@@ -537,21 +538,16 @@ tile-nav:hover {
   background-color: #ffffff;
 }
 
-.tile-nav--view {
-    width: 50px;
-}
+.tile-nav--view {}
 
-.tile-nav--customize {
-    width: 88px;
-}
+.tile-nav--customize {}
 
-.tile-nav--layout {
-    width: 69px;
-}
+.tile-nav--layout {}
 
-.tile-nav--data {
-    width: 50px;
-}
+.tile-nav--data {}
+
+.tile-nav--save {}
+
 .tile-nav--data:hover {
     background-color: #ffffff;
     color: #333;
@@ -1164,4 +1160,37 @@ num-periods:disabled {
     margin-right: auto;
     background: #fffafa;
     box-shadow: rgb(20, 20, 20) 0px 10px 20px;
+}
+
+/* Popup container - can be anything you want */
+.popup {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* The actual popup */
+.popup .popuptext {
+  visibility: hidden;
+  width: 160px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px 0;
+  position: absolute;
+  z-index: 1;
+  top: 80%;
+  margin: auto;
+}
+
+/* Toggle this class - hide and show the popup */
+.popup .show {
+  visibility: visible;
+  -webkit-animation: fadeIn 1s;
+  animation: fadeIn 1s;
 }

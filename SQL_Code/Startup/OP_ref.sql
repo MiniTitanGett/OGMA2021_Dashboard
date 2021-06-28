@@ -440,6 +440,13 @@ EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Lines_And_Points',@lan
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Lines_And_Points',@language = 'Fr', @ref_desc = 'Fr: Lines and Points'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Display',@language = 'En', @ref_desc = 'Display'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Display',@language = 'Fr', @ref_desc = 'Fr: Display'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Edit',@language = 'En', @ref_desc = 'Edit'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Edit',@language = 'Fr', @ref_desc = 'Fr: Edit'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Save',@language = 'En', @ref_desc = 'Save'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Save',@language = 'Fr', @ref_desc = 'Fr: Save'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Load',@language = 'En', @ref_desc = 'Load'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Load',@language = 'Fr', @ref_desc = 'Fr: Load'
+
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'En',@ref_desc = 'Hierarchy Selection''s Children'
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'Fr',@ref_desc = 'Enfants de la Sélection de Hiérarchie'
 

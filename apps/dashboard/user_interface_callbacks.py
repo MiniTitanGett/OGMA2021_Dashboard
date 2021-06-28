@@ -420,7 +420,7 @@ for x in range(4):
             raise PreventUpdate
 
         return view_content_style, customize_content_style, layouts_content_style, view_className, layouts_className, \
-            customize_className
+               customize_className
 
 
 # ************************************************CUSTOMIZE TAB*******************************************************
@@ -1118,7 +1118,6 @@ for x in range(4):
             return tile_class;
         }
         """,
-        # @app.callback(
         Output({'type': 'tile', 'index': x}, 'className'),
         [Input({'type': 'data-tile', 'index': ALL}, 'style'),
          Input({'type': 'tile-link', 'index': x}, 'className')],
@@ -1171,5 +1170,61 @@ app.clientside_callback(
     ),
     Output('df-constants-storage', 'n_clicks'),
     [Input('df-constants-storage', 'data')],
+    prevent_initial_call=True
+)
+
+# *************************************************PROMPT*********************************************************
+
+# initialize prompt
+app.clientside_callback(
+    """
+    function(prompt_trigger_0, prompt_trigger_1, prompt_trigger_2, prompt_trigger_3, 
+             close_n_clicks, cancel_n_clicks, ok_n_clicks, prompt_data){
+        const triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
+        var prompt_trigger = null;
+        var result = null;
+        
+        if (triggered == '{"index":0,"type":"prompt-trigger"}.data-'){
+            prompt_trigger = prompt_trigger_0;
+        }
+        if (triggered == '{"index":1,"type":"prompt-trigger"}.data-'){
+            prompt_trigger = prompt_trigger_1;
+        }
+        if (triggered == '{"index":2,"type":"prompt-trigger"}.data-'){
+            prompt_trigger = prompt_trigger_2;
+        }
+        if (triggered == '{"index":3,"type":"prompt-trigger"}.data-'){
+            prompt_trigger = prompt_trigger_3;
+        }
+        
+        if (triggered == 'prompt-close.n_clicks') {
+            prompt_trigger = [prompt_data, {'display': 'none'}, '', ''];
+            result = 'close';
+        }
+        if (triggered == 'prompt-cancel.n_clicks'){
+            prompt_trigger = [prompt_data, {'display': 'none'}, '', ''];
+            result = 'cancel';
+        }
+        if (triggered == 'prompt-ok.n_clicks'){
+            prompt_trigger = [prompt_data, {'display': 'none'}, '', ''];
+            result = 'ok';
+        }
+        
+        return [prompt_trigger[0], prompt_trigger[1], prompt_trigger[2], prompt_trigger[3], result];
+    }
+    """,
+    [Output('prompt-title', 'data-'),  # index value and reason for prompt
+     Output('prompt-obscure', 'style'),
+     Output('prompt-title', 'children'),
+     Output('prompt-body', 'children'),
+     Output('prompt-result', 'children')],
+    [Input({'type': 'prompt-trigger', 'index': 0}, 'data-'),
+     Input({'type': 'prompt-trigger', 'index': 1}, 'data-'),
+     Input({'type': 'prompt-trigger', 'index': 2}, 'data-'),
+     Input({'type': 'prompt-trigger', 'index': 3}, 'data-'),
+     Input('prompt-close', 'n_clicks'),
+     Input('prompt-cancel', 'n_clicks'),
+     Input('prompt-ok', 'n_clicks')],
+    State('prompt-title', 'data-'),
     prevent_initial_call=True
 )

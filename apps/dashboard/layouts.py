@@ -13,12 +13,9 @@ import dash_html_components as html
 from dash.exceptions import PreventUpdate
 from flask import session
 import json
-# import logging
 
 # Internal Modules
-# import config
 from conn import exec_storedproc_results
-# from apps.OPG001.app import app
 from apps.dashboard.data import GRAPH_OPTIONS, CLR, DATA_CONTENT_SHOW, DATA_CONTENT_HIDE, VIEW_CONTENT_SHOW, \
     BAR_X_AXIS_OPTIONS, CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LAYOUT_CONTENT_HIDE
 from apps.dashboard.hierarchy_filter import get_hierarchy_layout
@@ -387,7 +384,7 @@ def get_layout_dashboard():
                     html.Div([
                         html.I(
                             html.Span(
-                                get_label("LBL_Reset_Dashboard_All_Unsaved_Changes_will_Be_Lost"),
+                                get_label("LBL_Reset_Dashboard_All_Unsaved_Changes_Will_Be_Lost"),
                                 className='save-symbols-tooltip'),
                             id='confirm-dashboard-reset',
                             className='fa fa-undo',
@@ -505,6 +502,21 @@ def get_layout_dashboard():
             id='prompt-obscure',
             className='prompt-obscure'
         ),
+        html.Div(
+            id={'type': 'prompt-trigger', 'index': 0},
+            style={'display': 'none'}),
+        html.Div(
+            id={'type': 'prompt-trigger', 'index': 1},
+            style={'display': 'none'}),
+        html.Div(
+            id={'type': 'prompt-trigger', 'index': 2},
+            style={'display': 'none'}),
+        html.Div(
+            id={'type': 'prompt-trigger', 'index': 3},
+            style={'display': 'none'}),
+        html.Div(
+            id='prompt-result',
+            style={'display': 'none'}),
         # Floating Menu TODO: Link with menu
         html.Div(
             html.Div([
@@ -773,17 +785,22 @@ def get_tile(tile, tile_keys=None, df_name=None):
                     className='tile-title',
                     debounce=True),
                 html.Button(
-                    [get_label('LBL_View')],
+                    [get_label('LBL_Graph')],
                     id={'type': 'tile-view', 'index': tile},
                     className='tile-nav tile-nav--view tile-nav--selected'),
                 dcc.Store(
                     id={'type': 'tile-view-store', 'index': tile}),
                 html.Button(
-                    [get_label('LBL_Customize')],
+                    [get_label('LBL_Edit')],
                     id={'type': 'tile-customize', 'index': tile},
                     className='tile-nav tile-nav--customize'),
                 html.Button(
-                    [get_label('LBL_Graphs')],
+                    [get_label('LBL_Save')],
+                    id={'type': 'save-button', 'index': tile},
+                    n_clicks=0,
+                    className='tile-nav tile-nav--save'),
+                html.Button(
+                    [get_label('LBL_Load')],
                     id={'type': 'tile-layouts', 'index': tile},
                     className='tile-nav tile-nav--layout'),
                 html.Button(
@@ -822,7 +839,7 @@ def get_tile(tile, tile_keys=None, df_name=None):
                        style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
                 html.Div([
                     html.Button(
-                        id={'type': 'save-button', 'index': tile},
+                        # id={'type': 'save-button', 'index': tile},
                         n_clicks=0,
                         children=get_label('LBL_Save_Graph'),
                         style={'display': 'inline-block'},

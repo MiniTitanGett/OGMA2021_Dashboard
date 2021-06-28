@@ -96,7 +96,7 @@ def delete_layout(graph_id):
 def delete_dashboard(dashboard_id):
     query = """\
     declare @p_result_status varchar(255)
-    exec dbo.opp_addgeteditdeletefind_extdashboardrs {}, \'{}\', \'{}\', null, null, null, null, null,
+    exec dbo.opp_addgeteditdeletefind_extdashboards {}, \'{}\', \'{}\', null, null, null, null, null,
     @p_result_status output
     select @p_result_status as result_status
     """.format(session['sessionID'], 'Delete', dashboard_id)

@@ -26,7 +26,7 @@ from apps.dashboard.data import CLR, get_label
 # ********************************************DATE-PICKER LAYOUT**************************************************
 
 
-# datepicker layout
+# date picker layout
 def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, period_type, df_const):
     language = session["language"]
     if df_name:
@@ -43,9 +43,22 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                 value=fiscal_toggle,
                 style={'display': 'block', 'text-align': 'center'} if df_const[df_name]['FISCAL_AVAILABLE']
                 else {'display': 'none'}),
-            html.H6(
-                '{}:'.format(get_label("LBL_Timeframe")),
-                style={'margin-top': '20px', 'color': CLR['text1']}),
+            html.Div(
+                children=[
+                    html.H6(
+                        '{}:'.format(get_label("LBL_Timeframe")),
+                        style={'margin-top': '20px', 'color': CLR['text1'], 'display': 'inline-block',
+                               'text-align': 'none'}),
+                    html.I(
+                        html.Span(
+                            get_label("LBL_Date_Picker_Info"),
+                            className='save-symbols-tooltip'),
+                        className='fa fa-question-circle-o',
+                        id={'type': 'date-picker-info', 'index': tile},
+                        style={'position': 'relative'}),
+                ],
+                id={'type': 'date-picker-info-wrapper', 'index': tile}
+            ),
             dcc.RadioItems(
                 id={'type': 'radio-timeframe', 'index': tile},
                 options=[
@@ -136,9 +149,21 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                 className='toggle-tabs-wrapper',
                 value=fiscal_toggle,
                 style={'display': 'block', 'text-align': 'center'}),
-            html.H6(
-                '{}:'.format(get_label("LBL_Timeframe")),
-                style={'margin-top': '20px', 'color': CLR['text1']}),
+            html.Div(
+                children=[
+                    html.H6(
+                        '{}:'.format(get_label("LBL_Timeframe")),
+                        style={'margin-top': '20px', 'color': CLR['text1'], 'display': 'inline-block',
+                               'text-align': 'none'}),
+                    html.I(
+                        html.Span(
+                            get_label("LBL_Date_Picker_Info"),
+                            className='save-symbols-tooltip'),
+                        className='fa fa-question-circle-o',
+                        id={'type': 'date-picker-info', 'index': tile},
+                        style={'position': 'relative'})],
+                id={'type': 'date-picker-info-wrapper', 'index': tile}
+            ),
             dcc.RadioItems(
                 id={'type': 'radio-timeframe', 'index': tile},
                 options=[

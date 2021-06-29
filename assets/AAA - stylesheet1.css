@@ -506,10 +506,14 @@ there.
 .master-nav {
     border: 0;
     margin: 0 0 0 20px;
-    padding: 0;
-    width: 51px;
+    padding: 5px;
+    width: auto;
     height: 35px;
     font-size: 12px;
+}
+
+.master-nav:hover {
+    color: #333;
 }
 
 
@@ -533,7 +537,7 @@ tile-nav:focus {
 .tile-nav:hover,
 tile-nav:hover {
   color: #333;
-  font-weight: 600;
+  font-weight: 700;
   background-color: #ffffff;
 }
 
@@ -669,6 +673,20 @@ tile-nav:hover {
     color: #333;
 }
 
+.fa-question-circle-o {
+    color: #555;
+    font-size: 16px;
+    margin: 0 0 0 0px;
+    padding: 12px;
+    width: 20px;
+    position: absolute;
+    text-align: center;
+    cursor: pointer;
+}
+.fa-question-circle-o:hover {
+    color: #333;
+}
+
 
 .fa-unlink {
     color: #555;
@@ -689,7 +707,8 @@ tile-nav:hover {
 .fa-ban .save-symbols-tooltip,
 .fa-floppy-o .save-symbols-tooltip,
 .fa-undo .save-symbols-tooltip,
-.save-overwrite-symbols .save-symbols-tooltip {
+.save-overwrite-symbols .save-symbols-tooltip,
+{
     visibility: hidden;
     position: absolute;
     padding: 5px;
@@ -704,8 +723,10 @@ tile-nav:hover {
     margin-left: -100px; /* Use half of the width (120/2 = 60), to center the tooltip */
     left: 50%;
 }
+
 .fa-check .save-symbols-tooltip,
-.fa-refresh .save-symbols-tooltip{
+.fa-refresh .save-symbols-tooltip,
+.fa-question-circle-o .save-symbols-tooltip {
     visibility: hidden;
     position: absolute;
     padding: 5px;
@@ -720,14 +741,17 @@ tile-nav:hover {
     margin-left: -100px;
     left: 50%;
 }
+
 .fa-ban:hover .save-symbols-tooltip,
 .fa-floppy-o:hover .save-symbols-tooltip,
 .fa-undo:hover .save-symbols-tooltip,
 .fa-check:hover .save-symbols-tooltip,
 .fa-refresh:hover .save-symbols-tooltip,
+.fa-question-circle-o:hover .save-symbols-tooltip,
 .save-overwrite-symbols:hover .save-symbols-tooltip {
     visibility: visible;
 }
+
 .fa-ban .save-symbols-tooltip::after,
 .fa-floppy-o .save-symbols-tooltip::after,
 .fa-undo .save-symbols-tooltip::after,

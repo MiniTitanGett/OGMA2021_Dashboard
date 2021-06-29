@@ -159,7 +159,7 @@ def _new_and_delete(_new_clicks, _close_clicks, _dashboard_reset, input_tiles, n
         raise PreventUpdate
     # disable the NEW button
     new_button = html.Button(
-        className='master-nav', n_clicks=0, children=get_label('LBL_New'), id='button-new', disabled=True)
+        className='master-nav', n_clicks=0, children=get_label('LBL_Add_Tile'), id='button-new', disabled=True)
     return children, new_button, deleted_tile, num_tiles, dashboard_reset_trigger
 
 
@@ -493,7 +493,6 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
         graph_value = graph_type
 
     return link_trigger, options, graph_value, type_style, message_style
-    # options[0]['value'] if graph_type is None else graph_type
 
 
 # update graph menu to match selected graph type

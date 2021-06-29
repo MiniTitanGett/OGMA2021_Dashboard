@@ -127,9 +127,20 @@ def get_data_set_picker(tile, df_name):
     :return: Drop down of the possible data sets.
     """
     return [
-        html.H6(
-            "{}:".format(get_label('LBL_Data_Set')),
-            style={'color': CLR['text1'], 'margin-top': '25px', 'display': 'inline-block', 'cursor':'pointer'}),
+        html.Div(
+            children=[
+                html.H6(
+                    "{}:".format(get_label('LBL_Data_Set')),
+                    style={'color': CLR['text1'], 'margin-top': '25px', 'display': 'inline-block',
+                           'cursor': 'pointer'}),
+                html.I(
+                    html.Span(
+                        get_label("LBL_Data_Set_Info"),
+                        className='save-symbols-tooltip'),
+                    className='fa fa-question-circle-o',
+                    id={'type': 'data-set-info', 'index': tile},
+                    style={'position': 'relative'})],
+            id={'type': 'data-set-info-wrapper', 'index': tile}),
         html.Div([
             dcc.Dropdown(
                 id={'type': 'data-set', 'index': tile},
@@ -162,7 +173,8 @@ def get_data_set_picker(tile, df_name):
                     id='dataset-confirmation-symbols'),
                 style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
                        'position': 'relative', 'vertical-align': 'top', 'background-color': 'white', 'width': '40px',
-                       'border': '1px solid {}'.format(CLR['lightgray']), 'border-radius': '6px', 'cursor':'pointer'})],
+                       'border': '1px solid {}'.format(CLR['lightgray']), 'border-radius': '6px',
+                       'cursor': 'pointer'})],
             style={'display': 'flex'})
     ]
 
@@ -372,7 +384,7 @@ def get_layout_dashboard():
                     html.Button(
                         className='master-nav',
                         n_clicks=1,
-                        children=get_label('LBL_New'),
+                        children=get_label('LBL_Add_Tile'),
                         id='button-new',
                         disabled=False)
                 ], style={'display': 'inline-block'},
@@ -409,11 +421,11 @@ def get_layout_dashboard():
                             style={'padding': '7px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
                                    'margin-left': '10px', 'margin-right': '14px', 'display': 'inline-block',
                                    'vertical-align': 'top'})],
-                             id='dashboard-reset-symbols',
-                             style={'width': '71px',
-                                    'border': '1px solid {}'.format(CLR['lightgray']),
-                                    'margin': '2px 0', 'border-radius': '6px',
-                                    'display': 'none'}),
+                        id='dashboard-reset-symbols',
+                        style={'width': '71px',
+                               'border': '1px solid {}'.format(CLR['lightgray']),
+                               'margin': '2px 0', 'border-radius': '6px',
+                               'display': 'none'}),
                     style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
                            'position': 'relative', 'vertical-align': 'top'}),
                 html.Button(
@@ -680,9 +692,20 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
         html.Div(
             id={'type': 'div-graph-type', 'index': tile},
             children=[
-                html.P(
-                    "{}:".format(get_label('LBL_Graph_Type')),
-                    style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
+                html.Div(
+                    children=[
+                        html.P(
+                            "{}:".format(get_label('LBL_Graph_Type')),
+                            style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px',
+                                   'display': 'inline-block', 'text-align': 'none'}),
+                        html.I(
+                            html.Span(
+                                get_label("LBL_Graph_Type_Info"),
+                                className='save-symbols-tooltip'),
+                            className='fa fa-question-circle-o',
+                            id={'type': 'graph-type-info', 'index': tile},
+                            style={'position': 'relative'})],
+                    id={'type': 'graph-type-info-wrapper', 'index': tile}),
                 html.Div(
                     dcc.Dropdown(
                         id={'type': 'graph-type-dropdown', 'index': tile},
@@ -978,9 +1001,22 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, df_cons
     # (args-value: {})[3] = mode
 
     return [
-        html.P(
-            "{}:".format(get_label('LBL_Graph_Options')),
-            style={'margin-top': '10px', 'color': CLR['text1'], 'font-size': '15px'}),
+        html.Div(
+            children=[
+                html.P(
+                    "{}:".format(get_label('LBL_Graph_Options')),
+                    style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px', 'margin-left': '15px',
+                           'display': 'inline-block', 'text-align': 'none'}),
+                html.I(
+                    html.Span(
+                        get_label("LBL_Graph_Options_Info"),
+                        className='save-symbols-tooltip'),
+                    className='fa fa-question-circle-o',
+                    id={'type': 'graph-options-info', 'index': tile},
+                    style={'position': 'relative'})
+            ],
+            id={'type': 'graph-options-info-wrapper', 'index': tile}
+        ),
         html.Div([
             html.Div([
                 html.Div([
@@ -1069,9 +1105,22 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, df_name, 
     # (args-value: {})[4] = animate graph
 
     return [
-        html.P(
-            "{}:".format(get_label('LBL_Graph_Options')),
-            style={'margin-top': '10px', 'color': CLR['text1'], 'font-size': '15px'}),
+        html.Div(
+            children=[
+                html.P(
+                    "{}:".format(get_label('LBL_Graph_Options')),
+                    style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px', 'margin-left': '15px',
+                           'display': 'inline-block', 'text-align': 'none'}),
+                html.I(
+                    html.Span(
+                        get_label("LBL_Graph_Options_Info"),
+                        className='save-symbols-tooltip'),
+                    className='fa fa-question-circle-o',
+                    id={'type': 'graph-options-info', 'index': tile},
+                    style={'position': 'relative'})
+            ],
+            id={'type': 'graph-options-info-wrapper', 'index': tile}
+        ),
         html.Div([
             html.Div([
                 html.Div([
@@ -1155,9 +1204,22 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
     # (args-value: {})[5] = size measure
 
     return [
-        html.P(
-            "{}:".format(get_label('LBL_Graph_Options')),
-            style={'margin-top': '10px', 'color': CLR['text1'], 'font-size': '15px'}),
+        html.Div(
+            children=[
+                html.P(
+                    "{}:".format(get_label('LBL_Graph_Options')),
+                    style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px', 'margin-left': '15px',
+                           'display': 'inline-block', 'text-align': 'none'}),
+                html.I(
+                    html.Span(
+                        get_label("LBL_Graph_Options_Info"),
+                        className='save-symbols-tooltip'),
+                    className='fa fa-question-circle-o',
+                    id={'type': 'graph-options-info', 'index': tile},
+                    style={'position': 'relative'})
+            ],
+            id={'type': 'graph-options-info-wrapper', 'index': tile}
+        ),
         html.Div([
             html.Div([
                 html.Div([
@@ -1263,9 +1325,22 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
     # (args-value: {})[3] = orientation
 
     return [
-        html.P(
-            "{}:".format(get_label('LBL_Graph_Options')),
-            style={'margin-top': '10px', 'color': CLR['text1'], 'font-size': '15px'}),
+        html.Div(
+            children=[
+                html.P(
+                    "{}:".format(get_label('LBL_Graph_Options')),
+                    style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px', 'margin-left': '15px',
+                           'display': 'inline-block', 'text-align': 'none'}),
+                html.I(
+                    html.Span(
+                        get_label("LBL_Graph_Options_Info"),
+                        className='save-symbols-tooltip'),
+                    className='fa fa-question-circle-o',
+                    id={'type': 'graph-options-info', 'index': tile},
+                    style={'position': 'relative'})
+            ],
+            id={'type': 'graph-options-info-wrapper', 'index': tile}
+        ),
         html.Div([
             html.Div([
                 html.Div([
@@ -1407,9 +1482,22 @@ def get_sankey_menu(tile, graphed_options, df_name, df_const):
     # (args-value: {})[0] = graphed variables
 
     return [
-        html.P(
-            "{}:".format(get_label('LBL_Graph_Options')),
-            style={'margin-top': '10px', 'color': CLR['text1'], 'font-size': '15px'}),
+        html.Div(
+            children=[
+                html.P(
+                    "{}:".format(get_label('LBL_Graph_Options')),
+                    style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px', 'margin-left': '15px',
+                           'display': 'inline-block', 'text-align': 'none'}),
+                html.I(
+                    html.Span(
+                        get_label("LBL_Graph_Options_Info"),
+                        className='save-symbols-tooltip'),
+                    className='fa fa-question-circle-o',
+                    id={'type': 'graph-options-info', 'index': tile},
+                    style={'position': 'relative'})
+            ],
+            id={'type': 'graph-options-info-wrapper', 'index': tile}
+        ),
         html.Div([
             html.Div([
                 html.Div([

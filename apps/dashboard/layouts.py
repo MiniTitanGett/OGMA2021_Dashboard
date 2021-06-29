@@ -126,7 +126,7 @@ def get_data_set_picker(tile, df_name):
     return [
         html.H6(
             "{}:".format(get_label('LBL_Data_Set')),
-            style={'color': CLR['text1'], 'margin-top': '25px', 'display': 'inline-block', 'cursor': 'pointer'}),
+            style={'color': CLR['text1'], 'margin-top': '25px', 'display': 'inline-block', 'cursor':'pointer'}),
         html.Div([
             dcc.Dropdown(
                 id={'type': 'data-set', 'index': tile},
@@ -852,25 +852,6 @@ def get_tile(tile, tile_keys=None, df_name=None):
                                      value='',
                                      placeholder='{}...'.format(get_label('LBL_Select')))
                     ], style={'width': '400px'}),
-                html.P(get_label('LBL_Delete_A_Saved_Graph'),
-                       style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
-                html.Div([
-                    html.Div(
-                        id={'type': 'delete-layout-dropdown-div', 'index': tile},
-                        children=[
-                            dcc.Dropdown(id={'type': 'delete-layout-dropdown', 'index': tile},
-                                         options=[{'label': session['saved_layouts'][key]['Title'], 'value': key} for
-                                                  key in
-                                                  session['saved_layouts']],
-                                         style={'width': '400px', 'font-size': '13px'},
-                                         value='',
-                                         placeholder='{}...'.format(get_label('LBL_Select')))
-                        ], style={'width': '400px'}),
-                    html.Button(
-                        id={'type': 'confirm-delete-button', 'index': tile},
-                        children=get_label('LBL_Confirm_Delete'),
-                        n_clicks=0)
-                ], style={'display': 'inline-block'})
             ], style=LAYOUT_CONTENT_HIDE, id={'type': 'tile-layouts-content', 'index': tile},
                 className='customize-content')
         ], style={'flex-direction': 'column'},

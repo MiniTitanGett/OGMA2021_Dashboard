@@ -108,10 +108,10 @@ def delete_dashboard(dashboard_id):
 
 def load_graph_menu(graph_type, tile, df_name, args_list, df_const):
     if graph_type == 'Line' or graph_type == 'Scatter':
-        graph_menu = get_line_scatter_graph_menu(tile=tile, x=args_list[0], y=args_list[1], measure_type=args_list[2],
+        graph_menu = get_line_scatter_graph_menu(tile=tile, x=args_list[0], y=args_list[2], measure_type=args_list[1],
                                                  mode=args_list[3],  df_name=df_name, df_const=df_const)
     elif graph_type == 'Bar':
-        graph_menu = get_bar_graph_menu(tile=tile, x=args_list[0], y=args_list[1], measure_type=args_list[2],
+        graph_menu = get_bar_graph_menu(tile=tile, x=args_list[0], y=args_list[2], measure_type=args_list[1],
                                         orientation=args_list[3], animate=args_list[4], df_name=df_name,
                                         df_const=df_const)
     elif graph_type == 'Table':

@@ -111,10 +111,16 @@ def _manage_tile_saves_trigger(save_clicks, delete_clicks, prompt_result, prompt
     if '"type":"save-button"}.n_clicks' in changed_id and save_clicks[changed_index] == 0:
         raise PreventUpdate
 
+    # if 'delete-button' in changed id while its n_clicks == 0, do not update
+    if '"type":"delete-button"}.n_clicks' in changed_id and delete_clicks[changed_index] == 0:
+        raise PreventUpdate
+
     if 'save-button' in changed_id:
         mode = "save"
-    elif prompt_data[0] == 'delete' and prompt_result == 'ok':
+    elif 'delete-button' in changed_id:
         mode = "delete"
+    elif prompt_data[0] == 'delete' and prompt_result == 'ok':
+        mode = "confirm-delete"
     elif prompt_data[0] == 'overwrite' and prompt_result == 'ok':
         mode = "confirm-overwrite"
     else:
@@ -135,9 +141,8 @@ for y in range(4):
          Output({'type': 'set-dropdown-options-trigger', 'index': y}, 'data-tile_saving'),
          Output({'type': 'delete-layout-dropdown', 'index': y}, 'value')],
         [Input({'type': 'tile-save-trigger', 'index': y}, 'value')],
-        [State({'type': 'delete-layout-dropdown', 'index': y}, 'value'),
-         # Tile features
-         State({'type': 'tile-title', 'index': y}, 'value'),
+        # Tile features
+        [State({'type': 'tile-title', 'index': y}, 'value'),
          State({'type': 'tile-link', 'index': y}, 'className'),
          State({'type': 'graph-type-dropdown', 'index': y}, 'value'),
          State({'type': 'args-value: {}'.replace("{}", str(y)), 'index': ALL}, 'value'),
@@ -174,7 +179,7 @@ for y in range(4):
          State({'type': 'start-year-input', 'index': y}, 'name')],
         prevent_initial_call=True
     )
-    def _manage_tile_saves(trigger, remove_layout, graph_title, link_state, graph_type, args_list, df_name,
+    def _manage_tile_saves(trigger, graph_title, link_state, graph_type, args_list, df_name,
                            master_df_name, master_year_start, master_year_end, master_hierarchy_toggle,
                            master_hierarchy_level_dropdown, master_state_of_display, master_graph_children_toggle,
                            master_fiscal_toggle, master_input_method, master_secondary_start, master_secondary_end,
@@ -210,11 +215,11 @@ for y in range(4):
 
         delete_dropdown_val = no_update
         update_options_trigger = no_update
+        save_status_symbols = no_update
+        tile = int(dash.callback_context.inputs_list[0]['id']['index'])
 
         # if save requested or the overwrite was confirmed, check for exceptions and save
-        if 'save' == trigger or 'confirm-overwrite' == trigger:
-
-            tile = int(dash.callback_context.inputs_list[0]['id']['index'])
+        if trigger == 'save' or trigger == 'confirm-overwrite':
 
             intermediate_pointer = REPORT_POINTER_PREFIX + graph_title.replace(" ", "")
             # regex.sub('[^A-Za-z0-9]+', '', graph_title)
@@ -226,18 +231,16 @@ for y in range(4):
 
             # if tile is untitled, prevent updates but return save message
             if graph_title == '':
-                save_status_symbols = [['empty_title', tile], {}, get_label('LBL_Untitled_Graph'), get_label('LBL_Graphs_Require_A_Title_To_Be_Saved')]
+                save_status_symbols = [['empty_title', tile], {}, get_label('LBL_Untitled_Graph'),
+                                       get_label('LBL_Graphs_Require_A_Title_To_Be_Saved')]
 
             # if conflicting tiles and overwrite not requested, prompt overwrite
-            elif intermediate_pointer in session['saved_layouts'] and session['saved_layouts'][intermediate_pointer][
-                'Title'] == graph_title \
+            elif intermediate_pointer in session['saved_layouts'] \
+                    and session['saved_layouts'][intermediate_pointer]['Title'] == graph_title \
                     and 'confirm-overwrite' != trigger:
 
-                # was graph_title, changed to intermediate_pointer
-                overwrite_tooltip = "{} \'{}\'".format(get_label('LBL_Overwrite_Graph'),
-                                                       session['saved_layouts'][intermediate_pointer]['Title'])
-
-                save_status_symbols = [['overwrite', tile], {}, get_label('LBL_Overwrite_Graph'), get_label('LBL_Overwrite_Graph_Prompt')]
+                save_status_symbols = [['overwrite', tile], {}, get_label('LBL_Overwrite_Graph'),
+                                       get_label('LBL_Overwrite_Graph_Prompt')]
 
             # else, title is valid to be saved
             else:
@@ -280,17 +283,33 @@ for y in range(4):
                 update_options_trigger = 'trigger'
 
         # if overwrite was cancelled, clear displayed symbols
-        elif 'cancel' == trigger:
+        elif trigger == 'cancel':
             save_status_symbols = [None, {'display': 'hide'}, None, None]
 
+        # if delete button was pressed, prompt delete
+        elif trigger == 'delete':
+
+            intermediate_pointer = REPORT_POINTER_PREFIX + graph_title.replace(" ", "")
+
+            graph_titles = []
+
+            for layout in session['saved_layouts']:
+                graph_titles.append(session['saved_layouts'][layout]['Title'])
+
+            # if tile exists in session, send delete prompt
+            if intermediate_pointer in session['saved_layouts'] \
+                    and session['saved_layouts'][intermediate_pointer]['Title'] == graph_title:
+                save_status_symbols = [['delete', tile], {}, get_label('LBL_Delete_Graph'),
+                                       get_label('LBL_Delete_Prompt')]
+            else:
+                save_status_symbols = [None, {'display': 'hide'}, None, None]
+
         # If confirm delete button has been pressed
-        else:
-
-            if remove_layout != '':
-                delete_layout(remove_layout)
-                update_options_trigger = 'trigger'
-                delete_dropdown_val = ''
-
+        elif trigger == 'confirm-delete':
+            intermediate_pointer = REPORT_POINTER_PREFIX + graph_title.replace(" ", "")
+            delete_layout(intermediate_pointer)
+            update_options_trigger = 'trigger'
+            delete_dropdown_val = ''
             save_status_symbols = [None, {'display': 'hide'}, None, None]
 
         return save_status_symbols, update_options_trigger, delete_dropdown_val
@@ -821,7 +840,6 @@ def _load_tile_layout(selected_layout, df_const):
     graph_menu = load_graph_menu(graph_type=graph_type, tile=tile, df_name=df_name, args_list=args_list,
                                  df_const=df_const)
 
-    # TODO: Need to add df name
     customize_content = get_customize_content(tile=tile, graph_type=graph_type, graph_menu=graph_menu, df_name=df_name)
 
     #  --------- create data sidemenu ---------

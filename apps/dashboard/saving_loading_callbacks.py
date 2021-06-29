@@ -65,8 +65,7 @@ def _load_tile_title(tile_load_title, dashboard_load_title):
 
 # update the dropdown options of available tile layouts
 @app.callback(
-    [Output({'type': 'select-layout-dropdown', 'index': ALL}, 'options'),
-     Output({'type': 'delete-layout-dropdown', 'index': ALL}, 'options')],
+    [Output({'type': 'select-layout-dropdown', 'index': ALL}, 'options')],
     [Input({'type': 'set-dropdown-options-trigger', 'index': ALL}, 'data-tile_saving'),
      Input({'type': 'set-dropdown-options-trigger', 'index': 0}, 'data-dashboard_saving')],
     [State({'type': 'tile-link', 'index': ALL}, 'className')],
@@ -80,9 +79,7 @@ def _update_tile_loading_dropdown_options(_tile_saving_trigger, _dashboard_savin
 
     # graph titles was previously session['saved_layouts']
     return [[{'label': session['saved_layouts'][key]['Title'], 'value': key} for key in
-             session['saved_layouts']]] * len(links), [
-               [{'label': session['saved_layouts'][key]['Title'], 'value': key} for key in
-                session['saved_layouts']]] * len(links)
+             session['saved_layouts']]] * len(links)
 
 
 # *************************************************TILE SAVING********************************************************
@@ -138,8 +135,7 @@ for y in range(4):
     @app.callback(
         # LAYOUT components
         [Output({'type': 'prompt-trigger', 'index': y}, 'data-'),
-         Output({'type': 'set-dropdown-options-trigger', 'index': y}, 'data-tile_saving'),
-         Output({'type': 'delete-layout-dropdown', 'index': y}, 'value')],
+         Output({'type': 'set-dropdown-options-trigger', 'index': y}, 'data-tile_saving')],
         [Input({'type': 'tile-save-trigger', 'index': y}, 'value')],
         # Tile features
         [State({'type': 'tile-title', 'index': y}, 'value'),
@@ -213,7 +209,6 @@ for y in range(4):
         for button in state_of_display:
             nid_path += '^||^{}'.format(button['props']['children'])
 
-        delete_dropdown_val = no_update
         update_options_trigger = no_update
         save_status_symbols = no_update
         tile = int(dash.callback_context.inputs_list[0]['id']['index'])
@@ -309,10 +304,9 @@ for y in range(4):
             intermediate_pointer = REPORT_POINTER_PREFIX + graph_title.replace(" ", "")
             delete_layout(intermediate_pointer)
             update_options_trigger = 'trigger'
-            delete_dropdown_val = ''
             save_status_symbols = [None, {'display': 'hide'}, None, None]
 
-        return save_status_symbols, update_options_trigger, delete_dropdown_val
+        return save_status_symbols, update_options_trigger
 
 
 # **********************************************DASHBOARD SAVING******************************************************

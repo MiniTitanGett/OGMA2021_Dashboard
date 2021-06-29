@@ -432,8 +432,7 @@ for x in range(4):
      Output({'type': 'div-graph-type', 'index': MATCH}, 'style'),
      Output({'type': 'div-customize-warning-message', 'index': MATCH}, 'style')],
     [Input({'type': 'set-graph-options-trigger', 'index': MATCH}, 'options-'),
-     Input({'type': 'tile-link', 'index': ALL}, 'className'),
-     ],
+     Input({'type': 'tile-link', 'index': ALL}, 'className')],
     [State({'type': 'data-set', 'index': MATCH}, 'value'),
      State({'type': 'data-set', 'index': 4}, 'value'),
      State({'type': 'graph-type-dropdown', 'index': MATCH}, 'value'),
@@ -441,6 +440,7 @@ for x in range(4):
 )
 def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, graph_type, _type_options):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+    changed_value = [p['value'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.' or trigger is None or link_states is []:
         raise PreventUpdate
@@ -487,7 +487,7 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
 
     if '"type":"tile-link"}.className' not in changed_id and graph_type is None:
         graph_value = options[0]['value']
-    elif '"type":"tile-link"}.className' in changed_id and graph_type is not None:
+    elif '"type":"tile-link"}.className' in changed_id and graph_type is not None and changed_value == 'fa-fa-link':
         graph_value = None
     else:
         graph_value = graph_type

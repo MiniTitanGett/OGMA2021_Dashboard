@@ -173,8 +173,7 @@ def get_data_set_picker(tile, df_name):
                     id='dataset-confirmation-symbols'),
                 style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
                        'position': 'relative', 'vertical-align': 'top', 'background-color': 'white', 'width': '40px',
-                       'border': '1px solid {}'.format(CLR['lightgray']), 'border-radius': '6px',
-                       'cursor': 'pointer'})],
+                       'border': '1px solid {}'.format(CLR['lightgray']), 'border-radius': '6px', 'cursor':'pointer'})],
             style={'display': 'flex'})
     ]
 
@@ -421,11 +420,11 @@ def get_layout_dashboard():
                             style={'padding': '7px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
                                    'margin-left': '10px', 'margin-right': '14px', 'display': 'inline-block',
                                    'vertical-align': 'top'})],
-                        id='dashboard-reset-symbols',
-                        style={'width': '71px',
-                               'border': '1px solid {}'.format(CLR['lightgray']),
-                               'margin': '2px 0', 'border-radius': '6px',
-                               'display': 'none'}),
+                             id='dashboard-reset-symbols',
+                             style={'width': '71px',
+                                    'border': '1px solid {}'.format(CLR['lightgray']),
+                                    'margin': '2px 0', 'border-radius': '6px',
+                                    'display': 'none'}),
                     style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
                            'position': 'relative', 'vertical-align': 'top'}),
                 html.Button(
@@ -1023,8 +1022,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, df_cons
                     html.P(
                         "{}:".format(get_label('LBL_X_Axis')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
-                           'margin-right': '5px'}),
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '50px'}),
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
@@ -1032,8 +1030,16 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, df_cons
                                                               'value': i} for i in X_AXIS_OPTIONS],
                         value=x,
                         clearable=False,
-                        style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+                        style={'font-size': '13px', 'display': 'inline-block', 'width': '50px', 'position': 'relative',
+                               'top': '-15px',
+                               'margin-right': '5px'})],
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'} if len(
+                        X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
+                html.Div([
+                    html.P(
+                        "{}".format(X_AXIS_OPTIONS[0]),
+                        style={'color': CLR['text1'], 'font-size': '13px'})],
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}),
             html.Div([
                 html.Div([
                     html.P(
@@ -1070,8 +1076,8 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, df_cons
                 html.Div([
                     html.P(
                         "{}:".format(get_label('LBL_Display')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '60px', 'position': 'relative', 'top': '-3px',
+                        style={'color': CLR['text1'], 'font-size': '13px', 'position': 'relative', 'top': '-45px'})],
+                    style={'display': 'inline-block', 'width': '40px', 'position': 'relative', 'top': '-3px',
                            'margin-right': '15px'}),
                 html.Div([
                     dcc.RadioItems(
@@ -1082,7 +1088,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, df_cons
                         value=mode if mode else 'Lines',
                         style={'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})])
-        ], style={'margin-left': '15px'})]
+            ], style={'margin-left': '15px'})]), ]
 
 
 # bar graph menu layout

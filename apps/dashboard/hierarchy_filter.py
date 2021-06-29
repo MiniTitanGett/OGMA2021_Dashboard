@@ -191,7 +191,7 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
                             get_label('LBL_Top'),
                             id={'type': 'hierarchy_to_top', 'index': tile},
                             n_clicks=0,
-                            style={'min-width': '45px', 'display': 'inline-block', 'padding': '0 0 0 0'}),
+                            style={'min-width': '45px', 'display': 'inline-block', 'padding': '0  0 0'}),
                         html.Button(
                             get_label('LBL_Back'),
                             id={'type': 'hierarchy_revert', 'index': tile},

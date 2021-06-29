@@ -465,7 +465,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                 x = df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)]
                 color = 'Variable Name'
 
-            legend_title_text = get_label('LBL_' + color.replace(' ', '_'))
+            legend_title_text = get_label('LBL_' + color.replace(' ', '_'), df_name)
 
         # else, hierarchy type is specific item while "Graph all in Dropdown" is unselected
         else:

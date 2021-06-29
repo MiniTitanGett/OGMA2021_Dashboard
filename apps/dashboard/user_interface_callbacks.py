@@ -132,7 +132,7 @@ def _new_and_delete(_new_clicks, _close_clicks, _dashboard_reset, input_tiles, n
     dashboard_reset_trigger = no_update
 
     # if DELETE button pressed: pop deleted input_tile index and shift following indices left and adjust main layout
-    if 'tile-close' in changed_id and num_tiles != 0 and changed_value is not None:
+    if 'tile-close' in changed_id and num_tiles != 1 and changed_value is not None:
         num_tiles -= 1
         flag = False
         for i in range(len(input_tiles)):

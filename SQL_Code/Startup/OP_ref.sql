@@ -446,7 +446,8 @@ EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Save',@language = 'En'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Save',@language = 'Fr', @ref_desc = 'Fr: Save'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Load',@language = 'En', @ref_desc = 'Load'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Load',@language = 'Fr', @ref_desc = 'Fr: Load'
-
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Delete',@language = 'En', @ref_desc = 'Delete'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Delete',@language = 'Fr', @ref_desc = 'Fr: Delete'
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'En',@ref_desc = 'Hierarchy Selection''s Children'
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'Fr',@ref_desc = 'Enfants de la Sélection de Hiérarchie'
 

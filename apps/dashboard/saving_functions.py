@@ -56,13 +56,13 @@ def save_dashboard_state(name, attributes):
         session['saved_dashboards'][name] = attributes
 
 
-def save_layout_to_db(graph_id, graph_title):
+def save_layout_to_db(graph_id, graph_title, is_adding):
     query = """\
     declare @p_result_status varchar(255)
-    exec dbo.opp_addgeteditdeletefind_extdashboardreports {}, 'Add', \'{}\', \'{}\', 'Dash', \'{}\', 'application/json',
+    exec dbo.opp_addgeteditdeletefind_extdashboardreports {}, \'{}\', \'{}\', \'{}\', 'Dash', \'{}\', 'application/json',
     'json', @p_result_status output
     select @p_result_status as result_status
-    """.format(session['sessionID'], graph_id, graph_title,
+    """.format(session['sessionID'], 'Add' if is_adding else 'Edit', graph_id, graph_title,
                json.dumps(session['saved_layouts'][graph_id], sort_keys=True))
 
     exec_storedproc(query)

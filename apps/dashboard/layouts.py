@@ -804,6 +804,10 @@ def get_tile(tile, tile_keys=None, df_name=None):
                     id={'type': 'tile-layouts', 'index': tile},
                     className='tile-nav tile-nav--layout'),
                 html.Button(
+                    [get_label('LBL_Delete')],
+                    id={'type': 'delete-button', 'index': tile},
+                    className='tile-nav tile-nav--delete'),
+                html.Button(
                     [get_label('LBL_Data')],
                     id={'type': 'tile-data', 'index': tile},
                     className='tile-nav tile-nav--data'),
@@ -835,20 +839,6 @@ def get_tile(tile, tile_keys=None, df_name=None):
                 id={'type': 'tile-customize-content', 'index': tile},
                 className='customize-content'),
             html.Div([  # TODO : style this to match customize menu and get rid of unnecessary divs
-                html.P(get_label('LBL_Save_The_Graph'),
-                       style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
-                html.Div([
-                    html.Button(
-                        # id={'type': 'save-button', 'index': tile},
-                        n_clicks=0,
-                        children=get_label('LBL_Save_Graph'),
-                        style={'display': 'inline-block'},
-                        className='tile-save-button-{}'.format(str(tile))),
-                    html.Div(
-                        [],
-                        id={'type': 'tile-save-status-symbols', 'index': tile},
-                        style={'display': 'inline-block', 'height': '38px', 'text-align': 'center',
-                               'margin-left': '20px', 'position': 'relative', 'vertical-align': 'top'})]),
                 html.P(get_label('LBL_Select_A_Saved_Graph'),
                        style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
                 html.Div(

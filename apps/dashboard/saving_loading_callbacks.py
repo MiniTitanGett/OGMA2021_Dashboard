@@ -91,11 +91,12 @@ def _update_tile_loading_dropdown_options(_tile_saving_trigger, _dashboard_savin
 @app.callback(
     Output('tile-save-trigger-wrapper', 'children'),
     [Input({'type': 'save-button', 'index': ALL}, 'n_clicks'),
+     Input({'type': 'delete-button', 'index': ALL}, 'n_clicks'),
      Input('prompt-result', 'children')],
     State('prompt-title', 'data-'),
     prevent_initial_call=True
 )
-def _manage_tile_saves_trigger(save_clicks, prompt_result, prompt_data):
+def _manage_tile_saves_trigger(save_clicks, delete_clicks, prompt_result, prompt_data):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':
@@ -126,7 +127,7 @@ def _manage_tile_saves_trigger(save_clicks, prompt_result, prompt_data):
     return children
 
 
-# Tile saving/save deleting
+# Tile saving/save deleting, also serves prompt
 for y in range(4):
     @app.callback(
         # LAYOUT components
@@ -273,7 +274,7 @@ for y in range(4):
                 # saves the graph title and layout to the file where you are storing all of the saved layouts
                 # save_layout_to_file(session['saved_layouts'])
                 # saves the graph layout to the database
-                save_layout_to_db(layout_pointer, graph_title)
+                save_layout_to_db(layout_pointer, graph_title, 'save' == trigger)
 
                 save_status_symbols = [None, {'display': 'hide'}, None, None]
                 update_options_trigger = 'trigger'
@@ -691,7 +692,7 @@ def _save_dashboard(_save_clicks, _delete_clicks, _dashboard_overwrite_inputs,
                 save_layout_state(tile_pointer, {'Graph Type': graph_types[i], 'Args List': args_list, **tile_data,
                                                  'Title': tile_titles[i]})
                 # save_layout_to_file(session['saved_layouts'])
-                save_layout_to_db(tile_pointer, tile_titles[i])
+                save_layout_to_db(tile_pointer, tile_titles[i], True)
 
             # save dashboard to file
             # Change to a dashboard pointer from dashboard_title

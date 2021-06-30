@@ -13,6 +13,7 @@ import dash_html_components as html
 from dash.exceptions import PreventUpdate
 from flask import session
 import json
+import dash_bootstrap_components as dbc
 
 # Internal Modules
 from conn import exec_storedproc_results
@@ -126,7 +127,7 @@ def get_data_set_picker(tile, df_name):
     return [
         html.H6(
             "{}:".format(get_label('LBL_Data_Set')),
-            style={'color': CLR['text1'], 'margin-top': '25px', 'display': 'inline-block', 'cursor':'pointer'}),
+            style={'color': CLR['text1'], 'margin-top': '25px', 'display': 'inline-block', 'cursor': 'pointer'}),
         html.Div([
             dcc.Dropdown(
                 id={'type': 'data-set', 'index': tile},
@@ -543,7 +544,34 @@ def get_layout_dashboard():
             id='float-menu-obscure',
             className='prompt-obscure'
         ),
-
+        dbc.Alert(
+            'Your Tile Has Been Saved',
+            id={'type': 'minor-popup', 'index': 0},
+            is_open=False,
+            color='dark',
+            style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px'},
+            duration=4000),
+        dbc.Alert(
+            'Your Tile Has Been Saved',
+            id={'type': 'minor-popup', 'index': 1},
+            is_open=False,
+            color='dark',
+            style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px'},
+            duration=4000),
+        dbc.Alert(
+            'Your Tile Has Been Saved',
+            id={'type': 'minor-popup', 'index': 2},
+            is_open=False,
+            color='dark',
+            style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px'},
+            duration=4000),
+        dbc.Alert(
+            'Your Tile Has Been Saved',
+            id={'type': 'minor-popup', 'index': 3},
+            is_open=False,
+            color='dark',
+            style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px'},
+            duration=4000),
         # dashboard-reset-trigger is used by NEW/DELETE to trigger MANAGE DATA SIDEMENUS to reset the data menus
         html.Div(
             id='dashboard-reset-trigger',

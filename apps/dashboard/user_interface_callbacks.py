@@ -420,7 +420,7 @@ for x in range(4):
             raise PreventUpdate
 
         return view_content_style, customize_content_style, layouts_content_style, view_className, layouts_className, \
-            customize_className
+               customize_className
 
 
 # ************************************************CUSTOMIZE TAB*******************************************************

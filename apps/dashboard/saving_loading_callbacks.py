@@ -65,7 +65,7 @@ def _load_tile_title(tile_load_title, dashboard_load_title):
 
 # update the dropdown options of available tile layouts
 @app.callback(
-    [Output({'type': 'select-layout-dropdown', 'index': ALL}, 'options')],
+    Output({'type': 'select-layout-dropdown', 'index': ALL}, 'options'),
     [Input({'type': 'set-dropdown-options-trigger', 'index': ALL}, 'data-tile_saving'),
      Input({'type': 'set-dropdown-options-trigger', 'index': 0}, 'data-dashboard_saving')],
     [State({'type': 'tile-link', 'index': ALL}, 'className')],
@@ -135,7 +135,8 @@ for y in range(4):
     @app.callback(
         # LAYOUT components
         [Output({'type': 'prompt-trigger', 'index': y}, 'data-'),
-         Output({'type': 'set-dropdown-options-trigger', 'index': y}, 'data-tile_saving')],
+         Output({'type': 'set-dropdown-options-trigger', 'index': y}, 'data-tile_saving'),
+         Output({'type': 'minor-popup', 'index': y}, 'is_open')],
         [Input({'type': 'tile-save-trigger', 'index': y}, 'value')],
         # Tile features
         [State({'type': 'tile-title', 'index': y}, 'value'),
@@ -211,6 +212,7 @@ for y in range(4):
 
         update_options_trigger = no_update
         save_status_symbols = no_update
+        popup_class_name = no_update
         tile = int(dash.callback_context.inputs_list[0]['id']['index'])
 
         # if save requested or the overwrite was confirmed, check for exceptions and save
@@ -275,6 +277,7 @@ for y in range(4):
                 save_layout_to_db(layout_pointer, graph_title, 'save' == trigger)
 
                 save_status_symbols = [None, {'display': 'hide'}, None, None]
+                popup_class_name = True
                 update_options_trigger = 'trigger'
 
         # if overwrite was cancelled, clear displayed symbols
@@ -306,7 +309,7 @@ for y in range(4):
             update_options_trigger = 'trigger'
             save_status_symbols = [None, {'display': 'hide'}, None, None]
 
-        return save_status_symbols, update_options_trigger
+        return save_status_symbols, update_options_trigger, popup_class_name
 
 
 # **********************************************DASHBOARD SAVING******************************************************

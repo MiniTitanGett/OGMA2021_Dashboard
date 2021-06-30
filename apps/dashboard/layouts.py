@@ -1102,61 +1102,62 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, df_cons
                         style={'font-size': '13px', 'display': 'inline-block', 'width': '50px', 'position': 'relative',
                                'top': '-15px',
                                'margin-right': '5px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'} if len(
-                        X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
+                         style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'} if
+                         len(X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
                 html.Div([
                     html.P(
                         "{}".format(X_AXIS_OPTIONS[0]),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}),
-            html.Div([
                 html.Div([
-                    html.P(
-                        "{}:".format(get_label('LBL_Y_Axis')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
-                           'margin-right': '5px'}),
+                    html.Div([
+                        html.P(
+                            "{}:".format(get_label('LBL_Y_Axis')),
+                            style={'color': CLR['text1'], 'font-size': '13px'})],
+                        style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
+                               'margin-right': '5px'}),
+                    html.Div([
+                        dcc.Dropdown(
+                            id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
+                            options=[] if df_const is None else [{'label': i, 'value': i} for i in
+                                                                 df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                            clearable=False,
+                            value=measure_type,
+                            style={'font-size': '13px'})],
+                        style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
                 html.Div([
-                    dcc.Dropdown(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
-                        options=[] if df_const is None else [{'label': i, 'value': i} for i in
-                                                             df_const[df_name]['MEASURE_TYPE_OPTIONS']],
-                        clearable=False,
-                        value=measure_type,
-                        style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
-            html.Div([
+                    html.Div([
+                        html.P(
+                            "{}:".format(get_label('LBL_Graphed_Variables')),
+                            style={'color': CLR['text1'], 'font-size': '13px'})],
+                        style={'display': 'inline-block', 'width': '60px', 'position': 'relative', 'top': '-3px',
+                               'margin-right': '15px'}),
+                    html.Div([
+                        dcc.Dropdown(
+                            id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
+                            options=[] if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
+                            value=y,
+                            multi=True,
+                            clearable=False,
+                            style={'font-size': '13px'})],
+                        style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})]),
                 html.Div([
-                    html.P(
-                        "{}:".format(get_label('LBL_Graphed_Variables')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '60px', 'position': 'relative', 'top': '-3px',
-                           'margin-right': '15px'}),
-                html.Div([
-                    dcc.Dropdown(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
-                        options=[] if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
-                        value=y,
-                        multi=True,
-                        clearable=False,
-                        style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})]),
-            html.Div([
-                html.Div([
-                    html.P(
-                        "{}:".format(get_label('LBL_Display')),
-                        style={'color': CLR['text1'], 'font-size': '13px', 'position': 'relative', 'top': '-45px'})],
-                    style={'display': 'inline-block', 'width': '40px', 'position': 'relative', 'top': '-3px',
-                           'margin-right': '15px'}),
-                html.Div([
-                    dcc.RadioItems(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
-                        options=[{'label': get_label('LBL_Lines'), 'value': 'Line'},
-                                 {'label': get_label('LBL_Points'), 'value': 'Scatter'},
-                                 {'label': get_label('LBL_Lines_And_Points'), 'value': 'Lines and Points'}],
-                        value=mode if mode else 'Lines',
-                        style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})])
+                    html.Div([
+                        html.P(
+                            "{}:".format(get_label('LBL_Display')),
+                            style={'color': CLR['text1'], 'font-size': '13px', 'position': 'relative',
+                                   'top': '-45px'})],
+                             style={'display': 'inline-block', 'width': '40px', 'position': 'relative', 'top': '-3px',
+                                    'margin-right': '15px'}),
+                    html.Div([
+                        dcc.RadioItems(
+                            id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
+                            options=[{'label': get_label('LBL_Lines'), 'value': 'Line'},
+                                     {'label': get_label('LBL_Points'), 'value': 'Scatter'},
+                                     {'label': get_label('LBL_Lines_And_Points'), 'value': 'Lines and Points'}],
+                            value=mode if mode else 'Lines',
+                            style={'font-size': '13px'})],
+                        style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})])
             ], style={'margin-left': '15px'})]), ]
 
 

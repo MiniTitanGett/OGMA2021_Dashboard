@@ -86,14 +86,15 @@ def _update_tile_loading_dropdown_options(_tile_saving_trigger, _dashboard_savin
 
 # manage tile saves trigger
 @app.callback(
-    Output('tile-save-trigger-wrapper', 'children'),
+    Output('tile-save-trigger-wrapper', 'children'),  # formatted in two chained callbacks to mix ALL and y values
     [Input({'type': 'save-button', 'index': ALL}, 'n_clicks'),
      Input({'type': 'delete-button', 'index': ALL}, 'n_clicks'),
-     Input('prompt-result', 'children')],
+     Input('prompt-result', 'children'),
+     Input({'type': 'select-layout-dropdown', 'index': ALL}, 'value')],
     State('prompt-title', 'data-'),
     prevent_initial_call=True
 )
-def _manage_tile_saves_trigger(save_clicks, delete_clicks, prompt_result, prompt_data):
+def _manage_tile_saves_trigger(save_clicks, delete_clicks, prompt_result, _load_value, prompt_data):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':
@@ -116,10 +117,14 @@ def _manage_tile_saves_trigger(save_clicks, delete_clicks, prompt_result, prompt
         mode = "save"
     elif 'delete-button' in changed_id:
         mode = "delete"
+    elif 'select-layout-dropdown' in changed_id:
+        mode = "load"
     elif prompt_data[0] == 'delete' and prompt_result == 'ok':
         mode = "confirm-delete"
     elif prompt_data[0] == 'overwrite' and prompt_result == 'ok':
         mode = "confirm-overwrite"
+    elif prompt_data[0] == 'load' and prompt_result == 'ok':
+        mode = "confirm-load"
     else:
         mode = "cancel"
 
@@ -130,13 +135,26 @@ def _manage_tile_saves_trigger(save_clicks, delete_clicks, prompt_result, prompt
     return children
 
 
-# Tile saving/save deleting, also serves prompt
+# Tile saving/save deleting/tile loading - serves prompt
 for y in range(4):
     @app.callback(
         # LAYOUT components
         [Output({'type': 'prompt-trigger', 'index': y}, 'data-'),
          Output({'type': 'set-dropdown-options-trigger', 'index': y}, 'data-tile_saving'),
-         Output({'type': 'minor-popup', 'index': y}, 'is_open')],
+         Output({'type': 'minor-popup', 'index': y}, 'children'),
+         Output({'type': 'minor-popup', 'index': y}, 'is_open'),
+         # load tile layout outputs
+         Output({'type': 'set-tile-title-trigger', 'index': y}, 'data-tile_load_title'),
+         Output({'type': 'tile-customize-content', 'index': y}, 'children'),
+         Output({'type': 'data-menu-tile-loading', 'index': y}, 'children'),
+         Output({'type': 'select-layout-dropdown', 'index': y}, 'value'),
+         Output({'type': 'select-range-trigger', 'index': y}, 'data-tile-tab'),
+         Output({'type': 'select-range-trigger', 'index': y}, 'data-tile-start_year'),
+         Output({'type': 'select-range-trigger', 'index': y}, 'data-tile-end_year'),
+         Output({'type': 'select-range-trigger', 'index': y}, 'data-tile-start_secondary'),
+         Output({'type': 'select-range-trigger', 'index': y}, 'data-tile-end_secondary'),
+         Output({'type': 'tile-link-wrapper', 'index': y}, 'children'),
+         Output({'type': 'df-constants-storage-tile-wrapper', 'index': y}, 'children')],
         [Input({'type': 'tile-save-trigger', 'index': y}, 'value')],
         # Tile features
         [State({'type': 'tile-title', 'index': y}, 'value'),
@@ -173,7 +191,10 @@ for y in range(4):
          State({'type': 'end-secondary-input', 'index': y}, 'value'),
          State({'type': 'num-periods', 'index': y}, 'value'),
          State({'type': 'period-type', 'index': y}, 'value'),
-         State({'type': 'start-year-input', 'index': y}, 'name')],
+         State({'type': 'start-year-input', 'index': y}, 'name'),
+         # load layout states
+         State({'type': 'select-layout-dropdown', 'index': y}, 'value'),
+         State('df-constants-storage', 'data')],
         prevent_initial_call=True
     )
     def _manage_tile_saves(trigger, graph_title, link_state, graph_type, args_list, df_name,
@@ -182,9 +203,10 @@ for y in range(4):
                            master_fiscal_toggle, master_input_method, master_secondary_start, master_secondary_end,
                            master_x_time_period, master_period_type, master_tab, year_start, year_end, hierarchy_toggle,
                            hierarchy_level_dropdown, state_of_display, graph_children_toggle, fiscal_toggle,
-                           input_method, secondary_start, secondary_end, x_time_period, period_type, tab):
+                           input_method, secondary_start, secondary_end, x_time_period, period_type, tab,
+                           selected_layout, df_const):
 
-        if 'save' not in trigger and 'delete' not in trigger and 'overwrite' not in trigger:
+        if 'cancel' in trigger:
             raise PreventUpdate
 
         if link_state == 'fa fa-link':
@@ -210,10 +232,25 @@ for y in range(4):
         for button in state_of_display:
             nid_path += '^||^{}'.format(button['props']['children'])
 
-        update_options_trigger = no_update
-        save_status_symbols = no_update
-        popup_class_name = no_update
         tile = int(dash.callback_context.inputs_list[0]['id']['index'])
+
+        # Outputs
+        update_options_trigger = no_update
+        # [mode/prompt_trigger, tile], prompt_style/show_hide, prompt_title, prompt_body]
+        prompt_trigger = no_update
+        popup_text = no_update
+        popup_is_open = no_update
+        tile_title_trigger = no_update
+        customize_content = no_update
+        data_content = no_update
+        layout_dropdown = no_update
+        tab_output = no_update
+        start_year = no_update
+        end_year = no_update
+        start_secondary = no_update
+        end_secondary = no_update
+        unlink = no_update
+        df_const_output = no_update
 
         # if save requested or the overwrite was confirmed, check for exceptions and save
         if trigger == 'save' or trigger == 'confirm-overwrite':
@@ -228,16 +265,16 @@ for y in range(4):
 
             # if tile is untitled, prevent updates but return save message
             if graph_title == '':
-                save_status_symbols = [['empty_title', tile], {}, get_label('LBL_Untitled_Graph'),
-                                       get_label('LBL_Graphs_Require_A_Title_To_Be_Saved')]
+                prompt_trigger = [['empty_title', tile], {}, get_label('LBL_Untitled_Graph'),
+                                  get_label('LBL_Graphs_Require_A_Title_To_Be_Saved')]
 
             # if conflicting tiles and overwrite not requested, prompt overwrite
             elif intermediate_pointer in session['saved_layouts'] \
                     and session['saved_layouts'][intermediate_pointer]['Title'] == graph_title \
                     and 'confirm-overwrite' != trigger:
 
-                save_status_symbols = [['overwrite', tile], {}, get_label('LBL_Overwrite_Graph'),
-                                       get_label('LBL_Overwrite_Graph_Prompt')]
+                prompt_trigger = [['overwrite', tile], {}, get_label('LBL_Overwrite_Graph'),
+                                  get_label('LBL_Overwrite_Graph_Prompt')]
 
             # else, title is valid to be saved
             else:
@@ -276,13 +313,14 @@ for y in range(4):
                 # saves the graph layout to the database
                 save_layout_to_db(layout_pointer, graph_title, 'save' == trigger)
 
-                save_status_symbols = [None, {'display': 'hide'}, None, None]
-                popup_class_name = True
+                prompt_trigger = [None, {'display': 'hide'}, None, None]
+                popup_text = get_label('LBL_Your_Graph_Has_Been_Saved')
+                popup_is_open = True
                 update_options_trigger = 'trigger'
 
         # if overwrite was cancelled, clear displayed symbols
         elif trigger == 'cancel':
-            save_status_symbols = [None, {'display': 'hide'}, None, None]
+            prompt_trigger = [None, {'display': 'hide'}, None, None]
 
         # if delete button was pressed, prompt delete
         elif trigger == 'delete':
@@ -297,19 +335,102 @@ for y in range(4):
             # if tile exists in session, send delete prompt
             if intermediate_pointer in session['saved_layouts'] \
                     and session['saved_layouts'][intermediate_pointer]['Title'] == graph_title:
-                save_status_symbols = [['delete', tile], {}, get_label('LBL_Delete_Graph'),
-                                       get_label('LBL_Delete_Prompt')]
+                prompt_trigger = [['delete', tile], {}, get_label('LBL_Delete_Graph'),
+                                  get_label('LBL_Delete_Prompt')]
             else:
-                save_status_symbols = [None, {'display': 'hide'}, None, None]
+                prompt_trigger = [None, {'display': 'hide'}, None, None]
 
         # If confirm delete button has been pressed
         elif trigger == 'confirm-delete':
             intermediate_pointer = REPORT_POINTER_PREFIX + graph_title.replace(" ", "")
             delete_layout(intermediate_pointer)
             update_options_trigger = 'trigger'
-            save_status_symbols = [None, {'display': 'hide'}, None, None]
+            prompt_trigger = [None, {'display': 'hide'}, None, None]
+            popup_text = get_label('LBL_Your_Graph_Has_Been_Deleted')
+            popup_is_open = True
 
-        return save_status_symbols, update_options_trigger, popup_class_name
+        # if load then we send the load prompt
+        elif trigger == 'load':
+            prompt_trigger = [['load', tile], {}, get_label('LBL_Load_Graph'), get_label('LBL_Load_Graph_Prompt')]
+
+        # if confirm-load then we load what was selected
+        elif trigger == 'confirm-load':
+            df_name = session['saved_layouts'][selected_layout]['Data Set']
+
+            # check if data is loaded
+            if df_name not in session:
+                session[df_name] = dataset_to_df(df_name)
+                if df_const is None:
+                    df_const = {}
+                df_const[df_name] = generate_constants(df_name)
+
+            #  --------- create customize menu ---------
+
+            graph_type = session['saved_layouts'][selected_layout]['Graph Type']
+            args_list = session['saved_layouts'][selected_layout]['Args List']
+
+            graph_menu = load_graph_menu(graph_type=graph_type, tile=tile, df_name=df_name, args_list=args_list,
+                                         df_const=df_const)
+
+            customize_content = get_customize_content(tile=tile, graph_type=graph_type, graph_menu=graph_menu,
+                                                      df_name=df_name)
+
+            #  --------- create data sidemenu ---------
+
+            # set hierarchy toggle value (level vs specific)
+            hierarchy_toggle = session['saved_layouts'][selected_layout]['Hierarchy Toggle']
+            # set level value selection
+            level_value = session['saved_layouts'][selected_layout]['Level Value']
+            # retrieve nid string
+            nid_path = session['saved_layouts'][selected_layout]['NID Path']
+            # set the value of "Graph All" checkbox
+            graph_all_toggle = session['saved_layouts'][selected_layout]['Graph All Toggle']
+            # set gregorian/fiscal toggle value
+            fiscal_toggle = session['saved_layouts'][selected_layout]['Fiscal Toggle']
+            # set timeframe radio buttons selection
+            input_method = session['saved_layouts'][selected_layout]['Timeframe']
+            # set num periods
+            num_periods = session['saved_layouts'][selected_layout]['Num Periods']
+            # set period type
+            period_type = session['saved_layouts'][selected_layout]['Period Type']
+
+            data_content = get_data_menu(tile=tile, df_name=df_name, mode='tile-loading',
+                                         hierarchy_toggle=hierarchy_toggle, level_value=level_value,
+                                         nid_path=nid_path, graph_all_toggle=graph_all_toggle,
+                                         fiscal_toggle=fiscal_toggle, input_method=input_method,
+                                         num_periods=num_periods,
+                                         period_type=period_type, df_const=df_const)
+
+            # show and set 'Select Range' inputs if selected, else leave hidden and unset
+            if session['saved_layouts'][selected_layout]['Timeframe'] == 'select-range':
+                tab_output = session['saved_layouts'][selected_layout]['Date Tab']
+                start_year = session['saved_layouts'][selected_layout]['Start Year']
+                end_year = session['saved_layouts'][selected_layout]['End Year']
+                start_secondary = session['saved_layouts'][selected_layout]['Start Secondary']
+                end_secondary = session['saved_layouts'][selected_layout]['End Secondary']
+            else:
+                tab_output = start_year = end_year = start_secondary = end_secondary = no_update
+
+            df_const_output = dcc.Store(
+                id='df-constants-storage',
+                storage_type='memory',
+                data=df_const)
+            for x in range(tile):
+                df_const = html.Div(
+                    df_const,
+                    id={'type': 'df-constants-storage-tile-wrapper', 'index': x}
+                )
+
+            unlink = html.I(
+                className='fa fa-unlink',
+                id={'type': 'tile-link', 'index': tile},
+                style={'position': 'relative'})
+            tile_title_trigger = session['saved_layouts'][selected_layout]['Title']
+            popup_text = get_label('LBL_Your_Graph_Is_Being_Loaded')
+            popup_is_open = True
+        return prompt_trigger, update_options_trigger, popup_text, popup_is_open, tile_title_trigger, \
+            customize_content, data_content, layout_dropdown, tab_output, start_year, end_year, start_secondary, \
+            end_secondary, unlink, df_const_output
 
 
 # **********************************************DASHBOARD SAVING******************************************************
@@ -790,108 +911,6 @@ def _load_select_range_inputs(tile_tab, dashboard_tab, tile_start_year, tile_end
         end_secondary = dashboard_end_secondary
 
     return date_tab, start_year, end_year, start_secondary, end_secondary
-
-
-# ********************************************TILE LOADING***********************************************************
-
-# load tile layout
-@app.callback(
-    [Output({'type': 'set-tile-title-trigger', 'index': MATCH}, 'data-tile_load_title'),
-     Output({'type': 'tile-customize-content', 'index': MATCH}, 'children'),
-     Output({'type': 'data-menu-tile-loading', 'index': MATCH}, 'children'),
-     Output({'type': 'select-layout-dropdown', 'index': MATCH}, 'value'),
-     Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-tab'),
-     Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-start_year'),
-     Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-end_year'),
-     Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-start_secondary'),
-     Output({'type': 'select-range-trigger', 'index': MATCH}, 'data-tile-end_secondary'),
-     Output({'type': 'tile-link-wrapper', 'index': MATCH}, 'children'),
-     Output({'type': 'df-constants-storage-tile-wrapper', 'index': MATCH}, 'children')],
-    [Input({'type': 'select-layout-dropdown', 'index': MATCH}, 'value')],
-    [State('df-constants-storage', 'data')],
-    prevent_initial_call=True
-)
-def _load_tile_layout(selected_layout, df_const):
-    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-    changed_index = int(search(r'\d+', changed_id).group())
-
-    if changed_id == '.' or selected_layout is None or selected_layout == '':
-        raise PreventUpdate
-
-    tile = int(search(r'\d+', changed_id).group())
-
-    df_name = session['saved_layouts'][selected_layout]['Data Set']
-
-    # check if data is loaded
-    if df_name not in session:
-        session[df_name] = dataset_to_df(df_name)
-        if df_const is None:
-            df_const = {}
-        df_const[df_name] = generate_constants(df_name)
-
-    #  --------- create customize menu ---------
-
-    graph_type = session['saved_layouts'][selected_layout]['Graph Type']
-    args_list = session['saved_layouts'][selected_layout]['Args List']
-
-    graph_menu = load_graph_menu(graph_type=graph_type, tile=tile, df_name=df_name, args_list=args_list,
-                                 df_const=df_const)
-
-    customize_content = get_customize_content(tile=tile, graph_type=graph_type, graph_menu=graph_menu, df_name=df_name)
-
-    #  --------- create data sidemenu ---------
-
-    # set hierarchy toggle value (level vs specific)
-    hierarchy_toggle = session['saved_layouts'][selected_layout]['Hierarchy Toggle']
-    # set level value selection
-    level_value = session['saved_layouts'][selected_layout]['Level Value']
-    # retrieve nid string
-    nid_path = session['saved_layouts'][selected_layout]['NID Path']
-    # set the value of "Graph All" checkbox
-    graph_all_toggle = session['saved_layouts'][selected_layout]['Graph All Toggle']
-    # set gregorian/fiscal toggle value
-    fiscal_toggle = session['saved_layouts'][selected_layout]['Fiscal Toggle']
-    # set timeframe radio buttons selection
-    input_method = session['saved_layouts'][selected_layout]['Timeframe']
-    # set num periods
-    num_periods = session['saved_layouts'][selected_layout]['Num Periods']
-    # set period type
-    period_type = session['saved_layouts'][selected_layout]['Period Type']
-
-    data_content = get_data_menu(tile=tile, df_name=df_name, mode='tile-loading',
-                                 hierarchy_toggle=hierarchy_toggle, level_value=level_value,
-                                 nid_path=nid_path, graph_all_toggle=graph_all_toggle,
-                                 fiscal_toggle=fiscal_toggle, input_method=input_method, num_periods=num_periods,
-                                 period_type=period_type, df_const=df_const)
-
-    # show and set 'Select Range' inputs if selected, else leave hidden and unset
-    if session['saved_layouts'][selected_layout]['Timeframe'] == 'select-range':
-        tab = session['saved_layouts'][selected_layout]['Date Tab']
-        start_year = session['saved_layouts'][selected_layout]['Start Year']
-        end_year = session['saved_layouts'][selected_layout]['End Year']
-        start_secondary = session['saved_layouts'][selected_layout]['Start Secondary']
-        end_secondary = session['saved_layouts'][selected_layout]['End Secondary']
-    else:
-        tab = start_year = end_year = start_secondary = end_secondary = no_update
-
-    df_const = dcc.Store(
-        id='df-constants-storage',
-        storage_type='memory',
-        data=df_const)
-    for x in range(changed_index):
-        df_const = html.Div(
-            df_const,
-            id={'type': 'df-constants-storage-tile-wrapper', 'index': x}
-        )
-
-    unlink = html.I(
-        className='fa fa-unlink',
-        id={'type': 'tile-link', 'index': tile},
-        style={'position': 'relative'}),
-
-    # UPDATED the first output, previously was selected_layout
-    return session['saved_layouts'][selected_layout]['Title'], customize_content, data_content, None, tab, start_year, \
-        end_year, start_secondary, end_secondary, unlink, df_const
 
 
 # *********************************************DASHBOARD LOADING*****************************************************

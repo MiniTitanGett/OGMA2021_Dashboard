@@ -629,13 +629,14 @@ for x in range(4):
 # change link button appearance
 @app.callback(
     Output({'type': 'tile-link', 'index': MATCH}, 'className'),
-    [Input({'type': 'select-layout-dropdown', 'index': MATCH}, 'value'),
+    [Input({'type': 'tile-save-trigger', 'index': MATCH}, 'value'),
      Input({'type': 'tile-link', 'index': MATCH}, 'n_clicks'),
      Input({'type': 'set-tile-link-trigger', 'index': MATCH}, 'link-')],
-    [State({'type': 'tile-link', 'index': MATCH}, 'className')],
+    [State({'type': 'tile-link', 'index': MATCH}, 'className'),
+     State('prompt-result', 'children')],
     prevent_initial_call=True
 )
-def _change_link(_selected_layout, _link_clicks, link_trigger, link_state):
+def _change_link(prompt_data, _link_clicks, link_trigger, link_state, prompt_result):
     """
     :param _link_clicks: Detects the user clicking the link/unlink icon
     :param link_state: State of the link/unlink icon
@@ -647,8 +648,8 @@ def _change_link(_selected_layout, _link_clicks, link_trigger, link_state):
     if '.' == changed_id:  # or link_trigger is None
         raise PreventUpdate
 
-    if '"type":"select-layout-dropdown"}.value' in changed_id:
-        if link_state == 'fa fa-link':
+    if '"type":"tile-save-trigger"}.value' in changed_id:
+        if link_state == 'fa fa-link' and prompt_data[0] == 'load' and prompt_result == 'ok':
             link_state = 'fa fa-unlink'
         else:
             raise PreventUpdate
@@ -706,7 +707,6 @@ def _change_link(_selected_layout, _link_clicks, link_trigger, link_state):
      Input('tile-closed-trigger', 'data-'),
      Input('select-dashboard-dropdown', 'value'),
      Input({'type': 'tile-link', 'index': ALL}, 'className'),
-     Input({'type': 'select-layout-dropdown', 'index': ALL}, 'value'),
      Input({'type': 'tile-data', 'index': ALL}, 'n_clicks'),
      Input({'type': 'data-menu-close', 'index': ALL}, 'n_clicks'),
      Input({'type': 'data-set', 'index': 0}, 'value'),
@@ -745,7 +745,7 @@ def _change_link(_selected_layout, _link_clicks, link_trigger, link_state):
      State({'type': 'hierarchy_display_button', 'index': 4}, 'children')],
     prevent_initial_call=True
 )
-def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, links_style, _selected_layout, data_clicks,
+def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, links_style, data_clicks,
                            _data_close_clicks, df_name_0, df_name_1, df_name_2, df_name_3, df_name_4, _confirm_clicks_0,
                            _confirm_clicks_1, _confirm_clicks_2, _confirm_clicks_3, _confirm_clicks_4,
                            _refresh_clicks_0, _refresh_clicks_1, _refresh_clicks_2, _refresh_clicks_3,

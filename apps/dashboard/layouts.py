@@ -897,7 +897,7 @@ def get_tile(tile, tile_keys=None, df_name=None):
                                      options=[{'label': session['saved_layouts'][key]['Title'], 'value': key} for key in
                                               session['saved_layouts']],
                                      style={'width': '400px', 'font-size': '13px'},
-                                     clearable=True,
+                                     clearable=False,
                                      value='',
                                      placeholder='{}...'.format(get_label('LBL_Select')))
                     ], style={'width': '400px'}),
@@ -1108,7 +1108,8 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, df_cons
                     html.P(
                         "{}".format(X_AXIS_OPTIONS[0]),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}),
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'} if
+                    len(X_AXIS_OPTIONS) == 1 else {'display': 'None'}),
                 html.Div([
                     html.Div([
                         html.P(

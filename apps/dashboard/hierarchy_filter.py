@@ -79,9 +79,21 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
             button = generate_history_button(nid, len(hierarchy_button_path), tile)
             hierarchy_button_path.append(button)
         return [
-            html.H6(
-                "{}:".format('Hierarchy'),
-                style={'color': CLR['text1'], 'margin-top': '20px', 'display': 'inline-block', 'text-align': 'none'}),
+            html.Div(
+                children=[
+                    html.H6(
+                        "{}:".format('Hierarchy'),
+                        style={'color': CLR['text1'], 'margin-top': '20px', 'display': 'inline-block',
+                               'text-align': 'none'}),
+                    html.I(
+                        html.Span(
+                            get_label("LBL_Hierarchy_Info"),
+                            className='save-symbols-tooltip'),
+                        className='fa fa-question-circle-o',
+                        id={'type': 'hierarchy-info', 'index': tile},
+                        style={'position': 'relative'})],
+                id={'type': 'hierarchy-info-wrapper', 'index': tile}
+            ),
             # Hierarchy level filter vs specific node toggle switch
             dcc.Tabs([
                 dcc.Tab(label="{}".format(get_label("LBL_Level_Filter")), value='Level Filter'),
@@ -179,7 +191,7 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
                             get_label('LBL_Top'),
                             id={'type': 'hierarchy_to_top', 'index': tile},
                             n_clicks=0,
-                            style={'min-width': '45px', 'display': 'inline-block', 'padding': '0 0 0 0'}),
+                            style={'min-width': '45px', 'display': 'inline-block', 'padding': '0  0 0'}),
                         html.Button(
                             get_label('LBL_Back'),
                             id={'type': 'hierarchy_revert', 'index': tile},

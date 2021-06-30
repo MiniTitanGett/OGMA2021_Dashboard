@@ -26,7 +26,7 @@ from apps.dashboard.data import CLR, get_label
 # ********************************************DATE-PICKER LAYOUT**************************************************
 
 
-# datepicker layout
+# date picker layout
 def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, period_type, df_const):
     language = session["language"]
     if df_name:
@@ -43,9 +43,22 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                 value=fiscal_toggle,
                 style={'display': 'block', 'text-align': 'center'} if df_const[df_name]['FISCAL_AVAILABLE']
                 else {'display': 'none'}),
-            html.H6(
-                '{}:'.format(get_label("LBL_Timeframe")),
-                style={'margin-top': '20px', 'color': CLR['text1']}),
+            html.Div(
+                children=[
+                    html.H6(
+                        '{}:'.format(get_label("LBL_Timeframe")),
+                        style={'margin-top': '20px', 'color': CLR['text1'], 'display': 'inline-block',
+                               'text-align': 'none'}),
+                    html.I(
+                        html.Span(
+                            get_label("LBL_Date_Picker_Info"),
+                            className='save-symbols-tooltip'),
+                        className='fa fa-question-circle-o',
+                        id={'type': 'date-picker-info', 'index': tile},
+                        style={'position': 'relative'}),
+                ],
+                id={'type': 'date-picker-info-wrapper', 'index': tile}
+            ),
             dcc.RadioItems(
                 id={'type': 'radio-timeframe', 'index': tile},
                 options=[
@@ -53,7 +66,7 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                      'value': 'all-time'},
                     {'label': '{}'.format(
                         get_label('LBL_Last') if language == 'En' else '........... ' + get_label('LBL_Last')),
-                     'value': 'to-current'},
+                        'value': 'to-current'},
                     {'label': get_label('LBL_Select_Range'),
                      'value': 'select-range'}],
                 value=input_method,
@@ -68,16 +81,14 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                     type='number',
                     required=True,
                     min=1,
-                    style={'width': '45px', 'height': '27px', 'margin': '0', 'padding': '0', 'font-size': '15px',
-                           'text-align': 'center', 'padding-top': '7px', 'border-radius': '0', 'color': '#333'})
+                    style={'width': '45px', 'height': '29px', 'margin': '0', 'padding': '0', 'font-size': '15px',
+                           'text-align': 'center', 'padding-top': '3px', 'border-radius': '5px', 'color': '#333',
+                           'max-height': '26px'})
             ], style={'width': '0', 'height': '0', 'position': 'relative', 'bottom': '55px',
                       'left': '73px' if language == 'En' else '36px'}),
             html.Div([
                 dcc.Dropdown(
                     id={'type': 'period-type', 'index': tile},
-                    value=period_type,
-                    disabled=input_method != 'to-current',
-                    clearable=False,
                     options=[
                         {'label': get_label('LBL_Years'),
                          'value': 'last-years'},
@@ -87,8 +98,11 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                          'value': 'last-months'},
                         {'label': get_label('LBL_Weeks'),
                          'value': 'last-weeks'}],
-                    style={'width': '100px', 'height': '27px', 'margin': '0', 'padding': '0', 'font-size': '15px',
-                           'display': 'inline-block', 'text-align': 'center', 'border-radius': '0', 'color': '#333'})
+                    value=period_type,
+                    disabled=input_method != 'to-current',
+                    clearable=False,
+                    style={'width': '110px', 'max height': '26px', 'margin': '0', 'padding': '0', 'font-size': '15px',
+                           'text-align': 'center', 'border-radius': '5px', 'color': '#333', 'max-height': '26px'})
             ], style={'width': '0', 'height': '0', 'position': 'relative', 'bottom': '55px',
                       'left': '125px' if language == 'En' else '150px'}),
             html.P(
@@ -136,9 +150,21 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                 className='toggle-tabs-wrapper',
                 value=fiscal_toggle,
                 style={'display': 'block', 'text-align': 'center'}),
-            html.H6(
-                '{}:'.format(get_label("LBL_Timeframe")),
-                style={'margin-top': '20px', 'color': CLR['text1']}),
+            html.Div(
+                children=[
+                    html.H6(
+                        '{}:'.format(get_label("LBL_Timeframe")),
+                        style={'margin-top': '20px', 'color': CLR['text1'], 'display': 'inline-block',
+                               'text-align': 'none'}),
+                    html.I(
+                        html.Span(
+                            get_label("LBL_Date_Picker_Info"),
+                            className='save-symbols-tooltip'),
+                        className='fa fa-question-circle-o',
+                        id={'type': 'date-picker-info', 'index': tile},
+                        style={'position': 'relative'})],
+                id={'type': 'date-picker-info-wrapper', 'index': tile}
+            ),
             dcc.RadioItems(
                 id={'type': 'radio-timeframe', 'index': tile},
                 options=[
@@ -161,16 +187,14 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                     type='number',
                     required=True,
                     min=1,
-                    style={'width': '45px', 'height': '27px', 'margin': '0', 'padding': '0', 'font-size': '15px',
-                           'text-align': 'center', 'padding-top': '7px', 'border-radius': '0', 'color': '#333'})
+                    style={'width': '45px', 'height': '29px', 'margin': '0', 'padding': '0', 'font-size': '15px',
+                           'text-align': 'center', 'padding-top': '3px', 'border-radius': '5px', 'color': '#333',
+                           'max-height': '26px'})
             ], style={'width': '0', 'height': '0', 'position': 'relative', 'bottom': '55px',
                       'left': '73px' if language == 'En' else '36px'}),
             html.Div([
                 dcc.Dropdown(
                     id={'type': 'period-type', 'index': tile},
-                    value=period_type,
-                    disabled=input_method != 'to-current',
-                    clearable=False,
                     options=[
                         {'label': get_label('LBL_Years'),
                          'value': 'last-years'},
@@ -180,12 +204,15 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                          'value': 'last-months'},
                         {'label': get_label('LBL_Weeks'),
                          'value': 'last-weeks'}],
-                    style={'width': '100px', 'height': '27px', 'margin': '0', 'padding': '0', 'font-size': '15px',
-                           'display': 'inline-block', 'text-align': 'center', 'border-radius': '0', 'color': '#333'})
+                    value=period_type,
+                    disabled=input_method != 'to-current',
+                    clearable=False,
+                    style={'width': '110px', 'height': '26px', 'margin': '0', 'padding': '0', 'font-size': '15px',
+                            'text-align': 'center', 'border-radius': '5px', 'color': '#333', 'max-height': '26px'})
             ], style={'width': '0', 'height': '0', 'position': 'relative', 'bottom': '55px',
                       'left': '125px' if language == 'En' else '150px'}),
             html.P("{}: {} - {}".format(get_label('LBL_Available'), '_', '_'),
-                   style={'margin-top': '10px', 'text-align': 'center', 'font-size': '85%', 'color': CLR['text1']}),
+                   style={'margin-top': '15px', 'text-align': 'center', 'font-size': '85%', 'color': CLR['text1']}),
             html.Div([
                 # placeholders for datepicker inputs to avoid callback errors. Inputs are initialized to 1 so that they
                 # are only 'None' if an invalid date has been entered.
@@ -295,7 +322,7 @@ def get_secondary_data(conditions, fiscal_toggle, df_name, df_const):
         else:
             fringe_max += 1
     return quarter_class_name, quarter_disabled, month_class_name, month_disabled, week_class_name, week_disabled, \
-        fringe_min, fringe_max, default_max, max_year, new_tab
+           fringe_min, fringe_max, default_max, max_year, new_tab
 
 
 # create left and right columns for tabs with secondary time options (beneath years)

@@ -266,7 +266,7 @@ for y in range(4):
             # if tile is untitled, prevent updates but return save message
             if graph_title == '':
                 prompt_trigger = [['empty_title', tile], {}, get_label('LBL_Untitled_Graph'),
-                                  get_label('LBL_Graphs_Require_A_Title_To_Be_Saved')]
+                                  get_label('LBL_Untitled_Graph_Prompt')]
 
             # if conflicting tiles and overwrite not requested, prompt overwrite
             elif intermediate_pointer in session['saved_layouts'] \
@@ -314,7 +314,7 @@ for y in range(4):
                 save_layout_to_db(layout_pointer, graph_title, 'save' == trigger)
 
                 prompt_trigger = [None, {'display': 'hide'}, None, None]
-                popup_text = get_label('LBL_Your_Graph_Has_Been_Saved')
+                popup_text = get_label('LBL_Your_Graph_Has_Been_Saved').format(graph_title)
                 popup_is_open = True
                 update_options_trigger = 'trigger'
 
@@ -336,7 +336,7 @@ for y in range(4):
             if intermediate_pointer in session['saved_layouts'] \
                     and session['saved_layouts'][intermediate_pointer]['Title'] == graph_title:
                 prompt_trigger = [['delete', tile], {}, get_label('LBL_Delete_Graph'),
-                                  get_label('LBL_Delete_Prompt')]
+                                  get_label('LBL_Delete_Graph_Prompt').format(graph_title)]
             else:
                 prompt_trigger = [None, {'display': 'hide'}, None, None]
 
@@ -346,7 +346,7 @@ for y in range(4):
             delete_layout(intermediate_pointer)
             update_options_trigger = 'trigger'
             prompt_trigger = [None, {'display': 'hide'}, None, None]
-            popup_text = get_label('LBL_Your_Graph_Has_Been_Deleted')
+            popup_text = get_label('LBL_Your_Graph_Has_Been_Deleted').format(graph_title)
             popup_is_open = True
 
         # if load then we send the load prompt
@@ -426,7 +426,7 @@ for y in range(4):
                 id={'type': 'tile-link', 'index': tile},
                 style={'position': 'relative'})
             tile_title_trigger = session['saved_layouts'][selected_layout]['Title']
-            popup_text = get_label('LBL_Your_Graph_Is_Being_Loaded')
+            popup_text = get_label('LBL_Your_Graph_Has_Been_Loaded').format(tile_title_trigger)
             popup_is_open = True
         return prompt_trigger, update_options_trigger, popup_text, popup_is_open, tile_title_trigger, \
             customize_content, data_content, layout_dropdown, tab_output, start_year, end_year, start_secondary, \

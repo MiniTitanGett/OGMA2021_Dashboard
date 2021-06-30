@@ -97,7 +97,7 @@ def _update_tile_loading_dropdown_options(_tile_saving_trigger, _dashboard_savin
 def _manage_tile_saves_trigger(save_clicks, delete_clicks, prompt_result, _load_value, prompt_data):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
-    if changed_id == '.':
+    if changed_id == '.' or len(dash.callback_context.triggered) > 1:
         raise PreventUpdate
 
     if 'prompt-result' in changed_id:

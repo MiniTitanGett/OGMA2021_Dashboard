@@ -487,6 +487,101 @@ def get_layout_dashboard():
             # To hide footer: calc(100vh)
         ], style={'display': 'flex', 'flex-direction': 'column', 'height': 'calc(100vh - 15px)', 'overflow': 'hidden',
                   'border-bottom': '1px solid {}'.format(CLR['lightgray'])}),
+        # Prompt
+        html.Div(
+            html.Div([
+                html.Div([
+                    html.H6(
+                        'Empty Title',
+                        id='prompt-title'
+                    ),
+                    html.A(
+                        className='boxclose',
+                        id='prompt-close',
+                        style={'position': 'absolute', 'right': '16px', 'top': '8px'})],
+                    className='prompt-header'),
+                html.Div([
+                    html.Div('Empty Text', id='prompt-body'),
+                    html.Div([
+                        html.Button('Cancel', id='prompt-cancel', style={'margin-right': '16px', 'width': '80px'}),
+                        html.Button('OK', id='prompt-ok', style={'width': '80px'})],
+                        className='prompt-button-wrapper')],
+                    style={'padding': '24px'})],
+                id='prompt-box',
+                className='prompt-box'),
+            style=DATA_CONTENT_HIDE,
+            id='prompt-obscure',
+            className='prompt-obscure'
+        ),
+        html.Div(
+            id={'type': 'prompt-trigger', 'index': 0},
+            style={'display': 'none'}),
+        html.Div(
+            id={'type': 'prompt-trigger', 'index': 1},
+            style={'display': 'none'}),
+        html.Div(
+            id={'type': 'prompt-trigger', 'index': 2},
+            style={'display': 'none'}),
+        html.Div(
+            id={'type': 'prompt-trigger', 'index': 3},
+            style={'display': 'none'}),
+        html.Div(
+            id='prompt-result',
+            style={'display': 'none'}),
+        # Floating Menu TODO: Link with menu
+        html.Div(
+            html.Div([
+                html.Div([
+                    html.H6(
+                        'Empty Title',
+                        id='float-menu-title'
+                    ),
+                    html.A(
+                        className='boxclose',
+                        id='float-menu-close',
+                        style={'position': 'absolute', 'right': '16px', 'top': '8px'})],
+                    className='prompt-header'),
+                html.Div([
+                    html.Div('Empty Menu', id='float-menu-body'),
+                    html.Div([
+                        html.Button('Cancel', id='float-menu-cancel', style={'margin-right': '16px', 'width': '80px'}),
+                        html.Button('OK', id='float-menu-ok', style={'width': '80px'})],
+                        className='prompt-button-wrapper')],
+                    style={'padding': '24px'})],
+                id='float-menu-box',
+                className='float-menu-box'),
+            style=DATA_CONTENT_HIDE,
+            id='float-menu-obscure',
+            className='prompt-obscure'
+        ),
+        dbc.Alert(
+            'Your Tile Has Been Saved',
+            id={'type': 'minor-popup', 'index': 0},
+            is_open=False,
+            color='dark',
+            style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px'},
+            duration=4000),
+        dbc.Alert(
+            'Your Tile Has Been Saved',
+            id={'type': 'minor-popup', 'index': 1},
+            is_open=False,
+            color='dark',
+            style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px'},
+            duration=4000),
+        dbc.Alert(
+            'Your Tile Has Been Saved',
+            id={'type': 'minor-popup', 'index': 2},
+            is_open=False,
+            color='dark',
+            style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px'},
+            duration=4000),
+        dbc.Alert(
+            'Your Tile Has Been Saved',
+            id={'type': 'minor-popup', 'index': 3},
+            is_open=False,
+            color='dark',
+            style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px'},
+            duration=4000),
         # dashboard-reset-trigger is used by NEW/DELETE to trigger MANAGE DATA SIDEMENUS to reset the data menus
         html.Div(
             id='dashboard-reset-trigger',

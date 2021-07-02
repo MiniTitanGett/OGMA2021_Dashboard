@@ -56,13 +56,13 @@ def save_dashboard_state(name, attributes):
         session['saved_dashboards'][name] = attributes
 
 
-def save_layout_to_db(graph_id, graph_title):
+def save_layout_to_db(graph_id, graph_title, is_adding):
     query = """\
     declare @p_result_status varchar(255)
-    exec dbo.opp_addgeteditdeletefind_extdashboardreports {}, 'Add', \'{}\', \'{}\', 'Dash', \'{}\', 'application/json',
-    'json', @p_result_status output
+    exec dbo.opp_addgeteditdeletefind_extdashboardreports {}, \'{}\', \'{}\', \'{}\', 'Dash', \'{}\', 
+    'application/json', 'json', @p_result_status output
     select @p_result_status as result_status
-    """.format(session['sessionID'], graph_id, graph_title,
+    """.format(session['sessionID'], 'Add' if is_adding else 'Edit', graph_id, graph_title,
                json.dumps(session['saved_layouts'][graph_id], sort_keys=True))
 
     exec_storedproc(query)
@@ -96,7 +96,7 @@ def delete_layout(graph_id):
 def delete_dashboard(dashboard_id):
     query = """\
     declare @p_result_status varchar(255)
-    exec dbo.opp_addgeteditdeletefind_extdashboardrs {}, \'{}\', \'{}\', null, null, null, null, null,
+    exec dbo.opp_addgeteditdeletefind_extdashboards {}, \'{}\', \'{}\', null, null, null, null, null,
     @p_result_status output
     select @p_result_status as result_status
     """.format(session['sessionID'], 'Delete', dashboard_id)
@@ -108,10 +108,10 @@ def delete_dashboard(dashboard_id):
 
 def load_graph_menu(graph_type, tile, df_name, args_list, df_const):
     if graph_type == 'Line' or graph_type == 'Scatter':
-        graph_menu = get_line_scatter_graph_menu(tile=tile, x=args_list[0], y=args_list[1], measure_type=args_list[2],
+        graph_menu = get_line_scatter_graph_menu(tile=tile, x=args_list[0], y=args_list[2], measure_type=args_list[1],
                                                  mode=args_list[3],  df_name=df_name, df_const=df_const)
     elif graph_type == 'Bar':
-        graph_menu = get_bar_graph_menu(tile=tile, x=args_list[0], y=args_list[1], measure_type=args_list[2],
+        graph_menu = get_bar_graph_menu(tile=tile, x=args_list[0], y=args_list[2], measure_type=args_list[1],
                                         orientation=args_list[3], animate=args_list[4], df_name=df_name,
                                         df_const=df_const)
     elif graph_type == 'Table':

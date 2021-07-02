@@ -13,12 +13,10 @@ import dash_html_components as html
 from dash.exceptions import PreventUpdate
 from flask import session
 import json
-# import logging
+import dash_bootstrap_components as dbc
 
 # Internal Modules
-# import config
 from conn import exec_storedproc_results
-# from apps.OPG001.app import app
 from apps.dashboard.data import GRAPH_OPTIONS, CLR, DATA_CONTENT_SHOW, DATA_CONTENT_HIDE, VIEW_CONTENT_SHOW, \
     BAR_X_AXIS_OPTIONS, CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LAYOUT_CONTENT_HIDE
 from apps.dashboard.hierarchy_filter import get_hierarchy_layout
@@ -741,19 +739,28 @@ def get_tile(tile, tile_keys=None, df_name=None):
                     className='tile-title',
                     debounce=True),
                 html.Button(
-                    [get_label('LBL_View')],
+                    [get_label('LBL_Graph')],
                     id={'type': 'tile-view', 'index': tile},
                     className='tile-nav tile-nav--view tile-nav--selected'),
                 dcc.Store(
                     id={'type': 'tile-view-store', 'index': tile}),
                 html.Button(
-                    [get_label('LBL_Customize')],
+                    [get_label('LBL_Edit')],
                     id={'type': 'tile-customize', 'index': tile},
                     className='tile-nav tile-nav--customize'),
                 html.Button(
-                    [get_label('LBL_Graphs')],
+                    [get_label('LBL_Save')],
+                    id={'type': 'save-button', 'index': tile},
+                    n_clicks=0,
+                    className='tile-nav tile-nav--save'),
+                html.Button(
+                    [get_label('LBL_Load')],
                     id={'type': 'tile-layouts', 'index': tile},
                     className='tile-nav tile-nav--layout'),
+                html.Button(
+                    [get_label('LBL_Delete')],
+                    id={'type': 'delete-button', 'index': tile},
+                    className='tile-nav tile-nav--delete'),
                 html.Button(
                     [get_label('LBL_Data')],
                     id={'type': 'tile-data', 'index': tile},
@@ -786,20 +793,6 @@ def get_tile(tile, tile_keys=None, df_name=None):
                 id={'type': 'tile-customize-content', 'index': tile},
                 className='customize-content'),
             html.Div([  # TODO : style this to match customize menu and get rid of unnecessary divs
-                html.P(get_label('LBL_Save_The_Graph'),
-                       style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
-                html.Div([
-                    html.Button(
-                        id={'type': 'save-button', 'index': tile},
-                        n_clicks=0,
-                        children=get_label('LBL_Save_Graph'),
-                        style={'display': 'inline-block'},
-                        className='tile-save-button-{}'.format(str(tile))),
-                    html.Div(
-                        [],
-                        id={'type': 'tile-save-status-symbols', 'index': tile},
-                        style={'display': 'inline-block', 'height': '38px', 'text-align': 'center',
-                               'margin-left': '20px', 'position': 'relative', 'vertical-align': 'top'})]),
                 html.P(get_label('LBL_Select_A_Saved_Graph'),
                        style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
                 html.Div(
@@ -809,29 +802,10 @@ def get_tile(tile, tile_keys=None, df_name=None):
                                      options=[{'label': session['saved_layouts'][key]['Title'], 'value': key} for key in
                                               session['saved_layouts']],
                                      style={'width': '400px', 'font-size': '13px'},
-                                     clearable=True,
+                                     clearable=False,
                                      value='',
                                      placeholder='{}...'.format(get_label('LBL_Select')))
                     ], style={'width': '400px'}),
-                html.P(get_label('LBL_Delete_A_Saved_Graph'),
-                       style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
-                html.Div([
-                    html.Div(
-                        id={'type': 'delete-layout-dropdown-div', 'index': tile},
-                        children=[
-                            dcc.Dropdown(id={'type': 'delete-layout-dropdown', 'index': tile},
-                                         options=[{'label': session['saved_layouts'][key]['Title'], 'value': key} for
-                                                  key in
-                                                  session['saved_layouts']],
-                                         style={'width': '400px', 'font-size': '13px'},
-                                         value='',
-                                         placeholder='{}...'.format(get_label('LBL_Select')))
-                        ], style={'width': '400px'}),
-                    html.Button(
-                        id={'type': 'confirm-delete-button', 'index': tile},
-                        children=get_label('LBL_Confirm_Delete'),
-                        n_clicks=0)
-                ], style={'display': 'inline-block'})
             ], style=LAYOUT_CONTENT_HIDE, id={'type': 'tile-layouts-content', 'index': tile},
                 className='customize-content')
         ], style={'flex-direction': 'column'},
@@ -1039,63 +1013,63 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                     html.P(
                         "{}".format(X_AXIS_OPTIONS[0]),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}if len(
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'} if len(
                         X_AXIS_OPTIONS) == 1 else {'display': 'None'}),
-            html.Div([
                 html.Div([
-                    html.P(
-                        "{}:".format(get_label('LBL_Y_Axis')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
-                           'margin-right': '5px'}),
+                    html.Div([
+                        html.P(
+                            "{}:".format(get_label('LBL_Y_Axis')),
+                            style={'color': CLR['text1'], 'font-size': '13px'})],
+                        style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
+                               'margin-right': '5px'}),
+                    html.Div([
+                        dcc.Dropdown(
+                            id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
+                            options=[] if df_const is None else [{'label': i, 'value': i} for i in
+                                                                 df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                            clearable=False,
+                            value=measure_type,
+                            style={'font-size': '13px'})],
+                        style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
                 html.Div([
-                    dcc.Dropdown(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
-                        options=[] if df_const is None else [{'label': i, 'value': i} for i in
-                                                             df_const[df_name]['MEASURE_TYPE_OPTIONS']],
-                        clearable=False,
-                        value=measure_type,
-                        style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
-            html.Div([
+                    html.Div([
+                        html.P(
+                            "{}:".format(get_label('LBL_Graphed_Variables')),
+                            style={'color': CLR['text1'], 'font-size': '13px'})],
+                        style={'display': 'inline-block', 'width': '60px', 'position': 'relative', 'top': '-3px',
+                               'margin-right': '15px'}),
+                    html.Div([
+                        dcc.Dropdown(
+                            id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
+                            options=[] if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
+                            value=y,
+                            multi=True,
+                            clearable=False,
+                            style={'font-size': '13px'})],
+                        style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})]),
                 html.Div([
-                    html.P(
-                        "{}:".format(get_label('LBL_Graphed_Variables')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '60px', 'position': 'relative', 'top': '-3px',
-                           'margin-right': '15px'}),
-                html.Div([
-                    dcc.Dropdown(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
-                        options=[] if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
-                        value=y,
-                        multi=True,
-                        clearable=False,
-                        style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})]),
-            html.Div([
-                html.Div([
-                    html.P(
-                        "{}:".format(get_label('LBL_Display')),
-                        style={'color': CLR['text1'], 'font-size': '13px', 'position': 'relative', 'top': '-45px'})],
-                    style={'display': 'inline-block', 'width': '40px', 'position': 'relative', 'top': '-3px',
-                           'margin-right': '15px'}),
-                html.Div([
-                    dcc.RadioItems(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
-                        options=[{'label': get_label('LBL_Lines'), 'value': 'Line'},
-                                 {'label': get_label('LBL_Points'), 'value': 'Scatter'},
-                                 {'label': get_label('LBL_Lines_And_Points'), 'value': 'Lines and Points'}],
-                        value=mode if mode else 'Lines',
-                        style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})]),
+                    html.Div([
+                        html.P(
+                            "{}:".format(get_label('LBL_Display')),
+                            style={'color': CLR['text1'], 'font-size': '13px', 'position': 'relative',
+                                   'top': '-45px'})],
+                             style={'display': 'inline-block', 'width': '40px', 'position': 'relative', 'top': '-3px',
+                                    'margin-right': '15px'}),
+                    html.Div([
+                        dcc.RadioItems(
+                            id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
+                            options=[{'label': get_label('LBL_Lines'), 'value': 'Line'},
+                                     {'label': get_label('LBL_Points'), 'value': 'Scatter'},
+                                     {'label': get_label('LBL_Lines_And_Points'), 'value': 'Lines and Points'}],
+                            value=mode if mode else 'Lines',
+                            style={'font-size': '13px'})],
+                        style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})]),
             dcc.Checklist(
                 id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
                 options=[{'label': get_label('LBL_Show_Grid_Lines'),
                           'value': 'gridline'}],
                 value=gridline if gridline else [],
                 style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
-
             ], style={'margin-left': '15px'})]), ]
 
 

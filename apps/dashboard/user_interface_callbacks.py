@@ -432,8 +432,7 @@ for x in range(4):
      Output({'type': 'div-graph-type', 'index': MATCH}, 'style'),
      Output({'type': 'div-customize-warning-message', 'index': MATCH}, 'style')],
     [Input({'type': 'set-graph-options-trigger', 'index': MATCH}, 'options-'),
-     Input({'type': 'tile-link', 'index': ALL}, 'className'),
-     ],
+     Input({'type': 'tile-link', 'index': ALL}, 'className')],
     [State({'type': 'data-set', 'index': MATCH}, 'value'),
      State({'type': 'data-set', 'index': 4}, 'value'),
      State({'type': 'graph-type-dropdown', 'index': MATCH}, 'value'),
@@ -441,6 +440,7 @@ for x in range(4):
 )
 def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, graph_type, _type_options):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+    changed_value = [p['value'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.' or trigger is None or link_states is []:
         raise PreventUpdate
@@ -487,7 +487,7 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
 
     if '"type":"tile-link"}.className' not in changed_id and graph_type is None:
         graph_value = options[0]['value']
-    elif '"type":"tile-link"}.className' in changed_id and graph_type is not None:
+    elif '"type":"tile-link"}.className' in changed_id and graph_type is not None and changed_value == 'fa-fa-link':
         graph_value = None
     else:
         graph_value = graph_type
@@ -538,10 +538,6 @@ for x in range(4):
                 return no_update, 1, no_update
             else:
                 raise PreventUpdate
-
-        # for item in dash.callback_context.triggered:
-        #    if '"type":"tile-link"}.className' in item['prop_id']:
-        #        changed_id = item['prop_id']
 
         if link_state == 'fa fa-link':
             df_name = master_df_name
@@ -638,13 +634,14 @@ for x in range(4):
 # change link button appearance
 @app.callback(
     Output({'type': 'tile-link', 'index': MATCH}, 'className'),
-    [Input({'type': 'select-layout-dropdown', 'index': MATCH}, 'value'),
+    [Input({'type': 'tile-save-trigger', 'index': MATCH}, 'value'),
      Input({'type': 'tile-link', 'index': MATCH}, 'n_clicks'),
      Input({'type': 'set-tile-link-trigger', 'index': MATCH}, 'link-')],
-    [State({'type': 'tile-link', 'index': MATCH}, 'className')],
+    [State({'type': 'tile-link', 'index': MATCH}, 'className'),
+     State('prompt-result', 'children')],
     prevent_initial_call=True
 )
-def _change_link(_selected_layout, _link_clicks, link_trigger, link_state):
+def _change_link(prompt_data, _link_clicks, link_trigger, link_state, prompt_result):
     """
     :param _link_clicks: Detects the user clicking the link/unlink icon
     :param link_state: State of the link/unlink icon
@@ -656,8 +653,8 @@ def _change_link(_selected_layout, _link_clicks, link_trigger, link_state):
     if '.' == changed_id:  # or link_trigger is None
         raise PreventUpdate
 
-    if '"type":"select-layout-dropdown"}.value' in changed_id:
-        if link_state == 'fa fa-link':
+    if '"type":"tile-save-trigger"}.value' in changed_id:
+        if link_state == 'fa fa-link' and prompt_data[0] == 'load' and prompt_result == 'ok':
             link_state = 'fa fa-unlink'
         else:
             raise PreventUpdate
@@ -715,7 +712,6 @@ def _change_link(_selected_layout, _link_clicks, link_trigger, link_state):
      Input('tile-closed-trigger', 'data-'),
      Input('select-dashboard-dropdown', 'value'),
      Input({'type': 'tile-link', 'index': ALL}, 'className'),
-     Input({'type': 'select-layout-dropdown', 'index': ALL}, 'value'),
      Input({'type': 'tile-data', 'index': ALL}, 'n_clicks'),
      Input({'type': 'data-menu-close', 'index': ALL}, 'n_clicks'),
      Input({'type': 'data-set', 'index': 0}, 'value'),
@@ -754,7 +750,7 @@ def _change_link(_selected_layout, _link_clicks, link_trigger, link_state):
      State({'type': 'hierarchy_display_button', 'index': 4}, 'children')],
     prevent_initial_call=True
 )
-def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, links_style, _selected_layout, data_clicks,
+def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, links_style, data_clicks,
                            _data_close_clicks, df_name_0, df_name_1, df_name_2, df_name_3, df_name_4, _confirm_clicks_0,
                            _confirm_clicks_1, _confirm_clicks_2, _confirm_clicks_3, _confirm_clicks_4,
                            _refresh_clicks_0, _refresh_clicks_1, _refresh_clicks_2, _refresh_clicks_3,
@@ -1075,12 +1071,6 @@ app.clientside_callback(
     [Input({'type': 'confirm-load-data', 'index': MATCH}, 'style'),
      Input({'type': 'confirm-data-set-refresh', 'index': MATCH}, 'style')]
 )
-# def _hide_controls_until_data_is_loaded(load_data_trigger, refresh_data_trigger):
-#    if load_data_trigger == DATA_CONTENT_HIDE:
-#        return {}
-#    else:
-#        return DATA_CONTENT_HIDE
-
 
 # highlight tiles slaved to displayed data sidebar
 for x in range(4):
@@ -1132,7 +1122,6 @@ for x in range(4):
             return tile_class;
         }
         """,
-        # @app.callback(
         Output({'type': 'tile', 'index': x}, 'className'),
         [Input({'type': 'data-tile', 'index': ALL}, 'style'),
          Input({'type': 'tile-link', 'index': x}, 'className')],
@@ -1185,5 +1174,61 @@ app.clientside_callback(
     ),
     Output('df-constants-storage', 'n_clicks'),
     [Input('df-constants-storage', 'data')],
+    prevent_initial_call=True
+)
+
+# *************************************************PROMPT*********************************************************
+
+# initialize prompt
+app.clientside_callback(
+    """
+    function(prompt_trigger_0, prompt_trigger_1, prompt_trigger_2, prompt_trigger_3, 
+             close_n_clicks, cancel_n_clicks, ok_n_clicks, prompt_data){
+        const triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
+        var prompt_trigger = null;
+        var result = null;
+        
+        if (triggered == '{"index":0,"type":"prompt-trigger"}.data-'){
+            prompt_trigger = prompt_trigger_0;
+        }
+        if (triggered == '{"index":1,"type":"prompt-trigger"}.data-'){
+            prompt_trigger = prompt_trigger_1;
+        }
+        if (triggered == '{"index":2,"type":"prompt-trigger"}.data-'){
+            prompt_trigger = prompt_trigger_2;
+        }
+        if (triggered == '{"index":3,"type":"prompt-trigger"}.data-'){
+            prompt_trigger = prompt_trigger_3;
+        }
+        
+        if (triggered == 'prompt-close.n_clicks') {
+            prompt_trigger = [prompt_data, {'display': 'none'}, '', ''];
+            result = 'close';
+        }
+        if (triggered == 'prompt-cancel.n_clicks'){
+            prompt_trigger = [prompt_data, {'display': 'none'}, '', ''];
+            result = 'cancel';
+        }
+        if (triggered == 'prompt-ok.n_clicks'){
+            prompt_trigger = [prompt_data, {'display': 'none'}, '', ''];
+            result = 'ok';
+        }
+        
+        return [prompt_trigger[0], prompt_trigger[1], prompt_trigger[2], prompt_trigger[3], result];
+    }
+    """,
+    [Output('prompt-title', 'data-'),  # index value and reason for prompt
+     Output('prompt-obscure', 'style'),
+     Output('prompt-title', 'children'),
+     Output('prompt-body', 'children'),
+     Output('prompt-result', 'children')],
+    [Input({'type': 'prompt-trigger', 'index': 0}, 'data-'),
+     Input({'type': 'prompt-trigger', 'index': 1}, 'data-'),
+     Input({'type': 'prompt-trigger', 'index': 2}, 'data-'),
+     Input({'type': 'prompt-trigger', 'index': 3}, 'data-'),
+     Input('prompt-close', 'n_clicks'),
+     Input('prompt-cancel', 'n_clicks'),
+     Input('prompt-ok', 'n_clicks')],
+    State('prompt-title', 'data-'),
     prevent_initial_call=True
 )

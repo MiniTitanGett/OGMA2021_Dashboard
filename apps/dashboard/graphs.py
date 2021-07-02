@@ -225,6 +225,12 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
         overwrite=True,
         plot_bgcolor='rgba(0, 0, 0, 0)',
         paper_bgcolor='rgba(0, 0, 0, 0)')
+    if arg_value[4]:
+        fig.update_xaxes(showgrid=True, zeroline=True)
+        fig.update_yaxes(showgrid=True, zeroline=True)
+    else:
+        fig.update_xaxes(showgrid=False, zeroline=False)
+        fig.update_yaxes(showgrid=False, zeroline=False)
     graph = dcc.Graph(
         id='graph-display',
         className='fill-container',
@@ -358,6 +364,13 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
         overwrite=True,
         plot_bgcolor='rgba(0, 0, 0, 0)',
         paper_bgcolor='rgba(0, 0, 0, 0)')
+
+    if arg_value[6]:
+        fig.update_xaxes(showgrid=True, zeroline=True)
+        fig.update_yaxes(showgrid=True, zeroline=True)
+    else:
+        fig.update_xaxes(showgrid=False, zeroline=False)
+        fig.update_yaxes(showgrid=False, zeroline=False)
     graph = dcc.Graph(
         id='graph-display',
         className='fill-container',
@@ -512,7 +525,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             fig.update_layout(legend_title_text=legend_title_text)
 
             hovertemplate = get_label('LBL_Gen_Hover_Data', df_name)
-            hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event'))
+            hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event', df_name))
             hovertemplate = hovertemplate.replace('%AXIS-A%', '%{customdata[2]}').replace('%AXIS-TITLE-B%',
                                                                                           arg_value[1])
             if arg_value[3] == 'Vertical':
@@ -539,6 +552,13 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         overwrite=True,
         plot_bgcolor='rgba(0, 0, 0, 0)',
         paper_bgcolor='rgba(0, 0, 0, 0)')
+
+    if arg_value[5]:
+        fig.update_xaxes(showgrid=True, zeroline=True)
+        fig.update_yaxes(showgrid=True, zeroline=True)
+    else:
+        fig.update_xaxes(showgrid=False, zeroline=False)
+        fig.update_yaxes(showgrid=False, zeroline=False)
     graph = dcc.Graph(
         id='graph-display',
         className='fill-container',
@@ -662,6 +682,13 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         overwrite=True,
         plot_bgcolor='rgba(0, 0, 0, 0)',
         paper_bgcolor='rgba(0, 0, 0, 0)')
+
+    if arg_value[4]:
+        fig.update_xaxes(showgrid=True, zeroline=True)
+        fig.update_yaxes(showgrid=True, zeroline=True)
+    else:
+        fig.update_xaxes(showgrid=False, zeroline=False)
+        fig.update_yaxes(showgrid=False, zeroline=False)
     graph = dcc.Graph(
         id='graph-display',
         className='fill-container',

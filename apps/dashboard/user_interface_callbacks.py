@@ -564,7 +564,9 @@ for x in range(4):
                                                df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
                                                mode=selected_graph_type,
                                                measure_type=None if df_const is None else
-                                               df_const[df_name]['MEASURE_TYPE_OPTIONS'][0], df_name=df_name,
+                                               df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
+                                               gridline=None,
+                                               df_name=df_name,
                                                df_const=df_const)
 
         elif selected_graph_type == 'Bar':
@@ -575,6 +577,7 @@ for x in range(4):
                                       df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
                                       orientation=None,
                                       animate=None,
+                                      gridline=None,
                                       df_name=df_name,
                                       df_const=df_const)
 
@@ -592,6 +595,7 @@ for x in range(4):
                                          df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
                                          size_measure=None if df_const is None else
                                          df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
+                                         gridline=None,
                                          df_name=df_name,
                                          df_const=df_const)
 
@@ -607,6 +611,7 @@ for x in range(4):
                                      graph_orientation='Horizontal',
                                      df_name=df_name,
                                      show_data_points=[],
+                                     gridline=None,
                                      df_const=df_const)
 
         elif selected_graph_type == 'Sankey':

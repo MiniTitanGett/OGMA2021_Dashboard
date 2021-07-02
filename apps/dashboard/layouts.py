@@ -542,7 +542,7 @@ def get_layout_dashboard():
                         style={'position': 'absolute', 'right': '16px', 'top': '8px'})],
                     className='prompt-header'),
                 html.Div([
-                    html.Div('Empty Menu', id='float-menu-body'),
+                    html.Div(id='float-menu-body'),
                     html.Div([
                         html.Button('Cancel', id='float-menu-cancel', style={'margin-right': '16px', 'width': '80px'}),
                         html.Button('OK', id='float-menu-ok', style={'width': '80px'})],
@@ -919,6 +919,7 @@ def get_tile(tile, tile_keys=None, df_name=None):
             ], style=LAYOUT_CONTENT_HIDE, id={'type': 'tile-layouts-content', 'index': tile},
                 className='customize-content')
         ], style={'flex-direction': 'column'},
+            id={'type': 'tile-body', 'index': tile},
             className='flex-container fill-container')
     ], className='tile-container',
         id={'type': 'tile', 'index': tile},

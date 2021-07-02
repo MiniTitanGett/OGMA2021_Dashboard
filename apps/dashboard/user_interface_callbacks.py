@@ -7,26 +7,24 @@ stores all callbacks for the user interface
 ######################################################################################################################
 
 # External Packages
-# from datetime import datetime
+import copy
+from re import search
+from urllib.parse import parse_qsl
 
 import dash
 import dash_html_components as html
-import copy
+from dash import no_update
 from dash.dependencies import Input, Output, State, ALL, MATCH, ClientsideFunction
 from dash.exceptions import PreventUpdate
-from re import search
-from dash import no_update
-from urllib.parse import parse_qsl
 from flask import url_for
 
 # Internal Packages
+from apps.dashboard.app import app
+from apps.dashboard.data import DATA_CONTENT_HIDE, DATA_CONTENT_SHOW, get_label, X_AXIS_OPTIONS, \
+    session, BAR_X_AXIS_OPTIONS, generate_constants, dataset_to_df, GRAPH_OPTIONS
 from apps.dashboard.layouts import get_line_scatter_graph_menu, get_bar_graph_menu, get_table_graph_menu, \
     get_tile_layout, change_index, get_box_plot_menu, get_default_tab_content, get_layout_dashboard, get_layout_graph, \
     get_data_menu, get_sankey_menu, get_dashboard_title_input, get_bubble_graph_menu
-from apps.dashboard.app import app
-from apps.dashboard.data import VIEW_CONTENT_HIDE, VIEW_CONTENT_SHOW, CUSTOMIZE_CONTENT_HIDE, CUSTOMIZE_CONTENT_SHOW, \
-    DATA_CONTENT_HIDE, DATA_CONTENT_SHOW, get_label, LAYOUT_CONTENT_SHOW, LAYOUT_CONTENT_HIDE, X_AXIS_OPTIONS, \
-    session, BAR_X_AXIS_OPTIONS, generate_constants, dataset_to_df, GRAPH_OPTIONS
 
 
 # Contents:
@@ -340,101 +338,20 @@ def _update_tab_title(title, active_tab, list_of_children):
 
 
 # ************************************************TILE SETTINGS*******************************************************
-# # manage VIEW <-> CUSTOMIZE <--> LAYOUTS for each tab
-# for x in range(4):
-#     @app.callback(
-#         [Output({'type': 'tile-view-content', 'index': x}, 'style'),
-#          Output({'type': 'tile-customize-content', 'index': x}, 'style'),
-#          Output({'type': 'tile-layouts-content', 'index': x}, 'style'),
-#          Output({'type': 'tile-view', 'index': x}, 'className'),
-#          Output({'type': 'tile-layouts', 'index': x}, 'className'),
-#          Output({'type': 'tile-customize', 'index': x}, 'className')],
-#         [Input({'type': 'tile-view', 'index': x}, 'n_clicks'),
-#          Input({'type': 'tile-customize', 'index': x}, 'n_clicks'),
-#          Input({'type': 'tile-layouts', 'index': x}, 'n_clicks')],
-#         [State({'type': 'tile-view-content', 'index': x}, 'style'),
-#          State({'type': 'tile-customize-content', 'index': x}, 'style'),
-#          State({'type': 'tile-layouts-content', 'index': x}, 'style'),
-#          State({'type': 'tile-view', 'index': x}, 'className'),
-#          State({'type': 'tile-customize', 'index': x}, 'className'),
-#          State({'type': 'tile-layouts', 'index': x}, 'className')],
-#         prevent_initial_call=True
-#     )
-#     def _switch_tile_tab(_view_clicks, _customize_clicks, _layouts_clicks, view_content_style_state,
-#                          customize_content_style_state, layouts_content_style_state, _view_state, _customize_state,
-#                          _layouts_state):
-#         """
-#         :param _view_clicks: Detects the user clicking the VIEW button
-#         :param _customize_clicks: Detects the user clicking the CUSTOMIZE button
-#         :param view_content_style_state: Style of the VIEW tab, either VIEW_CONTENT_SHOW or
-#         VIEW_CONTENT_HIDE
-#         :param customize_content_style_state: Style of the CUSTOMIZE tab, either CUSTOMIZE_CONTENT_SHOW or
-#         CUSTOMIZE_CONTENT_HIDE
-#         :param _view_state: ClassName of the VIEW button, either 'tile-nav-selected' or 'tile-nav'
-#         :param _customize_state: ClassName of the CUSTOMIZE button, either 'tile-nav-selected' or 'tile-nav'
-#         :return: The styles of the CUSTOMIZE and VIEW tabs as being either hidden or shown, and the classNames of the
-#         VIEW and CUSTOMIZE buttons as being either selected or unselected
-#         """
-#         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-#
-#         # if view button was pressed, display view content and set view button as selected
-#         if '"type":"tile-view"}.n_clicks' in changed_id:
-#             # protect against spam clicking
-#             if view_content_style_state == VIEW_CONTENT_SHOW:
-#                 raise PreventUpdate
-#             view_content_style = VIEW_CONTENT_SHOW
-#             customize_content_style = CUSTOMIZE_CONTENT_HIDE
-#             layouts_content_style = LAYOUT_CONTENT_HIDE
-#             view_className = 'tile-nav tile-nav--view tile-nav--selected'
-#             customize_className = 'tile-nav tile-nav--customize'
-#             layouts_className = 'tile-nav tile-nav--layout'
-#
-#         # if customize button was pressed, display customize content and set customize button as selected
-#         elif '"type":"tile-customize"}.n_clicks' in changed_id:
-#             # protect against spam clicking
-#             if customize_content_style_state == CUSTOMIZE_CONTENT_SHOW:
-#                 raise PreventUpdate
-#             view_content_style = VIEW_CONTENT_HIDE
-#             customize_content_style = CUSTOMIZE_CONTENT_SHOW
-#             layouts_content_style = LAYOUT_CONTENT_HIDE
-#             view_className = 'tile-nav tile-nav--view'
-#             customize_className = 'tile-nav tile-nav--customize tile-nav--selected'
-#             # if the main layout was updated by DELETE or NEW or page loaded (meaning changed_id == '.'), prevent update
-#             layouts_className = 'tile-nav tile-nav--layout'
-#             # if layouts button was pressed, display layouts content and set layouts button as selected
-#
-#         elif '"type":"tile-layouts"}.n_clicks' in changed_id:
-#             # protect against spam clicking
-#             if layouts_content_style_state == LAYOUT_CONTENT_SHOW:
-#                 raise PreventUpdate
-#             view_content_style = VIEW_CONTENT_HIDE
-#             customize_content_style = CUSTOMIZE_CONTENT_HIDE
-#             layouts_content_style = LAYOUT_CONTENT_SHOW
-#             view_className = 'tile-nav tile-nav--view'
-#             customize_className = 'tile-nav tile-nav--customize'
-#             layouts_className = 'tile-nav tile-nav--layout tile-nav--selected'
-#
-#         # if the main layout was updated by DELETE or NEW or page loaded (meaning changed_id == '.'), prevent update
-#         else:
-#             raise PreventUpdate
-#
-#         return view_content_style, customize_content_style, layouts_content_style, view_className, layouts_className, \
-#             customize_className
 
 # Serve the float menu to the user
 for x in range(4):
     @app.callback(
         [Output({'type': 'float-menu-trigger', 'index': x}, 'data-'),
-         Output({'type': 'tile-layouts', 'index': x}, 'className'),
-         Output({'type': 'tile-customize', 'index': x}, 'className')],
+         Output({'type': 'tile-customize', 'index': x}, 'className'),
+         Output({'type': 'tile-layouts', 'index': x}, 'className')],
         [Input({'type': 'tile-customize', 'index': x}, 'n_clicks'),
          Input({'type': 'tile-layouts', 'index': x}, 'n_clicks'),
          Input('float-menu-result', 'children')],
-        [State({'type': 'tile-customize-content', 'index': x}, 'style'),
-         State({'type': 'tile-layouts-content', 'index': x}, 'style'),
-         State('prompt-title', 'data-')]
+        State('float-menu-title', 'data-'),
+        prevent_initial_call=True
     )
-    def _serve_float_menu(_customize_n_clicks, _layouts_n_clicks, float_menu_result, customize_content_style_state, layouts_content_style_state, float_menu_data):
+    def _serve_float_menu(_customize_n_clicks, _layouts_n_clicks, float_menu_result, float_menu_data):
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
         if changed_id == '.' or len(dash.callback_context.triggered) > 1:
@@ -447,75 +364,64 @@ for x in range(4):
 
         # switch statement
         if 'tile-customize' in changed_id:
-            # protect against spam clicking
-            if customize_content_style_state == CUSTOMIZE_CONTENT_SHOW:
-                raise PreventUpdate
-            float_menu_trigger = [['customize', tile], {}, get_label('LBL_Edit_Graph'),
-                                  get_label('LBL_Overwrite_Graph_Prompt')]
-            customize_content_style = CUSTOMIZE_CONTENT_SHOW
-            layouts_content_style = LAYOUT_CONTENT_HIDE
+            float_menu_trigger = [['customize', tile], {}, get_label('LBL_Edit_Graph')]
+            customize_className = 'tile-nav tile-nav--customize tile-nav--selected'
+            layouts_className = 'tile-nav tile-nav--layout'
         elif 'tile-layouts' in changed_id:
-            # protect against spam clicking
-            if layouts_content_style_state == LAYOUT_CONTENT_SHOW:
-                raise PreventUpdate
-            float_menu_trigger = [['layouts', tile], {}, get_label('LBL_Load_Graph'),
-                                  get_label('LBL_Overwrite_Graph_Prompt')]
-            customize_content_style = CUSTOMIZE_CONTENT_HIDE
-            layouts_content_style = LAYOUT_CONTENT_SHOW
+            float_menu_trigger = [['layouts', tile], {}, get_label('LBL_Load_Graph')]
+            customize_className = 'tile-nav tile-nav--customize'
+            layouts_className = 'tile-nav tile-nav--layout tile-nav--selected'
         elif float_menu_result == 'ok':
-            # confirm
             float_menu_trigger = [None, {'display': 'hide'}, None, None]
-            customize_content_style = no_update
-            layouts_content_style = no_update
+            customize_className = 'tile-nav tile-nav--customize'
+            layouts_className = 'tile-nav tile-nav--layout'
         else:
-            # cancel
             float_menu_trigger = [None, {'display': 'hide'}, None, None]
-            customize_content_style = no_update
-            layouts_content_style = no_update
-        return float_menu_trigger, customize_content_style, layouts_content_style
+            customize_className = 'tile-nav tile-nav--customize'
+            layouts_className = 'tile-nav tile-nav--layout'
+        return float_menu_trigger, customize_className, layouts_className
 
 # initialize prompt
 app.clientside_callback(
     """
-    function(float-menu_trigger_0, float-menu_trigger_1, float-menu_trigger_2, float-menu_trigger_3, 
-             close_n_clicks, cancel_n_clicks, ok_n_clicks, float-menu_data){
+    function(float_menu_trigger_0, float_menu_trigger_1, float_menu_trigger_2, float_menu_trigger_3, 
+             close_n_clicks, cancel_n_clicks, ok_n_clicks, float_menu_data){
         const triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
-        var float-menu_trigger = null;
+        var tile = dash_clientside.callback_context.inputs_list[0]['id']['index'];
+        
+        var float_menu_trigger = null;
         var result = null;
-        alert(triggered);
-        if (triggered == '{"index":0,"type":"float-menu-trigger"}.data-'){
-            float-menu_trigger = float-menu_trigger_0;
+        if (String(triggered).includes('float-menu-trigger')){
+            var trigger_arr = [float_menu_trigger_0, float_menu_trigger_1, float_menu_trigger_2, float_menu_trigger_3]
+            float_menu_trigger = trigger_arr[tile];
+            if (float_menu_trigger[0][0] == 'customize'){
+                var menu = document.getElementById(`{"index":${tile},"type":"tile-customize-content"}`);
+            }
+            else {
+                var menu = document.getElementById(`{"index":${tile},"type":"tile-layouts-content"}`);
+            }
+            document.getElementById("float-menu-body").appendChild(menu).style.display = ''; 
         }
-        if (triggered == '{"index":1,"type":"float-menu-trigger"}.data-'){
-            float-menu_trigger = float-menu_trigger_1;
+        else{
+            float_menu_trigger = [float_menu_data, {'display': 'none'}, '', ''];
+            if (float_menu_trigger[0][0] == 'customize'){
+                var menu = document.getElementById(`{"index":${tile},"type":"tile-customize-content"}`);
+            }
+            else {
+                var menu = document.getElementById(`{"index":${tile},"type":"tile-layouts-content"}`);
+            }
+            document.getElementById(`{"index":${tile},"type":"tile-body"}`).appendChild(menu).style.display = 'none'; 
+        
+            if(triggered == 'float-menu-close.n_clicks') {result = 'cancel';}
+            if (triggered == 'float-menu-cancel.n_clicks'){result = 'cancel';}
+            if (triggered == 'float-menu-ok.n_clicks'){result = 'ok';}
         }
-        if (triggered == '{"index":2,"type":"float-menu-trigger"}.data-'){
-            float-menu_trigger = float-menu_trigger_2;
-        }
-        if (triggered == '{"index":3,"type":"float-menu-trigger"}.data-'){
-            float-menu_trigger = float-menu_trigger_3;
-        }
-
-        if (triggered == 'float-menu-close.n_clicks') {
-            float-menu_trigger = [float-menu_data, {'display': 'none'}, '', ''];
-            result = 'close';
-        }
-        if (triggered == 'float-menu-cancel.n_clicks'){
-            float-menu_trigger = [float-menu_data, {'display': 'none'}, '', ''];
-            result = 'cancel';
-        }
-        if (triggered == 'float-menu-ok.n_clicks'){
-            float-menu_trigger = [float-menu_data, {'display': 'none'}, '', ''];
-            result = 'ok';
-        }
-
-        return [float-menu_trigger[0], float-menu_trigger[1], float-menu_trigger[2], float-menu_trigger[3], result];
+        return [float_menu_trigger[0], float_menu_trigger[1], float_menu_trigger[2], result];
     }
     """,
     [Output('float-menu-title', 'data-'),  # index value and reason for prompt
      Output('float-menu-obscure', 'style'),
      Output('float-menu-title', 'children'),
-     Output('float-menu-body', 'children'),
      Output('float-menu-result', 'children')],
     [Input({'type': 'float-menu-trigger', 'index': 0}, 'data-'),
      Input({'type': 'float-menu-trigger', 'index': 1}, 'data-'),

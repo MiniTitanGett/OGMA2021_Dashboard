@@ -552,8 +552,23 @@ def get_layout_dashboard():
                 className='float-menu-box'),
             style=DATA_CONTENT_HIDE,
             id='float-menu-obscure',
-            className='prompt-obscure'
-        ),
+            className='prompt-obscure'),
+        html.Div(
+            id={'type': 'float-menu-trigger', 'index': 0},
+            style={'display': 'none'}),
+        html.Div(
+            id={'type': 'float-menu-trigger', 'index': 1},
+            style={'display': 'none'}),
+        html.Div(
+            id={'type': 'float-menu-trigger', 'index': 2},
+            style={'display': 'none'}),
+        html.Div(
+            id={'type': 'float-menu-trigger', 'index': 3},
+            style={'display': 'none'}),
+        html.Div(
+            id='float-menu-result',
+            style={'display': 'none'}),
+        # Popups
         dbc.Alert(
             'Your Tile Has Been Saved',
             id={'type': 'minor-popup', 'index': 0},
@@ -882,8 +897,8 @@ def get_tile(tile, tile_keys=None, df_name=None):
                         id={'type': 'graph_display', 'index': tile},
                         className='fill-container')]),
             html.Div(
-                tile_keys['Customize Content'] if tile_keys else get_customize_content(
-                    tile=tile, graph_type=None, graph_menu=None, df_name=df_name),
+                tile_keys['Customize Content'] if tile_keys
+                else get_customize_content(tile=tile, graph_type=None, graph_menu=None, df_name=df_name),
                 style=CUSTOMIZE_CONTENT_HIDE,
                 id={'type': 'tile-customize-content', 'index': tile},
                 className='customize-content'),

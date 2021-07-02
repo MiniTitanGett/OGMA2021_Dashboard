@@ -339,88 +339,94 @@ def _update_tab_title(title, active_tab, list_of_children):
     return list_of_children
 
 
-# *************************************************TILE LAYOUT********************************************************
+# ************************************************TILE SETTINGS*******************************************************
+# # manage VIEW <-> CUSTOMIZE <--> LAYOUTS for each tab
+# for x in range(4):
+#     @app.callback(
+#         [Output({'type': 'tile-view-content', 'index': x}, 'style'),
+#          Output({'type': 'tile-customize-content', 'index': x}, 'style'),
+#          Output({'type': 'tile-layouts-content', 'index': x}, 'style'),
+#          Output({'type': 'tile-view', 'index': x}, 'className'),
+#          Output({'type': 'tile-layouts', 'index': x}, 'className'),
+#          Output({'type': 'tile-customize', 'index': x}, 'className')],
+#         [Input({'type': 'tile-view', 'index': x}, 'n_clicks'),
+#          Input({'type': 'tile-customize', 'index': x}, 'n_clicks'),
+#          Input({'type': 'tile-layouts', 'index': x}, 'n_clicks')],
+#         [State({'type': 'tile-view-content', 'index': x}, 'style'),
+#          State({'type': 'tile-customize-content', 'index': x}, 'style'),
+#          State({'type': 'tile-layouts-content', 'index': x}, 'style'),
+#          State({'type': 'tile-view', 'index': x}, 'className'),
+#          State({'type': 'tile-customize', 'index': x}, 'className'),
+#          State({'type': 'tile-layouts', 'index': x}, 'className')],
+#         prevent_initial_call=True
+#     )
+#     def _switch_tile_tab(_view_clicks, _customize_clicks, _layouts_clicks, view_content_style_state,
+#                          customize_content_style_state, layouts_content_style_state, _view_state, _customize_state,
+#                          _layouts_state):
+#         """
+#         :param _view_clicks: Detects the user clicking the VIEW button
+#         :param _customize_clicks: Detects the user clicking the CUSTOMIZE button
+#         :param view_content_style_state: Style of the VIEW tab, either VIEW_CONTENT_SHOW or
+#         VIEW_CONTENT_HIDE
+#         :param customize_content_style_state: Style of the CUSTOMIZE tab, either CUSTOMIZE_CONTENT_SHOW or
+#         CUSTOMIZE_CONTENT_HIDE
+#         :param _view_state: ClassName of the VIEW button, either 'tile-nav-selected' or 'tile-nav'
+#         :param _customize_state: ClassName of the CUSTOMIZE button, either 'tile-nav-selected' or 'tile-nav'
+#         :return: The styles of the CUSTOMIZE and VIEW tabs as being either hidden or shown, and the classNames of the
+#         VIEW and CUSTOMIZE buttons as being either selected or unselected
+#         """
+#         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+#
+#         # if view button was pressed, display view content and set view button as selected
+#         if '"type":"tile-view"}.n_clicks' in changed_id:
+#             # protect against spam clicking
+#             if view_content_style_state == VIEW_CONTENT_SHOW:
+#                 raise PreventUpdate
+#             view_content_style = VIEW_CONTENT_SHOW
+#             customize_content_style = CUSTOMIZE_CONTENT_HIDE
+#             layouts_content_style = LAYOUT_CONTENT_HIDE
+#             view_className = 'tile-nav tile-nav--view tile-nav--selected'
+#             customize_className = 'tile-nav tile-nav--customize'
+#             layouts_className = 'tile-nav tile-nav--layout'
+#
+#         # if customize button was pressed, display customize content and set customize button as selected
+#         elif '"type":"tile-customize"}.n_clicks' in changed_id:
+#             # protect against spam clicking
+#             if customize_content_style_state == CUSTOMIZE_CONTENT_SHOW:
+#                 raise PreventUpdate
+#             view_content_style = VIEW_CONTENT_HIDE
+#             customize_content_style = CUSTOMIZE_CONTENT_SHOW
+#             layouts_content_style = LAYOUT_CONTENT_HIDE
+#             view_className = 'tile-nav tile-nav--view'
+#             customize_className = 'tile-nav tile-nav--customize tile-nav--selected'
+#             # if the main layout was updated by DELETE or NEW or page loaded (meaning changed_id == '.'), prevent update
+#             layouts_className = 'tile-nav tile-nav--layout'
+#             # if layouts button was pressed, display layouts content and set layouts button as selected
+#
+#         elif '"type":"tile-layouts"}.n_clicks' in changed_id:
+#             # protect against spam clicking
+#             if layouts_content_style_state == LAYOUT_CONTENT_SHOW:
+#                 raise PreventUpdate
+#             view_content_style = VIEW_CONTENT_HIDE
+#             customize_content_style = CUSTOMIZE_CONTENT_HIDE
+#             layouts_content_style = LAYOUT_CONTENT_SHOW
+#             view_className = 'tile-nav tile-nav--view'
+#             customize_className = 'tile-nav tile-nav--customize'
+#             layouts_className = 'tile-nav tile-nav--layout tile-nav--selected'
+#
+#         # if the main layout was updated by DELETE or NEW or page loaded (meaning changed_id == '.'), prevent update
+#         else:
+#             raise PreventUpdate
+#
+#         return view_content_style, customize_content_style, layouts_content_style, view_className, layouts_className, \
+#             customize_className
 
-# manage VIEW <-> CUSTOMIZE <--> LAYOUTS for each tab
+# Serve the float menu to the user
 for x in range(4):
     @app.callback(
-        [Output({'type': 'tile-view-content', 'index': x}, 'style'),
-         Output({'type': 'tile-customize-content', 'index': x}, 'style'),
-         Output({'type': 'tile-layouts-content', 'index': x}, 'style'),
-         Output({'type': 'tile-view', 'index': x}, 'className'),
-         Output({'type': 'tile-layouts', 'index': x}, 'className'),
-         Output({'type': 'tile-customize', 'index': x}, 'className')],
-        [Input({'type': 'tile-view', 'index': x}, 'n_clicks'),
-         Input({'type': 'tile-customize', 'index': x}, 'n_clicks'),
-         Input({'type': 'tile-layouts', 'index': x}, 'n_clicks')],
-        [State({'type': 'tile-view-content', 'index': x}, 'style'),
-         State({'type': 'tile-customize-content', 'index': x}, 'style'),
-         State({'type': 'tile-layouts-content', 'index': x}, 'style'),
-         State({'type': 'tile-view', 'index': x}, 'className'),
-         State({'type': 'tile-customize', 'index': x}, 'className'),
-         State({'type': 'tile-layouts', 'index': x}, 'className')],
-        prevent_initial_call=True
+        Output(),
+        Input({'type': 'tile-customize', 'index': x}, 'n_clicks')
     )
-    def _switch_tile_tab(_view_clicks, _customize_clicks, _layouts_clicks, view_content_style_state,
-                         customize_content_style_state, layouts_content_style_state, _view_state, _customize_state,
-                         _layouts_state):
-        """
-        :param _view_clicks: Detects the user clicking the VIEW button
-        :param _customize_clicks: Detects the user clicking the CUSTOMIZE button
-        :param view_content_style_state: Style of the VIEW tab, either VIEW_CONTENT_SHOW or
-        VIEW_CONTENT_HIDE
-        :param customize_content_style_state: Style of the CUSTOMIZE tab, either CUSTOMIZE_CONTENT_SHOW or
-        CUSTOMIZE_CONTENT_HIDE
-        :param _view_state: ClassName of the VIEW button, either 'tile-nav-selected' or 'tile-nav'
-        :param _customize_state: ClassName of the CUSTOMIZE button, either 'tile-nav-selected' or 'tile-nav'
-        :return: The styles of the CUSTOMIZE and VIEW tabs as being either hidden or shown, and the classNames of the
-        VIEW and CUSTOMIZE buttons as being either selected or unselected
-        """
-        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-
-        # if view button was pressed, display view content and set view button as selected
-        if '"type":"tile-view"}.n_clicks' in changed_id:
-            # protect against spam clicking
-            if view_content_style_state == VIEW_CONTENT_SHOW:
-                raise PreventUpdate
-            view_content_style = VIEW_CONTENT_SHOW
-            customize_content_style = CUSTOMIZE_CONTENT_HIDE
-            layouts_content_style = LAYOUT_CONTENT_HIDE
-            view_className = 'tile-nav tile-nav--view tile-nav--selected'
-            customize_className = 'tile-nav tile-nav--customize'
-            layouts_className = 'tile-nav tile-nav--layout'
-
-        # if customize button was pressed, display customize content and set customize button as selected
-        elif '"type":"tile-customize"}.n_clicks' in changed_id:
-            # protect against spam clicking
-            if customize_content_style_state == CUSTOMIZE_CONTENT_SHOW:
-                raise PreventUpdate
-            view_content_style = VIEW_CONTENT_HIDE
-            customize_content_style = CUSTOMIZE_CONTENT_SHOW
-            layouts_content_style = LAYOUT_CONTENT_HIDE
-            view_className = 'tile-nav tile-nav--view'
-            customize_className = 'tile-nav tile-nav--customize tile-nav--selected'
-            # if the main layout was updated by DELETE or NEW or page loaded (meaning changed_id == '.'), prevent update
-            layouts_className = 'tile-nav tile-nav--layout'
-            # if layouts button was pressed, display layouts content and set layouts button as selected
-
-        elif '"type":"tile-layouts"}.n_clicks' in changed_id:
-            # protect against spam clicking
-            if layouts_content_style_state == LAYOUT_CONTENT_SHOW:
-                raise PreventUpdate
-            view_content_style = VIEW_CONTENT_HIDE
-            customize_content_style = CUSTOMIZE_CONTENT_HIDE
-            layouts_content_style = LAYOUT_CONTENT_SHOW
-            view_className = 'tile-nav tile-nav--view'
-            customize_className = 'tile-nav tile-nav--customize'
-            layouts_className = 'tile-nav tile-nav--layout tile-nav--selected'
-
-        # if the main layout was updated by DELETE or NEW or page loaded (meaning changed_id == '.'), prevent update
-        else:
-            raise PreventUpdate
-
-        return view_content_style, customize_content_style, layouts_content_style, view_className, layouts_className, \
-            customize_className
 
 
 # ************************************************CUSTOMIZE TAB*******************************************************

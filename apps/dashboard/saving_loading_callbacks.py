@@ -89,12 +89,12 @@ def _update_tile_loading_dropdown_options(_tile_saving_trigger, _dashboard_savin
     Output('tile-save-trigger-wrapper', 'children'),  # formatted in two chained callbacks to mix ALL and y values
     [Input({'type': 'save-button', 'index': ALL}, 'n_clicks'),
      Input({'type': 'delete-button', 'index': ALL}, 'n_clicks'),
-     Input('prompt-result', 'children'),
-     Input({'type': 'select-layout-dropdown', 'index': ALL}, 'value')],
+     Input({'type': 'select-layout-dropdown', 'index': ALL}, 'value'),
+     Input('prompt-result', 'children')],
     State('prompt-title', 'data-'),
     prevent_initial_call=True
 )
-def _manage_tile_saves_trigger(save_clicks, delete_clicks, prompt_result, load_value, prompt_data):
+def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, load_value, prompt_result, prompt_data):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.' or len(dash.callback_context.triggered) > 1:
@@ -198,14 +198,15 @@ for y in range(4):
          State('df-constants-storage', 'data')],
         prevent_initial_call=True
     )
-    def _manage_tile_saves(trigger, graph_title, link_state, graph_type, args_list, df_name,
-                           master_df_name, master_year_start, master_year_end, master_hierarchy_toggle,
-                           master_hierarchy_level_dropdown, master_state_of_display, master_graph_children_toggle,
-                           master_fiscal_toggle, master_input_method, master_secondary_start, master_secondary_end,
-                           master_x_time_period, master_period_type, master_tab, year_start, year_end, hierarchy_toggle,
-                           hierarchy_level_dropdown, state_of_display, graph_children_toggle, fiscal_toggle,
-                           input_method, secondary_start, secondary_end, x_time_period, period_type, tab,
-                           selected_layout, df_const):
+    def _manage_tile_save_and_load(trigger, graph_title, link_state, graph_type, args_list, df_name, master_df_name,
+                                   master_year_start, master_year_end, master_hierarchy_toggle,
+                                   master_hierarchy_level_dropdown, master_state_of_display,
+                                   master_graph_children_toggle, master_fiscal_toggle, master_input_method,
+                                   master_secondary_start, master_secondary_end, master_x_time_period,
+                                   master_period_type, master_tab, year_start, year_end, hierarchy_toggle,
+                                   hierarchy_level_dropdown, state_of_display, graph_children_toggle, fiscal_toggle,
+                                   input_method, secondary_start, secondary_end, x_time_period, period_type, tab,
+                                   selected_layout, df_const):
 
         if link_state == 'fa fa-link':
             fiscal_toggle = master_fiscal_toggle

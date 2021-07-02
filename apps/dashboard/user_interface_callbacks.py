@@ -424,9 +424,109 @@ def _update_tab_title(title, active_tab, list_of_children):
 # Serve the float menu to the user
 for x in range(4):
     @app.callback(
-        Output(),
-        Input({'type': 'tile-customize', 'index': x}, 'n_clicks')
+        [Output({'type': 'float-menu-trigger', 'index': x}, 'data-'),
+         Output({'type': 'tile-layouts', 'index': x}, 'className'),
+         Output({'type': 'tile-customize', 'index': x}, 'className')],
+        [Input({'type': 'tile-customize', 'index': x}, 'n_clicks'),
+         Input({'type': 'tile-layouts', 'index': x}, 'n_clicks'),
+         Input('float-menu-result', 'children')],
+        [State({'type': 'tile-customize-content', 'index': x}, 'style'),
+         State({'type': 'tile-layouts-content', 'index': x}, 'style'),
+         State('prompt-title', 'data-')]
     )
+    def _serve_float_menu(_customize_n_clicks, _layouts_n_clicks, float_menu_result, customize_content_style_state, layouts_content_style_state, float_menu_data):
+        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+
+        if changed_id == '.' or len(dash.callback_context.triggered) > 1:
+            raise PreventUpdate
+
+        if 'float-menu-result' in changed_id:
+            tile = float_menu_data[1]
+        else:
+            tile = int(search(r'\d+', changed_id).group())
+
+        # switch statement
+        if 'tile-customize' in changed_id:
+            # protect against spam clicking
+            if customize_content_style_state == CUSTOMIZE_CONTENT_SHOW:
+                raise PreventUpdate
+            float_menu_trigger = [['customize', tile], {}, get_label('LBL_Edit_Graph'),
+                                  get_label('LBL_Overwrite_Graph_Prompt')]
+            customize_content_style = CUSTOMIZE_CONTENT_SHOW
+            layouts_content_style = LAYOUT_CONTENT_HIDE
+        elif 'tile-layouts' in changed_id:
+            # protect against spam clicking
+            if layouts_content_style_state == LAYOUT_CONTENT_SHOW:
+                raise PreventUpdate
+            float_menu_trigger = [['layouts', tile], {}, get_label('LBL_Load_Graph'),
+                                  get_label('LBL_Overwrite_Graph_Prompt')]
+            customize_content_style = CUSTOMIZE_CONTENT_HIDE
+            layouts_content_style = LAYOUT_CONTENT_SHOW
+        elif float_menu_result == 'ok':
+            # confirm
+            float_menu_trigger = [None, {'display': 'hide'}, None, None]
+            customize_content_style = no_update
+            layouts_content_style = no_update
+        else:
+            # cancel
+            float_menu_trigger = [None, {'display': 'hide'}, None, None]
+            customize_content_style = no_update
+            layouts_content_style = no_update
+        return float_menu_trigger, customize_content_style, layouts_content_style
+
+# initialize prompt
+app.clientside_callback(
+    """
+    function(float-menu_trigger_0, float-menu_trigger_1, float-menu_trigger_2, float-menu_trigger_3, 
+             close_n_clicks, cancel_n_clicks, ok_n_clicks, float-menu_data){
+        const triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
+        var float-menu_trigger = null;
+        var result = null;
+        alert(triggered);
+        if (triggered == '{"index":0,"type":"float-menu-trigger"}.data-'){
+            float-menu_trigger = float-menu_trigger_0;
+        }
+        if (triggered == '{"index":1,"type":"float-menu-trigger"}.data-'){
+            float-menu_trigger = float-menu_trigger_1;
+        }
+        if (triggered == '{"index":2,"type":"float-menu-trigger"}.data-'){
+            float-menu_trigger = float-menu_trigger_2;
+        }
+        if (triggered == '{"index":3,"type":"float-menu-trigger"}.data-'){
+            float-menu_trigger = float-menu_trigger_3;
+        }
+
+        if (triggered == 'float-menu-close.n_clicks') {
+            float-menu_trigger = [float-menu_data, {'display': 'none'}, '', ''];
+            result = 'close';
+        }
+        if (triggered == 'float-menu-cancel.n_clicks'){
+            float-menu_trigger = [float-menu_data, {'display': 'none'}, '', ''];
+            result = 'cancel';
+        }
+        if (triggered == 'float-menu-ok.n_clicks'){
+            float-menu_trigger = [float-menu_data, {'display': 'none'}, '', ''];
+            result = 'ok';
+        }
+
+        return [float-menu_trigger[0], float-menu_trigger[1], float-menu_trigger[2], float-menu_trigger[3], result];
+    }
+    """,
+    [Output('float-menu-title', 'data-'),  # index value and reason for prompt
+     Output('float-menu-obscure', 'style'),
+     Output('float-menu-title', 'children'),
+     Output('float-menu-body', 'children'),
+     Output('float-menu-result', 'children')],
+    [Input({'type': 'float-menu-trigger', 'index': 0}, 'data-'),
+     Input({'type': 'float-menu-trigger', 'index': 1}, 'data-'),
+     Input({'type': 'float-menu-trigger', 'index': 2}, 'data-'),
+     Input({'type': 'float-menu-trigger', 'index': 3}, 'data-'),
+     Input('float-menu-close', 'n_clicks'),
+     Input('float-menu-cancel', 'n_clicks'),
+     Input('float-menu-ok', 'n_clicks')],
+    State('float-menu-title', 'data-'),
+    prevent_initial_call=True
+)
 
 
 # ************************************************CUSTOMIZE TAB*******************************************************

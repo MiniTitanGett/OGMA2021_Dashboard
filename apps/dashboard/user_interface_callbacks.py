@@ -394,7 +394,7 @@ app.clientside_callback(
             var trigger_arr = [float_menu_trigger_0, float_menu_trigger_1, float_menu_trigger_2, float_menu_trigger_3]
             var tile = triggered.match(/\d+/)[0];
             float_menu_trigger = trigger_arr[tile];
-            if (float_menu_trigger[tile][0] == 'customize'){
+            if (float_menu_trigger[0][0] == 'customize'){
                 var menu = document.getElementById(`{"index":${tile},"type":"tile-customize-content"}`);
             }
             else {
@@ -405,7 +405,7 @@ app.clientside_callback(
         else{
             float_menu_trigger = [float_menu_data, {'display': 'none'}, '', ''];
             var tile = float_menu_data[1];
-            if (float_menu_trigger[tile][0] == 'customize'){
+            if (float_menu_trigger[0][0] == 'customize'){
                 var menu = document.getElementById(`{"index":${tile},"type":"tile-customize-content"}`);
             }
             else {

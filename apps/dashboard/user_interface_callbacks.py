@@ -21,7 +21,7 @@ from flask import url_for
 # Internal Packages
 from apps.dashboard.app import app
 from apps.dashboard.data import DATA_CONTENT_HIDE, DATA_CONTENT_SHOW, get_label, X_AXIS_OPTIONS, \
-    session, BAR_X_AXIS_OPTIONS, generate_constants, dataset_to_df, GRAPH_OPTIONS
+    session, BAR_X_AXIS_OPTIONS, generate_constants, dataset_to_df, GRAPH_OPTIONS, CUSTOMIZE_CONTENT_HIDE
 from apps.dashboard.layouts import get_line_scatter_graph_menu, get_bar_graph_menu, get_table_graph_menu, \
     get_tile_layout, change_index, get_box_plot_menu, get_default_tab_content, get_layout_dashboard, get_layout_graph, \
     get_data_menu, get_sankey_menu, get_dashboard_title_input, get_bubble_graph_menu
@@ -344,14 +344,16 @@ for x in range(4):
     @app.callback(
         [Output({'type': 'float-menu-trigger', 'index': x}, 'data-'),
          Output({'type': 'tile-customize', 'index': x}, 'className'),
-         Output({'type': 'tile-layouts', 'index': x}, 'className')],
+         Output({'type': 'tile-layouts', 'index': x}, 'className'),
+         Output({'type': 'tile-customize-content-wrapper', 'index': x}, 'children')],
         [Input({'type': 'tile-customize', 'index': x}, 'n_clicks'),
          Input({'type': 'tile-layouts', 'index': x}, 'n_clicks'),
          Input('float-menu-result', 'children')],
-        State('float-menu-title', 'data-'),
+        [State('float-menu-title', 'data-'),
+         State({'type': 'tile-customize-content', 'index': x}, 'children')],
         prevent_initial_call=True
     )
-    def _serve_float_menu(_customize_n_clicks, _layouts_n_clicks, float_menu_result, float_menu_data):
+    def _serve_float_menu_and_take_result(_customize_n_clicks, _layouts_n_clicks, float_menu_result, float_menu_data, customize_menu):
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
         if changed_id == '.' or len(dash.callback_context.triggered) > 1:
@@ -362,9 +364,11 @@ for x in range(4):
         else:
             tile = int(search(r'\d+', changed_id).group())
 
+        customize_menu_output = no_update
+
         # switch statement
         if 'tile-customize' in changed_id:
-            float_menu_trigger = [['customize', tile], {}, get_label('LBL_Edit_Graph')]
+            float_menu_trigger = [['customize', tile, customize_menu], {}, get_label('LBL_Edit_Graph')]
             customize_className = 'tile-nav tile-nav--customize tile-nav--selected'
             layouts_className = 'tile-nav tile-nav--layout'
         elif 'tile-layouts' in changed_id:
@@ -372,29 +376,35 @@ for x in range(4):
             customize_className = 'tile-nav tile-nav--customize'
             layouts_className = 'tile-nav tile-nav--layout tile-nav--selected'
         elif float_menu_result == 'ok':
-            float_menu_trigger = [None, {'display': 'hide'}, None, None]
+            float_menu_trigger = [None, {'display': 'hide'}, None]
             customize_className = 'tile-nav tile-nav--customize'
             layouts_className = 'tile-nav tile-nav--layout'
+        # cancel
         else:
-            float_menu_trigger = [None, {'display': 'hide'}, None, None]
+            customize_menu_output = html.Div(
+                    float_menu_data[2],
+                    style=CUSTOMIZE_CONTENT_HIDE,
+                    id={'type': 'tile-customize-content', 'index': tile},
+                    className='customize-content'),
+            float_menu_trigger = [None, {'display': 'hide'}, None]
             customize_className = 'tile-nav tile-nav--customize'
             layouts_className = 'tile-nav tile-nav--layout'
-        return float_menu_trigger, customize_className, layouts_className
+        return float_menu_trigger, customize_className, layouts_className, customize_menu_output
 
 # initialize menu, shows which menu you need
 app.clientside_callback(
     """
     function(float_menu_trigger_0, float_menu_trigger_1, float_menu_trigger_2, float_menu_trigger_3, 
-             close_n_clicks, cancel_n_clicks, ok_n_clicks, float_menu_data){
+             close_n_clicks, cancel_n_clicks, ok_n_clicks, float_menu_data) {
         const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
         
         var float_menu_trigger = null;
         var result = null;
-        if (triggered.includes('float-menu-trigger')){
+        if (triggered.includes('float-menu-trigger')) {
             var trigger_arr = [float_menu_trigger_0, float_menu_trigger_1, float_menu_trigger_2, float_menu_trigger_3]
             var tile = triggered.match(/\d+/)[0];
             float_menu_trigger = trigger_arr[tile];
-            if (float_menu_trigger[0][0] == 'customize'){
+            if (float_menu_trigger[0][0] == 'customize') {
                 var menu = document.getElementById(`{"index":${tile},"type":"tile-customize-content"}`);
             }
             else {
@@ -402,10 +412,10 @@ app.clientside_callback(
             }
             document.getElementById("float-menu-body").appendChild(menu).style.display = ''; 
         }
-        else{
+        else {
             float_menu_trigger = [float_menu_data, {'display': 'none'}, '', ''];
             var tile = float_menu_data[1];
-            if (float_menu_trigger[0][0] == 'customize'){
+            if (float_menu_trigger[0][0] == 'customize') {
                 var menu = document.getElementById(`{"index":${tile},"type":"tile-customize-content"}`);
             }
             else {
@@ -413,9 +423,8 @@ app.clientside_callback(
             }
             document.getElementById(`{"index":${tile},"type":"tile-body"}`).appendChild(menu).style.display = 'none'; 
         
-            if(triggered == 'float-menu-close.n_clicks') {result = 'cancel';}
-            if (triggered == 'float-menu-cancel.n_clicks'){result = 'cancel';}
-            if (triggered == 'float-menu-ok.n_clicks'){result = 'ok';}
+            if (triggered == 'float-menu-close.n_clicks' || triggered == 'float-menu-cancel.n_clicks') {result = 'cancel';}
+            if (triggered == 'float-menu-ok.n_clicks') {result = 'ok';}
         }
         return [float_menu_trigger[0], float_menu_trigger[1], float_menu_trigger[2], result];
     }

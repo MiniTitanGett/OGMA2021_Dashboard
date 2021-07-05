@@ -528,7 +528,7 @@ def get_layout_dashboard():
         html.Div(
             id='prompt-result',
             style={'display': 'none'}),
-        # Floating Menu TODO: Link with menu
+        # Floating Menu
         html.Div(
             html.Div([
                 html.Div([
@@ -897,12 +897,15 @@ def get_tile(tile, tile_keys=None, df_name=None):
                         id={'type': 'graph_display', 'index': tile},
                         className='fill-container')]),
             html.Div(
-                tile_keys['Customize Content'] if tile_keys
-                else get_customize_content(tile=tile, graph_type=None, graph_menu=None, df_name=df_name),
-                style=CUSTOMIZE_CONTENT_HIDE,
-                id={'type': 'tile-customize-content', 'index': tile},
+                html.Div(
+                    tile_keys['Customize Content'] if tile_keys
+                    else get_customize_content(tile=tile, graph_type=None, graph_menu=None, df_name=df_name),
+                    style=CUSTOMIZE_CONTENT_HIDE,
+                    id={'type': 'tile-customize-content', 'index': tile},
+                    className='customize-content'),
+                id={'type': 'tile-customize-content-wrapper', 'index': tile},
                 className='customize-content'),
-            html.Div([  # TODO : style this to match customize menu and get rid of unnecessary divs
+            html.Div([
                 html.P(get_label('LBL_Select_A_Saved_Graph'),
                        style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
                 html.Div(

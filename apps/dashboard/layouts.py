@@ -574,28 +574,28 @@ def get_layout_dashboard():
             id={'type': 'minor-popup', 'index': 0},
             is_open=False,
             color='dark',
-            style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px'},
+            style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px', 'z-index': '500'},
             duration=4000),
         dbc.Alert(
             'Your Tile Has Been Saved',
             id={'type': 'minor-popup', 'index': 1},
             is_open=False,
             color='dark',
-            style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px'},
+            style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px', 'z-index': '500'},
             duration=4000),
         dbc.Alert(
             'Your Tile Has Been Saved',
             id={'type': 'minor-popup', 'index': 2},
             is_open=False,
             color='dark',
-            style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px'},
+            style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px', 'z-index': '500'},
             duration=4000),
         dbc.Alert(
             'Your Tile Has Been Saved',
             id={'type': 'minor-popup', 'index': 3},
             is_open=False,
             color='dark',
-            style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px'},
+            style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px', 'z-index': '500'},
             duration=4000),
         # dashboard-reset-trigger is used by NEW/DELETE to trigger MANAGE DATA SIDEMENUS to reset the data menus
         html.Div(

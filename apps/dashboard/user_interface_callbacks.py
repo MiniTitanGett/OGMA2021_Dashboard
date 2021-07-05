@@ -381,20 +381,20 @@ for x in range(4):
             layouts_className = 'tile-nav tile-nav--layout'
         return float_menu_trigger, customize_className, layouts_className
 
-# initialize prompt
+# initialize menu, shows which menu you need
 app.clientside_callback(
     """
     function(float_menu_trigger_0, float_menu_trigger_1, float_menu_trigger_2, float_menu_trigger_3, 
              close_n_clicks, cancel_n_clicks, ok_n_clicks, float_menu_data){
-        const triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
-        var tile = dash_clientside.callback_context.inputs_list[0]['id']['index'];
+        const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
         
         var float_menu_trigger = null;
         var result = null;
-        if (String(triggered).includes('float-menu-trigger')){
+        if (triggered.includes('float-menu-trigger')){
             var trigger_arr = [float_menu_trigger_0, float_menu_trigger_1, float_menu_trigger_2, float_menu_trigger_3]
+            var tile = triggered.match(/\d+/)[0];
             float_menu_trigger = trigger_arr[tile];
-            if (float_menu_trigger[0][0] == 'customize'){
+            if (float_menu_trigger[tile][0] == 'customize'){
                 var menu = document.getElementById(`{"index":${tile},"type":"tile-customize-content"}`);
             }
             else {
@@ -404,7 +404,8 @@ app.clientside_callback(
         }
         else{
             float_menu_trigger = [float_menu_data, {'display': 'none'}, '', ''];
-            if (float_menu_trigger[0][0] == 'customize'){
+            var tile = float_menu_data[1];
+            if (float_menu_trigger[tile][0] == 'customize'){
                 var menu = document.getElementById(`{"index":${tile},"type":"tile-customize-content"}`);
             }
             else {

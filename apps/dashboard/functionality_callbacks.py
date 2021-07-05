@@ -45,8 +45,10 @@ for x in range(4):
         Output({'type': 'graph_display', 'index': x}, 'children'),
         # Graph menu update graph trigger
         [Input({'type': 'update-graph-trigger', 'index': x}, 'data-graph_menu_trigger'),
+         # Customize menu inputs
+         Input({'type': 'args-value: {}'.replace("{}", str(x)), 'index': ALL}, 'value'),
+         Input({'type': 'graph-type-dropdown', 'index': x}, 'value'),
          # View menu inputs
-         Input({'type': 'tile-view', 'index': x}, 'className'),
          Input({'type': 'tile-title', 'index': x}, 'value'),
          # Tile date picker inputs
          Input({'type': 'date-picker-trigger', 'index': x}, 'data-boolean'),
@@ -86,9 +88,6 @@ for x in range(4):
          # Data set states
          State({'type': 'data-set', 'index': x}, 'value'),
          State({'type': 'data-set', 'index': 4}, 'value'),
-         # Customize menu states
-         State({'type': 'args-value: {}'.replace("{}", str(x)), 'index': ALL}, 'value'),
-         State({'type': 'graph-type-dropdown', 'index': x}, 'value'),
          # Link state
          State({'type': 'tile-link', 'index': x}, 'className'),
          # Hierarchy Options
@@ -98,7 +97,7 @@ for x in range(4):
          State('df-constants-storage', 'data')],
         prevent_initial_call=True
     )
-    def _update_graph(_df_trigger, view_state, tile_title, _datepicker_trigger,
+    def _update_graph(_df_trigger, arg_value, graph_type, tile_title, _datepicker_trigger,
                       num_periods, period_type, _master_datepicker_trigger, master_num_periods,
                       master_period_type, hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children,
                       state_of_display, master_state_of_display, master_hierarchy_toggle,
@@ -106,15 +105,15 @@ for x in range(4):
                       fiscal_toggle, start_year, end_year, start_secondary, end_secondary, master_secondary_type,
                       master_timeframe, master_fiscal_toggle, master_start_year, master_end_year,
                       master_start_secondary, master_end_secondary, graph_display, df_name, master_df_name,
-                      arg_value, graph_type, link_state, hierarchy_options, master_hierarchy_options, df_const):
+                      link_state, hierarchy_options, master_hierarchy_options, df_const):
 
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][-1]
 
         if '"type":"tile-view"}.className' in changed_id and df_name is None and master_df_name is None:
             return None
 
-        # if not in view tab, or new/delete while the graph already exists, prevent update
-        if view_state == 'tile-nav tile-nav--view' or (changed_id == '.' and graph_display):
+        # if new/delete while the graph already exists, prevent update
+        if changed_id == '.' and graph_display:
             raise PreventUpdate
 
         if len(arg_value) == 0:

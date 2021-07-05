@@ -451,7 +451,7 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
 
         return link_trigger, options, graph_value, type_style, message_style
 
-    if changed_id == '.' or trigger is None or link_states is []:
+    if changed_id == '.' or link_states is []:
         raise PreventUpdate
 
     if '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-unlink':
@@ -549,7 +549,7 @@ for x in range(4):
         if ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link') \
                 or ('type":"graph-type-dropdown"}.value' in changed_id and link_state == 'fa fa-link'
                     and selected_graph_type is None):
-            if master_df_name is None and df_name is not None:
+            if master_df_name is None and df_name is None:
                 return None, 1,no_update
             if selected_graph_type not in GRAPH_OPTIONS[master_df_name] or selected_graph_type is None:
                 return None, 1, no_update
@@ -1087,8 +1087,7 @@ app.clientside_callback(
 )
 
 # highlight tiles slaved to displayed data sidebar
-for x in range(4):
-    app.clientside_callback(
+for x in range(4):    app.clientside_callback(
         """
         function(_sidebar_styles, link_state, sidebar_style, master_sidebar_style){
             function isEquivalent(a, b) {

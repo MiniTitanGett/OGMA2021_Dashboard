@@ -480,6 +480,8 @@ EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graph_Options_Info',@l
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graph_Options_Info',@language = 'Fr', @ref_desc = 'Fr: Graph options info'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graph_Type_Info',@language = 'En', @ref_desc = 'Graph type info'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graph_Type_Info',@language = 'Fr', @ref_desc = 'Fr: Graph type info'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Edit_Graph',@language = 'En', @ref_desc = 'Edit Graph'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Edit_Graph',@language = 'Fr', @ref_desc = 'Fr: Edit Graph'
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'En',@ref_desc = 'Hierarchy Selection''s Children'
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'Fr',@ref_desc = 'Enfants de la Sélection de Hiérarchie'
 

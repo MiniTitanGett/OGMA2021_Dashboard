@@ -542,7 +542,7 @@ def get_layout_dashboard():
                         style={'position': 'absolute', 'right': '16px', 'top': '8px'})],
                     className='prompt-header'),
                 html.Div([
-                    html.Div(id='float-menu-body'),
+                    html.Div(id='float-menu-body', style={'display': 'flex', 'min-height': '200px'}),
                     html.Div([
                         html.Button('Cancel', id='float-menu-cancel', style={'margin-right': '16px', 'width': '80px'}),
                         html.Button('OK', id='float-menu-ok', style={'width': '80px'})],

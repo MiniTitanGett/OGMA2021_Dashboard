@@ -619,7 +619,7 @@ there.
     width: auto;
     margin-left: 20px;
     margin-right: 20px;
-    height: 100%;
+    flex-grow: 1;
     overflow: auto;
 }
 
@@ -1183,7 +1183,7 @@ there.
     top: 10%;
     left: 0;
     right: 0;
-    width: 60%;
+    width: 550px;
     margin-left: auto;
     margin-right: auto;
     background: #fffafa;

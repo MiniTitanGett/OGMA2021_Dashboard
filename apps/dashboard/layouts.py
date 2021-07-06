@@ -171,7 +171,7 @@ def get_data_set_picker(tile, df_name):
                     id='dataset-confirmation-symbols'),
                 style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
                        'position': 'relative', 'vertical-align': 'top', 'background-color': 'white', 'width': '40px',
-                       'border': '1px solid {}'.format(CLR['lightgray']), 'border-radius': '6px'})],
+                       'border': '1px solid {}'.format(CLR['lightgray']), 'border-radius': '6px', 'cursor':'pointer'})],
             style={'display': 'flex'})
     ]
 
@@ -395,7 +395,7 @@ def get_layout_dashboard():
                     html.Div([
                         html.I(
                             html.Span(
-                                get_label("LBL_Reset_Dashboard_All_Unsaved_Changes_Will_Be_Lost"),
+                                get_label("LBL_Reset_Dashboard_All_Unsaved_Changes_will_Be_Lost"),
                                 className='save-symbols-tooltip'),
                             id='confirm-dashboard-reset',
                             className='fa fa-undo',
@@ -1071,7 +1071,7 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, master_df=None):
 # ***************************************************GRAPH MENUS*****************************************************
 
 # line graph menu layout
-def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, df_const):
+def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridline, df_const):
     """
     :param measure_type: the measure type value
     :param y: the y-axis value
@@ -1121,14 +1121,14 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, df_cons
                         style={'font-size': '13px', 'display': 'inline-block', 'width': '50px', 'position': 'relative',
                                'top': '-15px',
                                'margin-right': '5px'})],
-                         style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'} if
-                         len(X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'} if len(
+                        X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
                 html.Div([
                     html.P(
                         "{}".format(X_AXIS_OPTIONS[0]),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'} if
-                    len(X_AXIS_OPTIONS) == 1 else {'display': 'None'}),
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'} if len(
+                        X_AXIS_OPTIONS) == 1 else {'display': 'None'}),
                 html.Div([
                     html.Div([
                         html.P(
@@ -1177,12 +1177,18 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, df_cons
                                      {'label': get_label('LBL_Lines_And_Points'), 'value': 'Lines and Points'}],
                             value=mode if mode else 'Lines',
                             style={'font-size': '13px'})],
-                        style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})])
+                        style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})]),
+            dcc.Checklist(
+                id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
+                options=[{'label': get_label('LBL_Show_Grid_Lines'),
+                          'value': 'gridline'}],
+                value=gridline if gridline else [],
+                style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
             ], style={'margin-left': '15px'})]), ]
 
 
 # bar graph menu layout
-def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, df_name, df_const):
+def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline, df_name, df_const):
     """
     :param measure_type: the measure type value
     :param y: the y-axis value
@@ -1286,12 +1292,18 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, df_name, 
                           'value': 'animate'}],
                 value=animate if animate else [],
                 style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
+            dcc.Checklist(
+                id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
+                options=[{'label': get_label('LBL_Show_Grid_Lines'),
+                          'value': 'gridline'}],
+                value=gridline if gridline else [],
+                style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
 
         ], style={'margin-left': '15px'})]
 
 
 # bubble graph menu layout
-def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, df_name, df_const):
+def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure,gridline , df_name, df_const):
     # (args-value: {})[0] = x-axis
     # (args-value: {})[1] = x-axis measure
     # (args-value: {})[2] = y-axis
@@ -1409,12 +1421,18 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                         value=size_measure,
                         clearable=False,
                         style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})])
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+            dcc.Checklist(
+                id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 6},
+                options=[{'label': get_label('LBL_Show_Grid_Lines'),
+                          'value': 'gridline'}],
+                value=gridline if gridline else [],
+                style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
         ], style={'margin-left': '15px'})]
 
 
 # box plot menu layout
-def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, df_name, show_data_points, df_const):
+def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, df_name, show_data_points, gridline, df_const):
     # (args-value: {})[0] = graphed variables
     # (args-value: {})[1] = measure type
     # (args-value: {})[2] = points toggle
@@ -1487,7 +1505,13 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
             dcc.Checklist(
                 id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
                 options=[{'label': get_label('LBL_Show_Data_Points'), 'value': 'show'}],
-                value=show_data_points)
+                value=show_data_points),
+            dcc.Checklist(
+                id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
+                options=[{'label': get_label('LBL_Show_Grid_Lines'),
+                          'value': 'gridline'}],
+                value=gridline if gridline else [],
+                style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
         ], style={'margin-left': '15px'})]
 
 

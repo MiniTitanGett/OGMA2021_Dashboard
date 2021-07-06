@@ -1079,6 +1079,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
     :param mode: the mode for the graph
     :param tile: Index of the tile the line graph menu corresponds to.
     :param df_name: Name of the data set being used.
+    :param gridline: Show gridline or not
     :param df_const: Dataframe constants
     :return: Menu with options to modify a line graph.
     """
@@ -1121,14 +1122,14 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                         style={'font-size': '13px', 'display': 'inline-block', 'width': '50px', 'position': 'relative',
                                'top': '-15px',
                                'margin-right': '5px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'} if len(
-                        X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
+                         style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}
+                         if len(X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
                 html.Div([
                     html.P(
                         "{}".format(X_AXIS_OPTIONS[0]),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'} if len(
-                        X_AXIS_OPTIONS) == 1 else {'display': 'None'}),
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}
+                    if len(X_AXIS_OPTIONS) == 1 else {'display': 'None'}),
                 html.Div([
                     html.Div([
                         html.P(
@@ -1178,12 +1179,11 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                             value=mode if mode else 'Lines',
                             style={'font-size': '13px'})],
                         style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})]),
-            dcc.Checklist(
-                id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
-                options=[{'label': get_label('LBL_Show_Grid_Lines'),
-                          'value': 'gridline'}],
-                value=gridline if gridline else [],
-                style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
+                dcc.Checklist(
+                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
+                    options=[{'label': get_label('LBL_Show_Grid_Lines'), 'value': 'gridline'}],
+                    value=gridline if gridline else [],
+                    style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
             ], style={'margin-left': '15px'})]), ]
 
 
@@ -1195,6 +1195,7 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
     :param x: the x-axis value
     :param orientation: the orientation value
     :param animate: the animate graph value
+    :param gridline: Show gridline or not
     :param tile: Index of the tile the bar graph menu corresponds to.
     :param df_name: Name of the data set being used.
     :param df_const: Dataframe constants
@@ -1303,7 +1304,7 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
 
 
 # bubble graph menu layout
-def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure,gridline , df_name, df_const):
+def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, gridline, df_name, df_const):
     # (args-value: {})[0] = x-axis
     # (args-value: {})[1] = x-axis measure
     # (args-value: {})[2] = y-axis
@@ -1432,7 +1433,8 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure,g
 
 
 # box plot menu layout
-def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, df_name, show_data_points, gridline, df_const):
+def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, df_name, show_data_points, gridline,
+                      df_const):
     # (args-value: {})[0] = graphed variables
     # (args-value: {})[1] = measure type
     # (args-value: {})[2] = points toggle

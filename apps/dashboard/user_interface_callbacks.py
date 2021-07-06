@@ -353,7 +353,8 @@ for x in range(4):
          State({'type': 'tile-customize-content', 'index': x}, 'children')],
         prevent_initial_call=True
     )
-    def _serve_float_menu_and_take_result(_customize_n_clicks, _layouts_n_clicks, float_menu_result, float_menu_data, customize_menu):
+    def _serve_float_menu_and_take_result(_customize_n_clicks, _layouts_n_clicks, float_menu_result, float_menu_data,
+                                          customize_menu):
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
         if changed_id == '.' or len(dash.callback_context.triggered) > 1:
@@ -424,7 +425,9 @@ app.clientside_callback(
             }
             document.getElementById(`{"index":${tile},"type":"tile-body"}`).appendChild(menu).style.display = 'none'; 
         
-            if (triggered == 'float-menu-close.n_clicks' || triggered == 'float-menu-cancel.n_clicks') {result = 'cancel';}
+            if (triggered == 'float-menu-close.n_clicks' || triggered == 'float-menu-cancel.n_clicks') {
+                result = 'cancel';
+            }
             if (triggered == 'float-menu-ok.n_clicks') {result = 'ok';}
         }
         return [float_menu_trigger[0], float_menu_trigger[1], float_menu_trigger[2], result];
@@ -465,8 +468,6 @@ app.clientside_callback(
 def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, graph_type, _type_options):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     changed_value = [p['value'] for p in dash.callback_context.triggered][0]
-
-
 
     if changed_id == '.' or link_states is []:
         raise PreventUpdate
@@ -516,13 +517,15 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
 
-    #loads in a default graph when dataset is first choosen
+    # loads in a default graph when dataset is first choosen
     if '"type":"tile-link"}.className' not in changed_id and graph_type is None:
         graph_value = options[0]['value']
-    #relink selected first graph option of parent data set not in graph options
-    elif '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-link' and graph_type not in graph_options:
+    # relink selected first graph option of parent data set not in graph options
+    elif '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-link' \
+            and graph_type not in graph_options:
         graph_value = options[0]['value']
-    elif '"type":"set-graph-options-trigger"}.options-' in changed_id and graph_type is not None and graph_type not in graph_options:
+    elif '"type":"set-graph-options-trigger"}.options-' in changed_id and graph_type is not None \
+            and graph_type not in graph_options:
         graph_value = options[0]['value']
     else:
         graph_value = graph_type

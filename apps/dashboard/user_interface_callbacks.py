@@ -495,6 +495,9 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
     #loads in a default graph when dataset is first choosen
     if '"type":"tile-link"}.className' not in changed_id and graph_type is None:
         graph_value = options[0]['value']
+    #relink selected first graph option of parent data set not in graph options
+    elif '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-link' and graph_type not in graph_options:
+        graph_value = options[0]['value']
     elif '"type":"set-graph-options-trigger"}.options-' in changed_id and graph_type is not None and graph_type not in graph_options:
         graph_value = options[0]['value']
     else:

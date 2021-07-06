@@ -459,6 +459,7 @@ app.clientside_callback(
      State({'type': 'data-set', 'index': 4}, 'value'),
      State({'type': 'graph-type-dropdown', 'index': MATCH}, 'value'),
      State({'type': 'graph-type-dropdown', 'index': MATCH}, 'options')]
+    # TODO: Why are we calling the state of things we are taking in as inputs
 )
 def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, graph_type, _type_options):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]

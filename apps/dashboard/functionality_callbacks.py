@@ -123,11 +123,17 @@ for x in range(4):
         if link_state == 'fa fa-unlink' and '"index":4' in changed_id:
             raise PreventUpdate
 
+        # if unlinked and dataset changes
+        if link_state == 'fa fa-unlink' and '"type":"date-picker-trigger"}.data-boolean' in changed_id:
+            raise PreventUpdate
+
         # if linked --> unlinked prevent update
         if link_state == 'fa fa-unlink' and '"type":"tile-link"}.className' in changed_id:
             raise PreventUpdate
 
-        if link_state == 'fa fa-link' and df_name is not None and graph_type in GRAPH_OPTIONS[df_name]:
+        # if linked and graph-type is in both data sets update graph
+        if link_state == 'fa fa-link' and df_name is not None and graph_type in GRAPH_OPTIONS[
+            df_name] and df_name != master_df_name:
             graph = __update_graph(df_name, arg_value, graph_type, tile_title, num_periods, period_type,
                                    hierarchy_toggle,
                                    hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options,
@@ -273,7 +279,6 @@ for x in range(5):
 
         return display_button, dropdown, options
 
-
 # swaps between displaying the SPECIFIC and LEVEL hierarchy menus
 app.clientside_callback(
     """
@@ -385,8 +390,8 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
         elif 'n_clicks' in changed_id:
             conditions = ['date-picker-quarter-button' in changed_id, 'date-picker-month-button' in changed_id]
             quarter_classname, quarter_disabled, month_classname, month_disabled, week_classname, week_disabled, \
-                fringe_min, fringe_max, default_max, max_year, \
-                new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
+            fringe_min, fringe_max, default_max, max_year, \
+            new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
             # set min_year according to user selected fiscal/gregorian time type
             if fiscal_toggle == 'Gregorian':
                 min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
@@ -442,8 +447,8 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                 selected_secondary_max = end_secondary_selection
                 conditions = [tab == 'Quarter', tab == 'Month']
                 quarter_classname, quarter_disabled, month_classname, month_disabled, week_classname, week_disabled, \
-                    fringe_min, fringe_max, default_max, max_year, \
-                    new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
+                fringe_min, fringe_max, default_max, max_year, \
+                new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
             # set min_year according to user selected time type (gregorian/fiscal)
             if fiscal_toggle == 'Gregorian':
                 min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
@@ -527,7 +532,6 @@ app.clientside_callback(
     [Input({'type': 'radio-timeframe', 'index': MATCH}, 'value')],
     prevent_initial_call=True
 )
-
 
 # *************************************************DATA-TABLE*********************************************************
 
@@ -703,4 +707,4 @@ for x in range(4):
                 inplace=False)
 
         return dff.iloc[page_current * page_size: (page_current + 1) * page_size].to_dict('records'), \
-            math.ceil(dff.iloc[:, 0].size / page_size)
+               math.ceil(dff.iloc[:, 0].size / page_size)

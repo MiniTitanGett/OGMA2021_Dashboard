@@ -359,6 +359,9 @@ for y in range(4):
                     df_const = {}
                 df_const[df_name] = generate_constants(df_name)
 
+            if df_const[df_name] != df_const:
+                df_const[df_name] = generate_constants(df_name)
+
             #  --------- create customize menu ---------
 
             graph_type = session['saved_layouts'][selected_layout]['Graph Type']

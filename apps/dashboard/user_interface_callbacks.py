@@ -464,7 +464,12 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     changed_value = [p['value'] for p in dash.callback_context.triggered][0]
 
-    if changed_id == '.' or trigger is None or link_states is []:
+
+
+    if changed_id == '.' or link_states is []:
+        raise PreventUpdate
+
+    if '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-unlink':
         raise PreventUpdate
 
     changed_index = int(search(r'\d+', changed_id).group())
@@ -482,6 +487,8 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
             graph_options = GRAPH_OPTIONS["OPG001"]
         elif df_name_parent == "OPG010":
             graph_options = GRAPH_OPTIONS["OPG010"]
+        else:
+            graph_options = []
         graph_options.sort()
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
@@ -507,10 +514,14 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
 
+    #loads in a default graph when dataset is first choosen
     if '"type":"tile-link"}.className' not in changed_id and graph_type is None:
         graph_value = options[0]['value']
-    elif '"type":"tile-link"}.className' in changed_id and graph_type is not None and changed_value == 'fa-fa-link':
-        graph_value = None
+    #relink selected first graph option of parent data set not in graph options
+    elif '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-link' and graph_type not in graph_options:
+        graph_value = options[0]['value']
+    elif '"type":"set-graph-options-trigger"}.options-' in changed_id and graph_type is not None and graph_type not in graph_options:
+        graph_value = options[0]['value']
     else:
         graph_value = graph_type
 
@@ -543,6 +554,9 @@ for x in range(4):
 
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][-1]
 
+        if '"type":"tile-link"}.className' in changed_id and  master_df_name is None and df_name is None:
+            return None, 1, no_update
+
         # if link state has changed from linked --> unlinked the data has not changed, prevent update
         if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink':
             if selected_graph_type is None:
@@ -554,6 +568,8 @@ for x in range(4):
         if ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link') \
                 or ('type":"graph-type-dropdown"}.value' in changed_id and link_state == 'fa fa-link'
                     and selected_graph_type is None):
+            if master_df_name is None and df_name is None:
+                return None, 1,no_update
             if selected_graph_type not in GRAPH_OPTIONS[master_df_name] or selected_graph_type is None:
                 return None, 1, no_update
             elif selected_graph_type in GRAPH_OPTIONS[master_df_name]:
@@ -656,14 +672,12 @@ for x in range(4):
 # change link button appearance
 @app.callback(
     Output({'type': 'tile-link', 'index': MATCH}, 'className'),
-    [Input({'type': 'tile-save-trigger', 'index': MATCH}, 'value'),
-     Input({'type': 'tile-link', 'index': MATCH}, 'n_clicks'),
+    [Input({'type': 'tile-link', 'index': MATCH}, 'n_clicks'),
      Input({'type': 'set-tile-link-trigger', 'index': MATCH}, 'link-')],
-    [State({'type': 'tile-link', 'index': MATCH}, 'className'),
-     State('prompt-result', 'children')],
+    [State({'type': 'tile-link', 'index': MATCH}, 'className')],
     prevent_initial_call=True
 )
-def _change_link(prompt_data, _link_clicks, link_trigger, link_state, prompt_result):
+def _change_link(_link_clicks, link_trigger, link_state):
     """
     :param _link_clicks: Detects the user clicking the link/unlink icon
     :param link_state: State of the link/unlink icon
@@ -675,11 +689,8 @@ def _change_link(prompt_data, _link_clicks, link_trigger, link_state, prompt_res
     if '.' == changed_id:  # or link_trigger is None
         raise PreventUpdate
 
-    if '"type":"tile-save-trigger"}.value' in changed_id:
-        if link_state == 'fa fa-link' and prompt_data[0] == 'load' and prompt_result == 'ok':
-            link_state = 'fa fa-unlink'
-        else:
-            raise PreventUpdate
+    if '"type":"select-layout-dropdown"}.value' in changed_id:
+        link_state = 'fa fa-unlink'
 
     if '"type":"tile-link"}.n_clicks' in changed_id:
         # if link button was pressed, toggle the link icon linked <--> unlinked

@@ -385,7 +385,8 @@ for x in range(4):
                     float_menu_data[2],
                     style=CUSTOMIZE_CONTENT_HIDE,
                     id={'type': 'tile-customize-content', 'index': tile},
-                    className='customize-content'),
+                    className='customize-content',
+                    **{'data-loaded': True}),
             float_menu_trigger = [None, {'display': 'hide'}, None]
             customize_className = 'tile-nav tile-nav--customize'
             layouts_className = 'tile-nav tile-nav--layout'
@@ -534,19 +535,21 @@ for x in range(4):
     @app.callback(
         [Output({'type': 'div-graph-options', 'index': x}, 'children'),
          Output({'type': 'update-graph-trigger', 'index': x}, 'data-graph_menu_trigger'),
-         Output({'type': 'update-graph-trigger', 'index': x}, 'data-graph_menu_table_trigger')],
+         Output({'type': 'update-graph-trigger', 'index': x}, 'data-graph_menu_table_trigger'),
+         Output({'type': 'tile-customize-content', 'index': x}, 'data-loaded')],
         [Input({'type': 'graph-menu-trigger', 'index': x}, 'data-'),
          Input({'type': 'graph-type-dropdown', 'index': x}, 'value'),
          Input({'type': 'tile-link', 'index': x}, 'className')],
         [State({'type': 'div-graph-options', 'index': x}, 'children'),
          State({'type': 'graph-type-dropdown', 'index': ALL}, 'value'),
+         State({'type': 'tile-customize-content', 'index': x}, 'data-loaded'),
          State({'type': 'data-set', 'index': x}, 'value'),
          State({'type': 'data-set', 'index': 4}, 'value'),
          State('df-constants-storage', 'data')],
         prevent_initial_call=True
     )
-    def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_options_state, _graph_option, df_name,
-                           master_df_name, df_const):
+    def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_options_state, _graph_option, is_loaded,
+                           df_name, master_df_name, df_const):
         """
         :param selected_graph_type: Selected graph type, ie. 'bar', 'line', etc.
         :param graph_options_state: State of the current graph options div
@@ -555,13 +558,13 @@ for x in range(4):
 
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][-1]
 
-        if '"type":"tile-link"}.className' in changed_id and  master_df_name is None and df_name is None:
-            return None, 1, no_update
+        if '"type":"tile-link"}.className' in changed_id and master_df_name is None and df_name is None:
+            return None, 1, no_update, no_update
 
         # if link state has changed from linked --> unlinked the data has not changed, prevent update
         if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink':
             if selected_graph_type is None:
-                return None, no_update, no_update
+                return None, no_update, no_update, no_update
             else:
                 raise PreventUpdate
 
@@ -570,11 +573,11 @@ for x in range(4):
                 or ('type":"graph-type-dropdown"}.value' in changed_id and link_state == 'fa fa-link'
                     and selected_graph_type is None):
             if master_df_name is None and df_name is None:
-                return None, 1,no_update
+                return None, 1, no_update, no_update
             if selected_graph_type not in GRAPH_OPTIONS[master_df_name] or selected_graph_type is None:
-                return None, 1, no_update
+                return None, 1, no_update, no_update
             elif selected_graph_type in GRAPH_OPTIONS[master_df_name]:
-                return no_update, 1, no_update
+                return no_update, 1, no_update, no_update
             else:
                 raise PreventUpdate
 
@@ -583,7 +586,11 @@ for x in range(4):
 
         # if graph menu trigger has value 'tile closed' then a tile was closed, don't update menu, still update table
         if 'graph-menu-trigger"}.data-' in changed_id and gm_trigger == 'tile closed':
-            return no_update, no_update, 1
+            return no_update, no_update, 1, no_update
+
+        # if this has been loaded from the cancel of a graph menu edit then set to false and prevent update
+        if 'graph-type-dropdown"}.value' in changed_id and is_loaded:
+            return no_update, no_update, no_update, False
 
         # if changed id == '.' and the graph menu already exists, prevent update
         if changed_id == '.' and graph_options_state or df_const is None or df_name not in df_const:
@@ -665,7 +672,7 @@ for x in range(4):
         else:
             update_graph_trigger = no_update
 
-        return menu, update_graph_trigger, no_update
+        return menu, update_graph_trigger, no_update, no_update
 
 
 # ************************************************DATA SIDE-MENU******************************************************

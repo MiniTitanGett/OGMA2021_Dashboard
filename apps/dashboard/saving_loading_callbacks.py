@@ -105,15 +105,18 @@ def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, float_menu_da
 
     if 'prompt-result' in changed_id:
         changed_index = prompt_data[1]
-    else:
+    elif float_menu_data:
         changed_index = int(float_menu_data[1])
+    else:
+        raise PreventUpdate
 
     # Blank prevent updates
     if '"type":"save-button"}.n_clicks' in changed_id and save_clicks[changed_index] == 0:
         raise PreventUpdate
     if '"type":"delete-button"}.n_clicks' in changed_id and delete_clicks[changed_index] == 0:
         raise PreventUpdate
-    if 'float-menu-title.data-' in changed_id and (float_menu_data[0] != 'layouts' or None in load_state or float_menu_result != 'ok'):
+    if 'float-menu-title.data-' in changed_id \
+            and (float_menu_data[0] != 'layouts' or None in load_state or float_menu_result != 'ok'):
         raise PreventUpdate
 
     # switch statement
@@ -431,8 +434,8 @@ for y in range(4):
             layout_dropdown = None
 
         return prompt_trigger, update_options_trigger, popup_text, popup_is_open, tile_title_trigger, \
-               customize_content, data_content, layout_dropdown, tab_output, start_year, end_year, start_secondary, \
-               end_secondary, unlink, df_const_output
+            customize_content, data_content, layout_dropdown, tab_output, start_year, end_year, start_secondary, \
+            end_secondary, unlink, df_const_output
 
 
 # **********************************************DASHBOARD SAVING******************************************************
@@ -864,7 +867,7 @@ def _save_dashboard(_save_clicks, _delete_clicks, _dashboard_overwrite_inputs,
         save_status_symbols = []
 
     return save_status_symbols, options, options, delete_dropdown_val, update_graph_options_trigger, \
-           tile_title_returns[0], tile_title_returns[1], tile_title_returns[2], tile_title_returns[3]
+        tile_title_returns[0], tile_title_returns[1], tile_title_returns[2], tile_title_returns[3]
 
 
 # *********************************************SHARED LOADING********************************************************

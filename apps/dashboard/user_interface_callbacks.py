@@ -357,13 +357,19 @@ for x in range(4):
                                           customize_menu):
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
-        if changed_id == '.' or len(dash.callback_context.triggered) > 1:
+        if changed_id == '.' or len(dash.callback_context.triggered) > 1 \
+                or 'float-menu-result' in changed_id and float_menu_result is None:
             raise PreventUpdate
 
+        # set which tile is being modified
         if 'float-menu-result' in changed_id:
             tile = float_menu_data[1]
         else:
             tile = int(search(r'\d+', changed_id).group())
+
+        # catch tile callback discrepancy due to looping
+        if dash.callback_context.inputs_list[0]['id']['index'] != tile:
+            raise PreventUpdate
 
         customize_menu_output = no_update
 
@@ -419,12 +425,13 @@ app.clientside_callback(
             var tile = float_menu_data[1];
             if (float_menu_trigger[0][0] == 'customize') {
                 var menu = document.getElementById(`{"index":${tile},"type":"tile-customize-content"}`);
+                document.getElementById(`{"index":${tile},"type":"tile-customize-content-wrapper"}`).appendChild(menu).style.display = 'none'; 
             }
             else {
                 var menu = document.getElementById(`{"index":${tile},"type":"tile-layouts-content"}`);
+                document.getElementById(`{"index":${tile},"type":"tile-body"}`).appendChild(menu).style.display = 'none'; 
             }
-            document.getElementById(`{"index":${tile},"type":"tile-body"}`).appendChild(menu).style.display = 'none'; 
-        
+            
             if (triggered == 'float-menu-close.n_clicks' || triggered == 'float-menu-cancel.n_clicks') {
                 result = 'cancel';
             }
@@ -517,7 +524,7 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
 
-    # loads in a default graph when dataset is first choosen
+    # loads in a default graph when dataset is first chosen
     if '"type":"tile-link"}.className' not in changed_id and graph_type is None:
         graph_value = options[0]['value']
     # relink selected first graph option of parent data set not in graph options

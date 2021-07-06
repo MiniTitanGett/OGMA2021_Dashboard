@@ -442,14 +442,7 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     changed_value = [p['value'] for p in dash.callback_context.triggered][0]
 
-    if '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-link' and df_name_parent is None:
-        options= []
-        link_trigger = no_update  # None
-        graph_value=None
-        type_style = {'margin-left': '15px'}
-        message_style = DATA_CONTENT_SHOW
 
-        return link_trigger, options, graph_value, type_style, message_style
 
     if changed_id == '.' or link_states is []:
         raise PreventUpdate
@@ -472,6 +465,8 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
             graph_options = GRAPH_OPTIONS["OPG001"]
         elif df_name_parent == "OPG010":
             graph_options = GRAPH_OPTIONS["OPG010"]
+        else:
+            graph_options = []
         graph_options.sort()
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
@@ -497,11 +492,10 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
 
+    #loads in a default graph when dataset is first choosen
     if '"type":"tile-link"}.className' not in changed_id and graph_type is None:
         graph_value = options[0]['value']
-    elif '"type":"tile-link"}.className' in changed_id and graph_type is not None and changed_value == 'fa fa-link':
-        graph_value = options[0]['value']
-    elif '"type":"set-graph-options-trigger"}.options-' and graph_type is not None and graph_type not in graph_options:
+    elif '"type":"set-graph-options-trigger"}.options-' in changed_id and graph_type is not None and graph_type not in graph_options:
         graph_value = options[0]['value']
     else:
         graph_value = graph_type

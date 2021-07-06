@@ -1,7 +1,7 @@
 if exists (select * from sysobjects where [name] = 'OPP_AddGetEditDeleteFind_ExtDashboardReports') drop procedure dbo.OPP_AddGetEditDeleteFind_ExtDashboardReports
 go
 
--- Copyright ï¿½ OGMA Consulting Corp.
+-- Copyright © OGMA Consulting Corp.
 -- $Id: cda7f654ced3f78d13751a58a003e7e8f17cd53d $
 Create Procedure dbo.OPP_AddGetEditDeleteFind_ExtDashboardReports
 

@@ -94,7 +94,7 @@ def _update_tile_loading_dropdown_options(_tile_saving_trigger, _dashboard_savin
     State('prompt-title', 'data-'),
     prevent_initial_call=True
 )
-def _manage_tile_saves_trigger(save_clicks, delete_clicks, prompt_result, _load_value, prompt_data):
+def _manage_tile_saves_trigger(save_clicks, delete_clicks, prompt_result, load_value, prompt_data):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.' or len(dash.callback_context.triggered) > 1:
@@ -105,14 +105,15 @@ def _manage_tile_saves_trigger(save_clicks, delete_clicks, prompt_result, _load_
     else:
         changed_index = int(search(r'\d+', changed_id).group())
 
-    # if 'save-button' in changed id while its n_clicks == 0, do not update
+    # Blank prevent updates
     if '"type":"save-button"}.n_clicks' in changed_id and save_clicks[changed_index] == 0:
         raise PreventUpdate
-
-    # if 'delete-button' in changed id while its n_clicks == 0, do not update
     if '"type":"delete-button"}.n_clicks' in changed_id and delete_clicks[changed_index] == 0:
         raise PreventUpdate
+    if '"type":"select-layout-dropdown"}.value' in changed_id and None in load_value:
+        raise PreventUpdate
 
+    # switch statement
     if 'save-button' in changed_id:
         mode = "save"
     elif 'delete-button' in changed_id:
@@ -205,9 +206,6 @@ for y in range(4):
                            hierarchy_level_dropdown, state_of_display, graph_children_toggle, fiscal_toggle,
                            input_method, secondary_start, secondary_end, x_time_period, period_type, tab,
                            selected_layout, df_const):
-
-        if 'cancel' in trigger:
-            raise PreventUpdate
 
         if link_state == 'fa fa-link':
             fiscal_toggle = master_fiscal_toggle
@@ -318,10 +316,6 @@ for y in range(4):
                 popup_is_open = True
                 update_options_trigger = 'trigger'
 
-        # if overwrite was cancelled, clear displayed symbols
-        elif trigger == 'cancel':
-            prompt_trigger = [None, {'display': 'hide'}, None, None]
-
         # if delete button was pressed, prompt delete
         elif trigger == 'delete':
 
@@ -431,6 +425,13 @@ for y in range(4):
             tile_title_trigger = session['saved_layouts'][selected_layout]['Title']
             popup_text = get_label('LBL_Your_Graph_Has_Been_Loaded').format(tile_title_trigger)
             popup_is_open = True
+            layout_dropdown = None
+
+        # if anything was cancelled, clear display
+        elif trigger == 'cancel':
+            prompt_trigger = [None, {'display': 'hide'}, None, None]
+            layout_dropdown = None
+
         return prompt_trigger, update_options_trigger, popup_text, popup_is_open, tile_title_trigger, \
             customize_content, data_content, layout_dropdown, tab_output, start_year, end_year, start_secondary, \
             end_secondary, unlink, df_const_output

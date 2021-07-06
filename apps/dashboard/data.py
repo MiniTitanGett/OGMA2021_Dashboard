@@ -57,8 +57,6 @@ GRAPH_OPTIONS = {
     'OPG010': ['Sankey', 'Table']
 }
 
-Sankey_Graph = ['Sankey']
-
 X_AXIS_OPTIONS = ['Time']
 
 BAR_X_AXIS_OPTIONS = ['Specific Item', 'Variable Names']

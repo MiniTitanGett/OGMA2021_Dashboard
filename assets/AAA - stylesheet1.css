@@ -267,9 +267,11 @@ select {
   border: 1px solid #D1D1D1;
   border-radius: 4px;
   box-shadow: none;
-  box-sizing: border-box; 
+  box-sizing: border-box;
   font-family: inherit;
-  font-size: inherit; /*https://stackoverflow.com/questions/6080413/why-doesnt-input-inherit-the-font-from-body*/}
+  font-size: inherit; /*https://stackoverflow.com/questions/6080413/why-doesnt-input-inherit-the-font-from-body*/
+  cursor: pointer;
+}
 /* Removes awkward default styles on some inputs for iOS */
 input[type="email"],
 input[type="number"] {
@@ -701,7 +703,8 @@ there.
 .fa-ban .save-symbols-tooltip,
 .fa-floppy-o .save-symbols-tooltip,
 .fa-undo .save-symbols-tooltip,
-.save-overwrite-symbols .save-symbols-tooltip,
+.save-overwrite-symbols,
+.save-symbols-tooltip
 {
     visibility: hidden;
     position: absolute;

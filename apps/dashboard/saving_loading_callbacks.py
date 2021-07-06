@@ -89,12 +89,15 @@ def _update_tile_loading_dropdown_options(_tile_saving_trigger, _dashboard_savin
     Output('tile-save-trigger-wrapper', 'children'),  # formatted in two chained callbacks to mix ALL and y values
     [Input({'type': 'save-button', 'index': ALL}, 'n_clicks'),
      Input({'type': 'delete-button', 'index': ALL}, 'n_clicks'),
-     Input({'type': 'select-layout-dropdown', 'index': ALL}, 'value'),
+     Input('float-menu-title', 'data-'),
      Input('prompt-result', 'children')],
-    State('prompt-title', 'data-'),
+    [State('prompt-title', 'data-'),
+     State({'type': 'select-layout-dropdown', 'index': ALL}, 'value'),
+     State('float-menu-result', 'children')],
     prevent_initial_call=True
 )
-def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, load_value, prompt_result, prompt_data):
+def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, float_menu_data, prompt_result, prompt_data,
+                                       load_state, float_menu_result):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.' or len(dash.callback_context.triggered) > 1:
@@ -103,14 +106,14 @@ def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, load_value, p
     if 'prompt-result' in changed_id:
         changed_index = prompt_data[1]
     else:
-        changed_index = int(search(r'\d+', changed_id).group())
+        changed_index = int(float_menu_data[1])
 
     # Blank prevent updates
     if '"type":"save-button"}.n_clicks' in changed_id and save_clicks[changed_index] == 0:
         raise PreventUpdate
     if '"type":"delete-button"}.n_clicks' in changed_id and delete_clicks[changed_index] == 0:
         raise PreventUpdate
-    if '"type":"select-layout-dropdown"}.value' in changed_id and None in load_value:
+    if 'float-menu-title.data-' in changed_id and (float_menu_data[0] != 'layouts' or None in load_state or float_menu_result != 'ok'):
         raise PreventUpdate
 
     # switch statement
@@ -118,14 +121,12 @@ def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, load_value, p
         mode = "save"
     elif 'delete-button' in changed_id:
         mode = "delete"
-    elif 'select-layout-dropdown' in changed_id:
-        mode = "load"
+    elif 'float-menu-title.data-' in changed_id:
+        mode = "confirm-load"
     elif prompt_data[0] == 'delete' and prompt_result == 'ok':
         mode = "confirm-delete"
     elif prompt_data[0] == 'overwrite' and prompt_result == 'ok':
         mode = "confirm-overwrite"
-    elif prompt_data[0] == 'load' and prompt_result == 'ok':
-        mode = "confirm-load"
     else:
         mode = "cancel"
 
@@ -344,11 +345,7 @@ for y in range(4):
             popup_text = get_label('LBL_Your_Graph_Has_Been_Deleted').format(graph_title)
             popup_is_open = True
 
-        # if load then we send the load prompt
-        elif trigger == 'load':
-            prompt_trigger = [['load', tile], {}, get_label('LBL_Load_Graph'), get_label('LBL_Load_Graph_Prompt')]
-
-        # if confirm-load then we load what was selected
+        # if confirm-load then we load what was selected from menu
         elif trigger == 'confirm-load':
             df_name = session['saved_layouts'][selected_layout]['Data Set']
 
@@ -434,8 +431,8 @@ for y in range(4):
             layout_dropdown = None
 
         return prompt_trigger, update_options_trigger, popup_text, popup_is_open, tile_title_trigger, \
-            customize_content, data_content, layout_dropdown, tab_output, start_year, end_year, start_secondary, \
-            end_secondary, unlink, df_const_output
+               customize_content, data_content, layout_dropdown, tab_output, start_year, end_year, start_secondary, \
+               end_secondary, unlink, df_const_output
 
 
 # **********************************************DASHBOARD SAVING******************************************************
@@ -867,7 +864,7 @@ def _save_dashboard(_save_clicks, _delete_clicks, _dashboard_overwrite_inputs,
         save_status_symbols = []
 
     return save_status_symbols, options, options, delete_dropdown_val, update_graph_options_trigger, \
-        tile_title_returns[0], tile_title_returns[1], tile_title_returns[2], tile_title_returns[3]
+           tile_title_returns[0], tile_title_returns[1], tile_title_returns[2], tile_title_returns[3]
 
 
 # *********************************************SHARED LOADING********************************************************

@@ -222,6 +222,7 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
     fig.update_layout(
         yaxis={'title': arg_value[1]},
         xaxis={'title': 'Date of Event', 'type': 'date'},
+        showlegend=False if arg_value[5] else True,
         overwrite=True,
         plot_bgcolor='rgba(0, 0, 0, 0)',
         paper_bgcolor='rgba(0, 0, 0, 0)')
@@ -365,6 +366,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
     fig.update_layout(
         xaxis_title='{} ({})'.format(arg_value[0], arg_value[1]),
         yaxis_title='{} ({})'.format(arg_value[2], arg_value[3]),
+        showlegend=False if arg_value[7] else True,
         overwrite=True,
         plot_bgcolor='rgba(0, 0, 0, 0)',
         paper_bgcolor='rgba(0, 0, 0, 0)')
@@ -557,6 +559,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
     fig.update_layout(
         xaxis=xaxis if arg_value[3] == 'Vertical' else {'title': arg_value[1]},
         yaxis={'title': arg_value[1]} if arg_value[3] == 'Vertical' else xaxis,
+        showlegend=False if arg_value[6] else True,
         overwrite=True,
         plot_bgcolor='rgba(0, 0, 0, 0)',
         paper_bgcolor='rgba(0, 0, 0, 0)')
@@ -685,10 +688,14 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             title=get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, arg_value[2],
                                            df_name, df_const))
 
+    button_layer_1_height = 1.12
+    button_layer_2_height = 1.065
+
     fig.update_layout(
         xaxis=xaxis if arg_value[2] == 'Horizontal' else yaxis,
         yaxis=yaxis if arg_value[2] == 'Horizontal' else xaxis,
         legend_title_text=get_label('LBL_Variable_Names'),
+        showlegend=False if arg_value[5] else True,
         boxgap=0.1,
         boxgroupgap=0.5,
         overwrite=True,

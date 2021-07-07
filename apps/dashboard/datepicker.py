@@ -101,8 +101,9 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                     value=period_type,
                     disabled=input_method != 'to-current',
                     clearable=False,
-                    style={'width': '110px', 'max height': '26px', 'margin': '0', 'padding': '0', 'font-size': '15px',
-                           'text-align': 'center', 'border-radius': '5px', 'color': '#333', 'max-height': '26px'})
+                    style={'width': '110px', 'height': '26px', 'margin': '0', 'padding': '0', 'font-size': '15px',
+                           'display': 'flow-root', 'text-align': 'center', 'border-radius': '5px', 'color': '#333',
+                           'max-height': '26px'})
             ], style={'width': '0', 'height': '0', 'position': 'relative', 'bottom': '55px',
                       'left': '125px' if language == 'En' else '150px'}),
             html.P(

@@ -375,11 +375,12 @@ for x in range(4):
 
         # switch statement
         if 'tile-customize' in changed_id:
-            float_menu_trigger = [['customize', tile, customize_menu], {}, get_label('LBL_Edit_Graph')]
+            float_menu_trigger = [['customize', tile, customize_menu], {}, get_label('LBL_Edit_Graph'),
+                                  session['tile_edited'][tile]]
             customize_className = 'tile-nav tile-nav--customize tile-nav--selected'
             layouts_className = 'tile-nav tile-nav--layout'
         elif 'tile-layouts' in changed_id:
-            float_menu_trigger = [['layouts', tile], {}, get_label('LBL_Load_Graph')]
+            float_menu_trigger = [['layouts', tile], {}, get_label('LBL_Load_Graph'), session['tile_edited'][tile]]
             customize_className = 'tile-nav tile-nav--customize'
             layouts_className = 'tile-nav tile-nav--layout tile-nav--selected'
         elif float_menu_result == 'ok':
@@ -391,12 +392,13 @@ for x in range(4):
             float_menu_trigger = [None, {'display': 'hide'}, None]
             customize_className = 'tile-nav tile-nav--customize'
             layouts_className = 'tile-nav tile-nav--layout'
-            customize_menu_output = html.Div(
-                float_menu_data[2],
-                style=CUSTOMIZE_CONTENT_HIDE,
-                id={'type': 'tile-customize-content', 'index': tile},
-                className='customize-content',
-                **{'data-loaded': True})
+            if float_menu_data[0] == 'customize':
+                customize_menu_output = html.Div(
+                    float_menu_data[2],
+                    style=CUSTOMIZE_CONTENT_HIDE,
+                    id={'type': 'tile-customize-content', 'index': tile},
+                    className='customize-content',
+                    **{'data-loaded': True})
         return float_menu_trigger, customize_className, layouts_className, customize_menu_output
 
 # initialize menu, shows which menu you need
@@ -419,6 +421,12 @@ app.clientside_callback(
                 var menu = document.getElementById(`{"index":${tile},"type":"tile-layouts-content"}`);
             }
             document.getElementById("float-menu-body").appendChild(menu).style.display = ''; 
+            if (float_menu_trigger[3]) {
+                document.getElementById(`{"index":${tile},"type":"tile-layouts-warning"}`).style.display = '';
+            }
+            else {
+                document.getElementById(`{"index":${tile},"type":"tile-layouts-warning"}`).style.display = 'none';
+            }
         }
         else {
             float_menu_trigger = [float_menu_data, {'display': 'none'}, '', ''];

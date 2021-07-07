@@ -418,6 +418,7 @@ for y in range(4):
                     df_const,
                     id={'type': 'df-constants-storage-tile-wrapper', 'index': x}
                 )
+            session['tile_edited'][tile] = 'Load'
 
             unlink = html.I(
                 className='fa fa-unlink',

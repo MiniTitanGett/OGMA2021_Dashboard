@@ -14,6 +14,7 @@ from dash.exceptions import PreventUpdate
 import dash_html_components as html
 import dash_core_components as dcc
 from re import search
+from flask import session
 
 # Internal Packages
 from apps.dashboard.graphs import __update_graph
@@ -108,6 +109,7 @@ for x in range(4):
                       link_state, hierarchy_options, master_hierarchy_options, df_const):
 
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][-1]
+        tile = int(search(r'\d+', changed_id).group())
 
         if '"type":"tile-view"}.className' in changed_id and df_name is None and master_df_name is None:
             return None
@@ -164,6 +166,12 @@ for x in range(4):
         if not start_year or not end_year or not start_secondary or not end_secondary or \
                 (not num_periods and timeframe == 'to-current') or df_name is None:
             raise PreventUpdate
+
+        # warning on load logic for if anything has been changed for a graph
+        if session['tile_edited'][tile] == 'Load':
+            session['tile_edited'][tile] = False
+        else:
+            session['tile_edited'][tile] = True
 
         graph = __update_graph(df_name, arg_value, graph_type, tile_title, num_periods, period_type, hierarchy_toggle,
                                hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options, state_of_display,

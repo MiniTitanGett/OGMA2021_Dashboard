@@ -969,11 +969,7 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
                               list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name, df_const)
     # table creation
     elif graph_type == 'Table':
-        # code to fix shifting
-        changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
         changed_index = dash.callback_context.inputs_list[2]['id']['index']
-        if search(r'\d+', changed_id) and int(search(r'\d+', changed_id).group()) != 4:
-            changed_index = int(search(r'\d+', changed_id).group())
         return get_table_figure(graph_options, filtered_df, changed_index, hierarchy_specific_dropdown,
                                 hierarchy_level_dropdown, list_of_names, hierarchy_toggle, hierarchy_graph_children,
                                 graph_title, df_name)

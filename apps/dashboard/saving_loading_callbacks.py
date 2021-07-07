@@ -105,18 +105,21 @@ def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, float_menu_da
 
     if 'prompt-result' in changed_id:
         changed_index = prompt_data[1]
-    elif float_menu_data:
+    elif 'float-menu-title' in changed_id:
         changed_index = int(float_menu_data[1])
     else:
-        raise PreventUpdate
+        changed_index = int(search(r'\d+', changed_id).group())
 
     # Blank prevent updates
     if '"type":"save-button"}.n_clicks' in changed_id and save_clicks[changed_index] == 0:
         raise PreventUpdate
     if '"type":"delete-button"}.n_clicks' in changed_id and delete_clicks[changed_index] == 0:
         raise PreventUpdate
+
+    if not isinstance(load_state, list):
+        load_state = [load_state]
     if 'float-menu-title.data-' in changed_id \
-            and (float_menu_data[0] != 'layouts' or None in load_state or float_menu_result != 'ok'):
+            and (float_menu_data[0] != 'layouts' or load_state[changed_index] is None or float_menu_result != 'ok'):
         raise PreventUpdate
 
     # switch statement

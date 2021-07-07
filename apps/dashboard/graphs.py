@@ -235,7 +235,11 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
         id='graph-display',
         className='fill-container',
         responsive=True,
-        config=dict(locale=language.lower()),
+        config=dict(locale=language.lower(), edits=dict(annotationPosition=False, annotationTail=False,
+                                                        annotationText=False, colourbarPosition=False,
+                                                        ColorbarTitleText=False, legendPosition=True,
+                                                        legendText=False, shapePosition=False,
+                                                        titleText=False, axisTitleText=True)),
         figure=fig)
 
     return graph
@@ -375,7 +379,11 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
         id='graph-display',
         className='fill-container',
         responsive=True,
-        config=dict(locale=language.lower()),
+        config=dict(locale=language.lower(), edits=dict(annotationPosition=False, annotationTail=False,
+                                                        annotationText=False, colourbarPosition=False,
+                                                        ColorbarTitleText=False, legendPosition=True,
+                                                        legendText=False, shapePosition=False,
+                                                        titleText=False, axisTitleText=True)),
         figure=fig)
 
     return graph
@@ -563,7 +571,11 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         id='graph-display',
         className='fill-container',
         responsive=True,
-        config=dict(locale=language.lower()),
+        config=dict(locale=language.lower(), edits=dict(annotationPosition=False, annotationTail=False,
+                                                        annotationText=False, colourbarPosition=False,
+                                                        ColorbarTitleText=False, legendPosition=True,
+                                                        legendText=False, shapePosition=False,
+                                                        titleText=False, axisTitleText=True)),
         figure=fig)
 
     return graph
@@ -693,7 +705,11 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         id='graph-display',
         className='fill-container',
         responsive=True,
-        config=dict(locale=language.lower()),
+        config=dict(locale=language.lower(), edits=dict(annotationPosition=False, annotationTail=False,
+                                                        annotationText=False, colourbarPosition=False,
+                                                        ColorbarTitleText=False, legendPosition=True,
+                                                        legendText=False, shapePosition=False,
+                                                        titleText=False, axisTitleText=True)),
         figure=fig)
 
     return graph

@@ -17,7 +17,6 @@ import dash_table
 import dash_html_components as html
 import dash
 import pandas as pd
-from re import search
 
 # import os
 import plotly.graph_objects as go
@@ -687,9 +686,6 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         fig = px.box(
             title=get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, arg_value[2],
                                            df_name, df_const))
-
-    button_layer_1_height = 1.12
-    button_layer_2_height = 1.065
 
     fig.update_layout(
         xaxis=xaxis if arg_value[2] == 'Horizontal' else yaxis,

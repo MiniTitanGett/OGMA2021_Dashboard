@@ -113,20 +113,21 @@ def load_graph_menu(graph_type, tile, df_name, args_list, df_const):
                                                  df_name=df_name, df_const=df_const)
     elif graph_type == 'Bar':
         graph_menu = get_bar_graph_menu(tile=tile, x=args_list[0], y=args_list[2], measure_type=args_list[1],
-                                        orientation=args_list[3], animate=args_list[4],gridline=args_list[5],
+                                        orientation=args_list[3], animate=args_list[4], gridline=args_list[5],
                                         legend=args_list[6], df_name=df_name, df_const=df_const)
     elif graph_type == 'Table':
         graph_menu = get_table_graph_menu(tile=tile, number_of_columns=args_list[1])
     elif graph_type == 'Box_Plot':
         graph_menu = get_box_plot_menu(tile=tile, axis_measure=args_list[0], graphed_variables=args_list[1],
-                                       graph_orientation=args_list[2], show_data_points=args_list[3], gridline=args_list[4],
-                                       legend=args_list[5], df_name=df_name,df_const=df_const)
+                                       graph_orientation=args_list[2], show_data_points=args_list[3],
+                                       gridline=args_list[4], legend=args_list[5], df_name=df_name, df_const=df_const)
     elif graph_type == 'Sankey':
         graph_menu = get_sankey_menu(tile=tile, graphed_options=args_list[0], df_name=df_name, df_const=df_const)
     elif graph_type == 'Bubble':
         graph_menu = get_bubble_graph_menu(tile=tile, x=args_list[0], x_measure=args_list[1], y=args_list[2],
                                            y_measure=args_list[3], size=args_list[4], size_measure=args_list[5],
-                                           gridline=args_list[6], legend=args_list[7], df_name=df_name, df_const=df_const)
+                                           gridline=args_list[6], legend=args_list[7], df_name=df_name,
+                                           df_const=df_const)
     else:
         raise PreventUpdate
 

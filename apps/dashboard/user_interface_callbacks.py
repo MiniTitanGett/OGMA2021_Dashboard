@@ -614,6 +614,12 @@ for x in range(4):
         if changed_id == '.' and graph_options_state or df_const is None or df_name not in df_const:
             raise PreventUpdate
 
+        # stop graph_menu_update on new tile loop call
+        if '"type":"tile-link"}.className' in str(dash.callback_context.triggered) \
+                and 'type":"graph-type-dropdown"}.value' in str(dash.callback_context.triggered) \
+                and graph_options_state is not None and (gm_trigger == df_name or df_name is None):
+            raise PreventUpdate
+
         tile = int(dash.callback_context.inputs_list[0]['id']['index'])
 
         # apply graph selection and generate menu
@@ -626,6 +632,7 @@ for x in range(4):
                                                measure_type=None if df_const is None else
                                                df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
                                                gridline=None,
+                                               legend=None,
                                                df_name=df_name,
                                                df_const=df_const)
 
@@ -638,6 +645,7 @@ for x in range(4):
                                       orientation=None,
                                       animate=None,
                                       gridline=None,
+                                      legend=None,
                                       df_name=df_name,
                                       df_const=df_const)
 
@@ -656,6 +664,7 @@ for x in range(4):
                                          size_measure=None if df_const is None else
                                          df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
                                          gridline=None,
+                                         legend=None,
                                          df_name=df_name,
                                          df_const=df_const)
 
@@ -672,6 +681,7 @@ for x in range(4):
                                      df_name=df_name,
                                      show_data_points=[],
                                      gridline=None,
+                                     legend=None,
                                      df_const=df_const)
 
         elif selected_graph_type == 'Sankey':

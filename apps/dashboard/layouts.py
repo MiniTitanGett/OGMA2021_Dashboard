@@ -1074,7 +1074,7 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, master_df=None):
 # ***************************************************GRAPH MENUS*****************************************************
 
 # line graph menu layout
-def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridline, df_const):
+def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridline, legend, df_const):
     """
     :param measure_type: the measure type value
     :param y: the y-axis value
@@ -1182,16 +1182,21 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                             value=mode if mode else 'Lines',
                             style={'font-size': '13px'})],
                         style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})]),
-                dcc.Checklist(
-                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
-                    options=[{'label': get_label('LBL_Show_Grid_Lines'), 'value': 'gridline'}],
-                    value=gridline if gridline else [],
-                    style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
+            dcc.Checklist(
+                id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
+                options=[{'label': get_label('LBL_Show_Grid_Lines'), 'value': 'gridline'}],
+                value=gridline if gridline else [],
+                style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
+            dcc.Checklist(
+                id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
+                options=[{'label': get_label('LBL_Hide_Legend'), 'value': 'legend'}],
+                value=legend if legend else [],
+                style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
             ], style={'margin-left': '15px'})]), ]
 
 
 # bar graph menu layout
-def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline, df_name, df_const):
+def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline, legend, df_name, df_const):
     """
     :param measure_type: the measure type value
     :param y: the y-axis value
@@ -1302,12 +1307,18 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
                           'value': 'gridline'}],
                 value=gridline if gridline else [],
                 style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
+            dcc.Checklist(
+                id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 6},
+                options=[{'label': get_label('LBL_Hide_Legend'),
+                          'value': 'legend'}],
+                value=legend if legend else [],
+                style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
 
         ], style={'margin-left': '15px'})]
 
 
 # bubble graph menu layout
-def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, gridline, df_name, df_const):
+def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, gridline , legend, df_name, df_const):
     # (args-value: {})[0] = x-axis
     # (args-value: {})[1] = x-axis measure
     # (args-value: {})[2] = y-axis
@@ -1432,12 +1443,17 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                           'value': 'gridline'}],
                 value=gridline if gridline else [],
                 style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
+            dcc.Checklist(
+                id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 7},
+                options=[{'label': get_label('LBL_Hide_Legend'),
+                          'value': 'legend'}],
+                value=legend if legend else [],
+                style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
         ], style={'margin-left': '15px'})]
 
 
 # box plot menu layout
-def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, df_name, show_data_points, gridline,
-                      df_const):
+def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, df_name, show_data_points, gridline, legend, df_const):
     # (args-value: {})[0] = graphed variables
     # (args-value: {})[1] = measure type
     # (args-value: {})[2] = points toggle
@@ -1516,6 +1532,12 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                 options=[{'label': get_label('LBL_Show_Grid_Lines'),
                           'value': 'gridline'}],
                 value=gridline if gridline else [],
+                style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
+            dcc.Checklist(
+                id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
+                options=[{'label': get_label('LBL_Hide_Legend'),
+                          'value': 'legend'}],
+                value=legend if legend else [],
                 style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
         ], style={'margin-left': '15px'})]
 

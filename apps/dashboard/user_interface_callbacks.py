@@ -516,14 +516,13 @@ for x in range(4):
          Input({'type': 'graph-type-dropdown', 'index': x}, 'value'),
          Input({'type': 'tile-link', 'index': x}, 'className')],
         [State({'type': 'div-graph-options', 'index': x}, 'children'),
-         State({'type': 'graph-type-dropdown', 'index': ALL}, 'value'),
          State({'type': 'data-set', 'index': x}, 'value'),
          State({'type': 'data-set', 'index': 4}, 'value'),
          State('df-constants-storage', 'data')],
         prevent_initial_call=True
     )
-    def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_options_state, _graph_option, df_name,
-                           master_df_name, df_const):
+    def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_options_state, df_name, master_df_name,
+                           df_const):
         """
         :param selected_graph_type: Selected graph type, ie. 'bar', 'line', etc.
         :param graph_options_state: State of the current graph options div
@@ -547,7 +546,7 @@ for x in range(4):
                 or ('type":"graph-type-dropdown"}.value' in changed_id and link_state == 'fa fa-link'
                     and selected_graph_type is None):
             if master_df_name is None and df_name is None:
-                return None, 1,no_update
+                return None, 1, no_update
             if selected_graph_type not in GRAPH_OPTIONS[master_df_name] or selected_graph_type is None:
                 return None, 1, no_update
             elif selected_graph_type in GRAPH_OPTIONS[master_df_name]:
@@ -564,6 +563,12 @@ for x in range(4):
 
         # if changed id == '.' and the graph menu already exists, prevent update
         if changed_id == '.' and graph_options_state or df_const is None or df_name not in df_const:
+            raise PreventUpdate
+
+        # stop graph_menu_update on new tile loop call
+        if '"type":"tile-link"}.className' in str(dash.callback_context.triggered) \
+                and 'type":"graph-type-dropdown"}.value' in str(dash.callback_context.triggered) \
+                and graph_options_state is not None and (gm_trigger == df_name or df_name is None):
             raise PreventUpdate
 
         tile = int(dash.callback_context.inputs_list[0]['id']['index'])

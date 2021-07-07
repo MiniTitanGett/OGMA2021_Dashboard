@@ -583,6 +583,7 @@ for x in range(4):
                                                measure_type=None if df_const is None else
                                                df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
                                                gridline=None,
+                                               legend=None,
                                                df_name=df_name,
                                                df_const=df_const)
 
@@ -595,6 +596,7 @@ for x in range(4):
                                       orientation=None,
                                       animate=None,
                                       gridline=None,
+                                      legend=None,
                                       df_name=df_name,
                                       df_const=df_const)
 
@@ -613,6 +615,7 @@ for x in range(4):
                                          size_measure=None if df_const is None else
                                          df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
                                          gridline=None,
+                                         legend=None,
                                          df_name=df_name,
                                          df_const=df_const)
 
@@ -629,6 +632,7 @@ for x in range(4):
                                      df_name=df_name,
                                      show_data_points=[],
                                      gridline=None,
+                                     legend=None,
                                      df_const=df_const)
 
         elif selected_graph_type == 'Sankey':

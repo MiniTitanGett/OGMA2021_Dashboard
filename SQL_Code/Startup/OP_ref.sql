@@ -482,6 +482,8 @@ EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graph_Type_Info',@lang
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graph_Type_Info',@language = 'Fr', @ref_desc = 'Fr: Graph type info'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Show_Grid_Lines',@language = 'En', @ref_desc = 'Show Grid Lines'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Show_Grid_Lines',@language = 'Fr', @ref_desc = 'Fr: Show Grid Lines'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hide_Legend',@language = 'En', @ref_desc = 'Hide Legend'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hide_Legend',@language = 'Fr', @ref_desc = 'Fr: Hide Legend'
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'En',@ref_desc = 'Hierarchy Selection''s Children'
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'Fr',@ref_desc = 'Enfants de la Sélection de Hiérarchie'
 

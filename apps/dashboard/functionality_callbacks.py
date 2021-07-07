@@ -109,7 +109,7 @@ for x in range(4):
                       link_state, hierarchy_options, master_hierarchy_options, df_const):
 
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
-        tile = int(search(r'\d+', changed_id).group())
+        tile = dash.callback_context.inputs_list[0]['id']['index']
 
         if '"type":"tile-view"}.className' in changed_id and df_name is None and master_df_name is None:
             return None
@@ -168,11 +168,10 @@ for x in range(4):
             raise PreventUpdate
 
         # warning on load logic for if anything has been changed for a graph
-        if tile != 4:
-            if session['tile_edited'][tile] == 'Load':
-                session['tile_edited'][tile] = False
-            else:
-                session['tile_edited'][tile] = True
+        if session['tile_edited'][tile] == 'Load':
+            session['tile_edited'][tile] = False
+        else:
+            session['tile_edited'][tile] = True
 
         graph = __update_graph(df_name, arg_value, graph_type, tile_title, num_periods, period_type, hierarchy_toggle,
                                hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options, state_of_display,

@@ -15,7 +15,7 @@
 - Utilities
 - Clearing
 - Media Queries
-- Master Nav
+- Parent Nav
 - Tile Nav
 - Tile Body
 - fa fa tweaks
@@ -500,10 +500,10 @@ there.
 @media (min-width: 1200px) {}
 
 
-/* Master Nav
+/* Parent Nav
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 
-.master-nav {
+.parent-nav {
     border: 0;
     margin: 0 0 0 20px;
     padding: 5px;
@@ -512,7 +512,7 @@ there.
     font-size: 12px;
 }
 
-.master-nav:hover {
+.parent-nav:hover {
     color: #333;
 }
 

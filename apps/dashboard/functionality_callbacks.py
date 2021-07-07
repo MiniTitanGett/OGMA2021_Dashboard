@@ -52,7 +52,7 @@ for x in range(4):
          Input({'type': 'date-picker-trigger', 'index': x}, 'data-boolean'),
          Input({'type': 'num-periods', 'index': x}, 'value'),
          Input({'type': 'period-type', 'index': x}, 'value'),
-         # Date Picker master inputs
+         # Date Picker parent inputs
          Input({'type': 'date-picker-trigger', 'index': 4}, 'data-boolean'),
          Input({'type': 'num-periods', 'index': 4}, 'value'),
          Input({'type': 'period-type', 'index': 4}, 'value'),
@@ -61,7 +61,7 @@ for x in range(4):
          Input({'type': 'hierarchy_level_dropdown', 'index': x}, 'value'),
          Input({'type': 'graph_children_toggle', 'index': x}, 'value'),
          Input({'type': 'hierarchy_display_button', 'index': x}, 'children'),
-         # Hierarchy inputs for master data menu
+         # Hierarchy inputs for parent data menu
          Input({'type': 'hierarchy_display_button', 'index': 4}, 'children'),
          Input({'type': 'hierarchy-toggle', 'index': 4}, 'value'),
          Input({'type': 'hierarchy_level_dropdown', 'index': 4}, 'value'),
@@ -74,7 +74,7 @@ for x in range(4):
          State({'type': 'end-year-input', 'index': x}, 'value'),
          State({'type': 'start-secondary-input', 'index': x}, 'value'),
          State({'type': 'end-secondary-input', 'index': x}, 'value'),
-         # Date picker states for master data menu
+         # Date picker states for parent data menu
          State({'type': 'start-year-input', 'index': 4}, 'name'),
          State({'type': 'radio-timeframe', 'index': 4}, 'value'),
          State({'type': 'fiscal-year-toggle', 'index': 4}, 'value'),
@@ -99,18 +99,18 @@ for x in range(4):
         prevent_initial_call=True
     )
     def _update_graph(_df_trigger, view_state, tile_title, _datepicker_trigger,
-                      num_periods, period_type, _master_datepicker_trigger, master_num_periods,
-                      master_period_type, hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children,
-                      state_of_display, master_state_of_display, master_hierarchy_toggle,
-                      master_hierarchy_level_dropdown, master_hierarchy_graph_children, secondary_type, timeframe,
-                      fiscal_toggle, start_year, end_year, start_secondary, end_secondary, master_secondary_type,
-                      master_timeframe, master_fiscal_toggle, master_start_year, master_end_year,
-                      master_start_secondary, master_end_secondary, graph_display, df_name, master_df_name,
-                      arg_value, graph_type, link_state, hierarchy_options, master_hierarchy_options, df_const):
+                      num_periods, period_type, _parent_datepicker_trigger, parent_num_periods,
+                      parent_period_type, hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children,
+                      state_of_display, parent_state_of_display, parent_hierarchy_toggle,
+                      parent_hierarchy_level_dropdown, parent_hierarchy_graph_children, secondary_type, timeframe,
+                      fiscal_toggle, start_year, end_year, start_secondary, end_secondary, parent_secondary_type,
+                      parent_timeframe, parent_fiscal_toggle, parent_start_year, parent_end_year,
+                      parent_start_secondary, parent_end_secondary, graph_display, df_name, parent_df_name,
+                      arg_value, graph_type, link_state, hierarchy_options, parent_hierarchy_options, df_const):
 
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][-1]
 
-        if '"type":"tile-view"}.className' in changed_id and df_name is None and master_df_name is None:
+        if '"type":"tile-view"}.className' in changed_id and df_name is None and parent_df_name is None:
             return None
 
         # if not in view tab, or new/delete while the graph already exists, prevent update
@@ -120,7 +120,7 @@ for x in range(4):
         if len(arg_value) == 0:
             return None
 
-        # if unlinked and master changes, prevent update
+        # if unlinked and parent changes, prevent update
         if link_state == 'fa fa-unlink' and '"index":4' in changed_id:
             raise PreventUpdate
 
@@ -134,7 +134,7 @@ for x in range(4):
 
         # if linked and graph-type is in both data sets update graph
         if link_state == 'fa fa-link' and df_name is not None and graph_type in GRAPH_OPTIONS[
-            df_name] and df_name != master_df_name:
+            df_name] and df_name != parent_df_name:
             graph = __update_graph(df_name, arg_value, graph_type, tile_title, num_periods, period_type,
                                    hierarchy_toggle,
                                    hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options,
@@ -145,21 +145,21 @@ for x in range(4):
 
         # account for tile being linked or not
         if link_state == 'fa fa-link':
-            secondary_type = master_secondary_type
-            timeframe = master_timeframe
-            fiscal_toggle = master_fiscal_toggle
-            start_year = master_start_year
-            end_year = master_end_year
-            start_secondary = master_start_secondary
-            end_secondary = master_end_secondary
-            hierarchy_toggle = master_hierarchy_toggle
-            hierarchy_level_dropdown = master_hierarchy_level_dropdown
-            state_of_display = master_state_of_display
-            hierarchy_graph_children = master_hierarchy_graph_children
-            num_periods = master_num_periods
-            period_type = master_period_type
-            df_name = master_df_name
-            hierarchy_options = master_hierarchy_options
+            secondary_type = parent_secondary_type
+            timeframe = parent_timeframe
+            fiscal_toggle = parent_fiscal_toggle
+            start_year = parent_start_year
+            end_year = parent_end_year
+            start_secondary = parent_start_secondary
+            end_secondary = parent_end_secondary
+            hierarchy_toggle = parent_hierarchy_toggle
+            hierarchy_level_dropdown = parent_hierarchy_level_dropdown
+            state_of_display = parent_state_of_display
+            hierarchy_graph_children = parent_hierarchy_graph_children
+            num_periods = parent_num_periods
+            period_type = parent_period_type
+            df_name = parent_df_name
+            hierarchy_options = parent_hierarchy_options
 
         # prevent update if invalid selections exist - should be handled by update_datepicker, but double check
         if not start_year or not end_year or not start_secondary or not end_secondary or \
@@ -602,7 +602,7 @@ for x in range(4):
          State({'type': 'hierarchy_display_button', 'index': x}, 'children'),
          State({'type': 'graph_children_toggle', 'index': x}, 'value'),
          State({'type': 'hierarchy_specific_dropdown', 'index': x}, 'options'),
-         # Date picker states for master data menu
+         # Date picker states for parent data menu
          State({'type': 'start-year-input', 'index': 4}, 'name'),
          State({'type': 'radio-timeframe', 'index': 4}, 'value'),
          State({'type': 'fiscal-year-toggle', 'index': 4}, 'value'),
@@ -612,41 +612,41 @@ for x in range(4):
          State({'type': 'end-secondary-input', 'index': 4}, 'value'),
          State({'type': 'num-periods', 'index': 4}, 'value'),
          State({'type': 'period-type', 'index': 4}, 'value'),
-         # Hierarchy States for master data menu
+         # Hierarchy States for parent data menu
          State({'type': 'hierarchy-toggle', 'index': 4}, 'value'),
          State({'type': 'hierarchy_level_dropdown', 'index': 4}, 'value'),
          State({'type': 'hierarchy_display_button', 'index': 4}, 'children'),
          State({'type': 'graph_children_toggle', 'index': 4}, 'value'),
          State({'type': 'hierarchy_specific_dropdown', 'index': 4}, 'options'),
-         # Master Data set
+         # Parent Data set
          State({'type': 'data-set', 'index': 4}, 'value'),
          State('df-constants-storage', 'data')]
     )
     def _update_table(page_current, page_size, sort_by, filter_query, _graph_trigger, _table_trigger, link_state,
                       df_name, secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
                       end_secondary, num_periods, period_type, hierarchy_toggle, hierarchy_level_dropdown,
-                      state_of_display, hierarchy_graph_children, hierarchy_options, master_secondary_type,
-                      master_timeframe, master_fiscal_toggle, master_start_year, master_end_year,
-                      master_start_secondary, master_end_secondary, master_num_periods, master_period_type,
-                      master_hierarchy_toggle, master_hierarchy_level_dropdown, master_state_of_display,
-                      master_hierarchy_graph_children, master_hierarchy_options, master_df_name, df_const):
+                      state_of_display, hierarchy_graph_children, hierarchy_options, parent_secondary_type,
+                      parent_timeframe, parent_fiscal_toggle, parent_start_year, parent_end_year,
+                      parent_start_secondary, parent_end_secondary, parent_num_periods, parent_period_type,
+                      parent_hierarchy_toggle, parent_hierarchy_level_dropdown, parent_state_of_display,
+                      parent_hierarchy_graph_children, parent_hierarchy_options, parent_df_name, df_const):
 
         if link_state == 'fa fa-link':
-            secondary_type = master_secondary_type
-            timeframe = master_timeframe
-            fiscal_toggle = master_fiscal_toggle
-            start_year = master_start_year
-            end_year = master_end_year
-            start_secondary = master_start_secondary
-            end_secondary = master_end_secondary
-            hierarchy_toggle = master_hierarchy_toggle
-            hierarchy_level_dropdown = master_hierarchy_level_dropdown
-            state_of_display = master_state_of_display
-            hierarchy_graph_children = master_hierarchy_graph_children
-            num_periods = master_num_periods
-            period_type = master_period_type
-            hierarchy_options = master_hierarchy_options
-            df_name = master_df_name
+            secondary_type = parent_secondary_type
+            timeframe = parent_timeframe
+            fiscal_toggle = parent_fiscal_toggle
+            start_year = parent_start_year
+            end_year = parent_end_year
+            start_secondary = parent_start_secondary
+            end_secondary = parent_end_secondary
+            hierarchy_toggle = parent_hierarchy_toggle
+            hierarchy_level_dropdown = parent_hierarchy_level_dropdown
+            state_of_display = parent_state_of_display
+            hierarchy_graph_children = parent_hierarchy_graph_children
+            num_periods = parent_num_periods
+            period_type = parent_period_type
+            hierarchy_options = parent_hierarchy_options
+            df_name = parent_df_name
 
         # prevent update if invalid selections exist - should be handled by update_datepicker, but double check
         if not start_year or not end_year or not start_secondary or not end_secondary:

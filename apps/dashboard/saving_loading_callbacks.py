@@ -165,7 +165,7 @@ for y in range(4):
          # Data set states
          State({'type': 'data-set', 'index': y}, 'value'),
          State({'type': 'data-set', 'index': 4}, 'value'),
-         # master data menu states
+         # parent data menu states
          State({'type': 'start-year-input', 'index': 4}, 'value'),
          State({'type': 'end-year-input', 'index': 4}, 'value'),
          State({'type': 'hierarchy-toggle', 'index': 4}, 'value'),
@@ -199,29 +199,29 @@ for y in range(4):
         prevent_initial_call=True
     )
     def _manage_tile_saves(trigger, graph_title, link_state, graph_type, args_list, df_name,
-                           master_df_name, master_year_start, master_year_end, master_hierarchy_toggle,
-                           master_hierarchy_level_dropdown, master_state_of_display, master_graph_children_toggle,
-                           master_fiscal_toggle, master_input_method, master_secondary_start, master_secondary_end,
-                           master_x_time_period, master_period_type, master_tab, year_start, year_end, hierarchy_toggle,
+                           parent_df_name, parent_year_start, parent_year_end, parent_hierarchy_toggle,
+                           parent_hierarchy_level_dropdown, parent_state_of_display, parent_graph_children_toggle,
+                           parent_fiscal_toggle, parent_input_method, parent_secondary_start, parent_secondary_end,
+                           parent_x_time_period, parent_period_type, parent_tab, year_start, year_end, hierarchy_toggle,
                            hierarchy_level_dropdown, state_of_display, graph_children_toggle, fiscal_toggle,
                            input_method, secondary_start, secondary_end, x_time_period, period_type, tab,
                            selected_layout, df_const):
 
         if link_state == 'fa fa-link':
-            fiscal_toggle = master_fiscal_toggle
-            year_start = master_year_start
-            year_end = master_year_end
-            secondary_start = master_secondary_start
-            secondary_end = master_secondary_end
-            x_time_period = master_x_time_period
-            period_type = master_period_type
-            input_method = master_input_method
-            hierarchy_toggle = master_hierarchy_toggle
-            hierarchy_level_dropdown = master_hierarchy_level_dropdown
-            state_of_display = master_state_of_display
-            tab = master_tab
-            df_name = master_df_name
-            graph_children_toggle = master_graph_children_toggle
+            fiscal_toggle = parent_fiscal_toggle
+            year_start = parent_year_start
+            year_end = parent_year_end
+            secondary_start = parent_secondary_start
+            secondary_end = parent_secondary_end
+            x_time_period = parent_x_time_period
+            period_type = parent_period_type
+            input_method = parent_input_method
+            hierarchy_toggle = parent_hierarchy_toggle
+            hierarchy_level_dropdown = parent_hierarchy_level_dropdown
+            state_of_display = parent_state_of_display
+            tab = parent_tab
+            df_name = parent_df_name
+            graph_children_toggle = parent_graph_children_toggle
 
         if type(state_of_display) == dict:
             state_of_display = [state_of_display]
@@ -731,14 +731,14 @@ def _save_dashboard(_save_clicks, _delete_clicks, _dashboard_overwrite_inputs,
 
             dashboard_saves = {'Dashboard Title': dashboard_title}
 
-            # if any tiles are linked, save the master data menu
+            # if any tiles are linked, save the parent data menu
             if links.count('fa fa-link') > 0:
 
-                master_nid_path = "root"
+                parent_nid_path = "root"
                 for button in button_paths[4]:
-                    master_nid_path += '^||^{}'.format(button['props']['children'])
+                    parent_nid_path += '^||^{}'.format(button['props']['children'])
 
-                master_data = {
+                parent_data = {
                     'Fiscal Toggle': fiscal_toggles[4],
                     'Timeframe': timeframes[4],
                     'Num Periods': num_periods[4],
@@ -747,18 +747,18 @@ def _save_dashboard(_save_clicks, _delete_clicks, _dashboard_overwrite_inputs,
                     'Level Value': level_values[4],
                     'Data Set': df_names[4],
                     'Graph All Toggle': graph_all_toggles[4],
-                    'NID Path': master_nid_path,
+                    'NID Path': parent_nid_path,
                 }
 
                 # if input method is 'select-range', add the states of the select range inputs
                 if timeframes[4] == 'select-range':
-                    master_data['Date Tab'] = date_tabs[4]
-                    master_data['Start Year'] = start_years[4]
-                    master_data['End Year'] = end_years[4]
-                    master_data['Start Secondary'] = start_secondaries[4]
-                    master_data['End Secondary'] = end_secondaries[4]
+                    parent_data['Date Tab'] = date_tabs[4]
+                    parent_data['Start Year'] = start_years[4]
+                    parent_data['End Year'] = end_years[4]
+                    parent_data['Start Secondary'] = start_secondaries[4]
+                    parent_data['End Secondary'] = end_secondaries[4]
 
-                dashboard_saves['Master Data'] = master_data
+                dashboard_saves['Parent Data'] = parent_data
 
             for i in range(len(links)):
 
@@ -827,7 +827,7 @@ def _save_dashboard(_save_clicks, _delete_clicks, _dashboard_overwrite_inputs,
                         tile_data['End Secondary'] = end_secondaries[i]
 
                 else:
-                    tile_data = dashboard_saves['Master Data']
+                    tile_data = dashboard_saves['Parent Data']
 
                 # save tile to file
                 save_layout_state(tile_pointer, {'Graph Type': graph_types[i], 'Args List': args_list, **tile_data,
@@ -1021,7 +1021,7 @@ def _load_dashboard_layout(selected_dashboard, df_const):
                     "Timeframe": "all-time",
                     "Title": "This Graph has been deleted"}
 
-            # pop graph_type/args_list to compare the dashboard master data menu to the saved tile data menu
+            # pop graph_type/args_list to compare the dashboard parent data menu to the saved tile data menu
             graph_type = tile_data.pop('Graph Type')
             args_list = tile_data.pop('Args List')
             df_name = tile_data['Data Set']
@@ -1034,11 +1034,11 @@ def _load_dashboard_layout(selected_dashboard, df_const):
                 df_const[df_name] = generate_constants(df_name)
 
             if link_state == 'fa fa-link':
-                # if tile was linked but it's data menu has changed and no longer matches master data, unlink
-                if tile_data != session['saved_dashboards'][selected_dashboard]['Master Data']:
+                # if tile was linked but it's data menu has changed and no longer matches parent data, unlink
+                if tile_data != session['saved_dashboards'][selected_dashboard]['Parent Data']:
                     link_state = 'fa fa-unlink'
 
-                # else, the tile is valid to be linked, generate master menu if it has not been created yet
+                # else, the tile is valid to be linked, generate parent menu if it has not been created yet
                 else:
                     data_index = 4
 
@@ -1051,7 +1051,7 @@ def _load_dashboard_layout(selected_dashboard, df_const):
             tile_key = {'Tile Title': tile_title, 'Link': link_state, 'Customize Content': customize_content}
             tile_keys[tile_index] = tile_key
 
-            # if tile is unlinked, or linked while the master does not exist, create data menu
+            # if tile is unlinked, or linked while the parent does not exist, create data menu
             if link_state == 'fa fa-unlink' or (link_state == 'fa fa-link' and dms[4]['Content'] == no_update):
 
                 hierarchy_toggle = tile_data['Hierarchy Toggle']

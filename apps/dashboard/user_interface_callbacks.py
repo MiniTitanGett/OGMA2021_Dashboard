@@ -46,7 +46,7 @@ from apps.dashboard.data import VIEW_CONTENT_HIDE, VIEW_CONTENT_SHOW, CUSTOMIZE_
 #   DATA SIDE-MENU
 #       - _change_link()
 #       - _manage_data_sidemenus()
-#       - _highlight_slaved_tiles()
+#       - _highlight_child_tiles()
 #   Load Screen
 #       - client side callbacks
 
@@ -112,9 +112,9 @@ app.clientside_callback(
     prevent_initial_call=True
 )
 def _new_and_delete(_new_clicks, _close_clicks, _dashboard_reset, input_tiles, num_tiles, new_disabled, _df_const,
-                    master_df):
+                    parent_df):
     """
-    :param _new_clicks: Detects user clicking 'NEW' button in master navigation bar and encodes the number of tiles to
+    :param _new_clicks: Detects user clicking 'NEW' button in parent navigation bar and encodes the number of tiles to
     display
     :param _close_clicks: Detects user clicking close ('x') button in top right of tile
     :param input_tiles: State of all currently existing tiles
@@ -142,24 +142,24 @@ def _new_and_delete(_new_clicks, _close_clicks, _dashboard_reset, input_tiles, n
                 deleted_tile = str(i)
             elif flag:
                 input_tiles[i - 1] = change_index(input_tiles[i - 1], i - 1)
-        children = get_tile_layout(num_tiles, input_tiles, master_df=master_df)
+        children = get_tile_layout(num_tiles, input_tiles, parent_df=parent_df)
     # if NEW button pressed: adjust main layout and disable NEW button until it is unlocked at the end of callback chain
     elif 'button-new' in changed_id:
         if num_tiles == 4:
             raise PreventUpdate
         num_tiles += 1
-        children = get_tile_layout(num_tiles, input_tiles, master_df=master_df)
+        children = get_tile_layout(num_tiles, input_tiles, parent_df=parent_df)
     # if RESET dashboard requested, set dashboard to default appearance
     elif 'dashboard-reset' in changed_id:
         num_tiles = 1
-        children = get_tile_layout(num_tiles, [], master_df=master_df)
+        children = get_tile_layout(num_tiles, [], parent_df=parent_df)
         dashboard_reset_trigger = 'trigger'
     # else, a tab change was made, prevent update
     else:
         raise PreventUpdate
     # disable the NEW button
     new_button = html.Button(
-        className='master-nav', n_clicks=0, children=get_label('LBL_Add_Tile'), id='button-new', disabled=True)
+        className='parent-nav', n_clicks=0, children=get_label('LBL_Add_Tile'), id='button-new', disabled=True)
     return children, new_button, deleted_tile, num_tiles, dashboard_reset_trigger
 
 
@@ -523,7 +523,7 @@ for x in range(4):
         prevent_initial_call=True
     )
     def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_options_state, _graph_option, df_name,
-                           master_df_name, df_const):
+                           parent_df_name, df_const):
         """
         :param selected_graph_type: Selected graph type, ie. 'bar', 'line', etc.
         :param graph_options_state: State of the current graph options div
@@ -532,7 +532,7 @@ for x in range(4):
 
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][-1]
 
-        if '"type":"tile-link"}.className' in changed_id and  master_df_name is None and df_name is None:
+        if '"type":"tile-link"}.className' in changed_id and  parent_df_name is None and df_name is None:
             return None, 1, no_update
 
         # if link state has changed from linked --> unlinked the data has not changed, prevent update
@@ -546,17 +546,17 @@ for x in range(4):
         if ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link') \
                 or ('type":"graph-type-dropdown"}.value' in changed_id and link_state == 'fa fa-link'
                     and selected_graph_type is None):
-            if master_df_name is None and df_name is None:
+            if parent_df_name is None and df_name is None:
                 return None, 1,no_update
-            if selected_graph_type not in GRAPH_OPTIONS[master_df_name] or selected_graph_type is None:
+            if selected_graph_type not in GRAPH_OPTIONS[parent_df_name] or selected_graph_type is None:
                 return None, 1, no_update
-            elif selected_graph_type in GRAPH_OPTIONS[master_df_name]:
+            elif selected_graph_type in GRAPH_OPTIONS[parent_df_name]:
                 return no_update, 1, no_update
             else:
                 raise PreventUpdate
 
         if link_state == 'fa fa-link':
-            df_name = master_df_name
+            df_name = parent_df_name
 
         # if graph menu trigger has value 'tile closed' then a tile was closed, don't update menu, still update table
         if 'graph-menu-trigger"}.data-' in changed_id and gm_trigger == 'tile closed':
@@ -749,7 +749,7 @@ def _change_link(_link_clicks, link_trigger, link_state):
      State('df-constants-storage', 'data'),
      State({'type': 'data-set', 'index': ALL}, 'data-'),
      State({'type': 'graph-type-dropdown', 'index': ALL}, 'value'),
-     # Date picker states for master data menu
+     # Date picker states for parent data menu
      State({'type': 'start-year-input', 'index': 4}, 'name'),
      State({'type': 'radio-timeframe', 'index': 4}, 'value'),
      State({'type': 'fiscal-year-toggle', 'index': 4}, 'value'),
@@ -770,9 +770,9 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                            _confirm_clicks_1, _confirm_clicks_2, _confirm_clicks_3, _confirm_clicks_4,
                            _refresh_clicks_0, _refresh_clicks_1, _refresh_clicks_2, _refresh_clicks_3,
                            _refresh_clicks_4, data_states, sidemenu_style_states, df_const, prev_selection, graph_types,
-                           _master_secondary_type, master_timeframe, master_fiscal_toggle, _master_start_year,
-                           _master_end_year, _master_start_secondary, _master_end_secondary, master_hierarchy_toggle,
-                           master_hierarchy_drop, master_num_state, master_period_type, master_graph_child_toggle,
+                           _parent_secondary_type, parent_timeframe, parent_fiscal_toggle, _parent_start_year,
+                           _parent_end_year, _parent_start_secondary, _parent_end_secondary, parent_hierarchy_toggle,
+                           parent_hierarchy_drop, parent_num_state, parent_period_type, parent_graph_child_toggle,
                            state_of_display):
     """
     :param closed_tile: Detects when a tile has been deleted and encodes the index of the deleted tile
@@ -820,13 +820,13 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
         # if a data menu is open and the only tile was not deleted, select the new open data menu
         if sidemenu_style_states.count(DATA_CONTENT_SHOW) > 0 and len(links_style) != 0:
             active_tile = sidemenu_style_states.index(DATA_CONTENT_SHOW)
-            # if the master data menu is active and there are any linked tiles, the master data menu stays open
+            # if the parent data menu is active and there are any linked tiles, the parent data menu stays open
             if active_tile == 4 and links_style.count('fa fa-link') > 0:
                 sidemenu_styles[4] = DATA_CONTENT_SHOW
-            # else, the master data menu is not active while any linked tiles exist
+            # else, the parent data menu is not active while any linked tiles exist
             else:
                 deleted_tile = int(closed_tile)
-                # if the master data menu is active and there are no linked tiles, the linked tile was deleted
+                # if the parent data menu is active and there are no linked tiles, the linked tile was deleted
                 if active_tile == 4:
                     active_tile = deleted_tile
                 if deleted_tile == active_tile:
@@ -926,36 +926,36 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                             df_names[i] = "OPG010"
                             df_const[df_names[i]] = generate_constants(df_names[i])
                             data[i] = get_data_menu(i, df_names[i],
-                                                    hierarchy_toggle=master_hierarchy_toggle,
-                                                    level_value=master_hierarchy_drop,
-                                                    nid_path=nid_path, graph_all_toggle=master_graph_child_toggle,
-                                                    fiscal_toggle=master_fiscal_toggle, input_method=master_timeframe,
-                                                    num_periods=master_num_state, period_type=master_period_type,
+                                                    hierarchy_toggle=parent_hierarchy_toggle,
+                                                    level_value=parent_hierarchy_drop,
+                                                    nid_path=nid_path, graph_all_toggle=parent_graph_child_toggle,
+                                                    fiscal_toggle=parent_fiscal_toggle, input_method=parent_timeframe,
+                                                    num_periods=parent_num_state, period_type=parent_period_type,
                                                     df_const=df_const)
                             # sidemenu_styles[i] = DATA_CONTENT_SHOW
                             refresh_button[i] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
                                                  'position': 'relative',
                                                  'margin-right': '10px', 'margin-left': '10px',
                                                  'vertical-align': 'top'}
-                            if master_timeframe == "select-range":
+                            if parent_timeframe == "select-range":
                                 date_picker_triggers[i] = "triggered"
 
                         elif df_name == "OPG010":
                             df_names[i] = "OPG001"
                             df_const[df_names[i]] = generate_constants(df_names[i])
                             data[i] = get_data_menu(i, df_names[i], mode='tile-loading',
-                                                    hierarchy_toggle=master_hierarchy_toggle,
-                                                    level_value=master_hierarchy_drop,
-                                                    nid_path=nid_path, graph_all_toggle=master_graph_child_toggle,
-                                                    fiscal_toggle=master_fiscal_toggle, input_method=master_timeframe,
-                                                    num_periods=master_num_state, period_type=master_period_type,
+                                                    hierarchy_toggle=parent_hierarchy_toggle,
+                                                    level_value=parent_hierarchy_drop,
+                                                    nid_path=nid_path, graph_all_toggle=parent_graph_child_toggle,
+                                                    fiscal_toggle=parent_fiscal_toggle, input_method=parent_timeframe,
+                                                    num_periods=parent_num_state, period_type=parent_period_type,
                                                     df_const=df_const)
                             # sidemenu_styles[i] = DATA_CONTENT_SHOW
                             refresh_button[i] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
                                                  'position': 'relative',
                                                  'margin-right': '10px', 'margin-left': '10px',
                                                  'vertical-align': 'top'}
-                            if master_timeframe == "select-range":
+                            if parent_timeframe == "select-range":
                                 date_picker_triggers[i] = "triggered"
                         options_triggers[i] = 'fa fa-unlink'
         else:
@@ -976,16 +976,16 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
         changed_index = int(search(r'\d+', changed_id).group())
         # if 'tile-link' requested
         if '"type":"tile-link"}.className' in changed_id:
-            # if linked --> unlinked: copy master tile data to unique tile data
+            # if linked --> unlinked: copy parent tile data to unique tile data
             if links_style[changed_index] == 'fa fa-unlink':
-                master_copy = copy.deepcopy(data_states[4])
-                data[changed_index] = change_index(master_copy, changed_index)
-        # if tile is slaved to master and a layout was not selected, display master data
+                parent_copy = copy.deepcopy(data_states[4])
+                data[changed_index] = change_index(parent_copy, changed_index)
+        # if tile is child to parent and a layout was not selected, display parent data
         if links_style[changed_index] == 'fa fa-link' and '"type":"select-layout-dropdown"}.value' not in changed_id:
-            # if 'data' requested or a data menu is already open, display master data
+            # if 'data' requested or a data menu is already open, display parent data
             if '"type":"tile-data"}.n_clicks' in changed_id or sidemenu_style_states.count(DATA_CONTENT_SHOW) > 0:
                 sidemenu_styles[4] = DATA_CONTENT_SHOW
-        # if tile is not linked to master or a layout was selected, display unique data side-menu
+        # if tile is not linked to parent or a layout was selected, display unique data side-menu
         else:
             # if 'data' requested or a data menu is already open, display tile data
             if '"type":"tile-data"}.n_clicks' in changed_id or sidemenu_style_states.count(DATA_CONTENT_SHOW) > 0:
@@ -998,10 +998,10 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
             data[i] = no_update
         # if the style of a data tile has not changed, do not update
         if sidemenu_styles[i] == sidemenu_style_states[i]:
-            # for all tiles besides master data tile do not update if style has not changed
+            # for all tiles besides parent data tile do not update if style has not changed
             if i != 4:
                 sidemenu_styles[i] = no_update
-            # if master data is SHOWN, do not prevent update to force trigger highlight tiles callback
+            # if parent data is SHOWN, do not prevent update to force trigger highlight tiles callback
             elif sidemenu_styles[4] != DATA_CONTENT_SHOW:
                 sidemenu_styles[4] = no_update
 
@@ -1087,11 +1087,11 @@ app.clientside_callback(
      Input({'type': 'confirm-data-set-refresh', 'index': MATCH}, 'style')]
 )
 
-# highlight tiles slaved to displayed data sidebar
+# highlight tiles child to displayed data sidebar
 for x in range(4):
     app.clientside_callback(
         """
-        function(_sidebar_styles, link_state, sidebar_style, master_sidebar_style){
+        function(_sidebar_styles, link_state, sidebar_style, parent_sidebar_style){
             function isEquivalent(a, b) {
                 // Create arrays of property names
                 var aProps = Object.getOwnPropertyNames(a);
@@ -1128,7 +1128,7 @@ for x in range(4):
                 'overflow-y': 'auto'};
 
             if (isEquivalent(sidebar_style, DATA_CONTENT_SHOW) || 
-                (isEquivalent(master_sidebar_style, DATA_CONTENT_SHOW) && link_state == 'fa fa-link')){
+                (isEquivalent(parent_sidebar_style, DATA_CONTENT_SHOW) && link_state == 'fa fa-link')){
                 var tile_class = 'tile-highlight';
             }
             else{

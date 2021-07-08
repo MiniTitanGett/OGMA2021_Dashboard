@@ -112,9 +112,9 @@ app.clientside_callback(
     prevent_initial_call=True
 )
 def _new_and_delete(_new_clicks, _close_clicks, _dashboard_reset, input_tiles, num_tiles, new_disabled, _df_const,
-                    master_df):
+                    parent_df):
     """
-    :param _new_clicks: Detects user clicking 'NEW' button in master navigation bar and encodes the number of tiles to
+    :param _new_clicks: Detects user clicking 'NEW' button in parent navigation bar and encodes the number of tiles to
     display
     :param _close_clicks: Detects user clicking close ('x') button in top right of tile
     :param input_tiles: State of all currently existing tiles
@@ -442,8 +442,6 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     changed_value = [p['value'] for p in dash.callback_context.triggered][0]
 
-
-
     if changed_id == '.' or link_states is []:
         raise PreventUpdate
 
@@ -492,13 +490,15 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
 
-    #loads in a default graph when dataset is first choosen
+    # loads in a default graph when dataset is first choosen
     if '"type":"tile-link"}.className' not in changed_id and graph_type is None:
         graph_value = options[0]['value']
-    #relink selected first graph option of parent data set not in graph options
-    elif '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-link' and graph_type not in graph_options:
+    # relink selected first graph option of parent data set not in graph options
+    elif '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-link' and\
+            graph_type not in graph_options:
         graph_value = options[0]['value']
-    elif '"type":"set-graph-options-trigger"}.options-' in changed_id and graph_type is not None and graph_type not in graph_options:
+    elif '"type":"set-graph-options-trigger"}.options-' in changed_id and graph_type is not None and\
+            graph_type not in graph_options:
         graph_value = options[0]['value']
     else:
         graph_value = graph_type
@@ -521,7 +521,7 @@ for x in range(4):
          State({'type': 'data-set', 'index': 4}, 'value'),
          State('df-constants-storage', 'data')],
         prevent_initial_call=True
-    )
+)
     def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_options_state, _graph_option, df_name,
                            parent_df_name, df_const):
         """
@@ -532,7 +532,7 @@ for x in range(4):
 
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][-1]
 
-        if '"type":"tile-link"}.className' in changed_id and  parent_df_name is None and df_name is None:
+        if '"type":"tile-link"}.className' in changed_id and parent_df_name is None and df_name is None:
             return None, 1, no_update
 
         # if link state has changed from linked --> unlinked the data has not changed, prevent update
@@ -547,7 +547,7 @@ for x in range(4):
                 or ('type":"graph-type-dropdown"}.value' in changed_id and link_state == 'fa fa-link'
                     and selected_graph_type is None):
             if parent_df_name is None and df_name is None:
-                return None, 1,no_update
+                return None, 1, no_update
             if selected_graph_type not in GRAPH_OPTIONS[parent_df_name] or selected_graph_type is None:
                 return None, 1, no_update
             elif selected_graph_type in GRAPH_OPTIONS[parent_df_name]:
@@ -755,7 +755,7 @@ def _change_link(_link_clicks, link_trigger, link_state):
      State('df-constants-storage', 'data'),
      State({'type': 'data-set', 'index': ALL}, 'data-'),
      State({'type': 'graph-type-dropdown', 'index': ALL}, 'value'),
-     # Date picker states for master data menu
+     # Date picker states for parent data menu
      State({'type': 'start-year-input', 'index': 4}, 'name'),
      State({'type': 'radio-timeframe', 'index': 4}, 'value'),
      State({'type': 'fiscal-year-toggle', 'index': 4}, 'value'),

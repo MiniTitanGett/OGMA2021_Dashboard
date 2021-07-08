@@ -112,9 +112,9 @@ app.clientside_callback(
     prevent_initial_call=True
 )
 def _new_and_delete(_new_clicks, _close_clicks, _dashboard_reset, input_tiles, num_tiles, new_disabled, _df_const,
-                    parent_df):
+                    master_df):
     """
-    :param _new_clicks: Detects user clicking 'NEW' button in parent navigation bar and encodes the number of tiles to
+    :param _new_clicks: Detects user clicking 'NEW' button in master navigation bar and encodes the number of tiles to
     display
     :param _close_clicks: Detects user clicking close ('x') button in top right of tile
     :param input_tiles: State of all currently existing tiles
@@ -566,6 +566,12 @@ for x in range(4):
         if changed_id == '.' and graph_options_state or df_const is None or df_name not in df_const:
             raise PreventUpdate
 
+        # stop graph_menu_update on new tile loop call
+        if '"type":"tile-link"}.className' in str(dash.callback_context.triggered) \
+                and 'type":"graph-type-dropdown"}.value' in str(dash.callback_context.triggered) \
+                and graph_options_state is not None and (gm_trigger == df_name or df_name is None):
+            raise PreventUpdate
+
         tile = int(dash.callback_context.inputs_list[0]['id']['index'])
 
         # apply graph selection and generate menu
@@ -749,7 +755,7 @@ def _change_link(_link_clicks, link_trigger, link_state):
      State('df-constants-storage', 'data'),
      State({'type': 'data-set', 'index': ALL}, 'data-'),
      State({'type': 'graph-type-dropdown', 'index': ALL}, 'value'),
-     # Date picker states for parent data menu
+     # Date picker states for master data menu
      State({'type': 'start-year-input', 'index': 4}, 'name'),
      State({'type': 'radio-timeframe', 'index': 4}, 'value'),
      State({'type': 'fiscal-year-toggle', 'index': 4}, 'value'),

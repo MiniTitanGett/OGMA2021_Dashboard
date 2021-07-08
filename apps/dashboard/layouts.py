@@ -376,11 +376,11 @@ def get_layout_dashboard():
                 id='tab-menu-header',
                 style={'border-bottom': '1px solid {}'.format(CLR['lightgray']), 'z-index': '99', 'width': '100%',
                        'background-color': CLR['background1'], 'display': 'flex'}),
-            # master nav bar
+            # parent nav bar
             html.Header([
                 html.Div([
                     html.Button(
-                        className='master-nav',
+                        className='parent-nav',
                         n_clicks=1,
                         children=get_label('LBL_Add_Tile'),
                         id='button-new',
@@ -389,7 +389,7 @@ def get_layout_dashboard():
                     id='button-new-wrapper'),
                 html.Button(
                     "Reset",
-                    className='master-nav',
+                    className='parent-nav',
                     id='dashboard-reset',
                     style={'width': 'auto'}),
                 html.Div(
@@ -427,7 +427,7 @@ def get_layout_dashboard():
                     style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
                            'position': 'relative', 'vertical-align': 'top'}),
                 html.Button(
-                    className='master-nav',
+                    className='parent-nav',
                     n_clicks=1,
                     children=get_label('LBL_Confirm_Delete'),
                     style={'display': 'inline-block', 'float': 'right', 'width': 'auto', 'margin-right': '20px'},
@@ -458,7 +458,7 @@ def get_layout_dashboard():
                     style={'float': 'right', 'display': 'inline-block', 'height': '35px',
                            'margin-left': '20px', 'text-align': 'center'}),
                 html.Button(
-                    className='master-nav',
+                    className='parent-nav',
                     n_clicks=1,
                     children=get_label('LBL_Save_Dashboard'),
                     style={'display': 'inline-block', 'float': 'right', 'width': 'auto'},
@@ -934,12 +934,12 @@ def get_tile(tile, tile_keys=None, df_name=None):
 
 
 # arrange tiles on the page for 1-4 tiles
-def get_tile_layout(num_tiles, input_tiles, tile_keys=None, master_df=None):
+def get_tile_layout(num_tiles, input_tiles, tile_keys=None, parent_df=None):
     """
     :param num_tiles: Desired number of tiles to display.
     :param input_tiles: List of children of existing tiles.
     :param tile_keys:
-    :param master_df: Name of the master data set being used
+    :param parent_df: Name of the parent data set being used
     :raise IndexError: If num_tiles < 0 or num_tiles > 4
     :return: Layout of specified number of tiles.
     """
@@ -955,9 +955,9 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, master_df=None):
                     className='tile-container',
                     id={'type': 'tile', 'index': 0}, style={'z-index': '0'})]
         elif tile_keys:
-            tile[0] = get_tile(0, tile_keys[0], df_name=master_df)
+            tile[0] = get_tile(0, tile_keys[0], df_name=parent_df)
         else:
-            tile[0] = get_tile(0, df_name=master_df)
+            tile[0] = get_tile(0, df_name=parent_df)
         children = [
             html.Div([
                 html.Div(
@@ -976,13 +976,13 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, master_df=None):
                         id={'type': 'tile', 'index': i},
                         style={'z-index': '{}'.replace("{}", str(i))})]
             for i in range(len(input_tiles), num_tiles):
-                tile[i] = get_tile(i, df_name=master_df)
+                tile[i] = get_tile(i, df_name=parent_df)
         elif tile_keys:
             for i in range(num_tiles):
-                tile[i] = get_tile(i, tile_keys[i], df_name=master_df)
+                tile[i] = get_tile(i, tile_keys[i], df_name=parent_df)
         else:
             for i in range(num_tiles):
-                tile[i] = get_tile(i, df_name=master_df)
+                tile[i] = get_tile(i, df_name=parent_df)
         children = [
             html.Div([
                 html.Div(
@@ -1005,13 +1005,13 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, master_df=None):
                         id={'type': 'tile', 'index': i},
                         style={'z-index': '{}'.replace("{}", str(i))})]
             for i in range(len(input_tiles), num_tiles):
-                tile[i] = get_tile(i, df_name=master_df)
+                tile[i] = get_tile(i, df_name=parent_df)
         elif tile_keys:
             for i in range(num_tiles):
-                tile[i] = get_tile(i, tile_keys[i], df_name=master_df)
+                tile[i] = get_tile(i, tile_keys[i], df_name=parent_df)
         else:
             for i in range(num_tiles):
-                tile[i] = get_tile(i, df_name=master_df)
+                tile[i] = get_tile(i, df_name=parent_df)
         children = [
             html.Div([
                 html.Div(
@@ -1039,13 +1039,13 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, master_df=None):
                         id={'type': 'tile', 'index': i},
                         style={'z-index': '{}'.replace("{}", str(i))})]
             for i in range(len(input_tiles), num_tiles):
-                tile[i] = get_tile(i, df_name=master_df)
+                tile[i] = get_tile(i, df_name=parent_df)
         elif tile_keys:
             for i in range(num_tiles):
-                tile[i] = get_tile(i, tile_keys[i], df_name=master_df)
+                tile[i] = get_tile(i, tile_keys[i], df_name=parent_df)
         else:
             for i in range(num_tiles):
-                tile[i] = get_tile(i, df_name=master_df)
+                tile[i] = get_tile(i, df_name=parent_df)
         children = [
             html.Div([
                 html.Div(

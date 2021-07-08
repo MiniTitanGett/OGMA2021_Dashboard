@@ -429,40 +429,35 @@ def get_layout_dashboard():
                 html.Button(
                     className='parent-nav',
                     n_clicks=1,
-                    children=get_label('LBL_Confirm_Delete'),
+                    children=get_label('LBL_Delete'),
                     style={'display': 'inline-block', 'float': 'right', 'width': 'auto', 'margin-right': '20px'},
-                    id='confirm-delete-dashboard'),
-                dcc.Dropdown(
-                    id='delete-dashboard',
-                    options=[{'label': session['saved_dashboards'][key]['Dashboard Title'], 'value': key} for key in
-                             session['saved_dashboards']],
-                    clearable=False,
-                    style={'width': '250px', 'font-size': '13px', 'box-sizing': 'border-box', 'height': '35px',
-                           'display': 'inline-block', 'vertical-align': 'bottom', 'float': 'right',
-                           'border-radius': '0'},
-                    value='',
-                    placeholder=get_label('LBL_Delete_A_Saved_Dashboard')),
-                dcc.Dropdown(
-                    id='select-dashboard-dropdown',
-                    options=[{'label': session['saved_dashboards'][key]['Dashboard Title'], 'value': key} for key in
-                             session['saved_dashboards']],
-                    clearable=False,
-                    style={'width': '250px', 'font-size': '13px', 'box-sizing': 'border-box', 'height': '35px',
-                           'display': 'inline-block', 'vertical-align': 'bottom', 'float': 'right',
-                           'border-radius': '0', 'margin-left': '20px'},
-                    value='',
-                    placeholder=get_label('LBL_Select_A_Saved_Dashboard')),
+                    id='delete-dashboard'),
+                html.Button(
+                    className='parent-nav',
+                    n_clicks=1,
+                    children=get_label('LBL_Load_Dashboard'),
+                    style={'display': 'inline-block', 'float': 'right', 'width': 'auto', 'margin-right': '20px'},
+                    id='load-dashboard'),
                 html.Div(
-                    [],
-                    id='dashboard-save-status-symbols',
-                    style={'float': 'right', 'display': 'inline-block', 'height': '35px',
-                           'margin-left': '20px', 'text-align': 'center'}),
+                    dcc.Dropdown(
+                        id='select-dashboard-dropdown',
+                        options=[{'label': session['saved_dashboards'][key]['Dashboard Title'], 'value': key} for key in
+                                 session['saved_dashboards']],
+                        clearable=False,
+                        style={'width': '250px', 'font-size': '13px', 'box-sizing': 'border-box', 'height': '35px',
+                               'display': 'inline-block', 'vertical-align': 'bottom', 'float': 'right',
+                               'border-radius': '0', 'margin-left': '20px'},
+                        value='',
+                        placeholder=get_label('LBL_Select_A_Saved_Dashboard')),
+                    id='load-dashboard-menu',
+                    style={'display': 'none'}
+                ),
                 html.Button(
                     className='parent-nav',
                     n_clicks=1,
                     children=get_label('LBL_Save_Dashboard'),
                     style={'display': 'inline-block', 'float': 'right', 'width': 'auto'},
-                    id='button-save-dashboard'),
+                    id='save-dashboard'),
                 html.Div(
                     get_dashboard_title_input(),
                     id='dashboard-title-wrapper',
@@ -527,6 +522,9 @@ def get_layout_dashboard():
             id={'type': 'prompt-trigger', 'index': 3},
             style={'display': 'none'}),
         html.Div(
+            id={'type': 'prompt-trigger', 'index': 4},
+            style={'display': 'none'}),
+        html.Div(
             id='prompt-result',
             style={'display': 'none'}),
         # Floating Menu
@@ -565,6 +563,9 @@ def get_layout_dashboard():
             style={'display': 'none'}),
         html.Div(
             id={'type': 'float-menu-trigger', 'index': 3},
+            style={'display': 'none'}),
+        html.Div(
+            id={'type': 'float-menu-trigger', 'index': 4},
             style={'display': 'none'}),
         html.Div(
             id='float-menu-result',

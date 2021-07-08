@@ -1251,7 +1251,7 @@ app.clientside_callback(
 # initialize prompt
 app.clientside_callback(
     """
-    function(prompt_trigger_0, prompt_trigger_1, prompt_trigger_2, prompt_trigger_3, 
+    function(prompt_trigger_0, prompt_trigger_1, prompt_trigger_2, prompt_trigger_3, prompt_trigger_4,
              close_n_clicks, cancel_n_clicks, ok_n_clicks, prompt_data){
         const triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
         var prompt_trigger = null;
@@ -1295,6 +1295,7 @@ app.clientside_callback(
      Input({'type': 'prompt-trigger', 'index': 1}, 'data-'),
      Input({'type': 'prompt-trigger', 'index': 2}, 'data-'),
      Input({'type': 'prompt-trigger', 'index': 3}, 'data-'),
+     Input({'type': 'prompt-trigger', 'index': 4}, 'data-'),
      Input('prompt-close', 'n_clicks'),
      Input('prompt-cancel', 'n_clicks'),
      Input('prompt-ok', 'n_clicks')],

@@ -89,15 +89,15 @@ def _update_tile_loading_dropdown_options(_tile_saving_trigger, _dashboard_savin
     Output('tile-save-trigger-wrapper', 'children'),  # formatted in two chained callbacks to mix ALL and y values
     [Input({'type': 'save-button', 'index': ALL}, 'n_clicks'),
      Input({'type': 'delete-button', 'index': ALL}, 'n_clicks'),
-     Input('float-menu-title', 'data-'),
+     Input('float-menu-result', 'children'),
      Input('prompt-result', 'children')],
     [State('prompt-title', 'data-'),
-     State({'type': 'select-layout-dropdown', 'index': ALL}, 'value'),
-     State('float-menu-result', 'children')],
+     State('float-menu-title', 'data-'),
+     State({'type': 'select-layout-dropdown', 'index': ALL}, 'value')],
     prevent_initial_call=True
 )
-def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, float_menu_data, prompt_result, prompt_data,
-                                       load_state, float_menu_result):
+def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, float_menu_result, prompt_result, prompt_data,
+                                       float_menu_data, load_state):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.' or len(dash.callback_context.triggered) > 1:
@@ -105,7 +105,7 @@ def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, float_menu_da
 
     if 'prompt-result' in changed_id:
         changed_index = prompt_data[1]
-    elif 'float-menu-title' in changed_id:
+    elif 'float-menu-result' in changed_id:
         changed_index = int(float_menu_data[1])
     else:
         changed_index = int(search(r'\d+', changed_id).group())
@@ -118,7 +118,7 @@ def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, float_menu_da
 
     if not isinstance(load_state, list):
         load_state = [load_state]
-    if 'float-menu-title.data-' in changed_id \
+    if 'float-menu-result.children' in changed_id \
             and (float_menu_data[0] != 'layouts' or load_state[changed_index] is None or float_menu_result != 'ok'):
         raise PreventUpdate
 
@@ -127,7 +127,7 @@ def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, float_menu_da
         mode = "save"
     elif 'delete-button' in changed_id:
         mode = "delete"
-    elif 'float-menu-title.data-' in changed_id:
+    elif 'float-menu-result.children' in changed_id:
         mode = "confirm-load"
     elif prompt_data[0] == 'delete' and prompt_result == 'ok':
         mode = "confirm-delete"
@@ -241,7 +241,7 @@ for y in range(4):
 
         # Outputs
         update_options_trigger = no_update
-        # [mode/prompt_trigger, tile], prompt_style/show_hide, prompt_title, prompt_body]
+        # [[mode/prompt_trigger, tile], prompt_style/show_hide, prompt_title, prompt_body]
         prompt_trigger = no_update
         popup_text = no_update
         popup_is_open = no_update
@@ -445,21 +445,21 @@ for y in range(4):
 
 # dashboard saving/save deleting
 @app.callback(
-    [Output('dashboard-save-status-symbols', 'children'),
-     Output('delete-dashboard', 'options'),
-     Output('select-dashboard-dropdown', 'options'),
-     Output('delete-dashboard', 'value'),
+    [Output('select-dashboard-dropdown', 'options'),
      Output({'type': 'set-dropdown-options-trigger', 'index': 0}, 'data-dashboard_saving'),
      Output({'type': 'set-tile-title-trigger', 'index': 0}, 'data-dashboard_load_title'),
      Output({'type': 'set-tile-title-trigger', 'index': 1}, 'data-dashboard_load_title'),
      Output({'type': 'set-tile-title-trigger', 'index': 2}, 'data-dashboard_load_title'),
      Output({'type': 'set-tile-title-trigger', 'index': 3}, 'data-dashboard_load_title')],
-    [Input('button-save-dashboard', 'n_clicks'),
-     Input('confirm-delete-dashboard', 'n_clicks'),
-     Input({'type': 'dashboard-overwrite', 'index': ALL}, 'n_clicks')],
-    # title of dashboard requested to be deleted
-    [State('delete-dashboard', 'value'),
-     # dashboard info
+    [Input('save-dashboard', 'n_clicks'),
+     Input('delete-dashboard', 'n_clicks'),
+     Input('load-dashboard', 'n_clicks'),
+     Input('float-menu-result', 'children'),
+     Input('prompt-result', 'children')],
+    # dashboard info
+    [State('prompt-title', 'data-'),
+     State('float-menu-title', 'data-'),
+     State({'type': 'select-layout-dropdown', 'index': ALL}, 'value'),
      State('dashboard-title', 'value'),
      # tile info
      State({'type': 'tile-title', 'index': ALL}, 'value'),
@@ -505,13 +505,13 @@ for y in range(4):
      State({'type': 'hierarchy_level_dropdown', 'index': 2}, 'value'),
      State({'type': 'hierarchy_level_dropdown', 'index': 3}, 'value'),
      State({'type': 'hierarchy_level_dropdown', 'index': 4}, 'value'),
-     # hieararchy display paths children
+     # hierarchy display paths children
      State({'type': 'hierarchy_display_button', 'index': 0}, 'children'),
      State({'type': 'hierarchy_display_button', 'index': 1}, 'children'),
      State({'type': 'hierarchy_display_button', 'index': 2}, 'children'),
      State({'type': 'hierarchy_display_button', 'index': 3}, 'children'),
      State({'type': 'hierarchy_display_button', 'index': 4}, 'children'),
-     # Fiscal year toggle
+     # fiscal year toggle
      State({'type': 'fiscal-year-toggle', 'index': 0}, 'value'),
      State({'type': 'fiscal-year-toggle', 'index': 1}, 'value'),
      State({'type': 'fiscal-year-toggle', 'index': 2}, 'value'),
@@ -555,8 +555,8 @@ for y in range(4):
      State({'type': 'start-year-input', 'index': 4}, 'name')],
     prevent_initial_call=True
 )
-def _save_dashboard(_save_clicks, _delete_clicks, _dashboard_overwrite_inputs,
-                    remove_dashboard, dashboard_title, tile_titles, links, graph_types,
+def _save_dashboard(_save_clicks, _delete_clicks, _load_clicks, float_menu_result, prompt_result,prompt_data,
+                                       float_menu_data, load_state,  dashboard_title, tile_titles, links, graph_types,
                     args_list_0, args_list_1, args_list_2, args_list_3,
                     df_name_0, df_name_1, df_name_2, df_name_3, df_name4,
                     start_year_0, start_year_1, start_year_2, start_year_3, start_year_4,
@@ -578,7 +578,6 @@ def _save_dashboard(_save_clicks, _delete_clicks, _dashboard_overwrite_inputs,
         raise PreventUpdate
 
     options = no_update
-    delete_dropdown_val = no_update
     update_graph_options_trigger = no_update
     tile_title_returns = [no_update] * 4
     auto_named_titles = [no_update] * 4
@@ -859,18 +858,16 @@ def _save_dashboard(_save_clicks, _delete_clicks, _dashboard_overwrite_inputs,
 
     # else, 'confirm-delete-dashboard' requested
     else:
-
+        remove_dashboard = ""
         if remove_dashboard != '':
             delete_dashboard(remove_dashboard)
             update_graph_options_trigger = 'trigger'
             options = [{'label': session['saved_dashboards'][key]["Dashboard Title"], 'value': key} for key in
                        session['saved_dashboards']]
-            delete_dropdown_val = ''
 
         save_status_symbols = []
 
-    return save_status_symbols, options, options, delete_dropdown_val, update_graph_options_trigger, \
-        tile_title_returns[0], tile_title_returns[1], tile_title_returns[2], tile_title_returns[3]
+    return options, update_graph_options_trigger, tile_title_returns[0], tile_title_returns[1], tile_title_returns[2], tile_title_returns[3]
 
 
 # *********************************************SHARED LOADING********************************************************

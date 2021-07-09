@@ -1078,8 +1078,10 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, parent_df=None):
 # ***************************************************GRAPH MENUS*****************************************************
 
 # line graph menu layout
-def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridline, legend, df_const, data_fitting):
+def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridline, legend, df_const, data_fitting, ci):
     """
+    :param data_fitting: boolean to determine whether to show data fitting options
+    :param ci: show confidence interval or not
     :param measure_type: the measure type value
     :param y: the y-axis value
     :param x: the x-axis value
@@ -1091,13 +1093,15 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
     :param df_const: Dataframe constants
     :return: Menu with options to modify a line graph.
     """
-    # (args-value: {})[0] = x-axis
-    # (args-value: {})[1] = y-axis (measure type)
-    # (args-value: {})[2] = graphed variables
-    # (args-value: {})[3] = mode
-    # (args-value: {})[4] = ?
-    # (args-value: {})[5] = fit
-    # (args-value: {})[6] = fit
+    # arg_value[0] = xaxis selector
+    # arg_value[1] = measure type selector
+    # arg_value[2] = variable names selector
+    # arg_value[3] = mode
+    # arg_value[4] = fit
+    # arg_value[5] = degree
+    # arg_value[6] = confidence interval
+    # arg_value[7] = grid lines
+    # arg_value[8] = legend
 
     return [
         html.Div(
@@ -1190,17 +1194,6 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                             value=mode if mode else 'Lines',
                             style={'font-size': '13px'})],
                         style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})]),
-                dcc.Checklist(
-                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
-                    options=[{'label': get_label('LBL_Show_Grid_Lines'), 'value': 'gridline'}],
-                    value=gridline if gridline else [],
-                    style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
-                dcc.Checklist(
-                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
-                    options=[{'label': get_label('LBL_Hide_Legend'), 'value': 'legend'}],
-                    value=legend if legend else [],
-                    style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
-                # ADDED
                 html.Div([
                     html.Div([
                         html.P(
@@ -1241,7 +1234,22 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                         className='fa fa-question-circle-o',
                         id={'type': 'data-fitting-info', 'index': tile},
                         style={'position': 'relative', 'vertical-align': 'top'})
-                ])
+                ]),
+                dcc.Checklist(
+                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 6},
+                    options=[{'label': get_label('LBL_Confidence_Interval'), 'value': 'ci'}],
+                    value=ci if ci else [],
+                    style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
+                dcc.Checklist(
+                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 7},
+                    options=[{'label': get_label('LBL_Show_Grid_Lines'), 'value': 'gridline'}],
+                    value=gridline if gridline else [],
+                    style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
+                dcc.Checklist(
+                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 8},
+                    options=[{'label': get_label('LBL_Hide_Legend'), 'value': 'legend'}],
+                    value=legend if legend else [],
+                    style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
             ], style={'margin-left': '15px'})]), ]
 
 

@@ -21,5 +21,3 @@ ELSE
         ) ON [PRIMARY]
     END
 GO
-
-

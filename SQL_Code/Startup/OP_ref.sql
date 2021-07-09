@@ -500,6 +500,8 @@ EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Edit_Graph',@language 
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Edit_Graph',@language = 'Fr', @ref_desc = 'Fr: Edit Graph'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hide_Legend',@language = 'En', @ref_desc = 'Hide Legend'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hide_Legend',@language = 'Fr', @ref_desc = 'Fr: Hide Legend'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Confidence_Interval',@language = 'En', @ref_desc = 'Fit Confidence Interval'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Confidence_Interval',@language = 'Fr', @ref_desc = 'Fr: Fit Confidence Interval'
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'En',@ref_desc = 'Hierarchy Selection''s Children'
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'Fr',@ref_desc = 'Enfants de la Sélection de Hiérarchie'
 

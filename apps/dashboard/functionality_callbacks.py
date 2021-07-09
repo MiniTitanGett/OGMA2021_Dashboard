@@ -20,7 +20,7 @@ from flask import session
 from apps.dashboard.graphs import __update_graph
 from apps.dashboard.hierarchy_filter import generate_history_button, generate_dropdown
 from apps.dashboard.app import app
-from apps.dashboard.data import data_filter, CLR, get_label, GRAPH_OPTIONS, linear_regression
+from apps.dashboard.data import data_filter, CLR, get_label, GRAPH_OPTIONS
 from apps.dashboard.datepicker import get_date_box, update_date_columns, get_secondary_data
 
 # Contents:

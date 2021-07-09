@@ -16,6 +16,7 @@ import logging
 from dateutil.relativedelta import relativedelta
 from flask import session
 import statsmodels.api as sm
+from statsmodels.sandbox.regression.predstd import wls_prediction_std
 from sklearn.preprocessing import PolynomialFeatures
 
 # import config
@@ -592,21 +593,24 @@ def get_label(label, table=None):
 
 # ********************************************DATA FITTING OPERATIONS**************************************************
 
-def linear_regression(df, x, y):
+def linear_regression(df, x, y, ci):
     df_best_fit = pd.DataFrame()
 
     df_best_fit['timestamp'] = pd.to_datetime(df[x])
     df_best_fit['serialtime'] = [(d - datetime(1970, 1, 1)).days for d in df_best_fit['timestamp']]
 
     x_axis = sm.add_constant(df_best_fit['serialtime'])
-    # Ordinary least square
+    # creates statistical model from ordinary lease squares method
     model = sm.OLS(df[y], x_axis).fit()
     df_best_fit['Best Fit'] = model.fittedvalues
+
+    if ci:
+        df_best_fit["Upper Interval"], df_best_fit["Lower Interval"] = confidence_intervals(model)
 
     return df_best_fit
 
 
-def polynomial_regression(df, x, y, degree):
+def polynomial_regression(df, x, y, degree, ci):
     df_best_fit = pd.DataFrame()
 
     df_best_fit['timestamp'] = pd.to_datetime(df[x])
@@ -614,7 +618,19 @@ def polynomial_regression(df, x, y, degree):
 
     polynomial_features = PolynomialFeatures(degree=degree)
     xp = polynomial_features.fit_transform(df_best_fit['serialtime'].to_numpy().reshape(-1, 1))
+    # creates statistical model from ordinary lease squares method
     model = sm.OLS(df[y], xp).fit()
+    # creates best fit with generated polynomial
     df_best_fit["Best Fit"] = model.predict(xp)
 
+    if ci:
+        df_best_fit["Upper Interval"], df_best_fit["Lower Interval"] = confidence_intervals(model)
+
     return df_best_fit
+
+
+def confidence_intervals(model):
+    # calculates standard deviation and confidence interval for prediction
+    _, upper, lower = wls_prediction_std(model)
+    # returns the upper and lower confidence interval
+    return upper, lower

@@ -121,9 +121,11 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
     # arg_value[1] = measure type selector
     # arg_value[2] = variable names selector
     # arg_value[3] = mode
-    # arg_value[4] = ?
-    # arg_value[5] = fit
-    # arg_value[6] = degree
+    # arg_value[4] = fit
+    # arg_value[5] = degree
+    # arg_value[6] = confidence interval
+    # arg_value[7] = grid lines
+    # arg_value[8] = legend
 
     language = session["language"]
 
@@ -215,9 +217,9 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
             fig.update_traces(hovertemplate=hovertemplate)
             fig = set_partial_periods(fig, filtered_df, 'Line')
 
-            # added
             if arg_value[4] == 'linear-fit':
-                best_fit_data = linear_regression(filtered_df, 'Date of Event', 'Measure Value')
+                ci = True if arg_value[6] == ['ci'] else False
+                best_fit_data = linear_regression(filtered_df, 'Date of Event', 'Measure Value', ci)
                 filtered_df["Best Fit"] = best_fit_data["Best Fit"]
                 fig2 = px.line(
                     data_frame=filtered_df,
@@ -228,8 +230,31 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                 fig2.data[0].name = 'Best fit'
                 fig2.data[0].showlegend = True
                 fig.add_trace(fig2.data[0])
+
+                if arg_value[6] == ['ci']:
+                    filtered_df["Upper Interval"] = best_fit_data["Upper Interval"]
+                    filtered_df["Lower Interval"] = best_fit_data["Lower Interval"]
+                    fig3 = px.line(
+                        data_frame=filtered_df,
+                        x='Date of Event',
+                        y='Upper Interval',
+                    )
+                    fig4 = px.line(
+                        data_frame=filtered_df,
+                        x='Date of Event',
+                        y='Lower Interval',
+                    )
+                    fig3.update_traces(line_color='#000000')
+                    fig3.data[0].showlegend = True
+                    fig3.data[0].name = 'Upper Interval'
+                    fig.add_trace(fig3.data[0])
+                    fig4.update_traces(line_color='#000000')
+                    fig4.data[0].showlegend = True
+                    fig4.data[0].name = 'Lower Interval'
+                    fig.add_trace(fig4.data[0])
             if arg_value[4] == 'curve-fit':
-                best_fit_data = polynomial_regression(filtered_df, 'Date of Event', 'Measure Value', arg_value[5])
+                ci = True if arg_value[6] == ['ci'] else False
+                best_fit_data = polynomial_regression(filtered_df, 'Date of Event', 'Measure Value', arg_value[5], ci)
                 filtered_df["Best Fit"] = best_fit_data["Best Fit"]
                 fig2 = px.line(
                     data_frame=filtered_df,
@@ -240,6 +265,28 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                 fig2.data[0].showlegend = True
                 fig2.data[0].name = 'Best Fit'
                 fig.add_trace(fig2.data[0])
+
+                if arg_value[6] == ['ci']:  # ci
+                    filtered_df["Upper Interval"] = best_fit_data["Upper Interval"]
+                    filtered_df["Lower Interval"] = best_fit_data["Lower Interval"]
+                    fig3 = px.line(
+                        data_frame=filtered_df,
+                        x='Date of Event',
+                        y='Upper Interval',
+                    )
+                    fig4 = px.line(
+                        data_frame=filtered_df,
+                        x='Date of Event',
+                        y='Lower Interval',
+                    )
+                    fig3.update_traces(line_color='#000000')
+                    fig3.data[0].showlegend = True
+                    fig3.data[0].name = 'Upper Interval'
+                    fig.add_trace(fig3.data[0])
+                    fig4.update_traces(line_color='#000000')
+                    fig4.data[0].showlegend = True
+                    fig4.data[0].name = 'Lower Interval'
+                    fig.add_trace(fig4.data[0])
         else:
             fig = px.line(
                 title=title + get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path,
@@ -251,11 +298,11 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
     fig.update_layout(
         yaxis={'title': arg_value[1]},
         xaxis={'title': 'Date of Event', 'type': 'date'},
-        showlegend=False if arg_value[5] else True,
+        showlegend=False if arg_value[8] else True,
         overwrite=True,
         plot_bgcolor='rgba(0, 0, 0, 0)',
         paper_bgcolor='rgba(0, 0, 0, 0)')
-    if arg_value[4]:
+    if arg_value[7]:
         fig.update_xaxes(showgrid=True, zeroline=True)
         fig.update_yaxes(showgrid=True, zeroline=True)
     else:

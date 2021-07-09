@@ -649,7 +649,8 @@ for x in range(4):
                                                legend=None,
                                                df_name=df_name,
                                                df_const=df_const,
-                                               data_fitting=data_fitting)
+                                               data_fitting=data_fitting,
+                                               ci=None)
 
         elif selected_graph_type == 'Bar':
             menu = get_bar_graph_menu(tile=tile,

@@ -1212,51 +1212,51 @@ for x in range(4):
 # *************************************************LOADSCREEN*********************************************************
 
 # All clientside callback functions referred to are stored in /assets/ClientsideCallbacks.js
-# TODO: REWORK ALL OF LOADSCREENS AND MOVE TO PYTHON FILE
-for x in range(4):
-    app.clientside_callback(
-        ClientsideFunction(
-            namespace='clientside',
-            function_name='graphLoadScreen{}'.format(x)
-        ),
-        Output({'type': 'tile-menu-header', 'index': x}, 'n_clicks'),
-        [Input({'type': 'tile-view', 'index': x}, 'n_clicks')],
-        [State({'type': 'tile-view', 'index': x}, 'className')],
-        prevent_initial_call=True
-    )
-
-    app.clientside_callback(
-        ClientsideFunction(
-            namespace='clientside',
-            function_name='graphRemoveLoadScreen{}'.format(x)
-        ),
-        Output({'type': 'graph_display', 'index': x}, 'n_clicks'),
-        [Input({'type': 'graph_display', 'index': x}, 'children')],
-        State('num-tiles', 'data-num-tiles'),
-        prevent_initial_call=True
-    )
-
-app.clientside_callback(
-    ClientsideFunction(
-        namespace='clientside',
-        function_name='datasetLoadScreen'
-    ),
-    Output('dataset-confirmation-symbols', 'n_clicks'),
-    [Input({'type': 'confirm-load-data', 'index': ALL}, 'n_clicks'),
-     Input({'type': 'confirm-data-set-refresh', 'index': ALL}, 'n_clicks'),
-     Input('select-dashboard-dropdown', 'value')],
-    prevent_initial_call=True
-)
-
-app.clientside_callback(
-    ClientsideFunction(
-        namespace='clientside',
-        function_name='datasetRemoveLoadScreen'
-    ),
-    Output('df-constants-storage', 'n_clicks'),
-    [Input('df-constants-storage', 'data')],
-    prevent_initial_call=True
-)
+# TODO: REWORK ALL OF LOAD SCREENS AND MOVE TO PYTHON FILE
+# for x in range(4):
+#     app.clientside_callback(
+#         ClientsideFunction(
+#             namespace='clientside',
+#             function_name='graphLoadScreen{}'.format(x)
+#         ),
+#         Output({'type': 'tile-menu-header', 'index': x}, 'n_clicks'),
+#         [Input({'type': 'tile-view', 'index': x}, 'n_clicks')],
+#         [State({'type': 'tile-view', 'index': x}, 'className')],
+#         prevent_initial_call=True
+#     )
+#
+#     app.clientside_callback(
+#         ClientsideFunction(
+#             namespace='clientside',
+#             function_name='graphRemoveLoadScreen{}'.format(x)
+#         ),
+#         Output({'type': 'graph_display', 'index': x}, 'n_clicks'),
+#         [Input({'type': 'graph_display', 'index': x}, 'children')],
+#         State('num-tiles', 'data-num-tiles'),
+#         prevent_initial_call=True
+#     )
+#
+# app.clientside_callback(
+#     ClientsideFunction(
+#         namespace='clientside',
+#         function_name='datasetLoadScreen'
+#     ),
+#     Output('dataset-confirmation-symbols', 'n_clicks'),
+#     [Input({'type': 'confirm-load-data', 'index': ALL}, 'n_clicks'),
+#      Input({'type': 'confirm-data-set-refresh', 'index': ALL}, 'n_clicks'),
+#      Input('select-dashboard-dropdown', 'value')],
+#     prevent_initial_call=True
+# )
+#
+# app.clientside_callback(
+#     ClientsideFunction(
+#         namespace='clientside',
+#         function_name='datasetRemoveLoadScreen'
+#     ),
+#     Output('df-constants-storage', 'n_clicks'),
+#     [Input('df-constants-storage', 'data')],
+#     prevent_initial_call=True
+# )
 
 # *************************************************PROMPT*********************************************************
 

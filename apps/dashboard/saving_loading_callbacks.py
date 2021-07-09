@@ -673,7 +673,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
         # if tile exists in session, send delete prompt
         if intermediate_pointer in session['saved_dashboards'] \
                 and session['saved_dashboards'][intermediate_pointer]['Dashboard Title'] == dashboard_title:
-            prompt_trigger = [['delete', 4], {}, get_label('LBL_Delete_Dashboard'),
+            prompt_trigger = [['delete-dashboard', 4], {}, get_label('LBL_Delete_Dashboard'),
                               get_label('LBL_Delete_Dashboard_Prompt').format(dashboard_title)]
 
     elif 'dashboard-reset' in changed_id:
@@ -796,18 +796,13 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 id={'type': 'df-constants-storage-tile-wrapper', 'index': 2}),
             id={'type': 'df-constants-storage-tile-wrapper', 'index': 3}),
         session['tile_edited'][4] = num_tiles  # set for load warning
-        popup_text = get_label('LBL_Your_Dashboard_Has_Been_Loaded').format(dashboard_title)
+        popup_text = get_label('LBL_Your_Dashboard_Has_Been_Loaded').format(dashboard_title_output)
         popup_is_open = True
 
     elif prompt_data is not None:
-        # if reset confirmed, trigger reset
-        if prompt_data[0] == 'reset' and prompt_result == 'ok':
-            dashboard_reset_trigger = 'trigger'
-            popup_text = get_label('LBL_Your_Dashboard_Has_Been_Reset')
-            popup_is_open = True
 
         # if save requested or the overwrite was confirmed, check for exceptions and save
-        if 'save-dashboard' in changed_id or (prompt_data[0] == 'overwrite' and prompt_result == 'ok'):
+        if 'save-dashboard' in changed_id or (prompt_data[0] == 'overwrite-dashboard' and prompt_result == 'ok'):
 
             intermediate_dashboard_pointer = DASHBOARD_POINTER_PREFIX + dashboard_title.replace(" ", "")
             # regex.sub('[^A-Za-z0-9]+', '', dashboard_title)
@@ -864,28 +859,20 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                             conflicting_graphs += ', '
                     # if conflicting graph titles and dashboard title
                     if dashboard_title in used_dashboard_titles:  # was session['saved_dashboards']
-                        # overwrite_tooltip = "{} \'{}\', {} {}".format(
-                        #     get_label('LBL_Overwrite_Dashboard'),
-                        #     dashboard_title,
-                        #     get_label('LBL_And_The_Graphs' if len(conflicting_graphs_list) > 1 else 'LBL_And_The_Graph'),
-                        #     conflicting_graphs)
-                        prompt_trigger = [['overwrite', 4], {},
-                                          get_label('LBL_Overwrite_Graph_C_Title_Graph'),
-                                          get_label('LBL_Overwrite_Graph_C_Title_Graph_Prompt')]
+                        prompt_trigger = [['overwrite-dashboard', 4], {},
+                                          get_label('LBL_Overwrite_Dashboard'),
+                                          get_label('LBL_Overwrite_Dashboard_C_Title_Graph_Prompt').format(
+                                              dashboard_title, conflicting_graphs_list)]
                     # else, just conflicting graph titles
                     else:
-                        # overwrite_tooltip = "{} {}".format(
-                        #     get_label(
-                        #         'LBL_Overwrite_Graphs' if len(conflicting_graphs_list) > 1 else 'LBL_Overwrite_Graph'),
-                        #     conflicting_graphs)
-                        prompt_trigger = [['overwrite', 4], {}, get_label('LBL_Overwrite_Graph_C_Graph'),
-                                          get_label('LBL_Overwrite_Graph_C_Graph_Prompt')]
+                        prompt_trigger = [['overwrite-dashboard', 4], {}, get_label('LBL_Overwrite_Dashboard'),
+                                          get_label('LBL_Overwrite_Dashboard_C_Graph_Prompt').format(
+                                              conflicting_graphs_list)]
 
                 # else, just conflicting dashboard title
                 else:
-                    # overwrite_tooltip = f"{get_label('LBL_Overwrite_Dashboard')} \'{dashboard_title}\'"
-                    prompt_trigger = [['overwrite', 4], {}, get_label('LBL_Overwrite_Graph_C_Title'),
-                                      get_label('LBL_Overwrite_Graph_C_Title_Prompt')]
+                    prompt_trigger = [['overwrite-dashboard', 4], {}, get_label('LBL_Overwrite_Dashboard'),
+                                      get_label('LBL_Overwrite_Dashboard_C_Title_Prompt').format(dashboard_title)]
 
             # else, save/overwrite the dashboard and contained tiles
             else:
@@ -1027,13 +1014,18 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 popup_is_open = True
 
         # if confirm delete, has been pressed
-        elif prompt_data[0] == 'delete' and prompt_result == 'ok':
+        elif prompt_data[0] == 'delete-dashboard' and prompt_result == 'ok':
             intermediate_pointer = DASHBOARD_POINTER_PREFIX + dashboard_title.replace(" ", "")
             delete_dashboard(intermediate_pointer)
             update_graph_options_trigger = 'trigger'
             options = [{'label': session['saved_dashboards'][key]["Dashboard Title"], 'value': key} for key
                        in session['saved_dashboards']]
-            popup_text = get_label('LBL_Your_Graph_Has_Been_Deleted').format(dashboard_title)
+            popup_text = get_label('LBL_Your_Dashboard_Has_Been_Deleted').format(dashboard_title)
+            popup_is_open = True
+        # if reset confirmed, trigger reset
+        elif prompt_data[0] == 'reset' and prompt_result == 'ok':
+            dashboard_reset_trigger = 'trigger'
+            popup_text = get_label('LBL_Your_Dashboard_Has_Been_Reset')
             popup_is_open = True
 
     return options, update_graph_options_trigger, tile_title_returns[0], tile_title_returns[1], tile_title_returns[2], \

@@ -384,14 +384,17 @@ def get_layout_dashboard():
                         n_clicks=1,
                         children=get_label('LBL_Add_Tile'),
                         id='button-new',
-                        disabled=False)
-                ], style={'display': 'inline-block'},
+                        disabled=False
+                    )
+                ],
+                    style={'display': 'inline-block', 'vertical-align': 'bottom'},
                     id='button-new-wrapper'),
                 html.Button(
-                    "Reset",
+                    children=get_label("LBL_Reset"),
                     className='parent-nav',
                     id='dashboard-reset',
-                    style={'width': 'auto'}),
+                    style={'width': 'auto'}
+                ),
                 html.Div(
                     html.Div([
                         html.I(
@@ -419,11 +422,11 @@ def get_layout_dashboard():
                             style={'padding': '7px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
                                    'margin-left': '10px', 'margin-right': '14px', 'display': 'inline-block',
                                    'vertical-align': 'top'})],
-                             id='dashboard-reset-symbols',
-                             style={'width': '71px',
-                                    'border': '1px solid {}'.format(CLR['lightgray']),
-                                    'margin': '2px 0', 'border-radius': '6px',
-                                    'display': 'none'}),
+                        id='dashboard-reset-symbols',
+                        style={'width': '71px',
+                               'border': '1px solid {}'.format(CLR['lightgray']),
+                               'margin': '2px 0', 'border-radius': '6px',
+                               'display': 'none'}),
                     style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
                            'position': 'relative', 'vertical-align': 'top'}),
                 html.Button(
@@ -1075,7 +1078,7 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, parent_df=None):
 # ***************************************************GRAPH MENUS*****************************************************
 
 # line graph menu layout
-def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridline, legend, df_const):
+def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridline, legend, df_const, data_fitting):
     """
     :param measure_type: the measure type value
     :param y: the y-axis value
@@ -1092,6 +1095,9 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
     # (args-value: {})[1] = y-axis (measure type)
     # (args-value: {})[2] = graphed variables
     # (args-value: {})[3] = mode
+    # (args-value: {})[4] = ?
+    # (args-value: {})[5] = fit
+    # (args-value: {})[6] = fit
 
     return [
         html.Div(
@@ -1194,6 +1200,48 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                     options=[{'label': get_label('LBL_Hide_Legend'), 'value': 'legend'}],
                     value=legend if legend else [],
                     style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
+                # ADDED
+                html.Div([
+                    html.Div([
+                        html.P(
+                            "{}:".format(get_label('LBL_Data_Fitting')),
+                            style={'color': CLR['text1'], 'font-size': '13px', 'position': 'relative'})
+                    ], style={'display': 'inline-block', 'width': '40px', 'position': 'relative',
+                              'margin-right': '15px', 'vertical-align': 'top'}),
+                    html.Div([
+                        dcc.RadioItems(
+                            id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
+                            options=[{'label': get_label('LBL_No_Fit'), 'value': 'no-fit'},
+                                     {'label': get_label('LBL_Linear_Fit'), 'value': 'linear-fit'},
+                                     {'label': get_label('LBL_Curve_Fit'), 'value': 'curve-fit'}],
+                            value='no-fit',
+                            style={'display': 'inline-block', 'font-size': '13px'}),
+                        html.Div([
+                            dcc.Input(
+                                id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
+                                value=3,
+                                disabled=False,  # != 'curve-fit',
+                                type='number',
+                                required=True,
+                                min=1,
+                                style={'width': '45px', 'height': '29px', 'margin': '0', 'padding': '0',
+                                       'font-size': '15px',
+                                       'text-align': 'center', 'padding-top': '3px', 'border-radius': '5px',
+                                       'color': '#333', 'max-height': '26px'})
+                        ], style={'display': 'inline-block', 'top': '-10px', 'padding-left': '5px'}),
+                    ],
+                        style={'display': 'inline-block', 'width': '80%',
+                               'max-width': '125px'} if data_fitting else DATA_CONTENT_HIDE),
+                    html.I(
+                        html.Span(
+                            children=get_label("LBL_Data_Fitting_Shown_Info") if data_fitting else
+                            get_label("LBL_Data_Fitting_Hidden_Info"),
+                            className='save-symbols-tooltip'
+                        ),
+                        className='fa fa-question-circle-o',
+                        id={'type': 'data-fitting-info', 'index': tile},
+                        style={'position': 'relative', 'vertical-align': 'top'})
+                ])
             ], style={'margin-left': '15px'})]), ]
 
 

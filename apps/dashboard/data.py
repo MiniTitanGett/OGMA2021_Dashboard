@@ -15,6 +15,8 @@ import pandas as pd
 import logging
 from dateutil.relativedelta import relativedelta
 from flask import session
+import statsmodels.api as sm
+from sklearn.preprocessing import PolynomialFeatures
 
 # import config
 from conn import get_ref, exec_storedproc_results
@@ -177,7 +179,6 @@ def dataset_to_df(df_name):
 
 # generates the constants required to be stored for the given dataset
 def generate_constants(df_name):
-
     HIERARCHY_LEVELS = ['H{}'.format(i + 1) for i in range(6)]
 
     df = session[df_name]
@@ -518,7 +519,6 @@ def get_table_columns(dff):
 # *********************************************LANGUAGE DATA***********************************************************
 
 def get_label(label, table=None):
-
     if label is None:
         return None
 
@@ -589,3 +589,32 @@ def get_label(label, table=None):
 # sql_query = pd.read_sql_query('''exec dbo.OPP_retrieve_datasets''', cnxn)
 # DATA_SETS = pd.DataFrame(sql_query)['ref_value'].tolist()
 # cnxn.close()
+
+# ********************************************DATA FITTING OPERATIONS**************************************************
+
+def linear_regression(df, x, y):
+    df_best_fit = pd.DataFrame()
+
+    df_best_fit['timestamp'] = pd.to_datetime(df[x])
+    df_best_fit['serialtime'] = [(d - datetime(1970, 1, 1)).days for d in df_best_fit['timestamp']]
+
+    x_axis = sm.add_constant(df_best_fit['serialtime'])
+    # Ordinary least square
+    model = sm.OLS(df[y], x_axis).fit()
+    df_best_fit['Best Fit'] = model.fittedvalues
+
+    return df_best_fit
+
+
+def polynomial_regression(df, x, y, degree):
+    df_best_fit = pd.DataFrame()
+
+    df_best_fit['timestamp'] = pd.to_datetime(df[x])
+    df_best_fit['serialtime'] = [(d - datetime(1970, 1, 1)).days for d in df_best_fit['timestamp']]
+
+    polynomial_features = PolynomialFeatures(degree=degree)
+    xp = polynomial_features.fit_transform(df_best_fit['serialtime'].to_numpy().reshape(-1, 1))
+    model = sm.OLS(df[y], xp).fit()
+    df_best_fit["Best Fit"] = model.predict(xp)
+
+    return df_best_fit

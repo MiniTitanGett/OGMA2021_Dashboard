@@ -478,7 +478,6 @@ app.clientside_callback(
      State({'type': 'data-set', 'index': 4}, 'value'),
      State({'type': 'graph-type-dropdown', 'index': MATCH}, 'value'),
      State({'type': 'graph-type-dropdown', 'index': MATCH}, 'options')]
-    # TODO: Why are we calling the state of things we are taking in as inputs
 )
 def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, graph_type, _type_options):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
@@ -557,7 +556,10 @@ for x in range(4):
          Output({'type': 'tile-customize-content', 'index': x}, 'data-loaded')],
         [Input({'type': 'graph-menu-trigger', 'index': x}, 'data-'),
          Input({'type': 'graph-type-dropdown', 'index': x}, 'value'),
-         Input({'type': 'tile-link', 'index': x}, 'className')],
+         Input({'type': 'tile-link', 'index': x}, 'className'),
+         Input({'type': 'graph_children_toggle', 'index': 4}, 'value'),
+         Input({'type': 'hierarchy-toggle', 'index': 4}, 'value')
+         ],
         [State({'type': 'div-graph-options', 'index': x}, 'children'),
          State({'type': 'graph-type-dropdown', 'index': ALL}, 'value'),
          State({'type': 'tile-customize-content', 'index': x}, 'data-loaded'),
@@ -566,8 +568,9 @@ for x in range(4):
          State('df-constants-storage', 'data')],
         prevent_initial_call=True
     )
-    def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_options_state, _graph_option, is_loaded,
-                           df_name, parent_df_name, df_const):
+    def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, hierarchy_toggle,
+                           graph_options_state, _graph_option, is_loaded, df_name,
+                           parent_df_name, df_const):
         """
         :param selected_graph_type: Selected graph type, ie. 'bar', 'line', etc.
         :param graph_options_state: State of the current graph options div
@@ -576,8 +579,19 @@ for x in range(4):
 
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][-1]
 
-        if '"type":"tile-link"}.className' in changed_id and parent_df_name is None and df_name is None:
-            return None, 1, no_update, no_update
+        # prevents update if hierarchy toggle or graph all children is selected when the graph type is not line or
+        # scatter
+        if ('"type":"graph_children_toggle"}.className' in changed_id
+            or '"type":"hierarchy-toggle"}.className' in changed_id) and (
+                selected_graph_type != "Line" or selected_graph_type != "Scatter"):
+            print("HERE HERE")
+            raise PreventUpdate
+
+        # sets boolean to allow data fitting as a customization option
+        if hierarchy_toggle == 'Specific Item' and graph_all == []:
+            data_fitting = True
+        else:
+            data_fitting = False
 
         # if link state has changed from linked --> unlinked the data has not changed, prevent update
         if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink':
@@ -634,7 +648,8 @@ for x in range(4):
                                                gridline=None,
                                                legend=None,
                                                df_name=df_name,
-                                               df_const=df_const)
+                                               df_const=df_const,
+                                               data_fitting=data_fitting)
 
         elif selected_graph_type == 'Bar':
             menu = get_bar_graph_menu(tile=tile,

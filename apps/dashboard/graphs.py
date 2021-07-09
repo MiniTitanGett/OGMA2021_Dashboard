@@ -22,7 +22,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 # Internal Modules
-from apps.dashboard.data import get_label, data_filter, customize_menu_filter
+from apps.dashboard.data import get_label, data_filter, customize_menu_filter, linear_regression, polynomial_regression
 
 
 # Contents:
@@ -121,6 +121,10 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
     # arg_value[1] = measure type selector
     # arg_value[2] = variable names selector
     # arg_value[3] = mode
+    # arg_value[4] = ?
+    # arg_value[5] = fit
+    # arg_value[6] = degree
+
     language = session["language"]
 
     # Check on whether we have enough information to attempt to get data for a graph
@@ -210,6 +214,32 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
             hovertemplate = hovertemplate.replace('%AXIS-TITLE-B%', arg_value[1]).replace('%AXIS-B%', '%{y}')
             fig.update_traces(hovertemplate=hovertemplate)
             fig = set_partial_periods(fig, filtered_df, 'Line')
+
+            # added
+            if arg_value[4] == 'linear-fit':
+                best_fit_data = linear_regression(filtered_df, 'Date of Event', 'Measure Value')
+                filtered_df["Best Fit"] = best_fit_data["Best Fit"]
+                fig2 = px.line(
+                    data_frame=filtered_df,
+                    x='Date of Event',
+                    y='Best Fit',
+                )
+                fig2.update_traces(line_color='#A9A9A9')
+                fig2.data[0].name = 'Best fit'
+                fig2.data[0].showlegend = True
+                fig.add_trace(fig2.data[0])
+            if arg_value[4] == 'curve-fit':
+                best_fit_data = polynomial_regression(filtered_df, 'Date of Event', 'Measure Value', arg_value[5])
+                filtered_df["Best Fit"] = best_fit_data["Best Fit"]
+                fig2 = px.line(
+                    data_frame=filtered_df,
+                    x='Date of Event',
+                    y='Best Fit',
+                )
+                fig2.update_traces(line_color='#A9A9A9')
+                fig2.data[0].showlegend = True
+                fig2.data[0].name = 'Best Fit'
+                fig.add_trace(fig2.data[0])
         else:
             fig = px.line(
                 title=title + get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path,

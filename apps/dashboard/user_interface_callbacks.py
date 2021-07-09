@@ -375,6 +375,8 @@ for x in range(4):
 
         # switch statement
         if 'tile-customize' in changed_id:
+            # [[mode/prompt_trigger, tile, stored_menu_for_cancel], menu_style/show_hide, menu_title,
+            # show_hide_load_warning]
             float_menu_trigger = [['customize', tile, customize_menu], {}, get_label('LBL_Edit_Graph'),
                                   session['tile_edited'][tile]]
             customize_className = 'tile-nav tile-nav--customize tile-nav--selected'
@@ -404,23 +406,27 @@ for x in range(4):
 # initialize menu, shows which menu you need
 app.clientside_callback(
     """
-    function(float_menu_trigger_0, float_menu_trigger_1, float_menu_trigger_2, float_menu_trigger_3, 
-             close_n_clicks, cancel_n_clicks, ok_n_clicks, float_menu_data) {
+    function(menu_trigger_0, menu_trigger_1, menu_trigger_2, menu_trigger_3, menu_trigger_4, close_n_clicks, 
+             cancel_n_clicks, ok_n_clicks, float_menu_data) {
         const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
         
         var float_menu_trigger = null;
         var result = null;
         if (triggered.includes('float-menu-trigger')) {
-            var trigger_arr = [float_menu_trigger_0, float_menu_trigger_1, float_menu_trigger_2, float_menu_trigger_3]
+            var trigger_arr = [menu_trigger_0, menu_trigger_1, menu_trigger_2, menu_trigger_3, menu_trigger_4]
             var tile = triggered.match(/\d+/)[0];
             float_menu_trigger = trigger_arr[tile];
             if (float_menu_trigger[0][0] == 'customize') {
                 var menu = document.getElementById(`{"index":${tile},"type":"tile-customize-content"}`);
             }
-            else {
+            if (float_menu_trigger[0][0] == 'layouts') {
                 var menu = document.getElementById(`{"index":${tile},"type":"tile-layouts-content"}`);
             }
+            if (float_menu_trigger[0][0] == 'dashboard_layouts') {
+                var menu = document.getElementById('load-dashboard-menu');
+            }
             document.getElementById("float-menu-body").appendChild(menu).style.display = ''; 
+            
             if (float_menu_trigger[3]) {
                 document.getElementById(`{"index":${tile},"type":"tile-layouts-warning"}`).style.display = '';
             }
@@ -435,9 +441,13 @@ app.clientside_callback(
                 var menu = document.getElementById(`{"index":${tile},"type":"tile-customize-content"}`);
                 document.getElementById(`{"index":${tile},"type":"tile-customize-content-wrapper"}`).appendChild(menu).style.display = 'none'; 
             }
-            else {
+            if (float_menu_trigger[0][0] == 'layouts') {
                 var menu = document.getElementById(`{"index":${tile},"type":"tile-layouts-content"}`);
                 document.getElementById(`{"index":${tile},"type":"tile-body"}`).appendChild(menu).style.display = 'none'; 
+            }
+            if (float_menu_trigger[0][0] == 'dashboard_layouts') {
+                var menu = document.getElementById('load-dashboard-menu');
+                document.getElementById('button-save-dashboard-wrapper').appendChild(menu).style.display = 'none';
             }
             
             if (triggered == 'float-menu-close.n_clicks' || triggered == 'float-menu-cancel.n_clicks') {
@@ -456,6 +466,7 @@ app.clientside_callback(
      Input({'type': 'float-menu-trigger', 'index': 1}, 'data-'),
      Input({'type': 'float-menu-trigger', 'index': 2}, 'data-'),
      Input({'type': 'float-menu-trigger', 'index': 3}, 'data-'),
+     Input({'type': 'float-menu-trigger', 'index': 4}, 'data-'),
      Input('float-menu-close', 'n_clicks'),
      Input('float-menu-cancel', 'n_clicks'),
      Input('float-menu-ok', 'n_clicks')],
@@ -1201,6 +1212,7 @@ for x in range(4):
 # *************************************************LOADSCREEN*********************************************************
 
 # All clientside callback functions referred to are stored in /assets/ClientsideCallbacks.js
+# TODO: REWORK ALL OF LOADSCREENS AND MOVE TO PYTHON FILE
 for x in range(4):
     app.clientside_callback(
         ClientsideFunction(
@@ -1253,21 +1265,14 @@ app.clientside_callback(
     """
     function(prompt_trigger_0, prompt_trigger_1, prompt_trigger_2, prompt_trigger_3, prompt_trigger_4,
              close_n_clicks, cancel_n_clicks, ok_n_clicks, prompt_data){
-        const triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
+        const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
         var prompt_trigger = null;
         var result = null;
         
-        if (triggered == '{"index":0,"type":"prompt-trigger"}.data-'){
-            prompt_trigger = prompt_trigger_0;
-        }
-        if (triggered == '{"index":1,"type":"prompt-trigger"}.data-'){
-            prompt_trigger = prompt_trigger_1;
-        }
-        if (triggered == '{"index":2,"type":"prompt-trigger"}.data-'){
-            prompt_trigger = prompt_trigger_2;
-        }
-        if (triggered == '{"index":3,"type":"prompt-trigger"}.data-'){
-            prompt_trigger = prompt_trigger_3;
+        if (triggered.includes('prompt-trigger')){
+            var trigger_arr = [prompt_trigger_0, prompt_trigger_1, prompt_trigger_2, prompt_trigger_3, prompt_trigger_4]
+            var tile = triggered.match(/\d+/)[0];
+            prompt_trigger = trigger_arr[tile];
         }
         
         if (triggered == 'prompt-close.n_clicks') {

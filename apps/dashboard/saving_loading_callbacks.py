@@ -19,7 +19,7 @@ from flask import session
 # Internal Packages
 from apps.dashboard.layouts import get_data_menu, get_customize_content, get_div_body
 from apps.dashboard.app import app
-from apps.dashboard.data import get_label, CLR, dataset_to_df, generate_constants
+from apps.dashboard.data import get_label, dataset_to_df, generate_constants
 from apps.dashboard.saving_functions import delete_layout, save_layout_state, save_layout_to_db, \
     save_dashboard_state, save_dashboard_to_db, delete_dashboard, load_graph_menu
 
@@ -120,6 +120,9 @@ def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, float_menu_re
         load_state = [load_state]
     if 'float-menu-result.children' in changed_id \
             and (float_menu_data[0] != 'layouts' or load_state[changed_index] is None or float_menu_result != 'ok'):
+        raise PreventUpdate
+    # do not call if we aren't dealing with tiles
+    if changed_index == 4:
         raise PreventUpdate
 
     # switch statement
@@ -327,9 +330,7 @@ for y in range(4):
         elif trigger == 'delete':
 
             intermediate_pointer = REPORT_POINTER_PREFIX + graph_title.replace(" ", "")
-
             graph_titles = []
-
             for layout in session['saved_layouts']:
                 graph_titles.append(session['saved_layouts'][layout]['Title'])
 
@@ -443,23 +444,69 @@ for y in range(4):
 
 # **********************************************DASHBOARD SAVING******************************************************
 
-# dashboard saving/save deleting
+# dashboard saving/save deleting/loading - triggers prompt and menu
 @app.callback(
     [Output('select-dashboard-dropdown', 'options'),
      Output({'type': 'set-dropdown-options-trigger', 'index': 0}, 'data-dashboard_saving'),
      Output({'type': 'set-tile-title-trigger', 'index': 0}, 'data-dashboard_load_title'),
      Output({'type': 'set-tile-title-trigger', 'index': 1}, 'data-dashboard_load_title'),
      Output({'type': 'set-tile-title-trigger', 'index': 2}, 'data-dashboard_load_title'),
-     Output({'type': 'set-tile-title-trigger', 'index': 3}, 'data-dashboard_load_title')],
+     Output({'type': 'set-tile-title-trigger', 'index': 3}, 'data-dashboard_load_title'),
+     # menu and prompt outputs
+     Output({'type': 'prompt-trigger', 'index': 4}, 'data-'),
+     Output({'type': 'float-menu-trigger', 'index': 4}, 'data-'),
+     # outputs for dashboard loading
+     Output('dashboard-title', 'value'),
+     # tile content
+     Output('div-body-wrapper', 'children'),
+     # data tile 0
+     Output({'type': 'data-menu-dashboard-loading', 'index': 0}, 'children'),
+     Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-tab'),
+     Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-start_year'),
+     Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-end_year'),
+     Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-start_secondary'),
+     Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-end_secondary'),
+     # data tile 1
+     Output({'type': 'data-menu-dashboard-loading', 'index': 1}, 'children'),
+     Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-tab'),
+     Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-start_year'),
+     Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-end_year'),
+     Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-start_secondary'),
+     Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-end_secondary'),
+     # data tile 2
+     Output({'type': 'data-menu-dashboard-loading', 'index': 2}, 'children'),
+     Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-tab'),
+     Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-start_year'),
+     Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-end_year'),
+     Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-start_secondary'),
+     Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-end_secondary'),
+     # data tile 3
+     Output({'type': 'data-menu-dashboard-loading', 'index': 3}, 'children'),
+     Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-tab'),
+     Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-start_year'),
+     Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-end_year'),
+     Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-start_secondary'),
+     Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-end_secondary'),
+     # data tile 4
+     Output({'type': 'data-menu-dashboard-loading', 'index': 4}, 'children'),
+     Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-tab'),
+     Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-start_year'),
+     Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-end_year'),
+     Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-start_secondary'),
+     Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-end_secondary'),
+     # num tiles update
+     Output('num-tiles-4', 'data-num-tiles'),
+     Output('df-constants-storage-dashboard-wrapper', 'children')],
     [Input('save-dashboard', 'n_clicks'),
      Input('delete-dashboard', 'n_clicks'),
      Input('load-dashboard', 'n_clicks'),
      Input('float-menu-result', 'children'),
      Input('prompt-result', 'children')],
-    # dashboard info
+    # prompt and menu info
     [State('prompt-title', 'data-'),
      State('float-menu-title', 'data-'),
-     State({'type': 'select-layout-dropdown', 'index': ALL}, 'value'),
+     State('select-dashboard-dropdown', 'value'),
+     # dashboard info
      State('dashboard-title', 'value'),
      # tile info
      State({'type': 'tile-title', 'index': ALL}, 'value'),
@@ -552,322 +599,443 @@ for y in range(4):
      State({'type': 'start-year-input', 'index': 1}, 'name'),
      State({'type': 'start-year-input', 'index': 2}, 'name'),
      State({'type': 'start-year-input', 'index': 3}, 'name'),
-     State({'type': 'start-year-input', 'index': 4}, 'name')],
+     State({'type': 'start-year-input', 'index': 4}, 'name'),
+     State('df-constants-storage', 'data')],
     prevent_initial_call=True
 )
-def _save_dashboard(_save_clicks, _delete_clicks, _load_clicks, float_menu_result, prompt_result,prompt_data,
-                                       float_menu_data, load_state,  dashboard_title, tile_titles, links, graph_types,
-                    args_list_0, args_list_1, args_list_2, args_list_3,
-                    df_name_0, df_name_1, df_name_2, df_name_3, df_name4,
-                    start_year_0, start_year_1, start_year_2, start_year_3, start_year_4,
-                    end_year_0, end_year_1, end_year_2, end_year_3, end_year_4,
-                    hierarchy_toggle_0, hierarchy_toggle_1, hierarchy_toggle_2, hierarchy_toggle_3, hierarchy_toggle_4,
-                    graph_all_toggle_0, graph_all_toggle_1, graph_all_toggle_2, graph_all_toggle_3, graph_all_toggle_4,
-                    level_value_0, level_value_1, level_value_2, level_value_3, level_value_4,
-                    button_path_0, button_path_1, button_path_2, button_path_3, button_path_4,
-                    fiscal_toggle_0, fiscal_toggle_1, fiscal_toggle_2, fiscal_toggle_3, fiscal_toggle_4,
-                    timeframe_0, timeframe_1, timeframe_2, timeframe_3, timeframe_4,
-                    start_secondary_0, start_secondary_1, start_secondary_2, start_secondary_3, start_secondary_4,
-                    end_secondary_0, end_secondary_1, end_secondary_2, end_secondary_3, end_secondary_4,
-                    num_periods_0, num_periods_1, num_periods_2, num_periods_3, num_periods_4,
-                    period_type_0, period_type_1, period_type_2, period_type_3, period_type_4,
-                    date_tab_0, date_tab_1, date_tab_2, date_tab_3, date_tab_4):
+def _manage_dashboard_saves(_save_clicks, _delete_clicks, _load_clicks, float_menu_result, prompt_result, prompt_data,
+                            float_menu_data, selected_dashboard, dashboard_title, tile_titles, links,
+                            graph_types,
+                            args_list_0, args_list_1, args_list_2, args_list_3,
+                            df_name_0, df_name_1, df_name_2, df_name_3, df_name4,
+                            start_year_0, start_year_1, start_year_2, start_year_3, start_year_4,
+                            end_year_0, end_year_1, end_year_2, end_year_3, end_year_4,
+                            hierarchy_toggle_0, hierarchy_toggle_1, hierarchy_toggle_2, hierarchy_toggle_3,
+                            hierarchy_toggle_4,
+                            graph_all_toggle_0, graph_all_toggle_1, graph_all_toggle_2, graph_all_toggle_3,
+                            graph_all_toggle_4,
+                            level_value_0, level_value_1, level_value_2, level_value_3, level_value_4,
+                            button_path_0, button_path_1, button_path_2, button_path_3, button_path_4,
+                            fiscal_toggle_0, fiscal_toggle_1, fiscal_toggle_2, fiscal_toggle_3, fiscal_toggle_4,
+                            timeframe_0, timeframe_1, timeframe_2, timeframe_3, timeframe_4,
+                            start_secondary_0, start_secondary_1, start_secondary_2, start_secondary_3,
+                            start_secondary_4,
+                            end_secondary_0, end_secondary_1, end_secondary_2, end_secondary_3, end_secondary_4,
+                            num_periods_0, num_periods_1, num_periods_2, num_periods_3, num_periods_4,
+                            period_type_0, period_type_1, period_type_2, period_type_3, period_type_4,
+                            date_tab_0, date_tab_1, date_tab_2, date_tab_3, date_tab_4, df_const):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':
         raise PreventUpdate
 
+    # Outputs
     options = no_update
     update_graph_options_trigger = no_update
     tile_title_returns = [no_update] * 4
     auto_named_titles = [no_update] * 4
+    # [[mode/prompt_trigger, tile], prompt_style/show_hide, prompt_title, prompt_body]
+    prompt_trigger = no_update
+    # [[mode/prompt_trigger, tile, stored_menu_for_cancel], menu_style/show_hide, menu_title, show_hide_load_warning]
+    float_menu_trigger = no_update
+    # Loading Outputs
+    dashboard_title_output = no_update
+    tile_content_children = no_update
+    dms = [{'Content': no_update, 'Tab': no_update, 'Start Year': no_update, 'End Year': no_update,
+            'Start Secondary': no_update, 'End Secondary': no_update},
+           {'Content': no_update, 'Tab': no_update, 'Start Year': no_update, 'End Year': no_update,
+            'Start Secondary': no_update, 'End Secondary': no_update},
+           {'Content': no_update, 'Tab': no_update, 'Start Year': no_update, 'End Year': no_update,
+            'Start Secondary': no_update, 'End Secondary': no_update},
+           {'Content': no_update, 'Tab': no_update, 'Start Year': no_update, 'End Year': no_update,
+            'Start Secondary': no_update, 'End Secondary': no_update},
+           {'Content': no_update, 'Tab': no_update, 'Start Year': no_update, 'End Year': no_update,
+            'Start Secondary': no_update, 'End Secondary': no_update}]
+    num_tiles = no_update
+    df_const_wrapper = no_update
 
-    # if save requested or the overwrite was confirmed, check for exceptions and save
-    if 'button-save-dashboard' in changed_id or '{"index":0,"type":"dashboard-overwrite"}.n_clicks' == changed_id:
+    # if delete button was pressed, prompt delete
+    if 'delete-button' in changed_id:
+        intermediate_pointer = DASHBOARD_POINTER_PREFIX + dashboard_title.replace(" ", "")
+        dashboard_titles = []
+        for dashboard in session['saved_dashboards']:
+            dashboard_titles.append(session['saved_dashboards'][dashboard]['Title'])
 
-        intermediate_dashboard_pointer = DASHBOARD_POINTER_PREFIX + dashboard_title.replace(" ", "")
-        # regex.sub('[^A-Za-z0-9]+', '', dashboard_title)
+        # if tile exists in session, send delete prompt
+        if intermediate_pointer in session['saved_dashboards'] \
+                and session['saved_dashboards'][intermediate_pointer]['Title'] == dashboard_title:
+            prompt_trigger = [['delete', 4], {}, get_label('LBL_Delete_Dashboard'),
+                              get_label('LBL_Delete_Dashboard_Prompt').format(dashboard_title)]
 
-        while True:
-            if intermediate_dashboard_pointer in session['saved_layouts']:
-                dashboard_pointer = intermediate_dashboard_pointer + "_"
-                intermediate_dashboard_pointer = dashboard_pointer
-            else:
-                dashboard_pointer = intermediate_dashboard_pointer
-                break
+    # if load button was pressed, send load menu
+    elif 'load-dashboard' in changed_id:
+        float_menu_trigger = [['dashboard_layouts', 4], {}, get_label('LBL_Load_Dashboard'),
+                              session['tile_edited'][4]]
 
-        used_dashboard_titles = []
+    # if confirm load, load dashboard
+    elif 'float-menu-result.children' in changed_id \
+            and float_menu_data[0] == 'dashboard_layouts' and selected_dashboard is not None \
+            and float_menu_result == 'ok':
+        tile_keys = [{}] * 4
+        num_tiles = 0
 
-        for dashboard_layout in session['saved_dashboards']:
-            used_dashboard_titles.append(session['saved_dashboards'][dashboard_layout]['Dashboard Title'])
+        for dict_key, dict_value in session['saved_dashboards'][selected_dashboard].items():
 
-        # get non-overwriting status symbol display (check-mark or ban symbol)
-        def get_status_symbol_display(tooltip, symbol):
-            return html.I(
-                html.Span(
-                    tooltip,
-                    className='save-symbols-tooltip'),
-                className=symbol,
-                id='save-status-symbols-inner',
-                style={'padding': '10px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
-                       'text-align': 'center'})
+            if 'Tile' in dict_key:
 
-        # auto name blank tile titles
-        for idx, tile_title in enumerate(tile_titles):
-            if tile_title == '':
-                auto_named_titles[idx] = tile_titles[idx] = dashboard_title + '-' + str(idx + 1)
+                num_tiles += 1
 
-        used_titles = []
+                tile_index = data_index = int(search(r'\d+', dict_key).group())
 
-        for key in session['saved_layouts']:
-            used_titles.append(session['saved_layouts'][key]["Title"])
+                # Change key to Tile Pointer instead of Tile Title
+                tile_pointer = dict_value['Tile Pointer']
+                link_state = dict_value['Link']
 
-        # check if the dashboard title is blank
-        if dashboard_title == '':
-            save_error_tooltip = get_label('LBL_Dashboards_Require_A_Title_To_Be_Saved')
-            save_symbol = 'fa fa-ban'
-            save_status_symbols = get_status_symbol_display(save_error_tooltip, save_symbol)
-
-        # check if the dashboard is empty
-        elif len(links) == 0:
-            save_error_tooltip = get_label('LBL_Dashboard_Must_Not_Be_Empty')
-            save_symbol = 'fa fa-ban'
-            save_status_symbols = get_status_symbol_display(save_error_tooltip, save_symbol)
-
-        # if conflicting tiles or dashboard and overwrite not requested, prompt overwrite
-        elif ((dashboard_title in used_dashboard_titles or any(x in used_titles for x in tile_titles))
-              and '{"index":0,"type":"dashboard-overwrite"}.n_clicks' != changed_id):
-
-            # dashboard-overwrite index 0 = confirm overwrite
-            # dashboard-overwrite index 1 = cancel overwrite
-            # if conflicting graph titles
-
-            if any(x in used_titles for x in tile_titles):
-                conflicting_graphs = ''
-                conflicting_graphs_list = [i for i in tile_titles if i in used_titles]  # was session['saved_layouts']
-                for idx, conflicting_graph in enumerate(conflicting_graphs_list):
-                    conflicting_graphs += '\'' + conflicting_graph + '\''
-                    if idx != (len(conflicting_graphs_list) - 1):
-                        conflicting_graphs += ', '
-                # if conflicting graph titles and dashboard title
-                if dashboard_title in used_dashboard_titles:  # was session['saved_dashboards']
-                    overwrite_tooltip = "{} \'{}\', {} {}".format(
-                        get_label('LBL_Overwrite_Dashboard'),
-                        dashboard_title,
-                        get_label('LBL_And_The_Graphs' if len(conflicting_graphs_list) > 1 else 'LBL_And_The_Graph'),
-                        conflicting_graphs)
-                # else, just conflicting graph titles
+                if tile_pointer in session['saved_layouts']:
+                    tile_data = session['saved_layouts'][tile_pointer].copy()
+                    tile_title = tile_data.pop("Title")
+                # TODO: In 'prod' we will check for pointers and only do a 'virtual' delete for
+                #  the single user
                 else:
-                    overwrite_tooltip = "{} {}".format(
-                        get_label(
-                            'LBL_Overwrite_Graphs' if len(conflicting_graphs_list) > 1 else 'LBL_Overwrite_Graph'),
-                        conflicting_graphs)
-
-            # else, just conflicting dashboard title
-            else:
-                overwrite_tooltip = f"{get_label('LBL_Overwrite_Dashboard')} \'{dashboard_title}\'"
-
-            save_status_symbols = html.Div([
-                html.I(
-                    html.Span(
-                        overwrite_tooltip,
-                        className='save-symbols-tooltip'),
-                    id={'type': 'dashboard-overwrite', 'index': 0},
-                    className='fa fa-floppy-o',
-                    style={'padding': '7px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
-                           'margin-right': '10px', 'margin-left': '7px', 'vertical-align': 'top'}),
-                html.Span([
-                    html.I(
-                        [],
-                        className='fa fa-floppy-o',
-                        style={'position': 'absolute', 'left': '0', 'width': '15px'}),
-                    html.I(
-                        [],
-                        className='fa fa-ban fa-2x',
-                        style={'position': 'absolute', 'top': '50%', 'margin-left': '-13px', 'width': '26px',
-                               'margin-top': '-15px', 'color': CLR['background1']}),
-                    html.Span(
-                        get_label("LBL_Cancel_Save_Attempt"),
-                        className='save-symbols-tooltip')],
-                    id={'type': 'dashboard-overwrite', 'index': 1},
-                    className='save-overwrite-symbols',
-                    style={'padding': '7px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
-                           'margin-left': '10px', 'margin-right': '14px', 'display': 'inline-block',
-                           'vertical-align': 'top'})],
-                id='save-status-symbols-inner',
-                style={'width': '71px', 'border': '1px solid {}'.format(CLR['lightgray']), 'margin': '2px 0',
-                       'border-radius': '6px'})
-
-        # else, save/overwrite the dashboard and contained tiles
-        else:
-
-            df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name4]
-
-            start_years = [start_year_0, start_year_1, start_year_2, start_year_3, start_year_4]
-
-            end_years = [end_year_0, end_year_1, end_year_2, end_year_3, end_year_4]
-
-            hierarchy_toggles = [hierarchy_toggle_0, hierarchy_toggle_1, hierarchy_toggle_2, hierarchy_toggle_3,
-                                 hierarchy_toggle_4]
-
-            graph_all_toggles = [graph_all_toggle_0, graph_all_toggle_1, graph_all_toggle_2, graph_all_toggle_3,
-                                 graph_all_toggle_4]
-
-            level_values = [level_value_0, level_value_1, level_value_2, level_value_3, level_value_4]
-
-            button_paths = [button_path_0, button_path_1, button_path_2, button_path_3, button_path_4]
-
-            fiscal_toggles = [fiscal_toggle_0, fiscal_toggle_1, fiscal_toggle_2, fiscal_toggle_3, fiscal_toggle_4]
-
-            timeframes = [timeframe_0, timeframe_1, timeframe_2, timeframe_3, timeframe_4]
-
-            start_secondaries = [start_secondary_0, start_secondary_1, start_secondary_2, start_secondary_3,
-                                 start_secondary_4]
-
-            end_secondaries = [end_secondary_0, end_secondary_1, end_secondary_2, end_secondary_3, end_secondary_4]
-
-            num_periods = [num_periods_0, num_periods_1, num_periods_2, num_periods_3, num_periods_4]
-
-            period_types = [period_type_0, period_type_1, period_type_2, period_type_3, period_type_4]
-
-            date_tabs = [date_tab_0, date_tab_1, date_tab_2, date_tab_3, date_tab_4]
-
-            dashboard_saves = {'Dashboard Title': dashboard_title}
-
-            # if any tiles are linked, save the parent data menu
-            if links.count('fa fa-link') > 0:
-
-                parent_nid_path = "root"
-                for button in button_paths[4]:
-                    parent_nid_path += '^||^{}'.format(button['props']['children'])
-
-                parent_data = {
-                    'Fiscal Toggle': fiscal_toggles[4],
-                    'Timeframe': timeframes[4],
-                    'Num Periods': num_periods[4],
-                    'Hierarchy Toggle': hierarchy_toggles[4],
-                    'Period Type': period_types[4],
-                    'Level Value': level_values[4],
-                    'Data Set': df_names[4],
-                    'Graph All Toggle': graph_all_toggles[4],
-                    'NID Path': parent_nid_path,
-                }
-
-                # if input method is 'select-range', add the states of the select range inputs
-                if timeframes[4] == 'select-range':
-                    parent_data['Date Tab'] = date_tabs[4]
-                    parent_data['Start Year'] = start_years[4]
-                    parent_data['End Year'] = end_years[4]
-                    parent_data['Start Secondary'] = start_secondaries[4]
-                    parent_data['End Secondary'] = end_secondaries[4]
-
-                dashboard_saves['Parent Data'] = parent_data
-
-            for i in range(len(links)):
-
-                intermediate_pointer = REPORT_POINTER_PREFIX + tile_titles[i].replace(" ", "")
-                # regex.sub('[^A-Za-z0-9]+', '', tile_titles[i])
-
-                used_titles = []
-
-                for key in session['saved_layouts']:
-                    used_titles.append(session['saved_layouts'][key]["Title"])
-
-                while True:
-                    if intermediate_pointer in session['saved_layouts'] \
-                            and session['saved_layouts'][intermediate_pointer]["Title"] not in used_titles:
-                        tile_pointer = intermediate_pointer + "_"
-                        intermediate_pointer = tile_pointer
-                    else:
-                        tile_pointer = intermediate_pointer
-                        break
-
-                if i == 0:
-                    args_list = args_list_0
-                elif i == 1:
-                    args_list = args_list_1
-                elif i == 2:
-                    args_list = args_list_2
-                else:
-                    args_list = args_list_3
-
-                if type(button_paths[i]) == dict:
-                    button_paths[i] = [button_paths[i]]
-
-                nid_path = "root"
-                for button in button_paths[i]:
-                    nid_path += '^||^{}'.format(button['props']['children'])
-
-                # ---------- save dashboard reference to tile ----------
-                dashboard_saves['Tile ' + str(i)] = {
-                    'Tile Pointer': tile_pointer,
-                    # 'Tile Title': tile_titles[i],
-                    'Link': links[i]
-                }
-
-                # ---------- save tile ----------
-
-                # if tile is unlinked, save data menu
-                if links[i] == 'fa fa-unlink':
+                    tile_title = "This Graph has been deleted"
                     tile_data = {
-                        'Fiscal Toggle': fiscal_toggles[i],
-                        'Timeframe': timeframes[i],
-                        'Num Periods': num_periods[i],
-                        'Hierarchy Toggle': hierarchy_toggles[i],
-                        'Period Type': period_types[i],
-                        'Level Value': level_values[i],
-                        'Data Set': df_names[i],
-                        'Graph All Toggle': graph_all_toggles[i],
-                        'NID Path': nid_path,
+                        "Args List": ["", "", ""],
+                        "Data Set": "OPG001",  # "Data Set": "OPG001_2016-17_Week_v3.csv",
+                        "Fiscal Toggle": "Gregorian",
+                        "Graph All Toggle": [],
+                        "Graph Type": "Line",
+                        "Hierarchy Toggle": "Level Filter",
+                        "Level Value": None,
+                        "NID Path": "root",
+                        "Num Periods": "5",
+                        "Period Type": "last-years",
+                        "Timeframe": "all-time",
+                        "Title": "This Graph has been deleted"}
+
+                # pop graph_type/args_list to compare the dashboard parent data menu to the saved tile data menu
+                graph_type = tile_data.pop('Graph Type')
+                args_list = tile_data.pop('Args List')
+                df_name = tile_data['Data Set']
+
+                # check if data is loaded
+                if df_name not in session:
+                    session[df_name] = dataset_to_df(df_name)
+                    if df_const is None:
+                        df_const = {}
+                    df_const[df_name] = generate_constants(df_name)
+
+                if link_state == 'fa fa-link':
+                    # if tile was linked but it's data menu has changed and no longer matches parent data, unlink
+                    if tile_data != session['saved_dashboards'][selected_dashboard]['Parent Data']:
+                        link_state = 'fa fa-unlink'
+
+                    # else, the tile is valid to be linked, generate parent menu if it has not been created yet
+                    else:
+                        data_index = 4
+
+                # create tile keys
+                graph_menu = load_graph_menu(graph_type=graph_type, tile=tile_index, df_name=df_name,
+                                             args_list=args_list,
+                                             df_const=df_const)
+                # TODO: Need to add df name
+                customize_content = get_customize_content(tile=tile_index, graph_type=graph_type, graph_menu=graph_menu,
+                                                          df_name=df_name)
+                tile_key = {'Tile Title': tile_title, 'Link': link_state, 'Customize Content': customize_content}
+                tile_keys[tile_index] = tile_key
+
+                # if tile is unlinked, or linked while the parent does not exist, create data menu
+                if link_state == 'fa fa-unlink' or (link_state == 'fa fa-link' and dms[4]['Content'] == no_update):
+
+                    hierarchy_toggle = tile_data['Hierarchy Toggle']
+                    level_value = tile_data['Level Value']
+                    nid_path = tile_data['NID Path']
+                    graph_all_toggle = tile_data['Graph All Toggle']
+                    fiscal_toggle = tile_data['Fiscal Toggle']
+                    timeframe = tile_data['Timeframe']
+                    num_periods = tile_data['Num Periods']
+                    period_type = tile_data['Period Type']
+
+                    dms[data_index]['Content'] = get_data_menu(
+                        tile=data_index, df_name=df_name, mode='dashboard-loading', hierarchy_toggle=hierarchy_toggle,
+                        level_value=level_value, nid_path=nid_path,
+                        graph_all_toggle=graph_all_toggle, fiscal_toggle=fiscal_toggle, input_method=timeframe,
+                        num_periods=num_periods, period_type=period_type, df_const=df_const)
+
+                    if timeframe == 'select-range':
+                        dms[data_index]['Tab'] = tile_data['Date Tab']
+                        dms[data_index]['Start Year'] = tile_data['Start Year']
+                        dms[data_index]['End Year'] = tile_data['End Year']
+                        dms[data_index]['Start Secondary'] = tile_data['Start Secondary']
+                        dms[data_index]['End Secondary'] = tile_data['End Secondary']
+
+        # outputs
+        dashboard_title_output = session['saved_dashboards'][selected_dashboard]['Dashboard Title']
+        tile_content_children = get_div_body(num_tiles=num_tiles, input_tiles=None, tile_keys=tile_keys)
+        df_const_wrapper = html.Div(
+            html.Div(
+                html.Div(
+                    html.Div(
+                        dcc.Store(
+                            id='df-constants-storage',
+                            storage_type='memory',
+                            data=df_const),
+                        id={'type': 'df-constants-storage-tile-wrapper', 'index': 0}),
+                    id={'type': 'df-constants-storage-tile-wrapper', 'index': 1}),
+                id={'type': 'df-constants-storage-tile-wrapper', 'index': 2}),
+            id={'type': 'df-constants-storage-tile-wrapper', 'index': 3}),
+        session['tile_edited'][4] = num_tiles
+        # TODO: INSERT ALERT FOR SUCCESSFUL LOAD
+
+    elif prompt_data is not None:
+        # if save requested or the overwrite was confirmed, check for exceptions and save
+        if 'save-dashboard' in changed_id or (prompt_data[0] == 'overwrite' and prompt_result == 'ok'):
+
+            intermediate_dashboard_pointer = DASHBOARD_POINTER_PREFIX + dashboard_title.replace(" ", "")
+            # regex.sub('[^A-Za-z0-9]+', '', dashboard_title)
+
+            while True:
+                if intermediate_dashboard_pointer in session['saved_layouts']:
+                    dashboard_pointer = intermediate_dashboard_pointer + "_"
+                    intermediate_dashboard_pointer = dashboard_pointer
+                else:
+                    dashboard_pointer = intermediate_dashboard_pointer
+                    break
+
+            used_dashboard_titles = []
+
+            for dashboard_layout in session['saved_dashboards']:
+                used_dashboard_titles.append(session['saved_dashboards'][dashboard_layout]['Dashboard Title'])
+
+            # auto name blank tile titles
+            for idx, tile_title in enumerate(tile_titles):
+                if tile_title == '':
+                    auto_named_titles[idx] = tile_titles[idx] = dashboard_title + '-' + str(idx + 1)
+
+            used_titles = []
+
+            for key in session['saved_layouts']:
+                used_titles.append(session['saved_layouts'][key]["Title"])
+
+            # check if the dashboard title is blank
+            if dashboard_title == '':
+                prompt_trigger = [['empty_title', 4], {}, get_label('LBL_Untitled_Dashboard'),
+                                  get_label('LBL_Untitled_Dashboard_Prompt')]
+                # get_label('LBL_Dashboards_Require_A_Title_To_Be_Saved')
+
+            # check if the dashboard is empty
+            elif len(links) == 0:
+                prompt_trigger = [['empty_dashboard', 4], {}, get_label('LBL_Empty_Dashboard'),
+                                  get_label('LBL_Empty_Dashboard_Prompt')]
+                # get_label('LBL_Dashboard_Must_Not_Be_Empty')
+
+            # if conflicting tiles or dashboard and overwrite not requested, prompt overwrite
+            elif ((dashboard_title in used_dashboard_titles or any(x in used_titles for x in tile_titles))
+                  and '{"index":0,"type":"dashboard-overwrite"}.n_clicks' != changed_id):
+
+                # dashboard-overwrite index 0 = confirm overwrite
+                # dashboard-overwrite index 1 = cancel overwrite
+                # if conflicting graph titles
+
+                if any(x in used_titles for x in tile_titles):
+                    conflicting_graphs = ''
+                    conflicting_graphs_list = [i for i in tile_titles if i in used_titles]
+                    for idx, conflicting_graph in enumerate(conflicting_graphs_list):
+                        conflicting_graphs += '\'' + conflicting_graph + '\''
+                        if idx != (len(conflicting_graphs_list) - 1):
+                            conflicting_graphs += ', '
+                    # if conflicting graph titles and dashboard title
+                    if dashboard_title in used_dashboard_titles:  # was session['saved_dashboards']
+                        # overwrite_tooltip = "{} \'{}\', {} {}".format(
+                        #     get_label('LBL_Overwrite_Dashboard'),
+                        #     dashboard_title,
+                        #     get_label('LBL_And_The_Graphs' if len(conflicting_graphs_list) > 1 else 'LBL_And_The_Graph'),
+                        #     conflicting_graphs)
+                        prompt_trigger = [['overwrite', 4], {},
+                                          get_label('LBL_Overwrite_Graph_C_Title_Graph'),
+                                          get_label('LBL_Overwrite_Graph_C_Title_Graph_Prompt')]
+                    # else, just conflicting graph titles
+                    else:
+                        # overwrite_tooltip = "{} {}".format(
+                        #     get_label(
+                        #         'LBL_Overwrite_Graphs' if len(conflicting_graphs_list) > 1 else 'LBL_Overwrite_Graph'),
+                        #     conflicting_graphs)
+                        prompt_trigger = [['overwrite', 4], {}, get_label('LBL_Overwrite_Graph_C_Graph'),
+                                          get_label('LBL_Overwrite_Graph_C_Graph_Prompt')]
+
+                # else, just conflicting dashboard title
+                else:
+                    # overwrite_tooltip = f"{get_label('LBL_Overwrite_Dashboard')} \'{dashboard_title}\'"
+                    prompt_trigger = [['overwrite', 4], {}, get_label('LBL_Overwrite_Graph_C_Title'),
+                                      get_label('LBL_Overwrite_Graph_C_Title_Prompt')]
+
+            # else, save/overwrite the dashboard and contained tiles
+            else:
+
+                df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name4]
+                start_years = [start_year_0, start_year_1, start_year_2, start_year_3, start_year_4]
+                end_years = [end_year_0, end_year_1, end_year_2, end_year_3, end_year_4]
+                hierarchy_toggles = [hierarchy_toggle_0, hierarchy_toggle_1, hierarchy_toggle_2, hierarchy_toggle_3,
+                                     hierarchy_toggle_4]
+                graph_all_toggles = [graph_all_toggle_0, graph_all_toggle_1, graph_all_toggle_2, graph_all_toggle_3,
+                                     graph_all_toggle_4]
+                level_values = [level_value_0, level_value_1, level_value_2, level_value_3, level_value_4]
+                button_paths = [button_path_0, button_path_1, button_path_2, button_path_3, button_path_4]
+                fiscal_toggles = [fiscal_toggle_0, fiscal_toggle_1, fiscal_toggle_2, fiscal_toggle_3, fiscal_toggle_4]
+                timeframes = [timeframe_0, timeframe_1, timeframe_2, timeframe_3, timeframe_4]
+                start_secondaries = [start_secondary_0, start_secondary_1, start_secondary_2, start_secondary_3,
+                                     start_secondary_4]
+                end_secondaries = [end_secondary_0, end_secondary_1, end_secondary_2, end_secondary_3, end_secondary_4]
+                num_periods = [num_periods_0, num_periods_1, num_periods_2, num_periods_3, num_periods_4]
+                period_types = [period_type_0, period_type_1, period_type_2, period_type_3, period_type_4]
+                date_tabs = [date_tab_0, date_tab_1, date_tab_2, date_tab_3, date_tab_4]
+                dashboard_saves = {'Dashboard Title': dashboard_title}
+
+                # if any tiles are linked, save the parent data menu
+                if links.count('fa fa-link') > 0:
+
+                    parent_nid_path = "root"
+                    for button in button_paths[4]:
+                        parent_nid_path += '^||^{}'.format(button['props']['children'])
+
+                    parent_data = {
+                        'Fiscal Toggle': fiscal_toggles[4],
+                        'Timeframe': timeframes[4],
+                        'Num Periods': num_periods[4],
+                        'Hierarchy Toggle': hierarchy_toggles[4],
+                        'Period Type': period_types[4],
+                        'Level Value': level_values[4],
+                        'Data Set': df_names[4],
+                        'Graph All Toggle': graph_all_toggles[4],
+                        'NID Path': parent_nid_path,
                     }
 
                     # if input method is 'select-range', add the states of the select range inputs
-                    if timeframes[i] == 'select-range':
-                        tile_data['Date Tab'] = date_tabs[i]
-                        tile_data['Start Year'] = start_years[i]
-                        tile_data['End Year'] = end_years[i]
-                        tile_data['Start Secondary'] = start_secondaries[i]
-                        tile_data['End Secondary'] = end_secondaries[i]
+                    if timeframes[4] == 'select-range':
+                        parent_data['Date Tab'] = date_tabs[4]
+                        parent_data['Start Year'] = start_years[4]
+                        parent_data['End Year'] = end_years[4]
+                        parent_data['Start Secondary'] = start_secondaries[4]
+                        parent_data['End Secondary'] = end_secondaries[4]
 
-                else:
-                    tile_data = dashboard_saves['Parent Data']
+                    dashboard_saves['Parent Data'] = parent_data
 
-                # save tile to file
-                save_layout_state(tile_pointer, {'Graph Type': graph_types[i], 'Args List': args_list, **tile_data,
-                                                 'Title': tile_titles[i]})
-                # save_layout_to_file(session['saved_layouts'])
-                save_layout_to_db(tile_pointer, tile_titles[i], True)
+                for i in range(len(links)):
 
-            # save dashboard to file
-            # Change to a dashboard pointer from dashboard_title
-            save_dashboard_state(dashboard_pointer, dashboard_saves)
-            # save_dashboard_to_file(session['saved_dashboards'])
-            save_dashboard_to_db(dashboard_pointer, dashboard_title)
+                    intermediate_pointer = REPORT_POINTER_PREFIX + tile_titles[i].replace(" ", "")
+                    # regex.sub('[^A-Za-z0-9]+', '', tile_titles[i])
 
-            save_error_tooltip = ''
+                    used_titles = []
+
+                    for key in session['saved_layouts']:
+                        used_titles.append(session['saved_layouts'][key]["Title"])
+
+                    while True:
+                        if intermediate_pointer in session['saved_layouts'] \
+                                and session['saved_layouts'][intermediate_pointer]["Title"] not in used_titles:
+                            tile_pointer = intermediate_pointer + "_"
+                            intermediate_pointer = tile_pointer
+                        else:
+                            tile_pointer = intermediate_pointer
+                            break
+
+                    if i == 0:
+                        args_list = args_list_0
+                    elif i == 1:
+                        args_list = args_list_1
+                    elif i == 2:
+                        args_list = args_list_2
+                    else:
+                        args_list = args_list_3
+
+                    if type(button_paths[i]) == dict:
+                        button_paths[i] = [button_paths[i]]
+
+                    nid_path = "root"
+                    for button in button_paths[i]:
+                        nid_path += '^||^{}'.format(button['props']['children'])
+
+                    # ---------- save dashboard reference to tile ----------
+                    dashboard_saves['Tile ' + str(i)] = {
+                        'Tile Pointer': tile_pointer,
+                        # 'Tile Title': tile_titles[i],
+                        'Link': links[i]
+                    }
+
+                    # ---------- save tile ----------
+
+                    # if tile is unlinked, save data menu
+                    if links[i] == 'fa fa-unlink':
+                        tile_data = {
+                            'Fiscal Toggle': fiscal_toggles[i],
+                            'Timeframe': timeframes[i],
+                            'Num Periods': num_periods[i],
+                            'Hierarchy Toggle': hierarchy_toggles[i],
+                            'Period Type': period_types[i],
+                            'Level Value': level_values[i],
+                            'Data Set': df_names[i],
+                            'Graph All Toggle': graph_all_toggles[i],
+                            'NID Path': nid_path,
+                        }
+
+                        # if input method is 'select-range', add the states of the select range inputs
+                        if timeframes[i] == 'select-range':
+                            tile_data['Date Tab'] = date_tabs[i]
+                            tile_data['Start Year'] = start_years[i]
+                            tile_data['End Year'] = end_years[i]
+                            tile_data['Start Secondary'] = start_secondaries[i]
+                            tile_data['End Secondary'] = end_secondaries[i]
+
+                    else:
+                        tile_data = dashboard_saves['Parent Data']
+
+                    # save tile to file
+                    save_layout_state(tile_pointer, {'Graph Type': graph_types[i], 'Args List': args_list, **tile_data,
+                                                     'Title': tile_titles[i]})
+                    # save_layout_to_file(session['saved_layouts'])
+                    save_layout_to_db(tile_pointer, tile_titles[i], True)
+
+                # save dashboard to file
+                # Change to a dashboard pointer from dashboard_title
+                save_dashboard_state(dashboard_pointer, dashboard_saves)
+                # save_dashboard_to_file(session['saved_dashboards'])
+                save_dashboard_to_db(dashboard_pointer, dashboard_title)
+
+                update_graph_options_trigger = 'trigger'
+                tile_title_returns = auto_named_titles
+                options = [{'label': session['saved_dashboards'][key]['Dashboard Title'], 'value': key} for key in
+                           session['saved_dashboards']]
+                # TODO: INSERT ALERT FOR SUCCESSFUL SAVE
+
+        # if confirm delete, has been pressed
+        elif prompt_data[0] == 'delete' and prompt_result == 'ok':
+            intermediate_pointer = DASHBOARD_POINTER_PREFIX + dashboard_title.replace(" ", "")
+            delete_dashboard(intermediate_pointer)
             update_graph_options_trigger = 'trigger'
-            save_symbol = 'fa fa-check'
-            tile_title_returns = auto_named_titles
-            options = [{'label': session['saved_dashboards'][key]['Dashboard Title'], 'value': key} for key in
-                       session['saved_dashboards']]
-            save_status_symbols = get_status_symbol_display(save_error_tooltip, save_symbol)
+            options = [{'label': session['saved_dashboards'][key]["Dashboard Title"], 'value': key} for key
+                       in session['saved_dashboards']]
+            # TODO: INSERT ALERT FOR SUCCESSFUL DELETE
 
-    # elif the overwrite was cancelled, clear displayed symbols
-    elif '{"index":1,"type":"dashboard-overwrite"}.n_clicks' == changed_id:
-        save_status_symbols = []
+        # if anything was cancelled, clear/do nothing
+        else:
+            pass  # TODO: Cancel logic
 
-    # else, 'confirm-delete-dashboard' requested
+    # if anything was cancelled, clear/do nothing
     else:
-        remove_dashboard = ""
-        if remove_dashboard != '':
-            delete_dashboard(remove_dashboard)
-            update_graph_options_trigger = 'trigger'
-            options = [{'label': session['saved_dashboards'][key]["Dashboard Title"], 'value': key} for key in
-                       session['saved_dashboards']]
+        pass  # TODO: Cancel logic
 
-        save_status_symbols = []
-
-    return options, update_graph_options_trigger, tile_title_returns[0], tile_title_returns[1], tile_title_returns[2], tile_title_returns[3]
+    return options, update_graph_options_trigger, tile_title_returns[0], tile_title_returns[1], tile_title_returns[2], \
+        tile_title_returns[3], prompt_trigger, float_menu_trigger, dashboard_title_output, tile_content_children, \
+        dms[0]['Content'], dms[0]['Tab'], dms[0]['Start Year'], dms[0]['End Year'], dms[0]['Start Secondary'], \
+        dms[0]['End Secondary'], \
+        dms[1]['Content'], dms[1]['Tab'], dms[1]['Start Year'], dms[1]['End Year'], dms[1]['Start Secondary'], \
+        dms[1]['End Secondary'], \
+        dms[2]['Content'], dms[2]['Tab'], dms[2]['Start Year'], dms[2]['End Year'], dms[2]['Start Secondary'], \
+        dms[2]['End Secondary'], \
+        dms[3]['Content'], dms[3]['Tab'], dms[3]['Start Year'], dms[3]['End Year'], dms[3]['Start Secondary'], \
+        dms[3]['End Secondary'], \
+        dms[4]['Content'], dms[4]['Tab'], dms[4]['Start Year'], dms[4]['End Year'], dms[4]['Start Secondary'], \
+        dms[4]['End Secondary'], \
+        num_tiles, df_const_wrapper
 
 
 # *********************************************SHARED LOADING********************************************************
@@ -916,202 +1084,6 @@ def _load_select_range_inputs(tile_tab, dashboard_tab, tile_start_year, tile_end
         end_secondary = dashboard_end_secondary
 
     return date_tab, start_year, end_year, start_secondary, end_secondary
-
-
-# *********************************************DASHBOARD LOADING*****************************************************
-
-# load dashboard layout
-@app.callback(
-    # dashboard title
-    [Output('dashboard-title', 'value'),
-     # tile content
-     Output('div-body-wrapper', 'children'),
-     # data tile 0
-     Output({'type': 'data-menu-dashboard-loading', 'index': 0}, 'children'),
-     Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-tab'),
-     Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-start_year'),
-     Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-end_year'),
-     Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-start_secondary'),
-     Output({'type': 'select-range-trigger', 'index': 0}, 'data-dashboard-end_secondary'),
-     # data tile 1
-     Output({'type': 'data-menu-dashboard-loading', 'index': 1}, 'children'),
-     Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-tab'),
-     Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-start_year'),
-     Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-end_year'),
-     Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-start_secondary'),
-     Output({'type': 'select-range-trigger', 'index': 1}, 'data-dashboard-end_secondary'),
-     # data tile 2
-     Output({'type': 'data-menu-dashboard-loading', 'index': 2}, 'children'),
-     Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-tab'),
-     Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-start_year'),
-     Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-end_year'),
-     Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-start_secondary'),
-     Output({'type': 'select-range-trigger', 'index': 2}, 'data-dashboard-end_secondary'),
-     # data tile 3
-     Output({'type': 'data-menu-dashboard-loading', 'index': 3}, 'children'),
-     Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-tab'),
-     Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-start_year'),
-     Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-end_year'),
-     Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-start_secondary'),
-     Output({'type': 'select-range-trigger', 'index': 3}, 'data-dashboard-end_secondary'),
-     # data tile 4
-     Output({'type': 'data-menu-dashboard-loading', 'index': 4}, 'children'),
-     Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-tab'),
-     Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-start_year'),
-     Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-end_year'),
-     Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-start_secondary'),
-     Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-end_secondary'),
-     # num tiles update
-     Output('num-tiles-4', 'data-num-tiles'),
-     Output('df-constants-storage-dashboard-wrapper', 'children')],
-    [Input('select-dashboard-dropdown', 'value')],
-    [State('df-constants-storage', 'data')],
-    prevent_initial_call=True
-)
-def _load_dashboard_layout(selected_dashboard, df_const):
-    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-
-    if changed_id == '.':
-        raise PreventUpdate
-
-    tile_keys = [{}] * 4
-
-    dms = [{'Content': no_update, 'Tab': no_update, 'Start Year': no_update, 'End Year': no_update,
-            'Start Secondary': no_update, 'End Secondary': no_update},
-           {'Content': no_update, 'Tab': no_update, 'Start Year': no_update, 'End Year': no_update,
-            'Start Secondary': no_update, 'End Secondary': no_update},
-           {'Content': no_update, 'Tab': no_update, 'Start Year': no_update, 'End Year': no_update,
-            'Start Secondary': no_update, 'End Secondary': no_update},
-           {'Content': no_update, 'Tab': no_update, 'Start Year': no_update, 'End Year': no_update,
-            'Start Secondary': no_update, 'End Secondary': no_update},
-           {'Content': no_update, 'Tab': no_update, 'Start Year': no_update, 'End Year': no_update,
-            'Start Secondary': no_update, 'End Secondary': no_update}]
-
-    num_tiles = 0
-
-    for dict_key, dict_value in session['saved_dashboards'][selected_dashboard].items():
-
-        if 'Tile' in dict_key:
-
-            num_tiles += 1
-
-            tile_index = data_index = int(search(r'\d+', dict_key).group())
-
-            # Change key to Tile Pointer instead of Tile Title
-            tile_pointer = dict_value['Tile Pointer']
-            link_state = dict_value['Link']
-
-            if tile_pointer in session['saved_layouts']:
-                tile_data = session['saved_layouts'][tile_pointer].copy()
-                tile_title = tile_data.pop("Title")
-            # TODO: In 'prod' we will check for pointers and only do a 'virtual' delete for
-            #  the single user
-            else:
-                tile_title = "This Graph has been deleted"
-                tile_data = {
-                    "Args List": ["", "", ""],
-                    "Data Set": "OPG001",  # "Data Set": "OPG001_2016-17_Week_v3.csv",
-                    "Fiscal Toggle": "Gregorian",
-                    "Graph All Toggle": [],
-                    "Graph Type": "Line",
-                    "Hierarchy Toggle": "Level Filter",
-                    "Level Value": None,
-                    "NID Path": "root",
-                    "Num Periods": "5",
-                    "Period Type": "last-years",
-                    "Timeframe": "all-time",
-                    "Title": "This Graph has been deleted"}
-
-            # pop graph_type/args_list to compare the dashboard parent data menu to the saved tile data menu
-            graph_type = tile_data.pop('Graph Type')
-            args_list = tile_data.pop('Args List')
-            df_name = tile_data['Data Set']
-
-            # check if data is loaded
-            if df_name not in session:
-                session[df_name] = dataset_to_df(df_name)
-                if df_const is None:
-                    df_const = {}
-                df_const[df_name] = generate_constants(df_name)
-
-            if link_state == 'fa fa-link':
-                # if tile was linked but it's data menu has changed and no longer matches parent data, unlink
-                if tile_data != session['saved_dashboards'][selected_dashboard]['Parent Data']:
-                    link_state = 'fa fa-unlink'
-
-                # else, the tile is valid to be linked, generate parent menu if it has not been created yet
-                else:
-                    data_index = 4
-
-            # create tile keys
-            graph_menu = load_graph_menu(graph_type=graph_type, tile=tile_index, df_name=df_name, args_list=args_list,
-                                         df_const=df_const)
-            # TODO: Need to add df name
-            customize_content = get_customize_content(tile=tile_index, graph_type=graph_type, graph_menu=graph_menu,
-                                                      df_name=df_name)
-            tile_key = {'Tile Title': tile_title, 'Link': link_state, 'Customize Content': customize_content}
-            tile_keys[tile_index] = tile_key
-
-            # if tile is unlinked, or linked while the parent does not exist, create data menu
-            if link_state == 'fa fa-unlink' or (link_state == 'fa fa-link' and dms[4]['Content'] == no_update):
-
-                hierarchy_toggle = tile_data['Hierarchy Toggle']
-                level_value = tile_data['Level Value']
-                nid_path = tile_data['NID Path']
-                graph_all_toggle = tile_data['Graph All Toggle']
-                fiscal_toggle = tile_data['Fiscal Toggle']
-                timeframe = tile_data['Timeframe']
-                num_periods = tile_data['Num Periods']
-                period_type = tile_data['Period Type']
-
-                dms[data_index]['Content'] = get_data_menu(
-                    tile=data_index, df_name=df_name, mode='dashboard-loading', hierarchy_toggle=hierarchy_toggle,
-                    level_value=level_value, nid_path=nid_path,
-                    graph_all_toggle=graph_all_toggle, fiscal_toggle=fiscal_toggle, input_method=timeframe,
-                    num_periods=num_periods, period_type=period_type, df_const=df_const)
-
-                if timeframe == 'select-range':
-                    dms[data_index]['Tab'] = tile_data['Date Tab']
-                    dms[data_index]['Start Year'] = tile_data['Start Year']
-                    dms[data_index]['End Year'] = tile_data['End Year']
-                    dms[data_index]['Start Secondary'] = tile_data['Start Secondary']
-                    dms[data_index]['End Secondary'] = tile_data['End Secondary']
-
-    children = get_div_body(num_tiles=num_tiles, input_tiles=None, tile_keys=tile_keys)
-
-    df_const = html.Div(
-        html.Div(
-            html.Div(
-                html.Div(
-                    dcc.Store(
-                        id='df-constants-storage',
-                        storage_type='memory',
-                        data=df_const),
-                    id={'type': 'df-constants-storage-tile-wrapper', 'index': 0}),
-                id={'type': 'df-constants-storage-tile-wrapper', 'index': 1}),
-            id={'type': 'df-constants-storage-tile-wrapper', 'index': 2}),
-        id={'type': 'df-constants-storage-tile-wrapper', 'index': 3}),
-
-    return (session['saved_dashboards'][selected_dashboard]['Dashboard Title'],
-
-            children,
-
-            dms[0]['Content'], dms[0]['Tab'], dms[0]['Start Year'], dms[0]['End Year'], dms[0]['Start Secondary'],
-            dms[0]['End Secondary'],
-
-            dms[1]['Content'], dms[1]['Tab'], dms[1]['Start Year'], dms[1]['End Year'], dms[1]['Start Secondary'],
-            dms[1]['End Secondary'],
-
-            dms[2]['Content'], dms[2]['Tab'], dms[2]['Start Year'], dms[2]['End Year'], dms[2]['Start Secondary'],
-            dms[2]['End Secondary'],
-
-            dms[3]['Content'], dms[3]['Tab'], dms[3]['Start Year'], dms[3]['End Year'], dms[3]['Start Secondary'],
-            dms[3]['End Secondary'],
-
-            dms[4]['Content'], dms[4]['Tab'], dms[4]['Start Year'], dms[4]['End Year'], dms[4]['Start Secondary'],
-            dms[4]['End Secondary'],
-
-            num_tiles, df_const)
 
 
 # resets selected dashboard dropdown value to ''

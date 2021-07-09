@@ -167,8 +167,13 @@ for x in range(4):
                 (not num_periods and timeframe == 'to-current') or df_name is None:
             raise PreventUpdate
 
-        # warning on load logic for if anything has been changed for a graph
-        if session['tile_edited'][tile] == 'Load':
+        # warning on load logic for if anything has been changed for a dashboard and graph
+        if not session['tile_edited'][4]:
+            session['tile_edited'][4] = True
+        elif session['tile_edited'][4] == tile + 1:  # to check if it is the last draw on a load
+            session['tile_edited'][4] = False
+
+        if session['tile_edited'][tile] == 'Load':  # to set to false after load
             session['tile_edited'][tile] = False
         else:
             session['tile_edited'][tile] = True

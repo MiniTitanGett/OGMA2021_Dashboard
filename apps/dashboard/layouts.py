@@ -438,20 +438,6 @@ def get_layout_dashboard():
                     children=get_label('LBL_Load_Dashboard'),
                     style={'display': 'inline-block', 'float': 'right', 'width': 'auto', 'margin-right': '20px'},
                     id='load-dashboard'),
-                html.Div(
-                    dcc.Dropdown(
-                        id='select-dashboard-dropdown',
-                        options=[{'label': session['saved_dashboards'][key]['Dashboard Title'], 'value': key} for key in
-                                 session['saved_dashboards']],
-                        clearable=False,
-                        style={'width': '250px', 'font-size': '13px', 'box-sizing': 'border-box', 'height': '35px',
-                               'display': 'inline-block', 'vertical-align': 'bottom', 'float': 'right',
-                               'border-radius': '0', 'margin-left': '20px'},
-                        value='',
-                        placeholder=get_label('LBL_Select_A_Saved_Dashboard')),
-                    id='load-dashboard-menu',
-                    style={'display': 'none'}
-                ),
                 html.Button(
                     className='parent-nav',
                     n_clicks=1,
@@ -461,10 +447,30 @@ def get_layout_dashboard():
                 html.Div(
                     get_dashboard_title_input(),
                     id='dashboard-title-wrapper',
-                    style={'display': 'inline-block', 'float': 'right'})
-            ], style={'border-bottom': '1px solid {}'.format(CLR['lightgray']),
-                      'z-index': '99', 'width': '100%', 'top': '0',
-                      'background-color': CLR['white']},
+                    style={'display': 'inline-block', 'float': 'right'}),
+                html.Div([
+                    html.P(get_label('LBL_Load_A_Saved_Dashboard'),
+                           style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
+                    html.Div(
+                        children=[
+                            dcc.Dropdown(
+                                id='select-dashboard-dropdown',
+                                options=[{'label': session['saved_dashboards'][key]['Dashboard Title'], 'value': key}
+                                         for key in
+                                         session['saved_dashboards']],
+                                clearable=False,
+                                style={'width': '400px', 'font-size': '13px'},
+                                value='',
+                                placeholder='{}...'.format(get_label('LBL_Select'))),
+                        ], style={'width': '400px'}),
+                    html.P(get_label('LBL_Load_Dashboard_Prompt'),
+                           id={'type': 'tile-layouts-warning', 'index': 4},
+                           style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'})],
+                    id='load-dashboard-menu',
+                    style={'display': 'none'}
+                )], style={'border-bottom': '1px solid {}'.format(CLR['lightgray']),
+                           'z-index': '99', 'width': '100%', 'top': '0',
+                           'background-color': CLR['white']},
                 id='button-save-dashboard-wrapper'),
             html.Div([
                 # tab content
@@ -595,6 +601,13 @@ def get_layout_dashboard():
         dbc.Alert(
             'Your Tile Has Been Saved',
             id={'type': 'minor-popup', 'index': 3},
+            is_open=False,
+            color='dark',
+            style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px', 'z-index': '500'},
+            duration=4000),
+        dbc.Alert(
+            'Your Tile Has Been Saved',
+            id={'type': 'minor-popup', 'index': 4},
             is_open=False,
             color='dark',
             style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px', 'z-index': '500'},
@@ -908,7 +921,7 @@ def get_tile(tile, tile_keys=None, df_name=None):
                 id={'type': 'tile-customize-content-wrapper', 'index': tile},
                 className='customize-content'),
             html.Div([
-                html.P(get_label('LBL_Select_A_Saved_Graph'),
+                html.P(get_label('LBL_Load_A_Saved_Graph'),
                        style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
                 html.Div(
                     id={'type': 'select-layout-dropdown-div', 'index': tile},

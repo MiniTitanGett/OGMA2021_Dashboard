@@ -442,7 +442,7 @@ for y in range(4):
             end_secondary, unlink, df_const_output
 
 
-# **********************************************DASHBOARD SAVING******************************************************
+# **********************************************DASHBOARD MENU*******************************************************
 
 # dashboard saving/save deleting/loading - triggers prompt and menu
 @app.callback(
@@ -455,6 +455,8 @@ for y in range(4):
      # menu and prompt outputs
      Output({'type': 'prompt-trigger', 'index': 4}, 'data-'),
      Output({'type': 'float-menu-trigger', 'index': 4}, 'data-'),
+     Output({'type': 'minor-popup', 'index': 4}, 'children'),
+     Output({'type': 'minor-popup', 'index': 4}, 'is_open'),
      # outputs for dashboard loading
      Output('dashboard-title', 'value'),
      # tile content
@@ -496,12 +498,14 @@ for y in range(4):
      Output({'type': 'select-range-trigger', 'index': 4}, 'data-dashboard-end_secondary'),
      # num tiles update
      Output('num-tiles-4', 'data-num-tiles'),
-     Output('df-constants-storage-dashboard-wrapper', 'children')],
+     Output('df-constants-storage-dashboard-wrapper', 'children'),
+     Output('dashboard-reset-confirmation', 'data-')],
     [Input('save-dashboard', 'n_clicks'),
      Input('delete-dashboard', 'n_clicks'),
      Input('load-dashboard', 'n_clicks'),
      Input('float-menu-result', 'children'),
-     Input('prompt-result', 'children')],
+     Input('prompt-result', 'children'),
+     Input('dashboard-reset', 'n_clicks')],
     # prompt and menu info
     [State('prompt-title', 'data-'),
      State('float-menu-title', 'data-'),
@@ -603,27 +607,29 @@ for y in range(4):
      State('df-constants-storage', 'data')],
     prevent_initial_call=True
 )
-def _manage_dashboard_saves(_save_clicks, _delete_clicks, _load_clicks, float_menu_result, prompt_result, prompt_data,
-                            float_menu_data, selected_dashboard, dashboard_title, tile_titles, links,
-                            graph_types,
-                            args_list_0, args_list_1, args_list_2, args_list_3,
-                            df_name_0, df_name_1, df_name_2, df_name_3, df_name4,
-                            start_year_0, start_year_1, start_year_2, start_year_3, start_year_4,
-                            end_year_0, end_year_1, end_year_2, end_year_3, end_year_4,
-                            hierarchy_toggle_0, hierarchy_toggle_1, hierarchy_toggle_2, hierarchy_toggle_3,
-                            hierarchy_toggle_4,
-                            graph_all_toggle_0, graph_all_toggle_1, graph_all_toggle_2, graph_all_toggle_3,
-                            graph_all_toggle_4,
-                            level_value_0, level_value_1, level_value_2, level_value_3, level_value_4,
-                            button_path_0, button_path_1, button_path_2, button_path_3, button_path_4,
-                            fiscal_toggle_0, fiscal_toggle_1, fiscal_toggle_2, fiscal_toggle_3, fiscal_toggle_4,
-                            timeframe_0, timeframe_1, timeframe_2, timeframe_3, timeframe_4,
-                            start_secondary_0, start_secondary_1, start_secondary_2, start_secondary_3,
-                            start_secondary_4,
-                            end_secondary_0, end_secondary_1, end_secondary_2, end_secondary_3, end_secondary_4,
-                            num_periods_0, num_periods_1, num_periods_2, num_periods_3, num_periods_4,
-                            period_type_0, period_type_1, period_type_2, period_type_3, period_type_4,
-                            date_tab_0, date_tab_1, date_tab_2, date_tab_3, date_tab_4, df_const):
+def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks, float_menu_result, prompt_result,
+                                      _reset_clicks, prompt_data, float_menu_data, selected_dashboard, dashboard_title,
+                                      tile_titles, links, graph_types,
+                                      args_list_0, args_list_1, args_list_2, args_list_3,
+                                      df_name_0, df_name_1, df_name_2, df_name_3, df_name4,
+                                      start_year_0, start_year_1, start_year_2, start_year_3, start_year_4,
+                                      end_year_0, end_year_1, end_year_2, end_year_3, end_year_4,
+                                      hierarchy_toggle_0, hierarchy_toggle_1, hierarchy_toggle_2, hierarchy_toggle_3,
+                                      hierarchy_toggle_4,
+                                      graph_all_toggle_0, graph_all_toggle_1, graph_all_toggle_2, graph_all_toggle_3,
+                                      graph_all_toggle_4,
+                                      level_value_0, level_value_1, level_value_2, level_value_3, level_value_4,
+                                      button_path_0, button_path_1, button_path_2, button_path_3, button_path_4,
+                                      fiscal_toggle_0, fiscal_toggle_1, fiscal_toggle_2, fiscal_toggle_3,
+                                      fiscal_toggle_4,
+                                      timeframe_0, timeframe_1, timeframe_2, timeframe_3, timeframe_4,
+                                      start_secondary_0, start_secondary_1, start_secondary_2, start_secondary_3,
+                                      start_secondary_4,
+                                      end_secondary_0, end_secondary_1, end_secondary_2, end_secondary_3,
+                                      end_secondary_4,
+                                      num_periods_0, num_periods_1, num_periods_2, num_periods_3, num_periods_4,
+                                      period_type_0, period_type_1, period_type_2, period_type_3, period_type_4,
+                                      date_tab_0, date_tab_1, date_tab_2, date_tab_3, date_tab_4, df_const):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':
@@ -638,6 +644,8 @@ def _manage_dashboard_saves(_save_clicks, _delete_clicks, _load_clicks, float_me
     prompt_trigger = no_update
     # [[mode/prompt_trigger, tile, stored_menu_for_cancel], menu_style/show_hide, menu_title, show_hide_load_warning]
     float_menu_trigger = no_update
+    popup_text = no_update
+    popup_is_open = no_update
     # Loading Outputs
     dashboard_title_output = no_update
     tile_content_children = no_update
@@ -653,19 +661,23 @@ def _manage_dashboard_saves(_save_clicks, _delete_clicks, _load_clicks, float_me
             'Start Secondary': no_update, 'End Secondary': no_update}]
     num_tiles = no_update
     df_const_wrapper = no_update
+    dashboard_reset_trigger = no_update
 
     # if delete button was pressed, prompt delete
-    if 'delete-button' in changed_id:
+    if 'delete-dashboard' in changed_id:
         intermediate_pointer = DASHBOARD_POINTER_PREFIX + dashboard_title.replace(" ", "")
         dashboard_titles = []
         for dashboard in session['saved_dashboards']:
-            dashboard_titles.append(session['saved_dashboards'][dashboard]['Title'])
+            dashboard_titles.append(session['saved_dashboards'][dashboard]['Dashboard Title'])
 
         # if tile exists in session, send delete prompt
         if intermediate_pointer in session['saved_dashboards'] \
-                and session['saved_dashboards'][intermediate_pointer]['Title'] == dashboard_title:
+                and session['saved_dashboards'][intermediate_pointer]['Dashboard Title'] == dashboard_title:
             prompt_trigger = [['delete', 4], {}, get_label('LBL_Delete_Dashboard'),
                               get_label('LBL_Delete_Dashboard_Prompt').format(dashboard_title)]
+
+    elif 'dashboard-reset' in changed_id:
+        prompt_trigger = [['reset', 4], {}, get_label('LBL_Reset_Dashboard'), get_label('LBL_Reset_Dashboard_Prompt')]
 
     # if load button was pressed, send load menu
     elif 'load-dashboard' in changed_id:
@@ -783,10 +795,17 @@ def _manage_dashboard_saves(_save_clicks, _delete_clicks, _load_clicks, float_me
                     id={'type': 'df-constants-storage-tile-wrapper', 'index': 1}),
                 id={'type': 'df-constants-storage-tile-wrapper', 'index': 2}),
             id={'type': 'df-constants-storage-tile-wrapper', 'index': 3}),
-        session['tile_edited'][4] = num_tiles
-        # TODO: INSERT ALERT FOR SUCCESSFUL LOAD
+        session['tile_edited'][4] = num_tiles  # set for load warning
+        popup_text = get_label('LBL_Your_Dashboard_Has_Been_Loaded').format(dashboard_title)
+        popup_is_open = True
 
     elif prompt_data is not None:
+        # if reset confirmed, trigger reset
+        if prompt_data[0] == 'reset' and prompt_result == 'ok':
+            dashboard_reset_trigger = 'trigger'
+            popup_text = get_label('LBL_Your_Dashboard_Has_Been_Reset')
+            popup_is_open = True
+
         # if save requested or the overwrite was confirmed, check for exceptions and save
         if 'save-dashboard' in changed_id or (prompt_data[0] == 'overwrite' and prompt_result == 'ok'):
 
@@ -1004,7 +1023,8 @@ def _manage_dashboard_saves(_save_clicks, _delete_clicks, _load_clicks, float_me
                 tile_title_returns = auto_named_titles
                 options = [{'label': session['saved_dashboards'][key]['Dashboard Title'], 'value': key} for key in
                            session['saved_dashboards']]
-                # TODO: INSERT ALERT FOR SUCCESSFUL SAVE
+                popup_text = get_label('LBL_Your_Dashboard_Has_Been_Saved').format(dashboard_title)
+                popup_is_open = True
 
         # if confirm delete, has been pressed
         elif prompt_data[0] == 'delete' and prompt_result == 'ok':
@@ -1013,18 +1033,12 @@ def _manage_dashboard_saves(_save_clicks, _delete_clicks, _load_clicks, float_me
             update_graph_options_trigger = 'trigger'
             options = [{'label': session['saved_dashboards'][key]["Dashboard Title"], 'value': key} for key
                        in session['saved_dashboards']]
-            # TODO: INSERT ALERT FOR SUCCESSFUL DELETE
-
-        # if anything was cancelled, clear/do nothing
-        else:
-            pass  # TODO: Cancel logic
-
-    # if anything was cancelled, clear/do nothing
-    else:
-        pass  # TODO: Cancel logic
+            popup_text = get_label('LBL_Your_Graph_Has_Been_Deleted').format(dashboard_title)
+            popup_is_open = True
 
     return options, update_graph_options_trigger, tile_title_returns[0], tile_title_returns[1], tile_title_returns[2], \
-        tile_title_returns[3], prompt_trigger, float_menu_trigger, dashboard_title_output, tile_content_children, \
+        tile_title_returns[3], prompt_trigger, float_menu_trigger, popup_text, popup_is_open, dashboard_title_output, \
+        tile_content_children, \
         dms[0]['Content'], dms[0]['Tab'], dms[0]['Start Year'], dms[0]['End Year'], dms[0]['Start Secondary'], \
         dms[0]['End Secondary'], \
         dms[1]['Content'], dms[1]['Tab'], dms[1]['Start Year'], dms[1]['End Year'], dms[1]['Start Secondary'], \
@@ -1035,7 +1049,7 @@ def _manage_dashboard_saves(_save_clicks, _delete_clicks, _load_clicks, float_me
         dms[3]['End Secondary'], \
         dms[4]['Content'], dms[4]['Tab'], dms[4]['Start Year'], dms[4]['End Year'], dms[4]['Start Secondary'], \
         dms[4]['End Secondary'], \
-        num_tiles, df_const_wrapper
+        num_tiles, df_const_wrapper, dashboard_reset_trigger
 
 
 # *********************************************SHARED LOADING********************************************************

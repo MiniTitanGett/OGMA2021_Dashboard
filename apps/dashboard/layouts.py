@@ -388,44 +388,10 @@ def get_layout_dashboard():
                 ], style={'display': 'inline-block'},
                     id='button-new-wrapper'),
                 html.Button(
-                    "Reset",
+                    get_label("LBL_Reset"),
                     className='parent-nav',
                     id='dashboard-reset',
                     style={'width': 'auto'}),
-                html.Div(
-                    html.Div([
-                        html.I(
-                            html.Span(
-                                get_label("LBL_Reset_Dashboard_All_Unsaved_Changes_will_Be_Lost"),
-                                className='save-symbols-tooltip'),
-                            id='confirm-dashboard-reset',
-                            className='fa fa-undo',
-                            style={'padding': '7px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
-                                   'margin-right': '10px', 'margin-left': '7px', 'vertical-align': 'top'}),
-                        html.Span([
-                            html.I(
-                                [],
-                                className='fa fa-undo',
-                                style={'position': 'absolute', 'left': '0', 'width': '15px'}),
-                            html.I(
-                                [],
-                                className='fa fa-ban fa-2x',
-                                style={'position': 'absolute', 'top': '50%', 'margin-left': '-13px', 'width': '26px',
-                                       'margin-top': '-15px', 'color': CLR['background1']}),
-                            html.Span(
-                                get_label("LBL_Cancel_Reset_Attempt"),
-                                className='save-symbols-tooltip')],
-                            className='save-overwrite-symbols',
-                            style={'padding': '7px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
-                                   'margin-left': '10px', 'margin-right': '14px', 'display': 'inline-block',
-                                   'vertical-align': 'top'})],
-                             id='dashboard-reset-symbols',
-                             style={'width': '71px',
-                                    'border': '1px solid {}'.format(CLR['lightgray']),
-                                    'margin': '2px 0', 'border-radius': '6px',
-                                    'display': 'none'}),
-                    style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
-                           'position': 'relative', 'vertical-align': 'top'}),
                 html.Button(
                     className='parent-nav',
                     n_clicks=1,
@@ -613,9 +579,8 @@ def get_layout_dashboard():
             style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px', 'z-index': '500'},
             duration=4000),
         # dashboard-reset-trigger is used by NEW/DELETE to trigger MANAGE DATA SIDEMENUS to reset the data menus
-        html.Div(
-            id='dashboard-reset-trigger',
-            style={'display': 'none'}),
+        html.Div(id='dashboard-reset-trigger', style={'display': 'none'}),
+        html.Div(id='dashboard-reset-confirmation', style={'display': 'hidden'}),
         # select-range-trigger is used by the load callbacks to load the select range datepicker section
         html.Div(
             id={'type': 'select-range-trigger', 'index': 0},

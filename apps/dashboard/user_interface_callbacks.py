@@ -101,7 +101,7 @@ app.clientside_callback(
      Output('dashboard-reset-trigger', 'data-')],
     [Input('button-new', 'n_clicks'),
      Input({'type': 'tile-close', 'index': ALL}, 'n_clicks'),
-     Input('confirm-dashboard-reset', 'n_clicks')],
+     Input('dashboard-reset-confirmation', 'data-')],
     [State({'type': 'tile', 'index': ALL}, 'children'),
      State('num-tiles', 'data-num-tiles'),
      State('button-new', 'disabled'),

@@ -321,7 +321,6 @@ for y in range(4):
                 # saves the graph layout to the database
                 save_layout_to_db(layout_pointer, graph_title, 'save' == trigger)
 
-                prompt_trigger = [None, {'display': 'hide'}, None, None]
                 popup_text = get_label('LBL_Your_Graph_Has_Been_Saved').format(graph_title)
                 popup_is_open = True
                 update_options_trigger = 'trigger'
@@ -339,15 +338,12 @@ for y in range(4):
                     and session['saved_layouts'][intermediate_pointer]['Title'] == graph_title:
                 prompt_trigger = [['delete', tile], {}, get_label('LBL_Delete_Graph'),
                                   get_label('LBL_Delete_Graph_Prompt').format(graph_title)]
-            else:
-                prompt_trigger = [None, {'display': 'hide'}, None, None]
 
         # If confirm delete button has been pressed
         elif trigger == 'confirm-delete':
             intermediate_pointer = REPORT_POINTER_PREFIX + graph_title.replace(" ", "")
             delete_layout(intermediate_pointer)
             update_options_trigger = 'trigger'
-            prompt_trigger = [None, {'display': 'hide'}, None, None]
             popup_text = get_label('LBL_Your_Graph_Has_Been_Deleted').format(graph_title)
             popup_is_open = True
 
@@ -434,7 +430,6 @@ for y in range(4):
 
         # if anything was cancelled, clear display
         elif trigger == 'cancel':
-            prompt_trigger = [None, {'display': 'hide'}, None, None]
             layout_dropdown = None
 
         return prompt_trigger, update_options_trigger, popup_text, popup_is_open, tile_title_trigger, \

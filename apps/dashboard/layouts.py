@@ -902,7 +902,8 @@ def get_tile(tile, tile_keys=None, df_name=None):
                 html.P(get_label('LBL_Load_Graph_Prompt'),
                        id={'type': 'tile-layouts-warning', 'index': tile},
                        style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
-            ], style=LAYOUT_CONTENT_HIDE, id={'type': 'tile-layouts-content', 'index': tile},
+            ], style=LAYOUT_CONTENT_HIDE,
+                id={'type': 'tile-layouts-content', 'index': tile},
                 className='customize-content')
         ], style={'flex-direction': 'column'},
             id={'type': 'tile-body', 'index': tile},

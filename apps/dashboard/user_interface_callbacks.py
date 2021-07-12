@@ -439,11 +439,13 @@ app.clientside_callback(
             var tile = float_menu_data[1];
             if (float_menu_trigger[0][0] == 'customize') {
                 var menu = document.getElementById(`{"index":${tile},"type":"tile-customize-content"}`);
-                document.getElementById(`{"index":${tile},"type":"tile-customize-content-wrapper"}`).appendChild(menu).style.display = 'none'; 
+                document.getElementById(`{"index":${tile},"type":"tile-customize-content-wrapper"}`).appendChild(
+                    menu).style.display = 'none'; 
             }
             if (float_menu_trigger[0][0] == 'layouts') {
                 var menu = document.getElementById(`{"index":${tile},"type":"tile-layouts-content"}`);
-                document.getElementById(`{"index":${tile},"type":"tile-body"}`).appendChild(menu).style.display = 'none'; 
+                document.getElementById(`{"index":${tile},"type":"tile-body"}`).appendChild(
+                    menu).style.display = 'none'; 
             }
             if (float_menu_trigger[0][0] == 'dashboard_layouts') {
                 var menu = document.getElementById('load-dashboard-menu');
@@ -1212,35 +1214,41 @@ for x in range(4):
 # *************************************************LOADSCREEN*********************************************************
 
 # All clientside callback functions referred to are stored in /assets/ClientsideCallbacks.js
-# TODO: REWORK ALL OF LOAD SCREENS AND MOVE TO PYTHON FILE
-# for x in range(4):
-#     app.clientside_callback(
-#         ClientsideFunction(
-#             namespace='clientside',
-#             function_name='graphLoadScreen{}'.format(x)
-#         ),
-#         Output({'type': 'tile-menu-header', 'index': x}, 'n_clicks'),
-#         [Input({'type': 'tile-view', 'index': x}, 'n_clicks')],
-#         [State({'type': 'tile-view', 'index': x}, 'className')],
-#         prevent_initial_call=True
-#     )
-#
-#     app.clientside_callback(
-#         ClientsideFunction(
-#             namespace='clientside',
-#             function_name='graphRemoveLoadScreen{}'.format(x)
-#         ),
-#         Output({'type': 'graph_display', 'index': x}, 'n_clicks'),
-#         [Input({'type': 'graph_display', 'index': x}, 'children')],
-#         State('num-tiles', 'data-num-tiles'),
-#         prevent_initial_call=True
-#     )
+for x in range(4):
+    app.clientside_callback(
+        ClientsideFunction(
+            namespace='clientside',
+            function_name='graphLoadScreen{}'.format(x)
+        ),
+        Output({'type': 'tile-menu-header', 'index': x}, 'n_clicks'),
+        [Input({'type': 'tile-save-trigger', 'index': x}, 'value')],
+        prevent_initial_call=True
+    )
+
+    app.clientside_callback(
+        ClientsideFunction(
+            namespace='clientside',
+            function_name='graphRemoveLoadScreen{}'.format(x)
+        ),
+        Output({'type': 'graph_display', 'index': x}, 'n_clicks'),
+        [Input({'type': 'graph_display', 'index': x}, 'children')],
+        State('num-tiles', 'data-num-tiles'),
+        prevent_initial_call=True
+    )
 
 app.clientside_callback(
-    ClientsideFunction(
-        namespace='clientside',
-        function_name='datasetLoadScreen'
-    ),
+    """
+    function datasetLoadScreen(n_click_load, n_click_reset, float_menu_result, float_menu_data, selected_dashboard) {
+        if (n_click_load != ',,,,' || n_click_reset != ',,,,' || (float_menu_data[0] == 'dashboard_layouts'
+             && selected_dashboard != null && float_menu_result == 'ok')){
+            var newDiv = document.createElement('div');
+            newDiv.className = '_data-loading';
+            newDiv.id = 'loading';
+            document.body.appendChild(newDiv, document.getElementById('content'));
+        }
+        return 0;
+    }
+    """,
     Output('dataset-confirmation-symbols', 'n_clicks'),
     [Input({'type': 'confirm-load-data', 'index': ALL}, 'n_clicks'),
      Input({'type': 'confirm-data-set-refresh', 'index': ALL}, 'n_clicks'),
@@ -1251,10 +1259,26 @@ app.clientside_callback(
 )
 
 app.clientside_callback(
-    ClientsideFunction(
-        namespace='clientside',
-        function_name='datasetRemoveLoadScreen'
-    ),
+    """
+    function datasetRemoveLoadScreen(data, graph_displays, num_tiles) {
+        var triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
+        triggered = triggered[triggered.length - 1];
+        if (triggered.includes('df-constants-storage')){
+            try{
+                document.getElementById('loading').remove();
+            }catch{ /* Do Nothing */ }
+        }
+        else {
+            var tile = parseInt(triggered.match(/\d+/)[0]) + 1;
+            if (tile == num_tiles){
+                try{
+                    document.getElementById('loading').remove();
+                }catch{ /* Do Nothing */ }
+            }
+        }
+        return 0;
+    }
+    """,
     Output('df-constants-storage', 'n_clicks'),
     [Input('df-constants-storage', 'data'),
      Input({'type': 'graph_display', 'index': ALL}, 'children')],

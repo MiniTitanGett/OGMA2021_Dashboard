@@ -421,8 +421,6 @@ for y in range(4):
                 id={'type': 'tile-link', 'index': tile},
                 style={'position': 'relative'})
             tile_title_trigger = session['saved_layouts'][selected_layout]['Title']
-            popup_text = get_label('LBL_Your_Graph_Has_Been_Loaded').format(tile_title_trigger)
-            popup_is_open = True
             layout_dropdown = None
 
         # if anything was cancelled, clear display
@@ -788,8 +786,6 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 id={'type': 'df-constants-storage-tile-wrapper', 'index': 2}),
             id={'type': 'df-constants-storage-tile-wrapper', 'index': 3}),
         session['tile_edited'][4] = num_tiles  # set for load warning
-        popup_text = get_label('LBL_Your_Dashboard_Has_Been_Loaded').format(dashboard_title_output)
-        popup_is_open = True
 
     elif prompt_data is not None or 'save-dashboard' in changed_id:
 

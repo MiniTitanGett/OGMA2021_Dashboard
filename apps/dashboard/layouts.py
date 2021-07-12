@@ -1137,8 +1137,8 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                         style={'font-size': '13px', 'display': 'inline-block', 'width': '50px', 'position': 'relative',
                                'top': '-15px',
                                'margin-right': '5px'})],
-                         style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}
-                         if len(X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}
+                    if len(X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
                 html.Div([
                     html.P(
                         "{}".format(X_AXIS_OPTIONS[0]),
@@ -1183,8 +1183,8 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                             "{}:".format(get_label('LBL_Display')),
                             style={'color': CLR['text1'], 'font-size': '13px', 'position': 'relative',
                                    'top': '-45px'})],
-                             style={'display': 'inline-block', 'width': '40px', 'position': 'relative', 'top': '-3px',
-                                    'margin-right': '15px'}),
+                        style={'display': 'inline-block', 'width': '40px', 'position': 'relative', 'top': '-3px',
+                               'margin-right': '15px'}),
                     html.Div([
                         dcc.RadioItems(
                             id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
@@ -1209,19 +1209,23 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                                      {'label': get_label('LBL_Curve_Fit'), 'value': 'curve-fit'}],
                             value='no-fit',
                             style={'display': 'inline-block', 'font-size': '13px'}),
-                        html.Div([
-                            dcc.Input(
-                                id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
-                                value=3,
-                                disabled=False,  # != 'curve-fit',
-                                type='number',
-                                required=True,
-                                min=1,
-                                style={'width': '45px', 'height': '29px', 'margin': '0', 'padding': '0',
-                                       'font-size': '15px',
-                                       'text-align': 'center', 'padding-top': '3px', 'border-radius': '5px',
-                                       'color': '#333', 'max-height': '26px'})
-                        ], style={'display': 'inline-block', 'top': '-10px', 'padding-left': '5px'}),
+
+                        html.Div(
+                            id={'type': 'degree-input-wrapper', 'index': tile},
+                            children=html.Div([
+                                dcc.Input(
+                                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
+                                    value=3,
+                                    type='number',
+                                    required=True,
+                                    min=1,
+                                    style={'width': '45px', 'height': '29px', 'margin': '0', 'padding': '0',
+                                           'font-size': '15px',
+                                           'text-align': 'center', 'padding-top': '3px', 'border-radius': '5px',
+                                           'color': '#333', 'max-height': '26px'})
+                            ], style={'display': 'inline-block', 'top': '-10px', 'padding-left': '5px'}),
+                            style={'display': 'none'}
+                        ),
                     ],
                         style={'display': 'inline-block', 'width': '80%',
                                'max-width': '125px'} if data_fitting else DATA_CONTENT_HIDE),
@@ -1235,11 +1239,15 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                         id={'type': 'data-fitting-info', 'index': tile},
                         style={'position': 'relative', 'vertical-align': 'top'})
                 ]),
-                dcc.Checklist(
-                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 6},
-                    options=[{'label': get_label('LBL_Confidence_Interval'), 'value': 'ci'}],
-                    value=ci if ci else [],
-                    style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
+                html.Div(
+                    id={'type': 'confidence-interval-wrapper', 'index': tile},
+                    children=dcc.Checklist(
+                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 6},
+                        options=[{'label': get_label('LBL_Confidence_Interval'), 'value': 'ci'}],
+                        value=ci if ci else [],
+                        style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
+                    style={'display': 'none'}
+                ),
                 dcc.Checklist(
                     id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 7},
                     options=[{'label': get_label('LBL_Show_Grid_Lines'), 'value': 'gridline'}],

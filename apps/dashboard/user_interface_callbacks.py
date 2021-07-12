@@ -918,9 +918,8 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
         sidemenu_styles[changed_index] = DATA_CONTENT_SHOW
         if df_name in session:
             confirm_button[changed_index] = DATA_CONTENT_HIDE
-            refresh_button[changed_index] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
-                                             'position': 'relative',
-                                             'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}
+            refresh_button[changed_index] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
+                                             'position': 'relative', 'vertical-align': 'top'}
             sidemenu_styles[changed_index] = DATA_CONTENT_SHOW
             # refresh data menu if not returning to last loaded
             if df_name is not prev_selection[changed_index]:
@@ -931,9 +930,8 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                     if links_style[i] == 'fa fa-link':
                         # graph_triggers[i] = df_name
                         confirm_button[i] = DATA_CONTENT_HIDE
-                        refresh_button[i] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
-                                             'position': 'relative',
-                                             'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}
+                        refresh_button[i] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
+                                             'position': 'relative', 'vertical-align': 'top'}
                         prev_selection[i] = df_name
                         options_triggers[i] = df_name
             else:
@@ -944,13 +942,12 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
             if changed_index == 4:
                 for i in range(len(links_style)):
                     if links_style[i] == 'fa fa-link':
-                        confirm_button[i] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
+                        confirm_button[i] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
                                              'position': 'relative',
                                              'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}
                         refresh_button[i] = DATA_CONTENT_HIDE
-            confirm_button[changed_index] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
-                                             'position': 'relative',
-                                             'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}
+            confirm_button[changed_index] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
+                                             'position': 'relative', 'vertical-align': 'top'}
             refresh_button[changed_index] = DATA_CONTENT_HIDE
 
     # elif 'data-set' in changed id, reset data tile with new df set as active, keep shown, and trigger graph update
@@ -1030,8 +1027,8 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
             options_triggers[changed_index] = df_name
         prev_selection[changed_index] = df_name
         confirm_button[changed_index] = DATA_CONTENT_HIDE
-        refresh_button[changed_index] = {'padding': '10px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
-                                         'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}
+        refresh_button[changed_index] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
+                                         'position': 'relative', 'vertical-align': 'top'}
 
     # elif 'RESET' dashboard requested, hide and reset all data tiles
     elif 'dashboard-reset-trigger' in changed_id:

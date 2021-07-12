@@ -945,8 +945,7 @@ there.
     width: 10px;
     z-index: 2;
     height: 100%;
-    padding: 2px 2px;
-    margin: 3px 2px;
+    padding: 2px 2px 40px 2px;
     color: white;
 }
 
@@ -959,8 +958,7 @@ there.
     width: 10px;
     z-index: 2;
     height: 100%;
-    padding: 2px 2px;
-    margin: 3px 2px;
+    padding: 2px 2px 40px 2px;
     color: black
 }
 
@@ -971,8 +969,7 @@ there.
     height: 100%;
     border: 0;
     color: white;
-    margin-left: 10px;
-    padding: 0 25px 0 25px;
+    padding: 0 45px 0 50px;
 }
 .dashboard-tab-button:disabled {
     color: black

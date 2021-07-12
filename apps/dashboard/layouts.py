@@ -129,8 +129,7 @@ def get_data_set_picker(tile, df_name):
             children=[
                 html.H6(
                     "{}:".format(get_label('LBL_Data_Set')),
-                    style={'color': CLR['text1'], 'margin-top': '25px', 'display': 'inline-block',
-                           'cursor': 'pointer'}),
+                    style={'color': CLR['text1'], 'margin-top': '25px', 'display': 'inline-block'}),
                 html.I(
                     html.Span(
                         get_label("LBL_Data_Set_Info"),

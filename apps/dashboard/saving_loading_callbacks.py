@@ -352,13 +352,10 @@ for y in range(4):
             df_name = session['saved_layouts'][selected_layout]['Data Set']
 
             # check if data is loaded
-            if df_name not in session:
+            if df_name not in session or (df_const is not None and df_name not in df_const):
                 session[df_name] = dataset_to_df(df_name)
                 if df_const is None:
                     df_const = {}
-                df_const[df_name] = generate_constants(df_name)
-
-            if df_const[df_name] != df_const:
                 df_const[df_name] = generate_constants(df_name)
 
             #  --------- create customize menu ---------
@@ -725,7 +722,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 df_name = tile_data['Data Set']
 
                 # check if data is loaded
-                if df_name not in session:
+                if df_name not in session or (df_const is not None and df_name not in df_const):
                     session[df_name] = dataset_to_df(df_name)
                     if df_const is None:
                         df_const = {}
@@ -794,21 +791,13 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
         popup_text = get_label('LBL_Your_Dashboard_Has_Been_Loaded').format(dashboard_title_output)
         popup_is_open = True
 
-    elif prompt_data is not None:
+    elif prompt_data is not None or 'save-dashboard' in changed_id:
 
         # if save requested or the overwrite was confirmed, check for exceptions and save
         if 'save-dashboard' in changed_id or (prompt_data[0] == 'overwrite-dashboard' and prompt_result == 'ok'):
 
-            intermediate_dashboard_pointer = DASHBOARD_POINTER_PREFIX + dashboard_title.replace(" ", "")
+            dashboard_pointer = DASHBOARD_POINTER_PREFIX + dashboard_title.replace(" ", "")
             # regex.sub('[^A-Za-z0-9]+', '', dashboard_title)
-
-            while True:
-                if intermediate_dashboard_pointer in session['saved_layouts']:
-                    dashboard_pointer = intermediate_dashboard_pointer + "_"
-                    intermediate_dashboard_pointer = dashboard_pointer
-                else:
-                    dashboard_pointer = intermediate_dashboard_pointer
-                    break
 
             used_dashboard_titles = []
 
@@ -822,8 +811,8 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
 
             used_titles = []
 
-            for key in session['saved_layouts']:
-                used_titles.append(session['saved_layouts'][key]["Title"])
+            for tile_layout in session['saved_layouts']:
+                used_titles.append(session['saved_layouts'][tile_layout]["Title"])
 
             # check if the dashboard title is blank
             if dashboard_title == '':
@@ -839,13 +828,13 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
 
             # if conflicting tiles or dashboard and overwrite not requested, prompt overwrite
             elif ((dashboard_title in used_dashboard_titles or any(x in used_titles for x in tile_titles))
-                  and '{"index":0,"type":"dashboard-overwrite"}.n_clicks' != changed_id):
+                  and 'prompt-result' not in changed_id):
 
                 # dashboard-overwrite index 0 = confirm overwrite
                 # dashboard-overwrite index 1 = cancel overwrite
                 # if conflicting graph titles
 
-                if any(x in used_titles for x in tile_titles):
+                if any(x in used_titles for x in tile_titles or dashboard_title in used_dashboard_titles):
                     conflicting_graphs = ''
                     conflicting_graphs_list = [i for i in tile_titles if i in used_titles]
                     for idx, conflicting_graph in enumerate(conflicting_graphs_list):
@@ -922,22 +911,13 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
 
                 for i in range(len(links)):
 
-                    intermediate_pointer = REPORT_POINTER_PREFIX + tile_titles[i].replace(" ", "")
+                    tile_pointer = REPORT_POINTER_PREFIX + tile_titles[i].replace(" ", "")
                     # regex.sub('[^A-Za-z0-9]+', '', tile_titles[i])
 
                     used_titles = []
 
                     for key in session['saved_layouts']:
                         used_titles.append(session['saved_layouts'][key]["Title"])
-
-                    while True:
-                        if intermediate_pointer in session['saved_layouts'] \
-                                and session['saved_layouts'][intermediate_pointer]["Title"] not in used_titles:
-                            tile_pointer = intermediate_pointer + "_"
-                            intermediate_pointer = tile_pointer
-                        else:
-                            tile_pointer = intermediate_pointer
-                            break
 
                     if i == 0:
                         args_list = args_list_0
@@ -993,13 +973,13 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                     save_layout_state(tile_pointer, {'Graph Type': graph_types[i], 'Args List': args_list, **tile_data,
                                                      'Title': tile_titles[i]})
                     # save_layout_to_file(session['saved_layouts'])
-                    save_layout_to_db(tile_pointer, tile_titles[i], True)
+                    save_layout_to_db(tile_pointer, tile_titles[i], tile_titles[i] not in used_titles)
 
                 # save dashboard to file
                 # Change to a dashboard pointer from dashboard_title
                 save_dashboard_state(dashboard_pointer, dashboard_saves)
                 # save_dashboard_to_file(session['saved_dashboards'])
-                save_dashboard_to_db(dashboard_pointer, dashboard_title)
+                save_dashboard_to_db(dashboard_pointer, dashboard_title, dashboard_title not in used_dashboard_titles)
 
                 update_graph_options_trigger = 'trigger'
                 tile_title_returns = auto_named_titles

@@ -1235,28 +1235,32 @@ for x in range(4):
 #         State('num-tiles', 'data-num-tiles'),
 #         prevent_initial_call=True
 #     )
-#
-# app.clientside_callback(
-#     ClientsideFunction(
-#         namespace='clientside',
-#         function_name='datasetLoadScreen'
-#     ),
-#     Output('dataset-confirmation-symbols', 'n_clicks'),
-#     [Input({'type': 'confirm-load-data', 'index': ALL}, 'n_clicks'),
-#      Input({'type': 'confirm-data-set-refresh', 'index': ALL}, 'n_clicks'),
-#      Input('select-dashboard-dropdown', 'value')],
-#     prevent_initial_call=True
-# )
-#
-# app.clientside_callback(
-#     ClientsideFunction(
-#         namespace='clientside',
-#         function_name='datasetRemoveLoadScreen'
-#     ),
-#     Output('df-constants-storage', 'n_clicks'),
-#     [Input('df-constants-storage', 'data')],
-#     prevent_initial_call=True
-# )
+
+app.clientside_callback(
+    ClientsideFunction(
+        namespace='clientside',
+        function_name='datasetLoadScreen'
+    ),
+    Output('dataset-confirmation-symbols', 'n_clicks'),
+    [Input({'type': 'confirm-load-data', 'index': ALL}, 'n_clicks'),
+     Input({'type': 'confirm-data-set-refresh', 'index': ALL}, 'n_clicks'),
+     Input('float-menu-result', 'children')],
+    [State('float-menu-title', 'data-'),
+     State('select-dashboard-dropdown', 'value')],
+    prevent_initial_call=True
+)
+
+app.clientside_callback(
+    ClientsideFunction(
+        namespace='clientside',
+        function_name='datasetRemoveLoadScreen'
+    ),
+    Output('df-constants-storage', 'n_clicks'),
+    [Input('df-constants-storage', 'data'),
+     Input({'type': 'graph_display', 'index': ALL}, 'children')],
+    State('num-tiles', 'data-num-tiles'),
+    prevent_initial_call=True
+)
 
 # *************************************************PROMPT*********************************************************
 

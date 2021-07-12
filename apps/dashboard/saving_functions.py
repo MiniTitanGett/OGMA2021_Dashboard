@@ -68,13 +68,13 @@ def save_layout_to_db(graph_id, graph_title, is_adding):
     exec_storedproc(query)
 
 
-def save_dashboard_to_db(dashboard_id, dashboard_title):
+def save_dashboard_to_db(dashboard_id, dashboard_title, is_adding):
     query = """\
     declare @p_result_status varchar(255)
-    exec dbo.opp_addgeteditdeletefind_extdashboards {}, 'Add', \'{}\', \'{}\', 'Dash', \'{}\', 'application/json',
+    exec dbo.opp_addgeteditdeletefind_extdashboards {}, \'{}\', \'{}\', \'{}\', 'Dash', \'{}\', 'application/json',
     'json', @p_result_status output
     select @p_result_status as result_status
-    """.format(session['sessionID'], dashboard_id, dashboard_title,
+    """.format(session['sessionID'], 'Add' if is_adding else 'Edit', dashboard_id, dashboard_title,
                json.dumps(session['saved_dashboards'][dashboard_id], sort_keys=True))
 
     exec_storedproc(query)

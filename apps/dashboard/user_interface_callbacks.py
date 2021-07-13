@@ -507,8 +507,7 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
 
     graph_options = no_update
     options = []
-
-    link_trigger = no_update  # None
+    link_trigger = no_update
 
     type_style = {'margin-left': '15px'}
     message_style = DATA_CONTENT_HIDE
@@ -717,42 +716,6 @@ for x in range(4):
 
 
 # ************************************************DATA SIDE-MENU******************************************************
-
-# change link button appearance
-@app.callback(
-    Output({'type': 'tile-link', 'index': MATCH}, 'className'),
-    [Input({'type': 'tile-link', 'index': MATCH}, 'n_clicks'),
-     Input({'type': 'set-tile-link-trigger', 'index': MATCH}, 'link-')],
-    [State({'type': 'tile-link', 'index': MATCH}, 'className')],
-    prevent_initial_call=True
-)
-def _change_link(_link_clicks, link_trigger, link_state):
-    """
-    :param _link_clicks: Detects the user clicking the link/unlink icon
-    :param link_state: State of the link/unlink icon
-    :return: New state of the link/unlink icon
-    """
-    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-
-    # if link button was not pressed and layout was not selected, do not update
-    if '.' == changed_id:  # or link_trigger is None
-        raise PreventUpdate
-
-    if '"type":"select-layout-dropdown"}.value' in changed_id:
-        link_state = 'fa fa-unlink'
-
-    if '"type":"tile-link"}.n_clicks' in changed_id:
-        # if link button was pressed, toggle the link icon linked <--> unlinked
-        if link_state == "fa fa-link":
-            link_state = 'fa fa-unlink'
-        else:
-            link_state = 'fa fa-link'
-
-    if '"type":"set-tile-link-trigger"}.link-' in changed_id and link_trigger is not None:
-        link_state = 'fa fa-unlink'
-
-    return link_state
-
 
 # manage data sidemenu appearance and content
 @app.callback(
@@ -1236,8 +1199,8 @@ for x in range(4):
 app.clientside_callback(
     """
     function datasetLoadScreen(n_click_load, n_click_reset, float_menu_result, float_menu_data, selected_dashboard) {
-        if (n_click_load != ',,,,' || n_click_reset != ',,,,' || (float_menu_data[0] == 'dashboard_layouts'
-             && selected_dashboard != null && float_menu_result == 'ok')){
+        if (n_click_load != ',,,,' || n_click_reset != ',,,,' || (typeof float_menu_data != 'undefined' 
+             && float_menu_data[0] == 'dashboard_layouts' && selected_dashboard != null && float_menu_result == 'ok')){
             var newDiv = document.createElement('div');
             newDiv.className = '_data-loading';
             newDiv.id = 'loading';
@@ -1259,13 +1222,13 @@ app.clientside_callback(
     """
     function datasetRemoveLoadScreen(data, graph_displays, num_tiles) {
         var triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
-        triggered = triggered[triggered.length - 1];
-        if (triggered.includes('df-constants-storage')){
+        if (triggered.includes("df-constants-storage.data")){
             try{
                 document.getElementById('loading').remove();
             }catch{ /* Do Nothing */ }
         }
         else {
+            triggered = triggered[triggered.length - 1];
             var tile = parseInt(triggered.match(/\d+/)[0]) + 1;
             if (tile == num_tiles){
                 try{

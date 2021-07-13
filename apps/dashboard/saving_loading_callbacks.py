@@ -89,15 +89,18 @@ def _update_tile_loading_dropdown_options(_tile_saving_trigger, _dashboard_savin
     Output('tile-save-trigger-wrapper', 'children'),  # formatted in two chained callbacks to mix ALL and y values
     [Input({'type': 'save-button', 'index': ALL}, 'n_clicks'),
      Input({'type': 'delete-button', 'index': ALL}, 'n_clicks'),
+     Input({'type': 'tile-link', 'index': ALL}, 'n_clicks'),
+     Input({'type': 'set-tile-link-trigger', 'index': ALL}, 'link-'),
      Input('float-menu-result', 'children'),
      Input('prompt-result', 'children')],
     [State('prompt-title', 'data-'),
      State('float-menu-title', 'data-'),
-     State({'type': 'select-layout-dropdown', 'index': ALL}, 'value')],
+     State({'type': 'select-layout-dropdown', 'index': ALL}, 'value'),
+     State({'type': 'tile-link', 'index': ALL}, 'className')],
     prevent_initial_call=True
 )
-def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, float_menu_result, prompt_result, prompt_data,
-                                       float_menu_data, load_state):
+def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, _link_clicks, link_trigger, float_menu_result,
+                                       prompt_result, prompt_data, float_menu_data, load_state, link_state):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.' or len(dash.callback_context.triggered) > 1:
@@ -130,12 +133,24 @@ def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, float_menu_re
         mode = "save"
     elif 'delete-button' in changed_id:
         mode = "delete"
+    elif '"type":"select-layout-dropdown"}.value' in changed_id:
+        mode = 'fa fa-unlink'
+    elif '"type":"tile-link"}.n_clicks' in changed_id:
+        # if link button was pressed, toggle the link icon linked <--> unlinked
+        if link_state[changed_index] == "fa fa-link":
+            mode = 'fa fa-unlink'
+        else:
+            mode = 'fa fa-link'
+    elif '"type":"set-tile-link-trigger"}.link-' in changed_id and link_trigger is not None:
+        mode = 'fa fa-unlink'
     elif 'float-menu-result.children' in changed_id:
         mode = "confirm-load"
     elif prompt_data[0] == 'delete' and prompt_result == 'ok':
         mode = "confirm-delete"
     elif prompt_data[0] == 'overwrite' and prompt_result == 'ok':
         mode = "confirm-overwrite"
+    elif prompt_data[0] == 'link' and prompt_result == 'ok':
+        mode = "confirm-link"
     else:
         mode = "cancel"
 
@@ -165,7 +180,9 @@ for y in range(4):
          Output({'type': 'select-range-trigger', 'index': y}, 'data-tile-start_secondary'),
          Output({'type': 'select-range-trigger', 'index': y}, 'data-tile-end_secondary'),
          Output({'type': 'tile-link-wrapper', 'index': y}, 'children'),
-         Output({'type': 'df-constants-storage-tile-wrapper', 'index': y}, 'children')],
+         Output({'type': 'df-constants-storage-tile-wrapper', 'index': y}, 'children'),
+         # tile link appearance
+         Output({'type': 'tile-link', 'index': y}, 'className')],
         [Input({'type': 'tile-save-trigger', 'index': y}, 'value')],
         # Tile features
         [State({'type': 'tile-title', 'index': y}, 'value'),
@@ -259,6 +276,7 @@ for y in range(4):
         end_secondary = no_update
         unlink = no_update
         df_const_output = no_update
+        link_output = no_update
 
         # if save requested or the overwrite was confirmed, check for exceptions and save
         if trigger == 'save' or trigger == 'confirm-overwrite':
@@ -423,13 +441,25 @@ for y in range(4):
             tile_title_trigger = session['saved_layouts'][selected_layout]['Title']
             layout_dropdown = None
 
+        # if we have linking inputs
+        elif trigger == 'fa fa-unlink':
+            link_output = 'fa fa-unlink'
+        elif trigger == 'fa fa-link':
+            if df_name != parent_df_name:
+                prompt_trigger = [['link', tile], {}, get_label('LBL_Link_Graph'),
+                                  get_label('LBL_Link_Graph_Prompt')]
+            else:
+                link_output = 'fa fa-link'
+        elif trigger == 'confirm-link':
+            link_output = 'fa fa-link'
+
         # if anything was cancelled, clear display
         elif trigger == 'cancel':
             layout_dropdown = None
 
         return prompt_trigger, update_options_trigger, popup_text, popup_is_open, tile_title_trigger, \
             customize_content, data_content, layout_dropdown, tab_output, start_year, end_year, start_secondary, \
-            end_secondary, unlink, df_const_output
+            end_secondary, unlink, df_const_output, link_output
 
 
 # **********************************************DASHBOARD MENU*******************************************************

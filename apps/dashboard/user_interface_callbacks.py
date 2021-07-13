@@ -27,27 +27,6 @@ from apps.dashboard.layouts import get_line_scatter_graph_menu, get_bar_graph_me
     get_data_menu, get_sankey_menu, get_dashboard_title_input, get_bubble_graph_menu
 
 
-# Contents:
-#   MAIN LAYOUT
-#       - _generate_layout()
-#       - _new_and_delete()
-#       - _unlock_new_button()
-#   TAB LAYOUT
-#       - _change_tab()
-#       - _update_num_tiles()
-#       - _update_tab_title()
-#   TILE LAYOUT
-#       - _switch_tile_tab()
-#   CUSTOMIZE TAB
-#       - _update_graph_type_options()
-#       - _update_graph_menu()
-#   DATA SIDE-MENU
-#       - _change_link()
-#       - _manage_data_sidemenus()
-#       - _highlight_child_tiles()
-#   Load Screen
-#       - client side callbacks
-
 # *************************************************MAIN LAYOUT********************************************************
 
 
@@ -656,6 +635,8 @@ for x in range(4):
                                                mode=selected_graph_type,
                                                measure_type=None if df_const is None else
                                                df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
+                                               data_fit=None,
+                                               degree=None,
                                                gridline=None,
                                                legend=None,
                                                df_name=df_name,

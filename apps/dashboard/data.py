@@ -22,36 +22,6 @@ from sklearn.preprocessing import PolynomialFeatures
 # import config
 from conn import get_ref, exec_storedproc_results
 
-# Contents:
-#   ARBITRARY CONSTANTS
-#       - GRAPH_OPTIONS
-#       - X_AXIS_OPTIONS
-#       - CLR
-#   STYLE RETURNS FOR CALLBACKS
-#       - VIEW_CONTENT_SHOW
-#       - VIEW_CONTENT_HIDE
-#       - CUSTOMIZE_CONTENT_SHOW
-#       - CUSTOMIZE_CONTENT_HIDE
-#       - LAYOUT_CONTENT_SHOW
-#       - LAYOUT_CONTENT_HIDE
-#       - DATA_CONTENT_SHOW
-#       - DATA_CONTENT_HIDE
-#   DATASET
-#       - dataset_to_df()
-#       - generate_constants()
-#   DATA MANIPULATION FUNCTIONS
-#       - data_filter()
-#       - customize_menu_filter()
-#       - create_categories()
-#       - get_table_columns()
-#   LANGUAGE DATA
-#       - get_label()
-#       - LANGUAGE_DF
-#       - LANGUAGE
-#   DATAFRAME OPERATIONS
-#       - DATA_SETS
-#       - LOADED_DFS
-
 
 # ***********************************************ARBITRARY CONSTANTS*************************************************
 

@@ -22,20 +22,6 @@ from apps.dashboard.layouts import get_line_scatter_graph_menu, get_bar_graph_me
     get_box_plot_menu, get_sankey_menu, get_bubble_graph_menu
 
 
-# Contents:
-#   SAVING FUNCTIONS
-#       - save_layout_state()
-#       - save_dashboard_state()
-#       - get_dashboard_attributes()
-#       - load_saved_graphs()
-#       - load_saved_dashboards()
-#       - save_layout_to_file()
-#       - save_layout_to_db
-#       - save_dashboard_to_file()
-#       - delete_layout()
-#       - delete_dashboard()
-
-
 # maps the name of the graph to the attributes you want to store
 def save_layout_state(name, attributes):
     """
@@ -109,8 +95,9 @@ def delete_dashboard(dashboard_id):
 def load_graph_menu(graph_type, tile, df_name, args_list, df_const):
     if graph_type == 'Line' or graph_type == 'Scatter':
         graph_menu = get_line_scatter_graph_menu(tile=tile, x=args_list[0], y=args_list[2], measure_type=args_list[1],
-                                                 mode=args_list[3], gridline=args_list[4], legend=args_list[5],
-                                                 df_name=df_name, df_const=df_const)
+                                                 mode=args_list[3], data_fit=args_list[4], degree=args_list[5],
+                                                 ci=args_list[6], gridline=args_list[7], legend=args_list[8],
+                                                 data_fitting=True, df_name=df_name, df_const=df_const)
     elif graph_type == 'Bar':
         graph_menu = get_bar_graph_menu(tile=tile, x=args_list[0], y=args_list[2], measure_type=args_list[1],
                                         orientation=args_list[3], animate=args_list[4], gridline=args_list[5],

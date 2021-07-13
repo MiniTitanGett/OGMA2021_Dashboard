@@ -15,16 +15,7 @@ import dash_html_components as html
 from apps.dashboard.data import CLR, get_label
 
 
-# Contents:
-#   DATE-PICKER LAYOUT
-#       - get_date_picker()
-#   DATE-PICKER FUNCTIONS
-#       - get_date_box()
-#       - get_secondary_data()
-#       - get_date_functions()
-
 # ********************************************DATE-PICKER LAYOUT**************************************************
-
 
 # date picker layout
 def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, period_type, df_const):

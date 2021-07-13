@@ -24,32 +24,6 @@ from apps.dashboard.datepicker import get_date_picker
 from apps.dashboard.graphs import __update_graph
 
 
-# Contents:
-#   HELPER FUNCTION(S)
-#       - change_index()
-#       - recursive_to_plotly_json()
-#   DATA SIDE MENU
-#       - get_data_set_picker()
-#       - get_data_menu()
-#   LAYOUT
-#       - get_layout()
-#   TAB LAYOUT
-#       - get_default_tab_content()
-#   DASHBOARD LAYOUT
-#       - get_layout()
-#       - get_layout_graph()
-#       - get_layout_dashboard()
-#   TILE LAYOUT
-#       - get_tile()
-#       - get_tile_layout()
-#   GRAPH MENUS
-#       - get_line_graph_menu()
-#       - get_bar_graph_menu()
-#       - get_scatter_graph_menu()
-#       - get_table_graph_menu()
-#       - get_sankey_menu()
-
-
 # ********************************************HELPER FUNCTION(S)******************************************************
 
 # change index numbers of all id's within tile or data side-menu
@@ -1054,7 +1028,8 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, parent_df=None):
 # ***************************************************GRAPH MENUS*****************************************************
 
 # line graph menu layout
-def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridline, legend, df_const, data_fitting, ci):
+def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridline, legend, df_const, data_fitting, ci,
+                                data_fit, degree):
     """
     :param data_fitting: boolean to determine whether to show data fitting options
     :param ci: show confidence interval or not
@@ -1067,6 +1042,8 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
     :param gridline: Show gridline or not
     :param legend: Show legend or not
     :param df_const: Dataframe constants
+    :param data_fit: data_fit value
+    :param degree: degree value
     :return: Menu with options to modify a line graph.
     """
     # arg_value[0] = xaxis selector
@@ -1183,7 +1160,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                             options=[{'label': get_label('LBL_No_Fit'), 'value': 'no-fit'},
                                      {'label': get_label('LBL_Linear_Fit'), 'value': 'linear-fit'},
                                      {'label': get_label('LBL_Curve_Fit'), 'value': 'curve-fit'}],
-                            value='no-fit',
+                            value=data_fit if data_fit else 'no-fit',
                             style={'display': 'inline-block', 'font-size': '13px'}),
 
                         html.Div(
@@ -1191,7 +1168,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                             children=html.Div([
                                 dcc.Input(
                                     id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
-                                    value=3,
+                                    value=degree if degree else 3,
                                     type='number',
                                     required=True,
                                     min=1,

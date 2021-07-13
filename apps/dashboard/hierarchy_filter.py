@@ -17,14 +17,6 @@ import dash_html_components as html
 from apps.dashboard.data import get_label, session, CLR
 
 
-# Contents:
-#   HELPER FUNCTIONS
-#       - generate_dropdown()
-#       - generate_history_button()
-#   LAYOUT
-#       - get_hierarchy_layout()
-
-
 # ***********************************************HELPER FUNCTIONS****************************************************
 
 # helper function to generate hierarchy dropdown

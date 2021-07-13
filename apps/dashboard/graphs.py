@@ -25,21 +25,6 @@ import plotly.graph_objects as go
 from apps.dashboard.data import get_label, data_filter, customize_menu_filter, linear_regression, polynomial_regression
 
 
-# Contents:
-#   HELPER FUNCTIONS
-#       - set_partial_periods()
-#       - get_empty_graph_subtitle()
-#       - get_hierarchy_col()
-#   GRAPH FUNCTIONS
-#       - get_blank_figure()
-#       - get_line_figure()
-#       - get_scatter_figure()
-#       - get_bar_figure()
-#       - get_box_figure()
-#       - get_table_figure()
-#       - __update_graph()
-
-
 # ***********************************************HELPER FUNCTIONS****************************************************
 
 # mark partial periods on graph

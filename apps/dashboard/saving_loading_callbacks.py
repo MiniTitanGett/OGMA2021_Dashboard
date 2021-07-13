@@ -23,13 +23,6 @@ from apps.dashboard.data import get_label, dataset_to_df, generate_constants
 from apps.dashboard.saving_functions import delete_layout, save_layout_state, save_layout_to_db, \
     save_dashboard_state, save_dashboard_to_db, delete_dashboard, load_graph_menu
 
-#   SAVING
-#       - _save_tile()
-#       _ _save_tile()
-#       - _save_dashboard()
-#   LOADING
-#       - _load_tile_layout()
-#       - _reset_selected_layout()
 
 # **********************************************GLOBAL VARIABLES*****************************************************
 

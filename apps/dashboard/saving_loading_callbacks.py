@@ -145,7 +145,7 @@ def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, _link_clicks,
     elif prompt_data[0] == 'link' and prompt_result == 'ok':
         mode = "confirm-link"
     else:
-        mode = "cancel"
+        return no_update
 
     children = dcc.Dropdown(
         id={'type': 'tile-save-trigger', 'index': changed_index},
@@ -166,7 +166,6 @@ for y in range(4):
          Output({'type': 'set-tile-title-trigger', 'index': y}, 'data-tile_load_title'),
          Output({'type': 'tile-customize-content', 'index': y}, 'children'),
          Output({'type': 'data-menu-tile-loading', 'index': y}, 'children'),
-         Output({'type': 'select-layout-dropdown', 'index': y}, 'value'),
          Output({'type': 'select-range-trigger', 'index': y}, 'data-tile-tab'),
          Output({'type': 'select-range-trigger', 'index': y}, 'data-tile-start_year'),
          Output({'type': 'select-range-trigger', 'index': y}, 'data-tile-end_year'),
@@ -261,7 +260,6 @@ for y in range(4):
         tile_title_trigger = no_update
         customize_content = no_update
         data_content = no_update
-        layout_dropdown = no_update
         tab_output = no_update
         start_year = no_update
         end_year = no_update
@@ -432,7 +430,6 @@ for y in range(4):
                 id={'type': 'tile-link', 'index': tile},
                 style={'position': 'relative'})
             tile_title_trigger = session['saved_layouts'][selected_layout]['Title']
-            layout_dropdown = None
 
         # if we have linking inputs
         elif trigger == 'fa fa-unlink':
@@ -446,12 +443,8 @@ for y in range(4):
         elif trigger == 'confirm-link':
             link_output = 'fa fa-link'
 
-        # if anything was cancelled, clear display
-        elif trigger == 'cancel':
-            layout_dropdown = None
-
         return prompt_trigger, update_options_trigger, popup_text, popup_is_open, tile_title_trigger, \
-            customize_content, data_content, layout_dropdown, tab_output, start_year, end_year, start_secondary, \
+            customize_content, data_content, tab_output, start_year, end_year, start_secondary, \
             end_secondary, unlink, df_const_output, link_output
 
 

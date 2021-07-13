@@ -454,24 +454,12 @@ def get_layout_dashboard():
             id='prompt-obscure',
             className='prompt-obscure'
         ),
-        html.Div(
-            id={'type': 'prompt-trigger', 'index': 0},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'prompt-trigger', 'index': 1},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'prompt-trigger', 'index': 2},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'prompt-trigger', 'index': 3},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'prompt-trigger', 'index': 4},
-            style={'display': 'none'}),
-        html.Div(
-            id='prompt-result',
-            style={'display': 'none'}),
+        dcc.Store(id={'type': 'prompt-trigger', 'index': 0}),
+        dcc.Store(id={'type': 'prompt-trigger', 'index': 1}),
+        dcc.Store(id={'type': 'prompt-trigger', 'index': 2}),
+        dcc.Store(id={'type': 'prompt-trigger', 'index': 3}),
+        dcc.Store(id={'type': 'prompt-trigger', 'index': 4}),
+        dcc.Store(id='prompt-result'),
         # Floating Menu
         html.Div(
             html.Div([
@@ -497,24 +485,12 @@ def get_layout_dashboard():
             style=DATA_CONTENT_HIDE,
             id='float-menu-obscure',
             className='prompt-obscure'),
-        html.Div(
-            id={'type': 'float-menu-trigger', 'index': 0},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'float-menu-trigger', 'index': 1},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'float-menu-trigger', 'index': 2},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'float-menu-trigger', 'index': 3},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'float-menu-trigger', 'index': 4},
-            style={'display': 'none'}),
-        html.Div(
-            id='float-menu-result',
-            style={'display': 'none'}),
+        dcc.Store(id={'type': 'float-menu-trigger', 'index': 0}),
+        dcc.Store(id={'type': 'float-menu-trigger', 'index': 1}),
+        dcc.Store(id={'type': 'float-menu-trigger', 'index': 2}),
+        dcc.Store(id={'type': 'float-menu-trigger', 'index': 3}),
+        dcc.Store(id={'type': 'float-menu-trigger', 'index': 4}),
+        dcc.Store(id='float-menu-result'),
         # Popups
         dbc.Alert(
             'Your Tile Has Been Saved',
@@ -552,156 +528,79 @@ def get_layout_dashboard():
             style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px', 'z-index': '500'},
             duration=4000),
         # dashboard-reset-trigger is used by NEW/DELETE to trigger MANAGE DATA SIDEMENUS to reset the data menus
-        html.Div(id='dashboard-reset-trigger', style={'display': 'none'}),
-        html.Div(id='dashboard-reset-confirmation', style={'display': 'hidden'}),
+        dcc.Store(id='dashboard-reset-trigger'),
+        dcc.Store(id='dashboard-reset-confirmation'),
         # select-range-trigger is used by the load callbacks to load the select range datepicker section
-        html.Div(
-            id={'type': 'select-range-trigger', 'index': 0},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'select-range-trigger', 'index': 1},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'select-range-trigger', 'index': 2},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'select-range-trigger', 'index': 3},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'select-range-trigger', 'index': 4},
-            style={'display': 'none'}),
+        dcc.Store(id={'type': 'select-range-trigger', 'index': 0}),
+        dcc.Store(id={'type': 'select-range-trigger', 'index': 1}),
+        dcc.Store(id={'type': 'select-range-trigger', 'index': 2}),
+        dcc.Store(id={'type': 'select-range-trigger', 'index': 3}),
+        dcc.Store(id={'type': 'select-range-trigger', 'index': 4}),
         # graph-menu-trigger is triggered by manage_sidemenus and triggers update_graph_menu. Represents a change in df.
-        html.Div(
+        dcc.Store(
             id={'type': 'graph-menu-trigger', 'index': 0},
-            **{'data-df_name': session['dataset_list'][0]},
-            style={'display': 'none'}),
-        html.Div(
+            data={'df_name': session['dataset_list'][0]}),
+        dcc.Store(
             id={'type': 'graph-menu-trigger', 'index': 1},
-            **{'data-df_name': session['dataset_list'][0]},
-            style={'display': 'none'}),
-        html.Div(
+            data={'df_name': session['dataset_list'][0]}),
+        dcc.Store(
             id={'type': 'graph-menu-trigger', 'index': 2},
-            **{'data-df_name': session['dataset_list'][0]},
-            style={'display': 'none'}),
-        html.Div(
+            data={'df_name': session['dataset_list'][0]}),
+        dcc.Store(
             id={'type': 'graph-menu-trigger', 'index': 3},
-            **{'data-df_name': session['dataset_list'][0]},
-            style={'display': 'none'}),
+            data={'df_name': session['dataset_list'][0]}),
         # update-graph-trigger is triggered by update_graph_menu and triggers update_graph. Represents a change in df or
         # link state
-        html.Div(
-            id={'type': 'update-graph-trigger', 'index': 0},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'update-graph-trigger', 'index': 1},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'update-graph-trigger', 'index': 2},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'update-graph-trigger', 'index': 3},
-            style={'display': 'none'}),
+        dcc.Store(id={'type': 'update-graph-trigger', 'index': 0}),
+        dcc.Store(id={'type': 'update-graph-trigger', 'index': 1}),
+        dcc.Store(id={'type': 'update-graph-trigger', 'index': 2}),
+        dcc.Store(id={'type': 'update-graph-trigger', 'index': 3}),
         # tile-closed-trigger stores index of deleted tile
-        html.Div(
-            id='tile-closed-trigger',
-            style={'display': 'none'}),
+        dcc.Store(id='tile-closed-trigger'),
         # tile-save-trigger-wrapper conditionally triggers the tile saving callback
-        html.Div(
-            id='tile-save-trigger-wrapper',
-            style={'display': 'none'}),
+        dcc.Store(id='tile-save-trigger-wrapper'),
         # reset-selected-layout-trigger resets the selected layout dropdown value to ''
-        html.Div(
-            id={'type': 'reset-selected-layout', 'index': 0},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'reset-selected-layout', 'index': 1},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'reset-selected-layout', 'index': 2},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'reset-selected-layout', 'index': 3},
-            style={'display': 'none'}),
+        dcc.Store(id={'type': 'reset-selected-layout', 'index': 0}),
+        dcc.Store(id={'type': 'reset-selected-layout', 'index': 1}),
+        dcc.Store(id={'type': 'reset-selected-layout', 'index': 2}),
+        dcc.Store(id={'type': 'reset-selected-layout', 'index': 3}),
         # set-graph-options-trigger is used by the _manage_data_sidemenus callback to load graph options based on
         # the selected dataset
-        html.Div(
-            id={'type': 'set-graph-options-trigger', 'index': 0},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'set-graph-options-trigger', 'index': 1},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'set-graph-options-trigger', 'index': 2},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'set-graph-options-trigger', 'index': 3},
-            style={'display': 'none'}),
+        dcc.Store(id={'type': 'set-graph-options-trigger', 'index': 0}),
+        dcc.Store(id={'type': 'set-graph-options-trigger', 'index': 1}),
+        dcc.Store(id={'type': 'set-graph-options-trigger', 'index': 2}),
+        dcc.Store(id={'type': 'set-graph-options-trigger', 'index': 3}),
         # set-dropdown-options-trigger is used to detect when to update all 'select layout' dropdown options
-        html.Div(
-            id={'type': 'set-dropdown-options-trigger', 'index': 0},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'set-dropdown-options-trigger', 'index': 1},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'set-dropdown-options-trigger', 'index': 2},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'set-dropdown-options-trigger', 'index': 3},
-            style={'display': 'none'}),
+        dcc.Store(id={'type': 'set-dropdown-options-trigger', 'index': 0}),
+        dcc.Store(id={'type': 'set-dropdown-options-trigger', 'index': 1}),
+        dcc.Store(id={'type': 'set-dropdown-options-trigger', 'index': 2}),
+        dcc.Store(id={'type': 'set-dropdown-options-trigger', 'index': 3}),
         # set-tile-title-trigger is used by the tile load callback and dashboard save callbacks to load the tile title
-        html.Div(
-            id={'type': 'set-tile-title-trigger', 'index': 0},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'set-tile-title-trigger', 'index': 1},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'set-tile-title-trigger', 'index': 2},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'set-tile-title-trigger', 'index': 3},
-            style={'display': 'none'}),
+        dcc.Store(id={'type': 'set-tile-title-trigger', 'index': 0}),
+        dcc.Store(id={'type': 'set-tile-title-trigger', 'index': 1}),
+        dcc.Store(id={'type': 'set-tile-title-trigger', 'index': 2}),
+        dcc.Store(id={'type': 'set-tile-title-trigger', 'index': 3}),
         # set-tile-link-trigger is used by the update graph options callback to trigger the link update callback
-        html.Div(
-            id={'type': 'set-tile-link-trigger', 'index': 0},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'set-tile-link-trigger', 'index': 1},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'set-tile-link-trigger', 'index': 2},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'set-tile-link-trigger', 'index': 3},
-            style={'display': 'none'}),
+        dcc.Store(id={'type': 'set-tile-link-trigger', 'index': 0}),
+        dcc.Store(id={'type': 'set-tile-link-trigger', 'index': 1}),
+        dcc.Store(id={'type': 'set-tile-link-trigger', 'index': 2}),
+        dcc.Store(id={'type': 'set-tile-link-trigger', 'index': 3}),
         # set-date-picker-trigger is used by the update data menu callback to trigger the date picker loading in an
         # unlinked tile due to a mismatch of graph type
-        html.Div(
-            id={'type': 'set-date-picker-trigger', 'index': 0},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'set-date-picker-trigger', 'index': 1},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'set-date-picker-trigger', 'index': 2},
-            style={'display': 'none'}),
-        html.Div(
-            id={'type': 'set-date-picker-trigger', 'index': 3},
-            style={'display': 'none'}),
+        dcc.Store(id={'type': 'set-date-picker-trigger', 'index': 0}),
+        dcc.Store(id={'type': 'set-date-picker-trigger', 'index': 1}),
+        dcc.Store(id={'type': 'set-date-picker-trigger', 'index': 2}),
+        dcc.Store(id={'type': 'set-date-picker-trigger', 'index': 3}),
         # num-tile-2 / 3 / 4 temporarily store the number of tiles before they are inserted into the primary num-tiles
-        html.Div(
+        dcc.Store(
             id='num-tiles-2',
-            style={'display': 'none'},
-            **{'data-num-tiles': 1}),
-        html.Div(
+            data={'num-tiles': 1}),
+        dcc.Store(
             id='num-tiles-3',
-            style={'display': 'none'},
-            **{'data-num-tiles': 1}),
-        html.Div(
+            data={'num-tiles': 1}),
+        dcc.Store(
             id='num-tiles-4',
-            style={'display': 'none'},
-            **{'data-num-tiles': 1}),
+            data={'num-tiles': 1}),
         # memory locations for tabs
         dcc.Store(
             id='tab-storage',

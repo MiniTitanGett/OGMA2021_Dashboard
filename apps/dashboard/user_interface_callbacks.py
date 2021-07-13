@@ -533,7 +533,7 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
             and graph_type not in graph_options:
         graph_value = options[0]['value']
     else:
-        graph_value = graph_type
+        graph_value = no_update
 
     return link_trigger, options, graph_value, type_style, message_style
 
@@ -549,8 +549,7 @@ for x in range(4):
          Input({'type': 'graph-type-dropdown', 'index': x}, 'value'),
          Input({'type': 'tile-link', 'index': x}, 'className'),
          Input({'type': 'graph_children_toggle', 'index': 4}, 'value'),
-         Input({'type': 'hierarchy-toggle', 'index': 4}, 'value')
-         ],
+         Input({'type': 'hierarchy-toggle', 'index': 4}, 'value')],
         [State({'type': 'div-graph-options', 'index': x}, 'children'),
          State({'type': 'graph-type-dropdown', 'index': ALL}, 'value'),
          State({'type': 'tile-customize-content', 'index': x}, 'data-loaded'),
@@ -572,8 +571,8 @@ for x in range(4):
 
         # prevents update if hierarchy toggle or graph all children is selected when the graph type is not line or
         # scatter
-        if ('"type":"graph_children_toggle"}.className' in changed_id
-            or '"type":"hierarchy-toggle"}.className' in changed_id) and (
+        if ('"type":"graph_children_toggle"}.value' in changed_id
+            or '"type":"hierarchy-toggle"}.value' in changed_id) and (
                 selected_graph_type != "Line" or selected_graph_type != "Scatter"):
             raise PreventUpdate
 

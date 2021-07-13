@@ -203,7 +203,7 @@ def before_request_func():
         # setup session variables
         session['saved_layouts'] = {}
         session['saved_dashboards'] = {}
-        session['tile_edited'] = {0: True, 1: True, 2: True, 3: True}
+        session['tile_edited'] = {0: True, 1: True, 2: True, 3: True, 4: True}
 
         # load the available graphs/layouts
         load_saved_graphs_from_db()

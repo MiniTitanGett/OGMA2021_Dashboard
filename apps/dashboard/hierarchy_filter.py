@@ -63,7 +63,8 @@ def generate_history_button(name, index, tile):
         id={'type': 'button: {}'.replace("{}", str(tile)), 'index': index},
         n_clicks=0,
         style={'background': 'none', 'border': 'none', 'padding': '5px', 'color': '#006699',
-               'cursor': 'pointer', 'text-align': 'center', 'text-decoration': 'underline', 'display': 'inline-block'})
+               'cursor': 'pointer', 'text-align': 'center', 'text-decoration': 'underline', 'display': 'inline-block',
+               'margin-left': str(index * 30) + 'px'})
 
 
 # ***********************************************LAYOUT***************************************************************

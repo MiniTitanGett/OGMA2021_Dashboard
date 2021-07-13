@@ -129,8 +129,7 @@ def get_data_set_picker(tile, df_name):
             children=[
                 html.H6(
                     "{}:".format(get_label('LBL_Data_Set')),
-                    style={'color': CLR['text1'], 'margin-top': '25px', 'display': 'inline-block',
-                           'cursor': 'pointer'}),
+                    style={'color': CLR['text1'], 'margin-top': '25px', 'display': 'inline-block'}),
                 html.I(
                     html.Span(
                         get_label("LBL_Data_Set_Info"),
@@ -384,95 +383,59 @@ def get_layout_dashboard():
                         n_clicks=1,
                         children=get_label('LBL_Add_Tile'),
                         id='button-new',
-                        disabled=False
-                    )
-                ],
-                    style={'display': 'inline-block', 'vertical-align': 'bottom'},
+                        disabled=False)
+                ], style={'display': 'inline-block'},
                     id='button-new-wrapper'),
                 html.Button(
-                    children=get_label("LBL_Reset"),
+                    get_label("LBL_Reset"),
                     className='parent-nav',
                     id='dashboard-reset',
-                    style={'width': 'auto'}
-                ),
-                html.Div(
-                    html.Div([
-                        html.I(
-                            html.Span(
-                                get_label("LBL_Reset_Dashboard_All_Unsaved_Changes_will_Be_Lost"),
-                                className='save-symbols-tooltip'),
-                            id='confirm-dashboard-reset',
-                            className='fa fa-undo',
-                            style={'padding': '7px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
-                                   'margin-right': '10px', 'margin-left': '7px', 'vertical-align': 'top'}),
-                        html.Span([
-                            html.I(
-                                [],
-                                className='fa fa-undo',
-                                style={'position': 'absolute', 'left': '0', 'width': '15px'}),
-                            html.I(
-                                [],
-                                className='fa fa-ban fa-2x',
-                                style={'position': 'absolute', 'top': '50%', 'margin-left': '-13px', 'width': '26px',
-                                       'margin-top': '-15px', 'color': CLR['background1']}),
-                            html.Span(
-                                get_label("LBL_Cancel_Reset_Attempt"),
-                                className='save-symbols-tooltip')],
-                            className='save-overwrite-symbols',
-                            style={'padding': '7px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
-                                   'margin-left': '10px', 'margin-right': '14px', 'display': 'inline-block',
-                                   'vertical-align': 'top'})],
-                        id='dashboard-reset-symbols',
-                        style={'width': '71px',
-                               'border': '1px solid {}'.format(CLR['lightgray']),
-                               'margin': '2px 0', 'border-radius': '6px',
-                               'display': 'none'}),
-                    style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
-                           'position': 'relative', 'vertical-align': 'top'}),
+                    style={'width': 'auto'}),
                 html.Button(
                     className='parent-nav',
                     n_clicks=1,
-                    children=get_label('LBL_Confirm_Delete'),
+                    children=get_label('LBL_Delete'),
                     style={'display': 'inline-block', 'float': 'right', 'width': 'auto', 'margin-right': '20px'},
-                    id='confirm-delete-dashboard'),
-                dcc.Dropdown(
-                    id='delete-dashboard',
-                    options=[{'label': session['saved_dashboards'][key]['Dashboard Title'], 'value': key} for key in
-                             session['saved_dashboards']],
-                    clearable=False,
-                    style={'width': '250px', 'font-size': '13px', 'box-sizing': 'border-box', 'height': '35px',
-                           'display': 'inline-block', 'vertical-align': 'bottom', 'float': 'right',
-                           'border-radius': '0'},
-                    value='',
-                    placeholder=get_label('LBL_Delete_A_Saved_Dashboard')),
-                dcc.Dropdown(
-                    id='select-dashboard-dropdown',
-                    options=[{'label': session['saved_dashboards'][key]['Dashboard Title'], 'value': key} for key in
-                             session['saved_dashboards']],
-                    clearable=False,
-                    style={'width': '250px', 'font-size': '13px', 'box-sizing': 'border-box', 'height': '35px',
-                           'display': 'inline-block', 'vertical-align': 'bottom', 'float': 'right',
-                           'border-radius': '0', 'margin-left': '20px'},
-                    value='',
-                    placeholder=get_label('LBL_Select_A_Saved_Dashboard')),
-                html.Div(
-                    [],
-                    id='dashboard-save-status-symbols',
-                    style={'float': 'right', 'display': 'inline-block', 'height': '35px',
-                           'margin-left': '20px', 'text-align': 'center'}),
+                    id='delete-dashboard'),
+                html.Button(
+                    className='parent-nav',
+                    n_clicks=1,
+                    children=get_label('LBL_Load_Dashboard'),
+                    style={'display': 'inline-block', 'float': 'right', 'width': 'auto', 'margin-right': '20px'},
+                    id='load-dashboard'),
                 html.Button(
                     className='parent-nav',
                     n_clicks=1,
                     children=get_label('LBL_Save_Dashboard'),
                     style={'display': 'inline-block', 'float': 'right', 'width': 'auto'},
-                    id='button-save-dashboard'),
+                    id='save-dashboard'),
                 html.Div(
                     get_dashboard_title_input(),
                     id='dashboard-title-wrapper',
-                    style={'display': 'inline-block', 'float': 'right'})
-            ], style={'border-bottom': '1px solid {}'.format(CLR['lightgray']),
-                      'z-index': '99', 'width': '100%', 'top': '0',
-                      'background-color': CLR['white']},
+                    style={'display': 'inline-block', 'float': 'right'}),
+                html.Div([
+                    html.P(get_label('LBL_Load_A_Saved_Dashboard'),
+                           style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
+                    html.Div(
+                        children=[
+                            dcc.Dropdown(
+                                id='select-dashboard-dropdown',
+                                options=[{'label': session['saved_dashboards'][key]['Dashboard Title'], 'value': key}
+                                         for key in
+                                         session['saved_dashboards']],
+                                clearable=False,
+                                style={'width': '400px', 'font-size': '13px'},
+                                value='',
+                                placeholder='{}...'.format(get_label('LBL_Select'))),
+                        ], style={'width': '400px'}),
+                    html.P(get_label('LBL_Load_Dashboard_Prompt'),
+                           id={'type': 'tile-layouts-warning', 'index': 4},
+                           style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'})],
+                    id='load-dashboard-menu',
+                    style={'display': 'none'}
+                )], style={'border-bottom': '1px solid {}'.format(CLR['lightgray']),
+                           'z-index': '99', 'width': '100%', 'top': '0',
+                           'background-color': CLR['white']},
                 id='button-save-dashboard-wrapper'),
             html.Div([
                 # tab content
@@ -530,6 +493,9 @@ def get_layout_dashboard():
             id={'type': 'prompt-trigger', 'index': 3},
             style={'display': 'none'}),
         html.Div(
+            id={'type': 'prompt-trigger', 'index': 4},
+            style={'display': 'none'}),
+        html.Div(
             id='prompt-result',
             style={'display': 'none'}),
         # Floating Menu
@@ -570,6 +536,9 @@ def get_layout_dashboard():
             id={'type': 'float-menu-trigger', 'index': 3},
             style={'display': 'none'}),
         html.Div(
+            id={'type': 'float-menu-trigger', 'index': 4},
+            style={'display': 'none'}),
+        html.Div(
             id='float-menu-result',
             style={'display': 'none'}),
         # Popups
@@ -601,10 +570,16 @@ def get_layout_dashboard():
             color='dark',
             style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px', 'z-index': '500'},
             duration=4000),
+        dbc.Alert(
+            'Your Tile Has Been Saved',
+            id={'type': 'minor-popup', 'index': 4},
+            is_open=False,
+            color='dark',
+            style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px', 'z-index': '500'},
+            duration=4000),
         # dashboard-reset-trigger is used by NEW/DELETE to trigger MANAGE DATA SIDEMENUS to reset the data menus
-        html.Div(
-            id='dashboard-reset-trigger',
-            style={'display': 'none'}),
+        html.Div(id='dashboard-reset-trigger', style={'display': 'none'}),
+        html.Div(id='dashboard-reset-confirmation', style={'display': 'hidden'}),
         # select-range-trigger is used by the load callbacks to load the select range datepicker section
         html.Div(
             id={'type': 'select-range-trigger', 'index': 0},
@@ -910,7 +885,7 @@ def get_tile(tile, tile_keys=None, df_name=None):
                 id={'type': 'tile-customize-content-wrapper', 'index': tile},
                 className='customize-content'),
             html.Div([
-                html.P(get_label('LBL_Select_A_Saved_Graph'),
+                html.P(get_label('LBL_Load_A_Saved_Graph'),
                        style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
                 html.Div(
                     id={'type': 'select-layout-dropdown-div', 'index': tile},
@@ -926,7 +901,8 @@ def get_tile(tile, tile_keys=None, df_name=None):
                 html.P(get_label('LBL_Load_Graph_Prompt'),
                        id={'type': 'tile-layouts-warning', 'index': tile},
                        style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
-            ], style=LAYOUT_CONTENT_HIDE, id={'type': 'tile-layouts-content', 'index': tile},
+            ], style=LAYOUT_CONTENT_HIDE,
+                id={'type': 'tile-layouts-content', 'index': tile},
                 className='customize-content')
         ], style={'flex-direction': 'column'},
             id={'type': 'tile-body', 'index': tile},
@@ -1183,7 +1159,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                             "{}:".format(get_label('LBL_Display')),
                             style={'color': CLR['text1'], 'font-size': '13px', 'position': 'relative',
                                    'top': '-45px'})],
-                        style={'display': 'inline-block', 'width': '40px', 'position': 'relative', 'top': '-3px',
+                            style={'display': 'inline-block', 'width': '40px', 'position': 'relative', 'top': '-3px',
                                'margin-right': '15px'}),
                     html.Div([
                         dcc.RadioItems(

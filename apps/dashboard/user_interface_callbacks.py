@@ -101,7 +101,7 @@ app.clientside_callback(
      Output('dashboard-reset-trigger', 'data-')],
     [Input('button-new', 'n_clicks'),
      Input({'type': 'tile-close', 'index': ALL}, 'n_clicks'),
-     Input('confirm-dashboard-reset', 'n_clicks')],
+     Input('dashboard-reset-confirmation', 'data-')],
     [State({'type': 'tile', 'index': ALL}, 'children'),
      State('num-tiles', 'data-num-tiles'),
      State('button-new', 'disabled'),
@@ -375,6 +375,8 @@ for x in range(4):
 
         # switch statement
         if 'tile-customize' in changed_id:
+            # [[mode/prompt_trigger, tile, stored_menu_for_cancel], menu_style/show_hide, menu_title,
+            # show_hide_load_warning]
             float_menu_trigger = [['customize', tile, customize_menu], {}, get_label('LBL_Edit_Graph'),
                                   session['tile_edited'][tile]]
             customize_className = 'tile-nav tile-nav--customize tile-nav--selected'
@@ -404,23 +406,27 @@ for x in range(4):
 # initialize menu, shows which menu you need
 app.clientside_callback(
     """
-    function(float_menu_trigger_0, float_menu_trigger_1, float_menu_trigger_2, float_menu_trigger_3, 
-             close_n_clicks, cancel_n_clicks, ok_n_clicks, float_menu_data) {
+    function(menu_trigger_0, menu_trigger_1, menu_trigger_2, menu_trigger_3, menu_trigger_4, close_n_clicks, 
+             cancel_n_clicks, ok_n_clicks, float_menu_data) {
         const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
         
         var float_menu_trigger = null;
         var result = null;
         if (triggered.includes('float-menu-trigger')) {
-            var trigger_arr = [float_menu_trigger_0, float_menu_trigger_1, float_menu_trigger_2, float_menu_trigger_3]
+            var trigger_arr = [menu_trigger_0, menu_trigger_1, menu_trigger_2, menu_trigger_3, menu_trigger_4]
             var tile = triggered.match(/\d+/)[0];
             float_menu_trigger = trigger_arr[tile];
             if (float_menu_trigger[0][0] == 'customize') {
                 var menu = document.getElementById(`{"index":${tile},"type":"tile-customize-content"}`);
             }
-            else {
+            if (float_menu_trigger[0][0] == 'layouts') {
                 var menu = document.getElementById(`{"index":${tile},"type":"tile-layouts-content"}`);
             }
+            if (float_menu_trigger[0][0] == 'dashboard_layouts') {
+                var menu = document.getElementById('load-dashboard-menu');
+            }
             document.getElementById("float-menu-body").appendChild(menu).style.display = ''; 
+            
             if (float_menu_trigger[3]) {
                 document.getElementById(`{"index":${tile},"type":"tile-layouts-warning"}`).style.display = '';
             }
@@ -433,11 +439,17 @@ app.clientside_callback(
             var tile = float_menu_data[1];
             if (float_menu_trigger[0][0] == 'customize') {
                 var menu = document.getElementById(`{"index":${tile},"type":"tile-customize-content"}`);
-                document.getElementById(`{"index":${tile},"type":"tile-customize-content-wrapper"}`).appendChild(menu).style.display = 'none'; 
+                document.getElementById(`{"index":${tile},"type":"tile-customize-content-wrapper"}`).appendChild(
+                    menu).style.display = 'none'; 
             }
-            else {
+            if (float_menu_trigger[0][0] == 'layouts') {
                 var menu = document.getElementById(`{"index":${tile},"type":"tile-layouts-content"}`);
-                document.getElementById(`{"index":${tile},"type":"tile-body"}`).appendChild(menu).style.display = 'none'; 
+                document.getElementById(`{"index":${tile},"type":"tile-body"}`).appendChild(
+                    menu).style.display = 'none'; 
+            }
+            if (float_menu_trigger[0][0] == 'dashboard_layouts') {
+                var menu = document.getElementById('load-dashboard-menu');
+                document.getElementById('button-save-dashboard-wrapper').appendChild(menu).style.display = 'none';
             }
             
             if (triggered == 'float-menu-close.n_clicks' || triggered == 'float-menu-cancel.n_clicks') {
@@ -456,6 +468,7 @@ app.clientside_callback(
      Input({'type': 'float-menu-trigger', 'index': 1}, 'data-'),
      Input({'type': 'float-menu-trigger', 'index': 2}, 'data-'),
      Input({'type': 'float-menu-trigger', 'index': 3}, 'data-'),
+     Input({'type': 'float-menu-trigger', 'index': 4}, 'data-'),
      Input('float-menu-close', 'n_clicks'),
      Input('float-menu-cancel', 'n_clicks'),
      Input('float-menu-ok', 'n_clicks')],
@@ -921,9 +934,8 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
         sidemenu_styles[changed_index] = DATA_CONTENT_SHOW
         if df_name in session:
             confirm_button[changed_index] = DATA_CONTENT_HIDE
-            refresh_button[changed_index] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
-                                             'position': 'relative',
-                                             'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}
+            refresh_button[changed_index] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
+                                             'position': 'relative', 'vertical-align': 'top'}
             sidemenu_styles[changed_index] = DATA_CONTENT_SHOW
             # refresh data menu if not returning to last loaded
             if df_name is not prev_selection[changed_index]:
@@ -934,9 +946,8 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                     if links_style[i] == 'fa fa-link':
                         # graph_triggers[i] = df_name
                         confirm_button[i] = DATA_CONTENT_HIDE
-                        refresh_button[i] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
-                                             'position': 'relative',
-                                             'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}
+                        refresh_button[i] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
+                                             'position': 'relative', 'vertical-align': 'top'}
                         prev_selection[i] = df_name
                         options_triggers[i] = df_name
             else:
@@ -947,13 +958,12 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
             if changed_index == 4:
                 for i in range(len(links_style)):
                     if links_style[i] == 'fa fa-link':
-                        confirm_button[i] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
+                        confirm_button[i] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
                                              'position': 'relative',
                                              'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}
                         refresh_button[i] = DATA_CONTENT_HIDE
-            confirm_button[changed_index] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
-                                             'position': 'relative',
-                                             'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}
+            confirm_button[changed_index] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
+                                             'position': 'relative', 'vertical-align': 'top'}
             refresh_button[changed_index] = DATA_CONTENT_HIDE
 
     # elif 'data-set' in changed id, reset data tile with new df set as active, keep shown, and trigger graph update
@@ -1033,8 +1043,8 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
             options_triggers[changed_index] = df_name
         prev_selection[changed_index] = df_name
         confirm_button[changed_index] = DATA_CONTENT_HIDE
-        refresh_button[changed_index] = {'padding': '10px 0', 'width': '15px', 'height': '15px', 'position': 'relative',
-                                         'margin-right': '10px', 'margin-left': '10px', 'vertical-align': 'top'}
+        refresh_button[changed_index] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
+                                         'position': 'relative', 'vertical-align': 'top'}
 
     # elif 'RESET' dashboard requested, hide and reset all data tiles
     elif 'dashboard-reset-trigger' in changed_id:
@@ -1224,8 +1234,7 @@ for x in range(4):
             function_name='graphLoadScreen{}'.format(x)
         ),
         Output({'type': 'tile-menu-header', 'index': x}, 'n_clicks'),
-        [Input({'type': 'tile-view', 'index': x}, 'n_clicks')],
-        [State({'type': 'tile-view', 'index': x}, 'className')],
+        [Input({'type': 'tile-save-trigger', 'index': x}, 'value')],
         prevent_initial_call=True
     )
 
@@ -1241,24 +1250,52 @@ for x in range(4):
     )
 
 app.clientside_callback(
-    ClientsideFunction(
-        namespace='clientside',
-        function_name='datasetLoadScreen'
-    ),
+    """
+    function datasetLoadScreen(n_click_load, n_click_reset, float_menu_result, float_menu_data, selected_dashboard) {
+        if (n_click_load != ',,,,' || n_click_reset != ',,,,' || (float_menu_data[0] == 'dashboard_layouts'
+             && selected_dashboard != null && float_menu_result == 'ok')){
+            var newDiv = document.createElement('div');
+            newDiv.className = '_data-loading';
+            newDiv.id = 'loading';
+            document.body.appendChild(newDiv, document.getElementById('content'));
+        }
+        return 0;
+    }
+    """,
     Output('dataset-confirmation-symbols', 'n_clicks'),
     [Input({'type': 'confirm-load-data', 'index': ALL}, 'n_clicks'),
      Input({'type': 'confirm-data-set-refresh', 'index': ALL}, 'n_clicks'),
-     Input('select-dashboard-dropdown', 'value')],
+     Input('float-menu-result', 'children')],
+    [State('float-menu-title', 'data-'),
+     State('select-dashboard-dropdown', 'value')],
     prevent_initial_call=True
 )
 
 app.clientside_callback(
-    ClientsideFunction(
-        namespace='clientside',
-        function_name='datasetRemoveLoadScreen'
-    ),
+    """
+    function datasetRemoveLoadScreen(data, graph_displays, num_tiles) {
+        var triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
+        triggered = triggered[triggered.length - 1];
+        if (triggered.includes('df-constants-storage')){
+            try{
+                document.getElementById('loading').remove();
+            }catch{ /* Do Nothing */ }
+        }
+        else {
+            var tile = parseInt(triggered.match(/\d+/)[0]) + 1;
+            if (tile == num_tiles){
+                try{
+                    document.getElementById('loading').remove();
+                }catch{ /* Do Nothing */ }
+            }
+        }
+        return 0;
+    }
+    """,
     Output('df-constants-storage', 'n_clicks'),
-    [Input('df-constants-storage', 'data')],
+    [Input('df-constants-storage', 'data'),
+     Input({'type': 'graph_display', 'index': ALL}, 'children')],
+    State('num-tiles', 'data-num-tiles'),
     prevent_initial_call=True
 )
 
@@ -1267,23 +1304,16 @@ app.clientside_callback(
 # initialize prompt
 app.clientside_callback(
     """
-    function(prompt_trigger_0, prompt_trigger_1, prompt_trigger_2, prompt_trigger_3, 
+    function(prompt_trigger_0, prompt_trigger_1, prompt_trigger_2, prompt_trigger_3, prompt_trigger_4,
              close_n_clicks, cancel_n_clicks, ok_n_clicks, prompt_data){
-        const triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
+        const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
         var prompt_trigger = null;
         var result = null;
         
-        if (triggered == '{"index":0,"type":"prompt-trigger"}.data-'){
-            prompt_trigger = prompt_trigger_0;
-        }
-        if (triggered == '{"index":1,"type":"prompt-trigger"}.data-'){
-            prompt_trigger = prompt_trigger_1;
-        }
-        if (triggered == '{"index":2,"type":"prompt-trigger"}.data-'){
-            prompt_trigger = prompt_trigger_2;
-        }
-        if (triggered == '{"index":3,"type":"prompt-trigger"}.data-'){
-            prompt_trigger = prompt_trigger_3;
+        if (triggered.includes('prompt-trigger')){
+            var trigger_arr = [prompt_trigger_0, prompt_trigger_1, prompt_trigger_2, prompt_trigger_3, prompt_trigger_4]
+            var tile = triggered.match(/\d+/)[0];
+            prompt_trigger = trigger_arr[tile];
         }
         
         if (triggered == 'prompt-close.n_clicks') {
@@ -1311,6 +1341,7 @@ app.clientside_callback(
      Input({'type': 'prompt-trigger', 'index': 1}, 'data-'),
      Input({'type': 'prompt-trigger', 'index': 2}, 'data-'),
      Input({'type': 'prompt-trigger', 'index': 3}, 'data-'),
+     Input({'type': 'prompt-trigger', 'index': 4}, 'data-'),
      Input('prompt-close', 'n_clicks'),
      Input('prompt-cancel', 'n_clicks'),
      Input('prompt-ok', 'n_clicks')],

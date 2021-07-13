@@ -722,7 +722,6 @@ for x in range(4):
         return dff.iloc[page_current * page_size: (page_current + 1) * page_size].to_dict('records'), \
                math.ceil(dff.iloc[:, 0].size / page_size)
 
-
 # *************************************************DATA-FITTING******************************************************
 # update the data fitting section of the edit graph menu
 for x in range(4):

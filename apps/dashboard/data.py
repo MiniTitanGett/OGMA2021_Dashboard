@@ -624,13 +624,13 @@ def polynomial_regression(df, x, y, degree, ci):
     df_best_fit["Best Fit"] = model.predict(xp)
 
     if ci:
-        df_best_fit["Upper Interval"], df_best_fit["Lower Interval"] = confidence_intervals(model)
+        df_best_fit["Lower Interval"], df_best_fit["Upper Interval"] = confidence_intervals(model)
 
     return df_best_fit
 
 
 def confidence_intervals(model):
     # calculates standard deviation and confidence interval for prediction
-    _, upper, lower = wls_prediction_std(model)
+    _, lower, upper = wls_prediction_std(model)
     # returns the upper and lower confidence interval
-    return upper, lower
+    return lower, upper

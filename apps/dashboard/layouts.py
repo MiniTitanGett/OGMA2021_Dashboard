@@ -1112,8 +1112,8 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                         clearable=False,
                         style={'font-size': '13px', 'display': 'inline-block', 'width': '50px', 'position': 'relative',
                                'top': '-15px',
-                               'margin-right': '5px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}
+                               'margin-right': '5px'})
+                ], style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}
                     if len(X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
                 html.Div([
                     html.P(
@@ -1158,9 +1158,9 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                         html.P(
                             "{}:".format(get_label('LBL_Display')),
                             style={'color': CLR['text1'], 'font-size': '13px', 'position': 'relative',
-                                   'top': '-45px'})],
-                            style={'display': 'inline-block', 'width': '40px', 'position': 'relative', 'top': '-3px',
-                               'margin-right': '15px'}),
+                                   'top': '-45px'})
+                    ], style={'display': 'inline-block', 'width': '40px', 'position': 'relative', 'top': '-3px',
+                              'margin-right': '15px'}),
                     html.Div([
                         dcc.RadioItems(
                             id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},

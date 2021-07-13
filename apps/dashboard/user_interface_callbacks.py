@@ -597,7 +597,6 @@ for x in range(4):
         if ('"type":"graph_children_toggle"}.className' in changed_id
             or '"type":"hierarchy-toggle"}.className' in changed_id) and (
                 selected_graph_type != "Line" or selected_graph_type != "Scatter"):
-            print("HERE HERE")
             raise PreventUpdate
 
         # sets boolean to allow data fitting as a customization option

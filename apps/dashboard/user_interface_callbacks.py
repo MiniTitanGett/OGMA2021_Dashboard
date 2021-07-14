@@ -272,30 +272,30 @@ def _change_tab(_tab_clicks, _tab_close_clicks, _tab_add_nclicks,
 
 
 # update num-tiles
-@app.callback(
+app.clientside_callback(
+    """
+    function _update_num_tiles(input1, input2, input3){
+        const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
+        var result = dash_clientside.no_update;
+    
+        if (triggered.includes('num-tiles-2')){
+            result = input1;
+        }
+        if (triggered.includes('num-tiles-3')){
+            result = input2;
+        }
+        if (triggered.includes('num-tiles-4')){
+            result = input3;
+        }
+        return result;
+    }
+    """,
     Output('num-tiles', 'data-num-tiles'),
     [Input('num-tiles-2', 'data-num-tiles'),
      Input('num-tiles-3', 'data-num-tiles'),
      Input('num-tiles-4', 'data-num-tiles')],
     prevent_initial_call=True
 )
-def _update_num_tiles(input1, input2, input3):
-    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-    result = no_update
-
-    if changed_id == '.':
-        raise PreventUpdate
-
-    if 'num-tiles-2' in changed_id:
-        result = input1
-
-    if 'num-tiles-3' in changed_id:
-        result = input2
-
-    if 'num-tiles-4' in changed_id:
-        result = input3
-
-    return result
 
 
 # update tab name
@@ -385,8 +385,8 @@ for x in range(4):
 # initialize menu, shows which menu you need
 app.clientside_callback(
     """
-    function(menu_trigger_0, menu_trigger_1, menu_trigger_2, menu_trigger_3, menu_trigger_4, close_n_clicks, 
-             cancel_n_clicks, ok_n_clicks, float_menu_data) {
+    function _init_float_menu(menu_trigger_0, menu_trigger_1, menu_trigger_2, menu_trigger_3, menu_trigger_4, 
+             close_n_clicks, cancel_n_clicks, ok_n_clicks, float_menu_data) {
         const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
         
         var float_menu_trigger = null;
@@ -1068,7 +1068,7 @@ def _date_picker_inputs(trigger, tile_tab, tile_start_year, tile_end_year, tile_
 # http://adripofjavascript.com/blog/drips/object-equality-in-javascript.html#:~:text=Here%20is%20a%20very%20basic,are%20not%20equivalent%20if%20(aProps.
 app.clientside_callback(
     """
-       function(load_data_trigger, refresh_data_trigger){
+       function _data_set_confirmation_visuals(load_data_trigger, refresh_data_trigger){
             function isEquivalent(a, b) {
                 // Create arrays of property names
                 var aProps = Object.getOwnPropertyNames(a);
@@ -1113,7 +1113,7 @@ app.clientside_callback(
 for x in range(4):
     app.clientside_callback(
         """
-        function(_sidebar_styles, link_state, sidebar_style, parent_sidebar_style){
+        function _highlight_tiles(_sidebar_styles, link_state, sidebar_style, parent_sidebar_style){
             function isEquivalent(a, b) {
                 // Create arrays of property names
                 var aProps = Object.getOwnPropertyNames(a);
@@ -1246,7 +1246,7 @@ app.clientside_callback(
 # initialize prompt
 app.clientside_callback(
     """
-    function(prompt_trigger_0, prompt_trigger_1, prompt_trigger_2, prompt_trigger_3, prompt_trigger_4,
+    function _serve_prompt(prompt_trigger_0, prompt_trigger_1, prompt_trigger_2, prompt_trigger_3, prompt_trigger_4,
              close_n_clicks, cancel_n_clicks, ok_n_clicks, prompt_data){
         const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
         var prompt_trigger = null;

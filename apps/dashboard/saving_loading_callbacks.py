@@ -34,25 +34,24 @@ DASHBOARD_POINTER_PREFIX = 'Dashboard_Ext_'
 
 
 # load the tile title
-@app.callback(
+app.clientside_callback(
+    """
+    function _load_tile_title(tile_load_title, dashboard_load_title){
+        const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
+
+        if (triggered.includes('data-tile_load_title')){
+            return tile_load_title;
+        }
+        else{
+            return dashboard_load_title;
+        }
+    }
+    """,
     Output({'type': 'tile-title', 'index': MATCH}, 'value'),
     [Input({'type': 'set-tile-title-trigger', 'index': MATCH}, 'data-tile_load_title'),
      Input({'type': 'set-tile-title-trigger', 'index': MATCH}, 'data-dashboard_load_title')],
     prevent_initial_call=True
 )
-def _load_tile_title(tile_load_title, dashboard_load_title):
-    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-
-    if changed_id == '.':
-        raise PreventUpdate
-
-    if 'data-tile_load_title' in changed_id:
-        title = tile_load_title
-    else:
-        title = dashboard_load_title
-
-    return title
-
 
 # ***********************************************SHARED SAVING*******************************************************
 

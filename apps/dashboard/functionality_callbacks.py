@@ -711,28 +711,35 @@ for x in range(4):
 # *************************************************DATA-FITTING******************************************************
 # update the data fitting section of the edit graph menu
 for x in range(4):
-    @app.callback(
+    app.clientside_callback(
+        """
+        function _update_data_fitting_options(degree_input){
+            const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
+    
+            if (degree_input == 'no-fit' || degree_input == 'linear-fit'){
+                var degree_input_wrapper = {'display': 'none'};
+                if (degree_input == 'no-fit'){
+                    var confidence_interval_wrapper = {'display': 'none'};
+                }
+                else{
+                    var confidence_interval_wrapper = {'display': 'inline'};
+                }
+            }
+            else if (degree_input == 'curve-fit'){
+                var degree_input_wrapper = {'display': 'inline'};
+                var confidence_interval_wrapper = {'display': 'inline'};
+            }
+            else{
+                var degree_input_wrapper = dash_clientside.no_update;
+                var confidence_interval_wrapper = dash_clientside.no_update;
+            }
+    
+            return [degree_input_wrapper, confidence_interval_wrapper];
+        }
+        """,
         [Output({'type': 'degree-input-wrapper', 'index': x}, 'style'),
          Output({'type': 'confidence-interval-wrapper', 'index': x}, 'style')],
         [Input({'type': 'args-value: {}'.replace("{}", str(x)), 'index': 4}, 'value')],
         prevent_initial_call=True
     )
-    def _update_data_fitting_options(degree_input):
-        changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
 
-        if changed_id == '.':
-            raise PreventUpdate
-
-        if degree_input == 'no-fit' or degree_input == 'linear-fit':
-            degree_input_wrapper = {'display': 'none'}
-            if degree_input == 'no-fit':
-                confidence_interval_wrapper = {'display': 'none'}
-            else:
-                confidence_interval_wrapper = {'display': 'inline'}
-        elif degree_input == 'curve-fit':
-            degree_input_wrapper = {'display': 'inline'}
-            confidence_interval_wrapper = {'display': 'inline'}
-        else:
-            raise PreventUpdate
-
-        return [degree_input_wrapper, confidence_interval_wrapper]

@@ -550,6 +550,10 @@ EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Link_Graph_Prompt',@la
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Link_Graph_Prompt',@language = 'Fr', @ref_desc = 'Fr: You are linking this graph to another dataset. Doing so may may have unintended results if the linked dataset does not support the used graph type. Continue?'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Confidence_Interval',@language = 'En', @ref_desc = 'Fit Confidence Interval'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Confidence_Interval',@language = 'Fr', @ref_desc = 'Fr: Fit Confidence Interval'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Close_Graph',@language = 'En', @ref_desc = 'Close Graph'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Close_Graph',@language = 'Fr', @ref_desc = 'Fr: Close Graph'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Close_Graph_Prompt',@language = 'En', @ref_desc = 'Your graph has unsaved changes. Continue to close this graph?'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Close_Graph_Prompt',@language = 'Fr', @ref_desc = 'Fr: Your graph has unsaved changes. Continue to close this graph?'
 
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'En',@ref_desc = 'Hierarchy Selection''s Children'
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'Fr',@ref_desc = 'Enfants de la Sélection de Hiérarchie'

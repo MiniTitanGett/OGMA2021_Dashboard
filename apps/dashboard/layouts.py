@@ -557,6 +557,7 @@ def get_layout_dashboard():
         dcc.Store(id={'type': 'update-graph-trigger', 'index': 3}),
         # tile-closed-trigger stores index of deleted tile
         dcc.Store(id='tile-closed-trigger'),
+        dcc.Store(id='tile-closed-input-trigger'),
         # tile-save-trigger-wrapper conditionally triggers the tile saving callback
         dcc.Store(id='tile-save-trigger-wrapper'),
         # reset-selected-layout-trigger resets the selected layout dropdown value to ''

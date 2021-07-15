@@ -79,7 +79,7 @@ app.clientside_callback(
      Output('num-tiles-2', 'data-num-tiles'),
      Output('dashboard-reset-trigger', 'data-')],
     [Input('button-new', 'n_clicks'),
-     Input({'type': 'tile-close', 'index': ALL}, 'n_clicks'),
+     Input('tile-closed-input-trigger', 'data'),
      Input('dashboard-reset-confirmation', 'data-')],
     [State({'type': 'tile', 'index': ALL}, 'children'),
      State('num-tiles', 'data-num-tiles'),
@@ -88,7 +88,7 @@ app.clientside_callback(
      State({'type': 'data-set', 'index': 4}, 'value')],
     prevent_initial_call=True
 )
-def _new_and_delete(_new_clicks, _close_clicks, _dashboard_reset, input_tiles, num_tiles, new_disabled, _df_const,
+def _new_and_delete(_new_clicks, close_id, _dashboard_reset, input_tiles, num_tiles, new_disabled, _df_const,
                     parent_df):
     """
     :param _new_clicks: Detects user clicking 'NEW' button in parent navigation bar and encodes the number of tiles to
@@ -113,7 +113,7 @@ def _new_and_delete(_new_clicks, _close_clicks, _dashboard_reset, input_tiles, n
         num_tiles -= 1
         flag = False
         for i in range(len(input_tiles)):
-            if '{"index":{},"type":"tile-close"}.n_clicks'.replace("{}", str(i)) in changed_id:
+            if i == close_id:
                 input_tiles.pop(i)
                 flag = True
                 deleted_tile = str(i)

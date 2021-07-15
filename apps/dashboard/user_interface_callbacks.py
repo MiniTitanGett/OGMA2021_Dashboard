@@ -324,16 +324,19 @@ for x in range(4):
         [Output({'type': 'float-menu-trigger', 'index': x}, 'data-'),
          Output({'type': 'tile-customize', 'index': x}, 'className'),
          Output({'type': 'tile-layouts', 'index': x}, 'className'),
-         Output({'type': 'tile-customize-content-wrapper', 'index': x}, 'children')],
+         Output({'type': 'tile-customize-content-wrapper', 'index': x}, 'children'),
+         Output({'type': 'old-graph', 'index': x}, 'children'),
+         Output({'type': 'cancel-trigger', 'index': x}, 'value')],
         [Input({'type': 'tile-customize', 'index': x}, 'n_clicks'),
          Input({'type': 'tile-layouts', 'index': x}, 'n_clicks'),
          Input('float-menu-result', 'children')],
         [State('float-menu-title', 'data-'),
-         State({'type': 'tile-customize-content', 'index': x}, 'children')],
+         State({'type': 'tile-customize-content', 'index': x}, 'children'),
+         State({'type': 'graph_display', 'index': x}, 'children')],
         prevent_initial_call=True
     )
     def _serve_float_menu_and_take_result(_customize_n_clicks, _layouts_n_clicks, float_menu_result, float_menu_data,
-                                          customize_menu):
+                                          customize_menu, graph_display):
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
         if changed_id == '.' or len(dash.callback_context.triggered) > 1 \
@@ -351,6 +354,8 @@ for x in range(4):
             raise PreventUpdate
 
         customize_menu_output = no_update
+        graph_figure = no_update
+        cancel_trigger = None
 
         # switch statement
         if 'tile-customize' in changed_id:
@@ -360,6 +365,8 @@ for x in range(4):
                                   session['tile_edited'][tile]]
             customize_className = 'tile-nav tile-nav--customize tile-nav--selected'
             layouts_className = 'tile-nav tile-nav--layout'
+            if graph_display:
+                graph_figure = graph_display
         elif 'tile-layouts' in changed_id:
             float_menu_trigger = [['layouts', tile], {}, get_label('LBL_Load_Graph'), session['tile_edited'][tile]]
             customize_className = 'tile-nav tile-nav--customize'
@@ -380,7 +387,9 @@ for x in range(4):
                     id={'type': 'tile-customize-content', 'index': tile},
                     className='customize-content',
                     **{'data-loaded': True})
-        return float_menu_trigger, customize_className, layouts_className, customize_menu_output
+            cancel_trigger = 'cancel'
+
+        return float_menu_trigger, customize_className, layouts_className, customize_menu_output, graph_figure, cancel_trigger
 
 # initialize menu, shows which menu you need
 app.clientside_callback(

@@ -490,6 +490,16 @@ def get_layout_dashboard():
         dcc.Store(id={'type': 'float-menu-trigger', 'index': 2}),
         dcc.Store(id={'type': 'float-menu-trigger', 'index': 3}),
         dcc.Store(id={'type': 'float-menu-trigger', 'index': 4}),
+        dcc.Store(id={'type': 'cancel-trigger', 'index': 0}),
+        dcc.Store(id={'type': 'cancel-trigger', 'index': 1}),
+        dcc.Store(id={'type': 'cancel-trigger', 'index': 2}),
+        dcc.Store(id={'type': 'cancel-trigger', 'index': 3}),
+        dcc.Store(id={'type': 'cancel-trigger', 'index': 4}),
+        dcc.Store(id={'type': 'old-graph', 'index': 0}),
+        dcc.Store(id={'type': 'old-graph', 'index': 1}),
+        dcc.Store(id={'type': 'old-graph', 'index': 2}),
+        dcc.Store(id={'type': 'old-graph', 'index': 3}),
+        dcc.Store(id={'type': 'old-graph', 'index': 4}),
         dcc.Store(id='float-menu-result'),
         # Popups
         dbc.Alert(

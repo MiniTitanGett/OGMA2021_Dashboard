@@ -324,19 +324,16 @@ for x in range(4):
         [Output({'type': 'float-menu-trigger', 'index': x}, 'data-'),
          Output({'type': 'tile-customize', 'index': x}, 'className'),
          Output({'type': 'tile-layouts', 'index': x}, 'className'),
-         Output({'type': 'tile-customize-content-wrapper', 'index': x}, 'children'),
-         Output({'type': 'old-graph', 'index': x}, 'children'),
-         Output({'type': 'cancel-trigger', 'index': x}, 'value')],
+         Output({'type': 'tile-customize-content-wrapper', 'index': x}, 'children')],
         [Input({'type': 'tile-customize', 'index': x}, 'n_clicks'),
          Input({'type': 'tile-layouts', 'index': x}, 'n_clicks'),
          Input('float-menu-result', 'children')],
         [State('float-menu-title', 'data-'),
-         State({'type': 'tile-customize-content', 'index': x}, 'children'),
-         State({'type': 'graph_display', 'index': x}, 'children')],
+         State({'type': 'tile-customize-content', 'index': x}, 'children')],
         prevent_initial_call=True
     )
     def _serve_float_menu_and_take_result(_customize_n_clicks, _layouts_n_clicks, float_menu_result, float_menu_data,
-                                          customize_menu, graph_display):
+                                          customize_menu):
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
         if changed_id == '.' or len(dash.callback_context.triggered) > 1 \
@@ -354,8 +351,6 @@ for x in range(4):
             raise PreventUpdate
 
         customize_menu_output = no_update
-        graph_figure = no_update
-        cancel_trigger = None
 
         # switch statement
         if 'tile-customize' in changed_id:
@@ -365,8 +360,6 @@ for x in range(4):
                                   session['tile_edited'][tile]]
             customize_className = 'tile-nav tile-nav--customize tile-nav--selected'
             layouts_className = 'tile-nav tile-nav--layout'
-            if graph_display:
-                graph_figure = graph_display
         elif 'tile-layouts' in changed_id:
             float_menu_trigger = [['layouts', tile], {}, get_label('LBL_Load_Graph'), session['tile_edited'][tile]]
             customize_className = 'tile-nav tile-nav--customize'
@@ -387,9 +380,8 @@ for x in range(4):
                     id={'type': 'tile-customize-content', 'index': tile},
                     className='customize-content',
                     **{'data-loaded': True})
-            cancel_trigger = 'cancel'
 
-        return float_menu_trigger, customize_className, layouts_className, customize_menu_output, graph_figure, cancel_trigger
+        return float_menu_trigger, customize_className, layouts_className, customize_menu_output
 
 # initialize menu, shows which menu you need
 app.clientside_callback(
@@ -629,7 +621,7 @@ for x in range(4):
         # stop graph_menu_update on new tile loop call
         if '"type":"tile-link"}.className' in str(dash.callback_context.triggered) \
                 and 'type":"graph-type-dropdown"}.value' in str(dash.callback_context.triggered) \
-                and graph_options_state is not None and (gm_trigger == df_name or df_name is None):
+                and graph_options_state is not None and (gm_trigger == df_name or df_name is not None ):
             raise PreventUpdate
 
         tile = int(dash.callback_context.inputs_list[0]['id']['index'])
@@ -647,6 +639,8 @@ for x in range(4):
                                                degree=None,
                                                gridline=None,
                                                legend=None,
+                                               xaxis=None,
+                                               yaxis=None,
                                                df_name=df_name,
                                                df_const=df_const,
                                                data_fitting=data_fitting,
@@ -663,6 +657,8 @@ for x in range(4):
                                       gridline=None,
                                       legend=None,
                                       df_name=df_name,
+                                      xaxis=None,
+                                      yaxis=None,
                                       df_const=df_const)
 
         elif selected_graph_type == 'Bubble':
@@ -681,6 +677,8 @@ for x in range(4):
                                          df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
                                          gridline=None,
                                          legend=None,
+                                         xaxis=None,
+                                         yaxis=None,
                                          df_name=df_name,
                                          df_const=df_const)
 
@@ -698,6 +696,8 @@ for x in range(4):
                                      show_data_points=[],
                                      gridline=None,
                                      legend=None,
+                                     xaxis=None,
+                                     yaxis=None,
                                      df_const=df_const)
 
         elif selected_graph_type == 'Sankey':

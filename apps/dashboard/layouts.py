@@ -490,16 +490,6 @@ def get_layout_dashboard():
         dcc.Store(id={'type': 'float-menu-trigger', 'index': 2}),
         dcc.Store(id={'type': 'float-menu-trigger', 'index': 3}),
         dcc.Store(id={'type': 'float-menu-trigger', 'index': 4}),
-        dcc.Store(id={'type': 'cancel-trigger', 'index': 0}),
-        dcc.Store(id={'type': 'cancel-trigger', 'index': 1}),
-        dcc.Store(id={'type': 'cancel-trigger', 'index': 2}),
-        dcc.Store(id={'type': 'cancel-trigger', 'index': 3}),
-        dcc.Store(id={'type': 'cancel-trigger', 'index': 4}),
-        dcc.Store(id={'type': 'old-graph', 'index': 0}),
-        dcc.Store(id={'type': 'old-graph', 'index': 1}),
-        dcc.Store(id={'type': 'old-graph', 'index': 2}),
-        dcc.Store(id={'type': 'old-graph', 'index': 3}),
-        dcc.Store(id={'type': 'old-graph', 'index': 4}),
         dcc.Store(id='float-menu-result'),
         # Popups
         dbc.Alert(
@@ -938,7 +928,7 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, parent_df=None):
 
 # line graph menu layout
 def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridline, legend, df_const, data_fitting, ci,
-                                data_fit, degree):
+                                data_fit, degree, xaxis, yaxis):
     """
     :param data_fitting: boolean to determine whether to show data fitting options
     :param ci: show confidence interval or not
@@ -1120,11 +1110,26 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                     options=[{'label': get_label('LBL_Hide_Legend'), 'value': 'legend'}],
                     value=legend if legend else [],
                     style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
+                html.Div([
+                    dcc.Input(
+                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 9},
+                        type="text",
+                        value=xaxis,
+                        style={'display': 'None'},
+                        debounce=True),
+                    dcc.Input(
+                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 10},
+                        type="text",
+                        value=yaxis,
+                        style={'display': 'None'},
+                        debounce=True)],
+                    style={'display': 'None'})
             ], style={'margin-left': '15px'})]), ]
 
 
 # bar graph menu layout
-def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline, legend, df_name, df_const):
+def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline, legend, df_name, df_const, xaxis,
+                       yaxis):
     """
     :param measure_type: the measure type value
     :param y: the y-axis value
@@ -1242,12 +1247,27 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
                           'value': 'legend'}],
                 value=legend if legend else [],
                 style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
+            html.Div([
+                dcc.Input(
+                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 7},
+                    type="text",
+                    value=xaxis,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 8},
+                    type="text",
+                    value=yaxis,
+                    style={'display': 'None'},
+                    debounce=True)],
+                style={'display': 'None'})
 
         ], style={'margin-left': '15px'})]
 
 
 # bubble graph menu layout
-def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, gridline, legend, df_name, df_const):
+def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, gridline, legend, df_name, df_const,
+                          xaxis, yaxis):
     # (args-value: {})[0] = x-axis
     # (args-value: {})[1] = x-axis measure
     # (args-value: {})[2] = y-axis
@@ -1378,12 +1398,26 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                           'value': 'legend'}],
                 value=legend if legend else [],
                 style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
+            html.Div([
+                dcc.Input(
+                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 8},
+                    type="text",
+                    value=xaxis,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 9},
+                    type="text",
+                    value=yaxis,
+                    style={'display': 'None'},
+                    debounce=True)],
+                style={'display': 'None'})
         ], style={'margin-left': '15px'})]
 
 
 # box plot menu layout
 def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, df_name, show_data_points, gridline,
-                      legend, df_const):
+                      legend, df_const, xaxis, yaxis):
     # (args-value: {})[0] = graphed variables
     # (args-value: {})[1] = measure type
     # (args-value: {})[2] = points toggle
@@ -1469,6 +1503,20 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                           'value': 'legend'}],
                 value=legend if legend else [],
                 style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
+            html.Div([
+                dcc.Input(
+                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 6},
+                    type="text",
+                    value=xaxis,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 7},
+                    type="text",
+                    value=yaxis,
+                    style={'display': 'None'},
+                    debounce=True)],
+                style={'display': 'None'})
         ], style={'margin-left': '15px'})]
 
 

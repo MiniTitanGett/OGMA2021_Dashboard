@@ -68,9 +68,7 @@ for x in range(4):
          Input({'type': 'hierarchy_display_button', 'index': 4}, 'children'),
          Input({'type': 'hierarchy-toggle', 'index': 4}, 'value'),
          Input({'type': 'hierarchy_level_dropdown', 'index': 4}, 'value'),
-         Input({'type': 'graph_children_toggle', 'index': 4}, 'value'),
-         # cancel trigger
-         Input({'type': 'cancel-trigger', 'index': x}, 'value')],
+         Input({'type': 'graph_children_toggle', 'index': 4}, 'value')],
         # Date picker states for tiles data menu
         [State({'type': 'start-year-input', 'index': x}, 'name'),
          State({'type': 'radio-timeframe', 'index': x}, 'value'),
@@ -99,42 +97,35 @@ for x in range(4):
          # Constants
          State('df-constants-storage', 'data'),
          # Float menu result
-         State('float-menu-result', 'children'),
-         State({'type': 'old-graph', 'index': x}, 'children')]
-        ,
+         State('float-menu-result', 'children')],
         prevent_initial_call=True
     )
     def _update_graph(_df_trigger, arg_value, graph_type, tile_title, _datepicker_trigger,
                       num_periods, period_type, _parent_datepicker_trigger, parent_num_periods,
                       parent_period_type, hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children,
                       state_of_display, parent_state_of_display, parent_hierarchy_toggle,
-                      parent_hierarchy_level_dropdown, parent_hierarchy_graph_children, can_trigger, secondary_type, timeframe,
-                      fiscal_toggle, start_year, end_year, start_secondary, end_secondary, parent_secondary_type,
-                      parent_timeframe, parent_fiscal_toggle, parent_start_year, parent_end_year,
+                      parent_hierarchy_level_dropdown, parent_hierarchy_graph_children, secondary_type,
+                      timeframe, fiscal_toggle, start_year, end_year, start_secondary, end_secondary,
+                      parent_secondary_type, parent_timeframe, parent_fiscal_toggle, parent_start_year, parent_end_year,
                       parent_start_secondary, parent_end_secondary, graph_display, df_name, parent_df_name,
-                      link_state, hierarchy_options, parent_hierarchy_options, df_const, result_edit_menu,old_graph):
+                      link_state, hierarchy_options, parent_hierarchy_options, df_const, result_edit_menu):
 
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
         tile = dash.callback_context.inputs_list[0]['id']['index']
-
-        if 'graph-type-dropdown' in changed_id and can_trigger == 'cancel':
-            graph = old_graph
-            return graph
 
         xaxis = None
         yaxis = None
         # check if the axes have changed take
         if graph_display:
             if ('"type":"args-value' in changed_id and (result_edit_menu == 'ok' or result_edit_menu is None)) \
-                    or ((result_edit_menu == 'ok' or result_edit_menu == 'cancel' or result_edit_menu is None)\
-                        and ('hierarchy-toggle' in changed_id or 'hierarchy_level_dropdown' in changed_id or \
-                             'date-picker-trigger' in changed_id or'hierarchy_display' in changed_id or \
-                             'tile-title' in changed_id or 'graph_children' in changed_id or 'num-periods' in changed_id\
-                            or 'period-type' in changed_id or 'cancel-trigger' in changed_id))\
+                    or ((result_edit_menu == 'ok' or result_edit_menu == 'cancel' or result_edit_menu is None)
+                        and ('hierarchy-toggle' in changed_id or 'hierarchy_level_dropdown' in changed_id or
+                             'date-picker-trigger' in changed_id or 'hierarchy_display' in changed_id or
+                             'tile-title' in changed_id or 'graph_children' in changed_id or 'num-periods' in changed_id
+                            or 'period-type' in changed_id))\
                     or 'update-graph-trigger' in changed_id:
 
                 if 'figure' in graph_display['props']:
-                    print(graph_display)
                     for j in graph_display['props']['figure']['layout']:
                         if j == 'yaxis':
                             if 'title' in graph_display['props']['figure']['layout']['yaxis']:
@@ -213,7 +204,7 @@ for x in range(4):
         graph = __update_graph(df_name, arg_value, graph_type, tile_title, num_periods, period_type, hierarchy_toggle,
                                hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options, state_of_display,
                                secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
-                               end_secondary, df_const,xaxis,yaxis)
+                               end_secondary, df_const, xaxis, yaxis)
 
         if graph is None:
             raise PreventUpdate
@@ -788,4 +779,3 @@ for x in range(4):
         [Input({'type': 'args-value: {}'.replace("{}", str(x)), 'index': 4}, 'value')],
         prevent_initial_call=True
     )
-

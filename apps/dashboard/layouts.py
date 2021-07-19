@@ -558,11 +558,15 @@ def get_layout_dashboard():
         # tile-closed-trigger stores index of deleted tile
         dcc.Store(id='tile-closed-trigger'),
         dcc.Store(id='tile-closed-input-trigger'),
-        # tile-save-trigger conditionally triggers the tile saving callback
-        dcc.Store(id={'type': 'tile-save-trigger', 'index': 0}),
-        dcc.Store(id={'type': 'tile-save-trigger', 'index': 1}),
-        dcc.Store(id={'type': 'tile-save-trigger', 'index': 2}),
-        dcc.Store(id={'type': 'tile-save-trigger', 'index': 3}),
+        # tile-save-trigger conditionally triggers the tile saving callback, wrapper is used to reduce load times
+        html.Div(
+            [dcc.Store(id={'type': 'tile-save-trigger', 'index': 0}),
+             dcc.Store(id={'type': 'tile-save-trigger', 'index': 1}),
+             dcc.Store(id={'type': 'tile-save-trigger', 'index': 2}),
+             dcc.Store(id={'type': 'tile-save-trigger', 'index': 3})],
+            style={'display': 'none'},
+            id='tile-save-trigger-wrapper'
+        ),
         # reset-selected-layout-trigger resets the selected layout dropdown value to ''
         dcc.Store(id={'type': 'reset-selected-layout', 'index': 0}),
         dcc.Store(id={'type': 'reset-selected-layout', 'index': 1}),

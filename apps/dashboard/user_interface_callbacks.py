@@ -479,7 +479,8 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
     if changed_id == '.' or link_states is []:
         raise PreventUpdate
 
-    if '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-unlink':
+    if '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-unlink' or \
+            (changed_value =='fa fa-link' and df_name is None and df_name_parent is None):
         raise PreventUpdate
 
     changed_index = int(search(r'\d+', changed_id).group())

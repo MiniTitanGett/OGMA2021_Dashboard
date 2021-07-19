@@ -197,7 +197,7 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                 fig.update_traces(mode='lines+markers')
 
             hovertemplate = get_label('LBL_Gen_Hover_Data', df_name)
-            hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event')).replace('%AXIS-A%',
+            hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event',df_name)).replace('%AXIS-A%',
                                                                                                             '%{x}')
             hovertemplate = hovertemplate.replace('%AXIS-TITLE-B%', arg_value[1]).replace('%AXIS-B%', '%{y}')
             fig.update_traces(hovertemplate=hovertemplate)

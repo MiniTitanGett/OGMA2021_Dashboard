@@ -79,7 +79,7 @@ def _update_tile_loading_dropdown_options(_tile_saving_trigger, _dashboard_savin
 
 # manage tile saves trigger
 @app.callback(
-    Output('tile-save-trigger-wrapper', 'children'),  # formatted in two chained callbacks to mix ALL and y values
+    Output({'type': 'tile-save-trigger', 'index': ALL}, 'data'),  # formatted in two chained callbacks to mix ALL and y values
     [Input({'type': 'save-button', 'index': ALL}, 'n_clicks'),
      Input({'type': 'delete-button', 'index': ALL}, 'n_clicks'),
      Input({'type': 'tile-link', 'index': ALL}, 'n_clicks'),
@@ -94,64 +94,79 @@ def _update_tile_loading_dropdown_options(_tile_saving_trigger, _dashboard_savin
 )
 def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, _link_clicks, link_trigger, float_menu_result,
                                        prompt_result, prompt_data, float_menu_data, load_state, link_state):
-    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+    changed_ids = [p['prop_id'] for p in dash.callback_context.triggered]
 
-    if changed_id == '.' or len(dash.callback_context.triggered) > 1:
+
+    if changed_ids == '.':
         raise PreventUpdate
 
-    if 'prompt-result' in changed_id:
-        changed_index = prompt_data[1]
-    elif 'float-menu-result' in changed_id:
-        changed_index = int(float_menu_data[1])
-    else:
-        changed_index = int(search(r'\d+', changed_id).group())
-
-    # Blank prevent updates
-    if '"type":"save-button"}.n_clicks' in changed_id and save_clicks[changed_index] == 0:
-        raise PreventUpdate
-    if '"type":"delete-button"}.n_clicks' in changed_id and delete_clicks[changed_index] == 0:
-        raise PreventUpdate
-
-    if not isinstance(load_state, list):
-        load_state = [load_state]
-    if 'float-menu-result.children' in changed_id \
-            and (float_menu_data[0] != 'layouts' or load_state[changed_index] is None or float_menu_result != 'ok'):
-        raise PreventUpdate
-    # do not call if we aren't dealing with tiles
-    if changed_index == 4:
-        raise PreventUpdate
-
-    # switch statement
-    if 'save-button' in changed_id:
-        mode = "save"
-    elif 'delete-button' in changed_id:
-        mode = "delete"
-    elif '"type":"select-layout-dropdown"}.value' in changed_id:
-        mode = 'fa fa-unlink'
-    elif '"type":"tile-link"}.n_clicks' in changed_id:
-        # if link button was pressed, toggle the link icon linked <--> unlinked
-        if link_state[changed_index] == "fa fa-link":
-            mode = 'fa fa-unlink'
+    changed_indices = [no_update] * 4
+    for id in changed_ids:
+        if 'prompt-result' in id:
+            changed_index = prompt_data[1]
+        elif 'float-menu-result' in id:
+            changed_index = int(float_menu_data[1])
         else:
-            mode = 'fa fa-link'
-    elif '"type":"set-tile-link-trigger"}.link-' in changed_id and link_trigger is not None:
-        mode = 'fa fa-unlink'
-    elif 'float-menu-result.children' in changed_id:
-        mode = "confirm-load"
-    elif prompt_data[0] == 'delete' and prompt_result == 'ok':
-        mode = "confirm-delete"
-    elif prompt_data[0] == 'overwrite' and prompt_result == 'ok':
-        mode = "confirm-overwrite"
-    elif prompt_data[0] == 'link' and prompt_result == 'ok':
-        mode = "confirm-link"
-    else:
-        return no_update
+            changed_index = int(search(r'\d+', id).group())
 
-    children = dcc.Dropdown(
-        id={'type': 'tile-save-trigger', 'index': changed_index},
-        value=mode)
+        # Blank prevent updates
+        if '"type":"save-button"}.n_clicks' in id and save_clicks[changed_index] == 0:
+            raise PreventUpdate
+        if '"type":"delete-button"}.n_clicks' in id and delete_clicks[changed_index] == 0:
+            raise PreventUpdate
 
-    return children
+        if not isinstance(load_state, list):
+            load_state = [load_state]
+        if 'float-menu-result.children' in id \
+                and (float_menu_data[0] != 'layouts' or load_state[changed_index] is None or float_menu_result != 'ok'):
+            raise PreventUpdate
+        # do not call if we aren't dealing with tiles
+        if changed_index == 4:
+            raise PreventUpdate
+
+        # switch statement
+        if 'save-button' in id:
+            mode = "save"
+        elif 'delete-button' in id:
+            mode = "delete"
+        elif '"type":"select-layout-dropdown"}.value' in id:
+            mode = 'fa fa-unlink'
+        elif '"type":"tile-link"}.n_clicks' in id:
+            # if link button was pressed, toggle the link icon linked <--> unlinked
+            if link_state[changed_index] == "fa fa-link":
+                mode = 'fa fa-unlink'
+            else:
+                mode = 'fa fa-link'
+        elif '"type":"set-tile-link-trigger"}.link-' in id and link_trigger is not None:
+            mode = 'fa fa-unlink'
+        elif 'float-menu-result.children' in id:
+            mode = "confirm-load"
+        elif prompt_data[0] == 'delete' and prompt_result == 'ok':
+            mode = "confirm-delete"
+        elif prompt_data[0] == 'overwrite' and prompt_result == 'ok':
+            mode = "confirm-overwrite"
+        elif prompt_data[0] == 'link' and prompt_result == 'ok':
+            mode = "confirm-link"
+        else:
+            mode = no_update
+
+        changed_indices[changed_index] = mode
+
+    return changed_indices
+
+#
+# @app.callback(
+#     Output({'type': 'tile-save-trigger', 'index': ALL}, 'value'),
+#     [Input({'type': 'set-tile-link-trigger', 'index': ALL}, 'link-')],
+#     [State({'type': 'tile-save-trigger', 'index': ALL}, 'value')],
+#     prevent_inital_call=True
+# )
+# def _trigger_on_auto_unlink(_link_triggers, save_triggers):
+#     changed_indices = [p['prop_id']['index'] for p in dash.callback_context.triggered]
+#     save_triggers = [no_update] * 4
+#     for index in changed_indices:
+#         save_triggers[index] = 'fa fa-unlink'
+#     return save_triggers
 
 
 # Tile saving/save deleting/tile loading - serves prompt
@@ -175,7 +190,7 @@ for y in range(4):
          Output({'type': 'df-constants-storage-tile-wrapper', 'index': y}, 'children'),
          # tile link appearance
          Output({'type': 'tile-link', 'index': y}, 'className')],
-        [Input({'type': 'tile-save-trigger', 'index': y}, 'value')],
+        [Input({'type': 'tile-save-trigger', 'index': y}, 'data')],
         # Tile features
         [State({'type': 'tile-title', 'index': y}, 'value'),
          State({'type': 'tile-link', 'index': y}, 'className'),

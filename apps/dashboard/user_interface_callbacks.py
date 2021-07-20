@@ -93,7 +93,6 @@ def _new_and_delete(_new_clicks, close_id, _dashboard_reset, input_tiles, num_ti
     """
     :param _new_clicks: Detects user clicking 'NEW' button in parent navigation bar and encodes the number of tiles to
     display
-    :param _close_clicks: Detects user clicking close ('x') button in top right of tile
     :param input_tiles: State of all currently existing tiles
     :return: Layout of tiles for the main body, a new NEW button whose n_clicks data encodes the number of tiles to
     display, and updates the tile-closed-trigger div with the index of the deleted tile
@@ -484,8 +483,6 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
             (changed_value == 'fa fa-link' and df_name is None and df_name_parent is None):
         raise PreventUpdate
 
-    changed_index = int(search(r'\d+', changed_id).group())
-
     graph_options = no_update
     options = []
     link_trigger = no_update
@@ -517,14 +514,14 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
             for i in graph_options:
                 options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
     else:
-        if (df_name or df_name_parent) == "OPG001":
+        if df_name == "OPG001" or df_name_parent == "OPG001":
             graph_options = GRAPH_OPTIONS["OPG001"]
             if graph_type is not None and graph_type not in graph_options:
-                link_states[changed_index] = "fa fa-unlink"
-        elif (df_name or df_name_parent) == "OPG010":
+                link_trigger = "fa fa-unlink"
+        elif df_name == "OPG010" or df_name_parent == "OPG010":
             graph_options = GRAPH_OPTIONS["OPG010"]
             if graph_type is not None and graph_type not in graph_options:
-                link_states[changed_index] = "fa fa-unlink"
+                link_trigger = "fa fa-unlink"
         else:
             graph_options = []
         graph_options.sort()

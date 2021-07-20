@@ -742,4 +742,3 @@ for x in range(4):
         [Input({'type': 'args-value: {}'.replace("{}", str(x)), 'index': 4}, 'value')],
         prevent_initial_call=True
     )
-

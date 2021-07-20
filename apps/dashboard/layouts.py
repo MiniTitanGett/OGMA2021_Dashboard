@@ -444,9 +444,32 @@ def get_layout_dashboard():
                 html.Div([
                     html.Div('Empty Text', id='prompt-body'),
                     html.Div([
-                        html.Button('Cancel', id='prompt-cancel', style={'margin-right': '16px', 'width': '80px'}),
-                        html.Button('OK', id='prompt-ok', style={'width': '80px'})],
-                        className='prompt-button-wrapper')],
+                        html.Button(
+                            get_label('LBL_Cancel'),
+                            id='prompt-cancel',
+                            style={'margin-right': '16px', 'width': '80px'}),
+                        html.Button(
+                            get_label('LBL_OK'),
+                            id='prompt-ok',
+                            style={'width': '80px'})],
+                        className='prompt-button-wrapper',
+                        id='prompt-button-wrapper-duo'),
+                    html.Div([
+                        html.Button(
+                            get_label('LBL_Cancel'),
+                            id='prompt-option-1',
+                            style={'margin-bottom': '16px'}),
+                        html.Button(
+                            get_label('LBL_Continue and unlink my graphs'),
+                            id='prompt-option-2',
+                            style={'margin-bottom': '16px'}),
+                        html.Button(
+                            get_label('LBL_Continue and modify my graphs as necessary'),
+                            id='prompt-option-3',
+                            style={})],
+                        className='prompt-button-wrapper-vertical',
+                        id='prompt-button-wrapper-trip',
+                        style={'display': 'none'})],
                     style={'padding': '24px'})],
                 id='prompt-box',
                 className='prompt-box'),
@@ -476,8 +499,14 @@ def get_layout_dashboard():
                 html.Div([
                     html.Div(id='float-menu-body', style={'display': 'flex', 'min-height': '200px'}),
                     html.Div([
-                        html.Button('Cancel', id='float-menu-cancel', style={'margin-right': '16px', 'width': '80px'}),
-                        html.Button('OK', id='float-menu-ok', style={'width': '80px'})],
+                        html.Button(
+                            get_label('LBL_Cancel'),
+                            id='float-menu-cancel',
+                            style={'margin-right': '16px', 'width': '80px'}),
+                        html.Button(
+                            get_label('LBL_OK'),
+                            id='float-menu-ok',
+                            style={'width': '80px'})],
                         className='prompt-button-wrapper')],
                     style={'padding': '24px'})],
                 id='float-menu-box',
@@ -998,7 +1027,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                                'top': '-15px',
                                'margin-right': '5px'})
                 ], style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}
-                    if len(X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
+                   if len(X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
                 html.Div([
                     html.P(
                         "{}".format(X_AXIS_OPTIONS[0]),

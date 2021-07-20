@@ -554,6 +554,10 @@ EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Close_Graph',@language
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Close_Graph',@language = 'Fr', @ref_desc = 'Fr: Close Graph'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Close_Graph_Prompt',@language = 'En', @ref_desc = 'Your graph has unsaved changes. Continue to close this graph?'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Close_Graph_Prompt',@language = 'Fr', @ref_desc = 'Fr: Your graph has unsaved changes. Continue to close this graph?'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Cancel',@language = 'En', @ref_desc = 'Cancel'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Cancel',@language = 'Fr', @ref_desc = 'Fr: Cancel'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_OK',@language = 'En', @ref_desc = 'OK'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_OK',@language = 'Fr', @ref_desc = 'Fr: OK'
 
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'En',@ref_desc = 'Hierarchy Selection''s Children'
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'Fr',@ref_desc = 'Enfants de la Sélection de Hiérarchie'

@@ -1178,6 +1178,15 @@ there.
     justify-content: flex-end;
 }
 
+.prompt-button-wrapper-vertical {
+    display: flex;
+    flex-flow: column nowrap;
+    width: 100%;
+    height: 100%;
+    padding-top: 24px;
+    justify-content: flex-end;
+}
+
 .float-menu-box {
     position: fixed;
     z-index: 1060;

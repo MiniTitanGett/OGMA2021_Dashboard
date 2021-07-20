@@ -257,7 +257,7 @@ for y in range(4):
 
         # Outputs
         update_options_trigger = no_update
-        # [[mode/prompt_trigger, tile], prompt_style/show_hide, prompt_title, prompt_body]
+        # [[mode/prompt_trigger, tile], prompt_style/show_hide, prompt_title, prompt_body, isTrip]
         prompt_trigger = no_update
         popup_text = no_update
         popup_is_open = no_update
@@ -287,7 +287,7 @@ for y in range(4):
             # if tile is untitled, prevent updates but return save message
             if graph_title == '':
                 prompt_trigger = [['empty_title', tile], {}, get_label('LBL_Untitled_Graph'),
-                                  get_label('LBL_Untitled_Graph_Prompt')]
+                                  get_label('LBL_Untitled_Graph_Prompt'), False]
 
             # if conflicting tiles and overwrite not requested, prompt overwrite
             elif intermediate_pointer in session['saved_layouts'] \
@@ -295,7 +295,7 @@ for y in range(4):
                     and 'confirm-overwrite' != trigger:
 
                 prompt_trigger = [['overwrite', tile], {}, get_label('LBL_Overwrite_Graph'),
-                                  get_label('LBL_Overwrite_Graph_Prompt')]
+                                  get_label('LBL_Overwrite_Graph_Prompt'), False]
 
             # else, title is valid to be saved
             else:
@@ -350,7 +350,7 @@ for y in range(4):
             if intermediate_pointer in session['saved_layouts'] \
                     and session['saved_layouts'][intermediate_pointer]['Title'] == graph_title:
                 prompt_trigger = [['delete', tile], {}, get_label('LBL_Delete_Graph'),
-                                  get_label('LBL_Delete_Graph_Prompt').format(graph_title)]
+                                  get_label('LBL_Delete_Graph_Prompt').format(graph_title), False]
 
         # If confirm delete button has been pressed
         elif trigger == 'confirm-delete':
@@ -441,7 +441,7 @@ for y in range(4):
         elif trigger == 'fa fa-link':
             if df_name != parent_df_name:
                 prompt_trigger = [['link', tile], {}, get_label('LBL_Link_Graph'),
-                                  get_label('LBL_Link_Graph_Prompt')]
+                                  get_label('LBL_Link_Graph_Prompt'), False]
             else:
                 link_output = 'fa fa-link'
         elif trigger == 'confirm-link':
@@ -688,10 +688,11 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
         if intermediate_pointer in session['saved_dashboards'] \
                 and session['saved_dashboards'][intermediate_pointer]['Dashboard Title'] == dashboard_title:
             prompt_trigger = [['delete-dashboard', 4], {}, get_label('LBL_Delete_Dashboard'),
-                              get_label('LBL_Delete_Dashboard_Prompt').format(dashboard_title)]
+                              get_label('LBL_Delete_Dashboard_Prompt').format(dashboard_title), False]
 
     elif 'dashboard-reset' in changed_id:
-        prompt_trigger = [['reset', 4], {}, get_label('LBL_Reset_Dashboard'), get_label('LBL_Reset_Dashboard_Prompt')]
+        prompt_trigger = [['reset', 4], {}, get_label('LBL_Reset_Dashboard'), get_label('LBL_Reset_Dashboard_Prompt'),
+                          False]
 
     # if load button was pressed, send load menu
     elif 'load-dashboard' in changed_id:
@@ -702,7 +703,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
             pass
         elif session['tile_edited'][int(search(r'\d+', changed_id).group())]:
             prompt_trigger = [['close', int(search(r'\d+', changed_id).group())], {}, get_label('LBL_Close_Graph'),
-                              get_label('LBL_Close_Graph_Prompt')]
+                              get_label('LBL_Close_Graph_Prompt'), False]
         else:
             close_trigger = int(search(r'\d+', changed_id).group())
     # if confirm load, load dashboard
@@ -844,13 +845,13 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
             # check if the dashboard title is blank
             if dashboard_title == '':
                 prompt_trigger = [['empty_title', 4], {}, get_label('LBL_Untitled_Dashboard'),
-                                  get_label('LBL_Untitled_Dashboard_Prompt')]
+                                  get_label('LBL_Untitled_Dashboard_Prompt'), False]
                 # get_label('LBL_Dashboards_Require_A_Title_To_Be_Saved')
 
             # check if the dashboard is empty
             elif len(links) == 0:
                 prompt_trigger = [['empty_dashboard', 4], {}, get_label('LBL_Empty_Dashboard'),
-                                  get_label('LBL_Empty_Dashboard_Prompt')]
+                                  get_label('LBL_Empty_Dashboard_Prompt'), False]
                 # get_label('LBL_Dashboard_Must_Not_Be_Empty')
 
             # if conflicting tiles or dashboard and overwrite not requested, prompt overwrite
@@ -873,17 +874,18 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                         prompt_trigger = [['overwrite-dashboard', 4], {},
                                           get_label('LBL_Overwrite_Dashboard'),
                                           get_label('LBL_Overwrite_Dashboard_C_Title_Graph_Prompt').format(
-                                              dashboard_title, conflicting_graphs_list)]
+                                              dashboard_title, conflicting_graphs_list), False]
                     # else, just conflicting graph titles
                     else:
                         prompt_trigger = [['overwrite-dashboard', 4], {}, get_label('LBL_Overwrite_Dashboard'),
                                           get_label('LBL_Overwrite_Dashboard_C_Graph_Prompt').format(
-                                              conflicting_graphs_list)]
+                                              conflicting_graphs_list), False]
 
                 # else, just conflicting dashboard title
                 else:
                     prompt_trigger = [['overwrite-dashboard', 4], {}, get_label('LBL_Overwrite_Dashboard'),
-                                      get_label('LBL_Overwrite_Dashboard_C_Title_Prompt').format(dashboard_title)]
+                                      get_label('LBL_Overwrite_Dashboard_C_Title_Prompt').format(dashboard_title),
+                                      False]
 
             # else, save/overwrite the dashboard and contained tiles
             else:

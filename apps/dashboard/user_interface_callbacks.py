@@ -354,7 +354,7 @@ for x in range(4):
         # switch statement
         if 'tile-customize' in changed_id:
             # [[mode/prompt_trigger, tile, stored_menu_for_cancel], menu_style/show_hide, menu_title,
-            # show_hide_load_warning]
+            # show_hide_load_warning, isTrip]
             float_menu_trigger = [['customize', tile, customize_menu], {}, get_label('LBL_Edit_Graph'),
                                   session['tile_edited'][tile]]
             customize_className = 'tile-nav tile-nav--customize tile-nav--selected'
@@ -1248,11 +1248,17 @@ app.clientside_callback(
         const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
         var prompt_trigger = null;
         var result = null;
+        var duo_style = {};
+        var trip_style = {'display': 'none'};
         
         if (triggered.includes('prompt-trigger')){
             var trigger_arr = [prompt_trigger_0, prompt_trigger_1, prompt_trigger_2, prompt_trigger_3, prompt_trigger_4]
             var tile = triggered.match(/\d+/)[0];
             prompt_trigger = trigger_arr[tile];
+            if (prompt_trigger[4]){
+                duo_style = {'display': 'none'};
+                trip_style = {};
+            } 
         }
         
         if (triggered == 'prompt-close.n_clicks') {
@@ -1268,14 +1274,17 @@ app.clientside_callback(
             result = 'ok';
         }
         
-        return [prompt_trigger[0], prompt_trigger[1], prompt_trigger[2], prompt_trigger[3], result];
+        return [prompt_trigger[0], prompt_trigger[1], prompt_trigger[2], prompt_trigger[3], 
+                result, duo_style, trip_style];
     }
     """,
     [Output('prompt-title', 'data-'),  # index value and reason for prompt
      Output('prompt-obscure', 'style'),
      Output('prompt-title', 'children'),
      Output('prompt-body', 'children'),
-     Output('prompt-result', 'children')],
+     Output('prompt-result', 'children'),
+     Output('prompt-button-wrapper-duo', 'style'),
+     Output('prompt-button-wrapper-trip', 'style')],
     [Input({'type': 'prompt-trigger', 'index': 0}, 'data-'),
      Input({'type': 'prompt-trigger', 'index': 1}, 'data-'),
      Input({'type': 'prompt-trigger', 'index': 2}, 'data-'),

@@ -490,6 +490,7 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
     type_style = {'margin-left': '15px'}
     message_style = DATA_CONTENT_HIDE
 
+    # if new tile is created and is on a dataset that is not confirmed use previous data set that has been confirmed
     if '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-link' and df_confirm is not None:
         graph_options = GRAPH_OPTIONS[df_confirm]
         graph_options.sort()
@@ -609,6 +610,7 @@ for x in range(4):
             else:
                 raise PreventUpdate
 
+        # if the data set is selected but has not been confirmed, use previous data set
         if 'graph-type-dropdown' in changed_id and link_state == 'fa fa-link' and df_confirm is not None:
             df_name = df_confirm
         elif link_state == 'fa fa-link':
@@ -927,6 +929,7 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
             confirm_button[changed_index] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
                                              'position': 'relative', 'vertical-align': 'top'}
             refresh_button[changed_index] = DATA_CONTENT_HIDE
+            #if data set is selected but not confirmed use previous selected data set
             if df_name not in session and prev_selection[changed_index] is not None:
                 df_name_confirm = prev_selection[changed_index]
 

@@ -116,6 +116,9 @@ for x in range(4):
 
         xaxis = None
         yaxis = None
+        #TODO have to finish hooking up plotly axes title edits to hidden div so we are able to save \
+        # and update the graph menu when ever a user edits the titles
+
         # # check if the axes have changed take
         # if graph_display:
         #     if ('"type":"args-value' in changed_id and (result_edit_menu == 'ok' or result_edit_menu is None)) \

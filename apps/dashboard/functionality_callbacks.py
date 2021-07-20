@@ -98,7 +98,7 @@ for x in range(4):
          State('df-constants-storage', 'data'),
          # Float menu result
          State('float-menu-result', 'children'),
-         State({'type': 'data-set-parent', 'index': ALL}, 'value')],
+         State({'type': 'data-set-parent', 'index': 4}, 'value')],
         prevent_initial_call=True
     )
     def _update_graph(_df_trigger, arg_value, graph_type, tile_title, _datepicker_trigger,
@@ -659,7 +659,8 @@ for x in range(4):
          State({'type': 'hierarchy_specific_dropdown', 'index': 4}, 'options'),
          # Parent Data set
          State({'type': 'data-set', 'index': 4}, 'value'),
-         State('df-constants-storage', 'data')]
+         State('df-constants-storage', 'data'),
+         State({'type': 'data-set-parent', 'index': 4}, 'value')]
     )
     def _update_table(page_current, page_size, sort_by, filter_query, _graph_trigger, _table_trigger, link_state,
                       df_name, secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
@@ -668,7 +669,7 @@ for x in range(4):
                       parent_timeframe, parent_fiscal_toggle, parent_start_year, parent_end_year,
                       parent_start_secondary, parent_end_secondary, parent_num_periods, parent_period_type,
                       parent_hierarchy_toggle, parent_hierarchy_level_dropdown, parent_state_of_display,
-                      parent_hierarchy_graph_children, parent_hierarchy_options, parent_df_name, df_const):
+                      parent_hierarchy_graph_children, parent_hierarchy_options, parent_df_name, df_const, df_confirm):
 
         if link_state == 'fa fa-link':
             secondary_type = parent_secondary_type
@@ -685,7 +686,10 @@ for x in range(4):
             num_periods = parent_num_periods
             period_type = parent_period_type
             hierarchy_options = parent_hierarchy_options
-            df_name = parent_df_name
+            if df_confirm is not None:
+                df_name = df_confirm
+            else:
+                df_name = parent_df_name
 
         # prevent update if invalid selections exist - should be handled by update_datepicker, but double check
         if not start_year or not end_year or not start_secondary or not end_secondary:

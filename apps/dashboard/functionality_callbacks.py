@@ -116,8 +116,8 @@ for x in range(4):
 
         xaxis = None
         yaxis = None
-        #TODO have to finish hooking up plotly axes title edits to hidden div so we are able to save \
-        # and update the graph menu when ever a user edits the titles
+        # TODO have to finish hooking up plotly axes title edits to hidden div so we are able to save
+        #  and update the graph menu when ever a user edits the titles
 
         # # check if the axes have changed take
         # if graph_display:
@@ -161,11 +161,11 @@ for x in range(4):
             raise PreventUpdate
 
         # if linked and graph-type is in both data sets update graph
-        if link_state == 'fa fa-link' and (df_name is not None \
+        if link_state == 'fa fa-link' and (df_name is not None
                 and graph_type in GRAPH_OPTIONS[df_name] and df_name != parent_df_name) or \
                 (df_name is None and df_confirm is not None and parent_df_name != df_confirm):
             if df_confirm is not None:
-                df_name=df_confirm
+                df_name = df_confirm
             graph = __update_graph(df_name, arg_value, graph_type, tile_title, num_periods, period_type,
                                    hierarchy_toggle,
                                    hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options,

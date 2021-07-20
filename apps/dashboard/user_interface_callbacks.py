@@ -634,7 +634,6 @@ for x in range(4):
                 and graph_options_state is not None and (gm_trigger == df_name or df_name is not None):
             raise PreventUpdate
 
-
         tile = int(dash.callback_context.inputs_list[0]['id']['index'])
 
         # apply graph selection and generate menu
@@ -929,7 +928,7 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
             confirm_button[changed_index] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
                                              'position': 'relative', 'vertical-align': 'top'}
             refresh_button[changed_index] = DATA_CONTENT_HIDE
-            #if data set is selected but not confirmed use previous selected data set
+            # if data set is selected but not confirmed use previous selected data set
             if df_name not in session and prev_selection[changed_index] is not None:
                 df_name_confirm = prev_selection[changed_index]
 

@@ -452,7 +452,7 @@ app.clientside_callback(
      Input('float-menu-close', 'n_clicks'),
      Input('float-menu-cancel', 'n_clicks'),
      Input('float-menu-ok', 'n_clicks')],
-    State('float-menu-title', 'data-'),
+    [State('float-menu-title', 'data-')],
     prevent_initial_call=True
 )
 
@@ -470,9 +470,10 @@ app.clientside_callback(
     [State({'type': 'data-set', 'index': MATCH}, 'value'),
      State({'type': 'data-set', 'index': 4}, 'value'),
      State({'type': 'graph-type-dropdown', 'index': MATCH}, 'value'),
-     State({'type': 'graph-type-dropdown', 'index': MATCH}, 'options')]
+     State({'type': 'graph-type-dropdown', 'index': MATCH}, 'options'),
+     State({'type': 'data-set-parent', 'index': 4}, 'value')]
 )
-def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, graph_type, _type_options):
+def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, graph_type, _type_options, df_confirm):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     changed_value = [p['value'] for p in dash.callback_context.triggered][0]
 
@@ -480,7 +481,7 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
         raise PreventUpdate
 
     if '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-unlink' or \
-            (changed_value =='fa fa-link' and df_name is None and df_name_parent is None):
+            (changed_value == 'fa fa-link' and df_name is None and df_name_parent is None):
         raise PreventUpdate
 
     changed_index = int(search(r'\d+', changed_id).group())
@@ -492,7 +493,13 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
     type_style = {'margin-left': '15px'}
     message_style = DATA_CONTENT_HIDE
 
-    if '"type":"tile-link"}.className' in changed_id:
+    if '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-link' and df_confirm is not None:
+        graph_options = GRAPH_OPTIONS[df_confirm]
+        graph_options.sort()
+        for i in graph_options:
+            options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+
+    elif '"type":"tile-link"}.className' in changed_id:
         if df_name_parent == "OPG001":
             graph_options = GRAPH_OPTIONS["OPG001"]
         elif df_name_parent == "OPG010":
@@ -557,12 +564,13 @@ for x in range(4):
          State({'type': 'tile-customize-content', 'index': x}, 'data-loaded'),
          State({'type': 'data-set', 'index': x}, 'value'),
          State({'type': 'data-set', 'index': 4}, 'value'),
-         State('df-constants-storage', 'data')],
+         State('df-constants-storage', 'data'),
+         State({'type': 'data-set-parent', 'index': 4}, 'value')],
         prevent_initial_call=True
     )
     def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, hierarchy_toggle,
                            graph_options_state, _graph_option, is_loaded, df_name,
-                           parent_df_name, df_const):
+                           parent_df_name, df_const, df_confirm):
         """
         :param selected_graph_type: Selected graph type, ie. 'bar', 'line', etc.
         :param graph_options_state: State of the current graph options div
@@ -604,7 +612,9 @@ for x in range(4):
             else:
                 raise PreventUpdate
 
-        if link_state == 'fa fa-link':
+        if 'graph-type-dropdown' in changed_id and link_state == 'fa fa-link' and df_confirm is not None:
+            df_name = df_confirm
+        elif link_state == 'fa fa-link':
             df_name = parent_df_name
 
         # if graph menu trigger has value 'tile closed' then a tile was closed, don't update menu, still update table
@@ -622,8 +632,9 @@ for x in range(4):
         # stop graph_menu_update on new tile loop call
         if '"type":"tile-link"}.className' in str(dash.callback_context.triggered) \
                 and 'type":"graph-type-dropdown"}.value' in str(dash.callback_context.triggered) \
-                and graph_options_state is not None and (gm_trigger == df_name or df_name is not None ):
+                and graph_options_state is not None and (gm_trigger == df_name or df_name is not None):
             raise PreventUpdate
+
 
         tile = int(dash.callback_context.inputs_list[0]['id']['index'])
 
@@ -757,7 +768,8 @@ for x in range(4):
      Output({'type': 'set-graph-options-trigger', 'index': 0}, 'options-'),
      Output({'type': 'set-graph-options-trigger', 'index': 1}, 'options-'),
      Output({'type': 'set-graph-options-trigger', 'index': 2}, 'options-'),
-     Output({'type': 'set-graph-options-trigger', 'index': 3}, 'options-'), ],
+     Output({'type': 'set-graph-options-trigger', 'index': 3}, 'options-'),
+     Output({'type': 'data-set-parent', 'index': 4}, 'value')],
     [Input('dashboard-reset-trigger', 'data-'),
      Input('tile-closed-trigger', 'data-'),
      Input('select-dashboard-dropdown', 'value'),
@@ -835,6 +847,7 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
     store = no_update
     options_triggers = [no_update] * 5
     date_picker_triggers = [no_update] * 5
+    df_name_confirm = None
 
     # if 'data-menu-close' or 'select-dashboard-dropdown' requested, close all data menus
     if 'data-menu-close' in changed_id or 'select-dashboard-dropdown' in changed_id:
@@ -917,6 +930,8 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
             confirm_button[changed_index] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
                                              'position': 'relative', 'vertical-align': 'top'}
             refresh_button[changed_index] = DATA_CONTENT_HIDE
+            if df_name not in session and prev_selection[changed_index] is not None:
+                df_name_confirm = prev_selection[changed_index]
 
     # elif 'data-set' in changed id, reset data tile with new df set as active, keep shown, and trigger graph update
     elif '"type":"confirm-load-data"}.n_clicks' in changed_id \
@@ -1043,7 +1058,7 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
             confirm_button[0], confirm_button[1], confirm_button[2], confirm_button[3], confirm_button[4],
             refresh_button[0], refresh_button[1], refresh_button[2], refresh_button[3], refresh_button[4],
             prev_selection[0], prev_selection[1], prev_selection[2], prev_selection[3], prev_selection[4],
-            options_triggers[0], options_triggers[1], options_triggers[2], options_triggers[3])
+            options_triggers[0], options_triggers[1], options_triggers[2], options_triggers[3], df_name_confirm)
 
 
 """

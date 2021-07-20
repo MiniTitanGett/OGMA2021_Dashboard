@@ -92,7 +92,7 @@ def recursive_to_plotly_json(document):
 
 
 # get Data set picker for data menu
-def get_data_set_picker(tile, df_name):
+def get_data_set_picker(tile, df_name, confirm_parent):
     """
     :param tile: Index of the created data side-menu.
     :param df_name: Dataframe name.
@@ -112,6 +112,14 @@ def get_data_set_picker(tile, df_name):
                     id={'type': 'data-set-info', 'index': tile},
                     style={'position': 'relative'})],
             id={'type': 'data-set-info-wrapper', 'index': tile}),
+        html.Div([
+            dcc.Input(
+                id={'type': 'data-set-parent', 'index': tile},
+                type="text",
+                value=confirm_parent,
+                style={'display': 'None'},
+                debounce=True)],
+            style={'display': 'None'}),
         html.Div([
             dcc.Dropdown(
                 id={'type': 'data-set', 'index': tile},
@@ -153,7 +161,7 @@ def get_data_set_picker(tile, df_name):
 # get DATA side-menu
 def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Filter', level_value='H1',
                   nid_path="root", graph_all_toggle=None, fiscal_toggle='Gregorian', input_method='all-time',
-                  num_periods='5', period_type='last-years', df_const=None):
+                  num_periods='5', period_type='last-years', df_const=None, confirm_parent=None):
     # if df_name is None:
     #     df_name = session['dataset_list'][0]
     content = [
@@ -161,7 +169,7 @@ def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Fi
             className='boxclose',
             style={'position': 'relative', 'left': '3px'},
             id={'type': 'data-menu-close', 'index': tile}),
-        html.Div(get_data_set_picker(tile, df_name)),
+        html.Div(get_data_set_picker(tile, df_name, confirm_parent)),
         html.Div([
             html.Div(
                 get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle, nid_path,

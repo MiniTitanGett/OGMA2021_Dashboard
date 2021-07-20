@@ -97,7 +97,8 @@ for x in range(4):
          # Constants
          State('df-constants-storage', 'data'),
          # Float menu result
-         State('float-menu-result', 'children')],
+         State('float-menu-result', 'children'),
+         State({'type': 'data-set-parent', 'index': ALL}, 'value')],
         prevent_initial_call=True
     )
     def _update_graph(_df_trigger, arg_value, graph_type, tile_title, _datepicker_trigger,
@@ -108,31 +109,31 @@ for x in range(4):
                       timeframe, fiscal_toggle, start_year, end_year, start_secondary, end_secondary,
                       parent_secondary_type, parent_timeframe, parent_fiscal_toggle, parent_start_year, parent_end_year,
                       parent_start_secondary, parent_end_secondary, graph_display, df_name, parent_df_name,
-                      link_state, hierarchy_options, parent_hierarchy_options, df_const, result_edit_menu):
+                      link_state, hierarchy_options, parent_hierarchy_options, df_const, result_edit_menu, df_confirm):
 
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
         tile = dash.callback_context.inputs_list[0]['id']['index']
 
         xaxis = None
         yaxis = None
-        # check if the axes have changed take
-        if graph_display:
-            if ('"type":"args-value' in changed_id and (result_edit_menu == 'ok' or result_edit_menu is None)) \
-                    or ((result_edit_menu == 'ok' or result_edit_menu == 'cancel' or result_edit_menu is None)
-                        and ('hierarchy-toggle' in changed_id or 'hierarchy_level_dropdown' in changed_id or
-                             'date-picker-trigger' in changed_id or 'hierarchy_display' in changed_id or
-                             'tile-title' in changed_id or 'graph_children' in changed_id or 'num-periods' in changed_id
-                            or 'period-type' in changed_id))\
-                    or 'update-graph-trigger' in changed_id:
-
-                if 'figure' in graph_display['props']:
-                    for j in graph_display['props']['figure']['layout']:
-                        if j == 'yaxis':
-                            if 'title' in graph_display['props']['figure']['layout']['yaxis']:
-                                yaxis = graph_display['props']['figure']['layout']['yaxis']['title']['text']
-                            if 'title' in graph_display['props']['figure']['layout']['xaxis']:
-                                xaxis = graph_display['props']['figure']['layout']['xaxis']['title']['text']
-                                break
+        # # check if the axes have changed take
+        # if graph_display:
+        #     if ('"type":"args-value' in changed_id and (result_edit_menu == 'ok' or result_edit_menu is None)) \
+        #             or ((result_edit_menu == 'ok' or result_edit_menu == 'cancel' or result_edit_menu is None)
+        #                 and ('hierarchy-toggle' in changed_id or 'hierarchy_level_dropdown' in changed_id or
+        #                      'date-picker-trigger' in changed_id or 'hierarchy_display' in changed_id or
+        #                      'tile-title' in changed_id or 'graph_children' in changed_id or 'num-periods' in changed_id
+        #                     or 'period-type' in changed_id))\
+        #             or 'update-graph-trigger' in changed_id:
+        #
+        #         if 'figure' in graph_display['props']:
+        #             for j in graph_display['props']['figure']['layout']:
+        #                 if j == 'yaxis':
+        #                     if 'title' in graph_display['props']['figure']['layout']['yaxis']:
+        #                         yaxis = graph_display['props']['figure']['layout']['yaxis']['title']['text']
+        #                     if 'title' in graph_display['props']['figure']['layout']['xaxis']:
+        #                         xaxis = graph_display['props']['figure']['layout']['xaxis']['title']['text']
+        #                         break
 
         if '"type":"tile-view"}.className' in changed_id and df_name is None and parent_df_name is None:
             return None
@@ -157,8 +158,11 @@ for x in range(4):
             raise PreventUpdate
 
         # if linked and graph-type is in both data sets update graph
-        if link_state == 'fa fa-link' and df_name is not None \
-                and graph_type in GRAPH_OPTIONS[df_name] and df_name != parent_df_name:
+        if link_state == 'fa fa-link' and (df_name is not None \
+                and graph_type in GRAPH_OPTIONS[df_name] and df_name != parent_df_name) or \
+                (df_name is None and df_confirm is not None and parent_df_name != df_confirm):
+            if df_confirm is not None:
+                df_name=df_confirm
             graph = __update_graph(df_name, arg_value, graph_type, tile_title, num_periods, period_type,
                                    hierarchy_toggle,
                                    hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options,

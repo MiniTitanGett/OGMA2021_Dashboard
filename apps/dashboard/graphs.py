@@ -298,6 +298,7 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
         overwrite=True,
         plot_bgcolor='rgba(0, 0, 0, 0)',
         paper_bgcolor='rgba(0, 0, 0, 0)')
+    # if the checkbox for line and scatter is select or not show gird lines
     if arg_value[7]:
         fig.update_xaxes(showgrid=True, zeroline=True)
         fig.update_yaxes(showgrid=True, zeroline=True)

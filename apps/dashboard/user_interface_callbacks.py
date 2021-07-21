@@ -504,15 +504,20 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
             graph_options.sort()
             for i in graph_options:
                 options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+    elif trigger == 'fa fa-link':
+        graph_options = GRAPH_OPTIONS[df_name_parent]
+        graph_options.sort()
+        for i in graph_options:
+            options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
     else:
         if df_name == "OPG001" or df_name_parent == "OPG001":
             graph_options = GRAPH_OPTIONS["OPG001"]
-            if graph_type is not None and graph_type not in graph_options:
-                link_trigger = "fa fa-unlink"
+            # if graph_type is not None and graph_type not in graph_options:
+            #     link_trigger = "fa fa-unlink"
         elif df_name == "OPG010" or df_name_parent == "OPG010":
             graph_options = GRAPH_OPTIONS["OPG010"]
-            if graph_type is not None and graph_type not in graph_options:
-                link_trigger = "fa fa-unlink"
+            # if graph_type is not None and graph_type not in graph_options:
+            #     link_trigger = "fa fa-unlink"
         else:
             graph_options = []
         graph_options.sort()
@@ -736,15 +741,16 @@ for x in range(4):
      Output({'type': 'confirm-data-set-refresh', 'index': 2}, 'style'),
      Output({'type': 'confirm-data-set-refresh', 'index': 3}, 'style'),
      Output({'type': 'confirm-data-set-refresh', 'index': 4}, 'style'),
-     Output({'type': 'data-set', 'index': 0}, 'data-'),
-     Output({'type': 'data-set', 'index': 1}, 'data-'),
-     Output({'type': 'data-set', 'index': 2}, 'data-'),
-     Output({'type': 'data-set', 'index': 3}, 'data-'),
-     Output({'type': 'data-set', 'index': 4}, 'data-'),
+     Output({'type': 'data-set-prev-selected', 'index': 0}, 'data'),
+     Output({'type': 'data-set-prev-selected', 'index': 1}, 'data'),
+     Output({'type': 'data-set-prev-selected', 'index': 2}, 'data'),
+     Output({'type': 'data-set-prev-selected', 'index': 3}, 'data'),
+     Output({'type': 'data-set-prev-selected', 'index': 4}, 'data'),
      Output({'type': 'set-graph-options-trigger', 'index': 0}, 'options-'),
      Output({'type': 'set-graph-options-trigger', 'index': 1}, 'options-'),
      Output({'type': 'set-graph-options-trigger', 'index': 2}, 'options-'),
-     Output({'type': 'set-graph-options-trigger', 'index': 3}, 'options-'), ],
+     Output({'type': 'set-graph-options-trigger', 'index': 3}, 'options-'),
+     Output({'type': 'prompt-trigger', 'index': 5}, 'data-')],
     [Input('dashboard-reset-trigger', 'data-'),
      Input('tile-closed-trigger', 'data-'),
      Input('select-dashboard-dropdown', 'value'),
@@ -765,11 +771,17 @@ for x in range(4):
      Input({'type': 'confirm-data-set-refresh', 'index': 1}, 'n_clicks'),
      Input({'type': 'confirm-data-set-refresh', 'index': 2}, 'n_clicks'),
      Input({'type': 'confirm-data-set-refresh', 'index': 3}, 'n_clicks'),
-     Input({'type': 'confirm-data-set-refresh', 'index': 4}, 'n_clicks')],
-    [State({'type': 'data-tile', 'index': ALL}, 'children'),
+     Input({'type': 'confirm-data-set-refresh', 'index': 4}, 'n_clicks'),
+     Input('prompt-result', 'children')],
+    [State('prompt-title', 'data-'),
+     State({'type': 'data-tile', 'index': ALL}, 'children'),
      State({'type': 'data-tile', 'index': ALL}, 'style'),
      State('df-constants-storage', 'data'),
-     State({'type': 'data-set', 'index': ALL}, 'data-'),
+     State({'type': 'data-set-prev-selected', 'index': 0}, 'data'),
+     State({'type': 'data-set-prev-selected', 'index': 1}, 'data'),
+     State({'type': 'data-set-prev-selected', 'index': 2}, 'data'),
+     State({'type': 'data-set-prev-selected', 'index': 3}, 'data'),
+     State({'type': 'data-set-prev-selected', 'index': 4}, 'data'),
      State({'type': 'graph-type-dropdown', 'index': ALL}, 'value'),
      # Date picker states for parent data menu
      State({'type': 'start-year-input', 'index': 4}, 'name'),
@@ -791,7 +803,9 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                            _data_close_clicks, df_name_0, df_name_1, df_name_2, df_name_3, df_name_4, _confirm_clicks_0,
                            _confirm_clicks_1, _confirm_clicks_2, _confirm_clicks_3, _confirm_clicks_4,
                            _refresh_clicks_0, _refresh_clicks_1, _refresh_clicks_2, _refresh_clicks_3,
-                           _refresh_clicks_4, data_states, sidemenu_style_states, df_const, prev_selection, graph_types,
+                           _refresh_clicks_4, prompt_result, prompt_data, data_states, sidemenu_style_states, df_const,
+                           prev_selection_0, prev_selection_1, prev_selection_2, prev_selection_3, prev_selection_4,
+                           graph_types,
                            _parent_secondary_type, parent_timeframe, parent_fiscal_toggle, _parent_start_year,
                            _parent_end_year, _parent_start_secondary, _parent_end_secondary, parent_hierarchy_toggle,
                            parent_hierarchy_drop, parent_num_state, parent_period_type, parent_graph_child_toggle,
@@ -822,7 +836,10 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
     store = no_update
     options_triggers = [no_update] * 5
     date_picker_triggers = [no_update] * 5
-
+    prompt_trigger = no_update
+    # unknown why but this has to be done this way instead of using ALL since ALL was changing the order in seemingly
+    # random ways
+    prev_selection = [prev_selection_0, prev_selection_1, prev_selection_2, prev_selection_3, prev_selection_4]
     # if 'data-menu-close' or 'select-dashboard-dropdown' requested, close all data menus
     if 'data-menu-close' in changed_id or 'select-dashboard-dropdown' in changed_id:
         pass
@@ -872,28 +889,24 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
         df_name = df_names[changed_index]
         sidemenu_styles[changed_index] = DATA_CONTENT_SHOW
         if df_name in session:
-            confirm_button[changed_index] = DATA_CONTENT_HIDE
-            refresh_button[changed_index] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
-                                             'position': 'relative', 'vertical-align': 'top'}
-            sidemenu_styles[changed_index] = DATA_CONTENT_SHOW
             # refresh data menu if not returning to last loaded
-            if df_name is not prev_selection[changed_index]:
+            if df_name == prev_selection[changed_index] and prev_selection[changed_index] is not None:
                 data[changed_index] = get_data_menu(changed_index, df_name, df_const=df_const)
-            # trigger update for all tiles that are linked to the active data menu
-            if changed_index == 4:
+            # send out a prompt
+            elif changed_index == 4:  # prompt with trip prompt
+                prompt_trigger = [['loaded_dataset_swap', changed_index], {}, get_label('LBL_Loaded_Dataset_Swap'),
+                                  get_label('LBL_Loaded_Dataset_Swap_Prompt'), True]
                 for i in range(len(links_style)):
                     if links_style[i] == 'fa fa-link':
                         # graph_triggers[i] = df_name
                         confirm_button[i] = DATA_CONTENT_HIDE
                         refresh_button[i] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
                                              'position': 'relative', 'vertical-align': 'top'}
-                        prev_selection[i] = df_name
-                        options_triggers[i] = df_name
-            else:
-                # graph_triggers[changed_index] = df_name
-                prev_selection[changed_index] = df_name
-                options_triggers[changed_index] = df_name
+            else:  # prompt with only two options
+                prompt_trigger = [['loaded_dataset_swap', changed_index], {}, get_label('LBL_Loaded_Dataset_Swap'),
+                                  get_label('LBL_Loaded_Dataset_Swap_Prompt'), False]
         else:
+            # trigger update for all tiles that are linked to the active data menu
             if changed_index == 4:
                 for i in range(len(links_style)):
                     if links_style[i] == 'fa fa-link':
@@ -906,89 +919,343 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
             refresh_button[changed_index] = DATA_CONTENT_HIDE
 
     # elif 'data-set' in changed id, reset data tile with new df set as active, keep shown, and trigger graph update
-    elif '"type":"confirm-load-data"}.n_clicks' in changed_id \
-            or '"type":"confirm-data-set-refresh"}.n_clicks' in changed_id:
+    elif '"type":"confirm-data-set-refresh"}.n_clicks' in changed_id or \
+            '"type":"confirm-load-data"}.n_clicks' in changed_id:
         changed_index = int(search(r'\d+', changed_id).group())
         df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
-
         df_name = df_names[changed_index]
-        session[df_name] = dataset_to_df(df_name)
-
-        if df_const is None:
-            df_const = {}
-        df_const[df_name] = generate_constants(df_name)
-        store = df_const
-        data[changed_index] = get_data_menu(changed_index, df_name, df_const=df_const)
-        sidemenu_styles[changed_index] = DATA_CONTENT_SHOW
-        # trigger update for all tiles that are linked to the active data menu
-        if changed_index == 4:
-            prev_selection[changed_index] = df_name
-            for i in range(len(links_style)):
-                if links_style[i] == 'fa fa-link':
-                    prev_selection[i] = df_name
-                    if graph_types[i] is None or graph_types[i] in GRAPH_OPTIONS[df_name]:
-                        graph_triggers[i] = df_name
-                        options_triggers[i] = df_name
-                        df_names[i] = df_name
-
-                    else:
-                        links_style[i] = 'fa fa-unlink'
-                        # [i]= 'fa-fa-unlink'
-                        # set the dataset of the new menu from unlinking
-                        if type(state_of_display) == dict:
-                            state_of_display = [state_of_display]
-                        nid_path = "root"
-                        for button in state_of_display:
-                            nid_path += '^||^{}'.format(button['props']['children'])
-
-                        if df_name == "OPG001":
-                            df_names[i] = "OPG010"
-                            df_const[df_names[i]] = generate_constants(df_names[i])
-                            data[i] = get_data_menu(i, df_names[i],
-                                                    hierarchy_toggle=parent_hierarchy_toggle,
-                                                    level_value=parent_hierarchy_drop,
-                                                    nid_path=nid_path, graph_all_toggle=parent_graph_child_toggle,
-                                                    fiscal_toggle=parent_fiscal_toggle, input_method=parent_timeframe,
-                                                    num_periods=parent_num_state, period_type=parent_period_type,
-                                                    df_const=df_const)
-                            # sidemenu_styles[i] = DATA_CONTENT_SHOW
-                            refresh_button[i] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
-                                                 'position': 'relative',
-                                                 'margin-right': '10px', 'margin-left': '10px',
-                                                 'vertical-align': 'top'}
-                            if parent_timeframe == "select-range":
-                                date_picker_triggers[i] = "triggered"
-
-                        elif df_name == "OPG010":
-                            df_names[i] = "OPG001"
-                            df_const[df_names[i]] = generate_constants(df_names[i])
-                            data[i] = get_data_menu(i, df_names[i],
-                                                    hierarchy_toggle=parent_hierarchy_toggle,
-                                                    level_value=parent_hierarchy_drop,
-                                                    nid_path=nid_path, graph_all_toggle=parent_graph_child_toggle,
-                                                    fiscal_toggle=parent_fiscal_toggle, input_method=parent_timeframe,
-                                                    num_periods=parent_num_state, period_type=parent_period_type,
-                                                    df_const=df_const)
-                            # sidemenu_styles[i] = DATA_CONTENT_SHOW
-                            refresh_button[i] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
-                                                 'position': 'relative',
-                                                 'margin-right': '10px', 'margin-left': '10px',
-                                                 'vertical-align': 'top'}
-                            if parent_timeframe == "select-range":
-                                date_picker_triggers[i] = "triggered"
-                        options_triggers[i] = 'fa fa-unlink'
+        if '"type":"confirm-load-data"}.n_clicks' in changed_id \
+                and (prev_selection[changed_index] in session):
+            changed_index = int(search(r'\d+', changed_id).group())
+            if changed_index == 4:  # prompt with trip prompt
+                prompt_trigger = [['load_dataset', changed_index], {}, get_label('LBL_Load_Dataset'),
+                                  get_label('LBL_Loaded_Dataset_Swap_Prompt'), True]
+            else:  # prompt with only two options
+                prompt_trigger = [['load_dataset', changed_index], {}, get_label('LBL_Load_Dataset'),
+                                  get_label('LBL_Load_Dataset_Prompt'), False]
         else:
-            graph_triggers[changed_index] = df_name
-            options_triggers[changed_index] = df_name
-        prev_selection[changed_index] = df_name
-        confirm_button[changed_index] = DATA_CONTENT_HIDE
-        refresh_button[changed_index] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
-                                         'position': 'relative', 'vertical-align': 'top'}
+            df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
+
+            df_name = df_names[changed_index]
+            session[df_name] = dataset_to_df(df_name)
+
+            if df_const is None:
+                df_const = {}
+            df_const[df_name] = generate_constants(df_name)
+            store = df_const
+            data[changed_index] = get_data_menu(changed_index, df_name, df_const=df_const)
+            sidemenu_styles[changed_index] = DATA_CONTENT_SHOW
+            # trigger update for all tiles that are linked to the active data menu
+            if changed_index == 4:
+                prev_selection[changed_index] = df_name
+                for i in range(len(links_style)):
+                    if links_style[i] == 'fa fa-link':
+                        prev_selection[i] = df_name
+                        if graph_types[i] is None or graph_types[i] in GRAPH_OPTIONS[df_name]:
+                            graph_triggers[i] = df_name
+                            options_triggers[i] = df_name
+                            df_names[i] = df_name
+
+                        else:
+                            links_style[i] = 'fa fa-unlink'
+                            # [i]= 'fa-fa-unlink'
+                            # set the dataset of the new menu from unlinking
+                            if type(state_of_display) == dict:
+                                state_of_display = [state_of_display]
+                            nid_path = "root"
+                            for button in state_of_display:
+                                nid_path += '^||^{}'.format(button['props']['children'])
+
+                            if df_name == "OPG001":
+                                df_names[i] = "OPG010"  # TODO: hardcode is a bit worrisome
+                                df_const[df_names[i]] = generate_constants(df_names[i])
+                                data[i] = get_data_menu(i, df_names[i],
+                                                        hierarchy_toggle=parent_hierarchy_toggle,
+                                                        level_value=parent_hierarchy_drop,
+                                                        nid_path=nid_path,
+                                                        graph_all_toggle=parent_graph_child_toggle,
+                                                        fiscal_toggle=parent_fiscal_toggle,
+                                                        input_method=parent_timeframe,
+                                                        num_periods=parent_num_state,
+                                                        period_type=parent_period_type,
+                                                        prev_selection=prev_selection[i],
+                                                        df_const=df_const)
+                                # sidemenu_styles[i] = DATA_CONTENT_SHOW
+                                refresh_button[i] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
+                                                     'position': 'relative',
+                                                     'margin-right': '10px', 'margin-left': '10px',
+                                                     'vertical-align': 'top'}
+                                if parent_timeframe == "select-range":
+                                    date_picker_triggers[i] = "triggered"
+
+                            elif df_name == "OPG010":
+                                df_names[i] = "OPG001"  # TODO: hardcode is a bit worrisome
+                                df_const[df_names[i]] = generate_constants(df_names[i])
+                                data[i] = get_data_menu(i, df_names[i],
+                                                        hierarchy_toggle=parent_hierarchy_toggle,
+                                                        level_value=parent_hierarchy_drop,
+                                                        nid_path=nid_path,
+                                                        graph_all_toggle=parent_graph_child_toggle,
+                                                        fiscal_toggle=parent_fiscal_toggle,
+                                                        input_method=parent_timeframe,
+                                                        num_periods=parent_num_state,
+                                                        period_type=parent_period_type,
+                                                        prev_selection=prev_selection[i],
+                                                        df_const=df_const)
+                                # sidemenu_styles[i] = DATA_CONTENT_SHOW
+                                refresh_button[i] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
+                                                     'position': 'relative',
+                                                     'margin-right': '10px', 'margin-left': '10px',
+                                                     'vertical-align': 'top'}
+                                if parent_timeframe == "select-range":
+                                    date_picker_triggers[i] = "triggered"
+                            options_triggers[i] = 'fa fa-unlink'
+            else:
+                graph_triggers[changed_index] = df_name
+                options_triggers[changed_index] = df_name
+            prev_selection[changed_index] = df_name
+            confirm_button[changed_index] = DATA_CONTENT_HIDE
+            refresh_button[changed_index] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
+                                             'position': 'relative', 'vertical-align': 'top'}
 
     # elif 'RESET' dashboard requested, hide and reset all data tiles
     elif 'dashboard-reset-trigger' in changed_id:
         for i in range(len(data)):
             data[i] = get_data_menu(i, df_const=df_const)
+
+    # elif prompt has been received, handle request for cancel, load, swap dataset, link, unlink
+    elif 'prompt-result' in changed_id:
+        if prompt_data[0] == 'loaded_dataset_swap' or prompt_data[0] == 'load_dataset':
+            tile = prompt_data[1]
+            df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
+            df_name = df_names[tile]
+            # see if a trip option or not
+            if tile == 4:
+                # cancelled, reset dropdown
+                if prompt_result == 'op-1' or prompt_result == 'close':
+                    data[tile] = get_data_menu(tile, prev_selection[tile], df_const=df_const)
+                    sidemenu_styles[tile] = DATA_CONTENT_SHOW
+                else:
+                    # set previous
+                    for i in range(len(links_style)):
+                        if links_style[i] == 'fa fa-link':
+                            prev_selection[i] = df_name
+                    prev_selection[tile] = df_name
+
+                    df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
+                    df_name = df_names[tile]
+                    # if load called, load dataset here
+                    if prompt_data[0] == 'load_dataset':
+                        session[df_name] = dataset_to_df(df_name)
+                        if df_const is None:
+                            df_const = {}
+                        df_const[df_name] = generate_constants(df_name)
+                        store = df_const
+                        data[tile] = get_data_menu(tile, df_name, df_const=df_const)
+                        # op-2 is continue the dataset change but unlink my graph
+                        # op-3 is continue the dataset change and modify my graph as necessary (keeping the link)
+                        # trigger update for all tiles that are linked to the active data menu
+                        prev_selection[tile] = df_name
+                        for i in range(len(links_style)):
+                            if links_style[i] == 'fa fa-link':
+                                if graph_types[i] is None or graph_types[i] in GRAPH_OPTIONS[df_name]:
+                                    graph_triggers[i] = df_name
+                                    options_triggers[i] = df_name
+                                    df_names[i] = df_name
+
+                                else:
+                                    links_style[i] = 'fa fa-unlink'
+                                    # [i]= 'fa-fa-unlink'
+                                    # set the dataset of the new menu from unlinking
+                                    if type(state_of_display) == dict:
+                                        state_of_display = [state_of_display]
+                                    nid_path = "root"
+                                    for button in state_of_display:
+                                        nid_path += '^||^{}'.format(button['props']['children'])
+
+                                    if df_name == "OPG001":
+                                        df_names[i] = "OPG010"  # TODO: hardcode is a bit worrisome
+                                        df_const[df_names[i]] = generate_constants(df_names[i])
+                                        data[i] = get_data_menu(i, df_names[i],
+                                                                hierarchy_toggle=parent_hierarchy_toggle,
+                                                                level_value=parent_hierarchy_drop,
+                                                                nid_path=nid_path,
+                                                                graph_all_toggle=parent_graph_child_toggle,
+                                                                fiscal_toggle=parent_fiscal_toggle,
+                                                                input_method=parent_timeframe,
+                                                                num_periods=parent_num_state,
+                                                                period_type=parent_period_type,
+                                                                prev_selection=prev_selection[i],
+                                                                df_const=df_const)
+                                        # sidemenu_styles[i] = DATA_CONTENT_SHOW
+                                        refresh_button[i] = {'padding': '10px 0', 'width': '15px',
+                                                             'height': '15px',
+                                                             'position': 'relative',
+                                                             'margin-right': '10px', 'margin-left': '10px',
+                                                             'vertical-align': 'top'}
+                                        if parent_timeframe == "select-range":
+                                            date_picker_triggers[i] = "triggered"
+
+                                    elif df_name == "OPG010":
+                                        df_names[i] = "OPG001"  # TODO: hardcode is a bit worrisome
+                                        df_const[df_names[i]] = generate_constants(df_names[i])
+                                        data[i] = get_data_menu(i, df_names[i],
+                                                                hierarchy_toggle=parent_hierarchy_toggle,
+                                                                level_value=parent_hierarchy_drop,
+                                                                nid_path=nid_path,
+                                                                graph_all_toggle=parent_graph_child_toggle,
+                                                                fiscal_toggle=parent_fiscal_toggle,
+                                                                input_method=parent_timeframe,
+                                                                num_periods=parent_num_state,
+                                                                period_type=parent_period_type,
+                                                                prev_selection=prev_selection[i],
+                                                                df_const=df_const)
+                                        # sidemenu_styles[i] = DATA_CONTENT_SHOW
+                                        refresh_button[i] = {'padding': '10px 0', 'width': '15px',
+                                                             'height': '15px',
+                                                             'position': 'relative',
+                                                             'margin-right': '10px', 'margin-left': '10px',
+                                                             'vertical-align': 'top'}
+                                        if parent_timeframe == "select-range":
+                                            date_picker_triggers[i] = "triggered"
+
+                                    if prompt_result == 'op-3':
+                                        options_triggers[i] = 'fa fa-link'
+                                        prev_selection[i] = df_name
+                                        sidemenu_styles[tile] = DATA_CONTENT_SHOW
+                                    else:
+                                        options_triggers[i] = 'fa fa-unlink'
+                    else:
+                        confirm_button[tile] = DATA_CONTENT_HIDE
+                        refresh_button[tile] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
+                                                'position': 'relative', 'vertical-align': 'top'}
+                        sidemenu_styles[tile] = DATA_CONTENT_SHOW
+                        # refresh data menu if not returning to last loaded
+                        if df_name is not prev_selection[tile]:
+                            data[tile] = get_data_menu(tile, df_name, df_const=df_const)
+                        # trigger update for all tiles that are linked to the active data menu
+                        if tile == 4:
+                            for i in range(len(links_style)):
+                                if links_style[i] == 'fa fa-link':
+                                    # graph_triggers[i] = df_name
+                                    confirm_button[i] = DATA_CONTENT_HIDE
+                                    refresh_button[i] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
+                                                         'position': 'relative', 'vertical-align': 'top'}
+                                    prev_selection[i] = df_name
+                                    options_triggers[i] = df_name
+                        else:
+                            # graph_triggers[changed_index] = df_name
+                            prev_selection[tile] = df_name
+                            options_triggers[tile] = df_name
+            # duo options
+            else:
+                if prompt_result == 'ok':
+                    df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
+                    df_name = df_names[tile]
+                    prev_selection[tile] = df_name
+                    if prompt_data[0] == 'load_dataset':
+                        # trigger update for all tiles that are linked to the active data menu
+                        if tile == 4:
+                            prev_selection[tile] = df_name
+                            for i in range(len(links_style)):
+                                if links_style[i] == 'fa fa-link':
+                                    prev_selection[i] = df_name
+                                    if graph_types[i] is None or graph_types[i] in GRAPH_OPTIONS[df_name]:
+                                        graph_triggers[i] = df_name
+                                        options_triggers[i] = df_name
+                                        df_names[i] = df_name
+
+                                    else:
+                                        links_style[i] = 'fa fa-unlink'
+                                        # [i]= 'fa-fa-unlink'
+                                        # set the dataset of the new menu from unlinking
+                                        if type(state_of_display) == dict:
+                                            state_of_display = [state_of_display]
+                                        nid_path = "root"
+                                        for button in state_of_display:
+                                            nid_path += '^||^{}'.format(button['props']['children'])
+
+                                        if df_name == "OPG001":
+                                            df_names[i] = "OPG010"  # TODO: hardcode is a bit worrisome
+                                            df_const[df_names[i]] = generate_constants(df_names[i])
+                                            data[i] = get_data_menu(i, df_names[i],
+                                                                    hierarchy_toggle=parent_hierarchy_toggle,
+                                                                    level_value=parent_hierarchy_drop,
+                                                                    nid_path=nid_path,
+                                                                    graph_all_toggle=parent_graph_child_toggle,
+                                                                    fiscal_toggle=parent_fiscal_toggle,
+                                                                    input_method=parent_timeframe,
+                                                                    num_periods=parent_num_state,
+                                                                    period_type=parent_period_type,
+                                                                    prev_selection=prev_selection[i],
+                                                                    df_const=df_const)
+                                            # sidemenu_styles[i] = DATA_CONTENT_SHOW
+                                            refresh_button[i] = {'padding': '10px 0', 'width': '15px',
+                                                                 'height': '15px',
+                                                                 'position': 'relative',
+                                                                 'margin-right': '10px', 'margin-left': '10px',
+                                                                 'vertical-align': 'top'}
+                                            if parent_timeframe == "select-range":
+                                                date_picker_triggers[i] = "triggered"
+
+                                        elif df_name == "OPG010":
+                                            df_names[i] = "OPG001"  # TODO: hardcode is a bit worrisome
+                                            df_const[df_names[i]] = generate_constants(df_names[i])
+                                            data[i] = get_data_menu(i, df_names[i],
+                                                                    hierarchy_toggle=parent_hierarchy_toggle,
+                                                                    level_value=parent_hierarchy_drop,
+                                                                    nid_path=nid_path,
+                                                                    graph_all_toggle=parent_graph_child_toggle,
+                                                                    fiscal_toggle=parent_fiscal_toggle,
+                                                                    input_method=parent_timeframe,
+                                                                    num_periods=parent_num_state,
+                                                                    period_type=parent_period_type,
+                                                                    prev_selection=prev_selection[i],
+                                                                    df_const=df_const)
+                                            # sidemenu_styles[i] = DATA_CONTENT_SHOW
+                                            refresh_button[i] = {'padding': '10px 0', 'width': '15px',
+                                                                 'height': '15px',
+                                                                 'position': 'relative',
+                                                                 'margin-right': '10px', 'margin-left': '10px',
+                                                                 'vertical-align': 'top'}
+                                            if parent_timeframe == "select-range":
+                                                date_picker_triggers[i] = "triggered"
+                                        options_triggers[i] = 'fa fa-unlink'
+                        else:
+                            graph_triggers[tile] = df_name
+                            options_triggers[tile] = df_name
+                        prev_selection[tile] = df_name
+                        confirm_button[tile] = DATA_CONTENT_HIDE
+                        refresh_button[tile] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
+                                                'position': 'relative', 'vertical-align': 'top'}
+                    else:
+                        confirm_button[tile] = DATA_CONTENT_HIDE
+                        refresh_button[tile] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
+                                                'position': 'relative', 'vertical-align': 'top'}
+                        sidemenu_styles[tile] = DATA_CONTENT_SHOW
+                        # refresh data menu if not returning to last loaded
+                        if df_name is not prev_selection[tile]:
+                            data[tile] = get_data_menu(tile, df_name, df_const=df_const)
+                        # trigger update for all tiles that are linked to the active data menu
+                        if tile == 4:
+                            for i in range(len(links_style)):
+                                if links_style[i] == 'fa fa-link':
+                                    # graph_triggers[i] = df_name
+                                    confirm_button[i] = DATA_CONTENT_HIDE
+                                    refresh_button[i] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
+                                                         'position': 'relative', 'vertical-align': 'top'}
+                                    prev_selection[i] = df_name
+                                    options_triggers[i] = df_name
+                            prev_selection[tile] = df_name
+                        else:
+                            # graph_triggers[changed_index] = df_name
+                            prev_selection[tile] = df_name
+                            options_triggers[tile] = df_name
+                else:
+                    data[tile] = get_data_menu(tile, prev_selection[tile], df_const=df_const)
+                    sidemenu_styles[tile] = DATA_CONTENT_SHOW
+        else:
+            raise PreventUpdate
 
     # else, 'data', 'tile-link', or 'select-layout' requested
     else:
@@ -1030,7 +1297,7 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
             confirm_button[0], confirm_button[1], confirm_button[2], confirm_button[3], confirm_button[4],
             refresh_button[0], refresh_button[1], refresh_button[2], refresh_button[3], refresh_button[4],
             prev_selection[0], prev_selection[1], prev_selection[2], prev_selection[3], prev_selection[4],
-            options_triggers[0], options_triggers[1], options_triggers[2], options_triggers[3])
+            options_triggers[0], options_triggers[1], options_triggers[2], options_triggers[3], prompt_trigger)
 
 
 """
@@ -1045,8 +1312,7 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
      State({'type': 'start-year-input', 'index': 4}, 'value'),
      State({'type': 'end-year-input', 'index': 4}, 'value'),
      State({'type': 'start-secondary-input', 'index': 4}, 'value'),
-     State({'type': 'end-secondary-input', 'index': 4}, 'value'),
-     ]
+     State({'type': 'end-secondary-input', 'index': 4}, 'value')]
 )
 def _date_picker_inputs(trigger, tile_tab, tile_start_year, tile_end_year, tile_start_secondary, tile_end_secondary):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
@@ -1188,55 +1454,55 @@ for x in range(4):
         prevent_initial_call=True
     )
 
-app.clientside_callback(
-    """
-    function datasetLoadScreen(n_click_load, n_click_reset, float_menu_result, float_menu_data, selected_dashboard) {
-        if (n_click_load != ',,,,' || n_click_reset != ',,,,' || (typeof float_menu_data != 'undefined' 
-             && float_menu_data[0] == 'dashboard_layouts' && selected_dashboard != null && float_menu_result == 'ok')){
-            var newDiv = document.createElement('div');
-            newDiv.className = '_data-loading';
-            newDiv.id = 'loading';
-            document.body.appendChild(newDiv, document.getElementById('content'));
-        }
-        return 0;
-    }
-    """,
-    Output('dataset-confirmation-symbols', 'n_clicks'),
-    [Input({'type': 'confirm-load-data', 'index': ALL}, 'n_clicks'),
-     Input({'type': 'confirm-data-set-refresh', 'index': ALL}, 'n_clicks'),
-     Input('float-menu-result', 'children')],
-    [State('float-menu-title', 'data-'),
-     State('select-dashboard-dropdown', 'value')],
-    prevent_initial_call=True
-)
-
-app.clientside_callback(
-    """
-    function datasetRemoveLoadScreen(data, graph_displays, num_tiles) {
-        var triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
-        if (triggered.includes("df-constants-storage.data")){
-            try{
-                document.getElementById('loading').remove();
-            }catch{ /* Do Nothing */ }
-        }
-        else {
-            triggered = triggered[triggered.length - 1];
-            var tile = parseInt(triggered.match(/\d+/)[0]) + 1;
-            if (tile == num_tiles){
-                try{
-                    document.getElementById('loading').remove();
-                }catch{ /* Do Nothing */ }
-            }
-        }
-        return 0;
-    }
-    """,
-    Output('df-constants-storage', 'n_clicks'),
-    [Input('df-constants-storage', 'data'),
-     Input({'type': 'graph_display', 'index': ALL}, 'children')],
-    State('num-tiles', 'data-num-tiles'),
-    prevent_initial_call=True
-)
+# app.clientside_callback(
+#     """
+#     function datasetLoadScreen(n_click_load, n_click_reset, float_menu_result, float_menu_data, selected_dashboard) {
+#         if (n_click_load != ',,,,' || n_click_reset != ',,,,' || (typeof float_menu_data != 'undefined'
+#              && float_menu_data[0] == 'dashboard_layouts' && selected_dashboard != null && float_menu_result == 'ok')){
+#             var newDiv = document.createElement('div');
+#             newDiv.className = '_data-loading';
+#             newDiv.id = 'loading';
+#             document.body.appendChild(newDiv, document.getElementById('content'));
+#         }
+#         return 0;
+#     }
+#     """,
+#     Output('dataset-confirmation-symbols', 'n_clicks'),
+#     [Input({'type': 'confirm-load-data', 'index': ALL}, 'n_clicks'),
+#      Input({'type': 'confirm-data-set-refresh', 'index': ALL}, 'n_clicks'),
+#      Input('float-menu-result', 'children')],
+#     [State('float-menu-title', 'data-'),
+#      State('select-dashboard-dropdown', 'value')],
+#     prevent_initial_call=True
+# )
+#
+# app.clientside_callback(
+#     """
+#     function datasetRemoveLoadScreen(data, graph_displays, num_tiles) {
+#         var triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
+#         if (triggered.includes("df-constants-storage.data")){
+#             try{
+#                 document.getElementById('loading').remove();
+#             }catch{ /* Do Nothing */ }
+#         }
+#         else {
+#             triggered = triggered[triggered.length - 1];
+#             var tile = parseInt(triggered.match(/\d+/)[0]) + 1;
+#             if (tile == num_tiles){
+#                 try{
+#                     document.getElementById('loading').remove();
+#                 }catch{ /* Do Nothing */ }
+#             }
+#         }
+#         return 0;
+#     }
+#     """,
+#     Output('df-constants-storage', 'n_clicks'),
+#     [Input('df-constants-storage', 'data'),
+#      Input({'type': 'graph_display', 'index': ALL}, 'children')],
+#     State('num-tiles', 'data-num-tiles'),
+#     prevent_initial_call=True
+# )
 
 # *************************************************PROMPT*********************************************************
 
@@ -1244,15 +1510,17 @@ app.clientside_callback(
 app.clientside_callback(
     """
     function _serve_prompt(prompt_trigger_0, prompt_trigger_1, prompt_trigger_2, prompt_trigger_3, prompt_trigger_4,
-             close_n_clicks, cancel_n_clicks, ok_n_clicks, prompt_data){
+             prompt_trigger_5, close_n_clicks, cancel_n_clicks, ok_n_clicks, op1_n_clicks, op2_n_clicks, op3_n_clicks, 
+             prompt_data){
         const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
-        var prompt_trigger = null;
-        var result = null;
+        var prompt_trigger = dash_clientside.no_update;
+        var result = dash_clientside.no_update;
         var duo_style = {};
         var trip_style = {'display': 'none'};
         
         if (triggered.includes('prompt-trigger')){
-            var trigger_arr = [prompt_trigger_0, prompt_trigger_1, prompt_trigger_2, prompt_trigger_3, prompt_trigger_4]
+            var trigger_arr = [prompt_trigger_0, prompt_trigger_1, prompt_trigger_2, prompt_trigger_3, prompt_trigger_4,
+                               prompt_trigger_5];
             var tile = triggered.match(/\d+/)[0];
             prompt_trigger = trigger_arr[tile];
             if (prompt_trigger[4]){
@@ -1260,20 +1528,16 @@ app.clientside_callback(
                 trip_style = {};
             } 
         }
-        
-        if (triggered == 'prompt-close.n_clicks') {
+        else {
+            if (triggered == 'prompt-close.n_clicks') {result = 'close';}
+            else if (triggered == 'prompt-cancel.n_clicks'){result = 'cancel';}
+            else if (triggered == 'prompt-ok.n_clicks'){result = 'ok';}
+            else if (triggered == 'prompt-option-1.n_clicks'){result = 'op-1';}
+            else if (triggered == 'prompt-option-2.n_clicks'){result = 'op-2';}
+            else if (triggered == 'prompt-option-3.n_clicks'){result = 'op-3';}
+            
             prompt_trigger = [prompt_data, {'display': 'none'}, '', ''];
-            result = 'close';
         }
-        if (triggered == 'prompt-cancel.n_clicks'){
-            prompt_trigger = [prompt_data, {'display': 'none'}, '', ''];
-            result = 'cancel';
-        }
-        if (triggered == 'prompt-ok.n_clicks'){
-            prompt_trigger = [prompt_data, {'display': 'none'}, '', ''];
-            result = 'ok';
-        }
-        
         return [prompt_trigger[0], prompt_trigger[1], prompt_trigger[2], prompt_trigger[3], 
                 result, duo_style, trip_style];
     }
@@ -1285,14 +1549,18 @@ app.clientside_callback(
      Output('prompt-result', 'children'),
      Output('prompt-button-wrapper-duo', 'style'),
      Output('prompt-button-wrapper-trip', 'style')],
-    [Input({'type': 'prompt-trigger', 'index': 0}, 'data-'),
-     Input({'type': 'prompt-trigger', 'index': 1}, 'data-'),
-     Input({'type': 'prompt-trigger', 'index': 2}, 'data-'),
-     Input({'type': 'prompt-trigger', 'index': 3}, 'data-'),
-     Input({'type': 'prompt-trigger', 'index': 4}, 'data-'),
+    [Input({'type': 'prompt-trigger', 'index': 0}, 'data-'),  # tile 0
+     Input({'type': 'prompt-trigger', 'index': 1}, 'data-'),  # tile 1
+     Input({'type': 'prompt-trigger', 'index': 2}, 'data-'),  # tile 2
+     Input({'type': 'prompt-trigger', 'index': 3}, 'data-'),  # tile 3
+     Input({'type': 'prompt-trigger', 'index': 4}, 'data-'),  # dashboard
+     Input({'type': 'prompt-trigger', 'index': 5}, 'data-'),  # sidemenus
      Input('prompt-close', 'n_clicks'),
      Input('prompt-cancel', 'n_clicks'),
-     Input('prompt-ok', 'n_clicks')],
+     Input('prompt-ok', 'n_clicks'),
+     Input('prompt-option-1', 'n_clicks'),
+     Input('prompt-option-2', 'n_clicks'),
+     Input('prompt-option-3', 'n_clicks')],
     State('prompt-title', 'data-'),
     prevent_initial_call=True
 )

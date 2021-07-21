@@ -92,10 +92,11 @@ def recursive_to_plotly_json(document):
 
 
 # get Data set picker for data menu
-def get_data_set_picker(tile, df_name):
+def get_data_set_picker(tile, df_name, prev_selection=None):
     """
     :param tile: Index of the created data side-menu.
     :param df_name: Dataframe name.
+    :param prev_selection: takes in last selected dataframe
     :return: Drop down of the possible data sets.
     """
     return [
@@ -119,6 +120,9 @@ def get_data_set_picker(tile, df_name):
                 value=df_name,
                 clearable=False,
                 style={'flex-grow': '1'}),
+            dcc.Store(
+                data=prev_selection,
+                id={'type': 'data-set-prev-selected', 'index': tile}),
             html.Div(
                 html.Div([
                     html.I(
@@ -153,7 +157,7 @@ def get_data_set_picker(tile, df_name):
 # get DATA side-menu
 def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Filter', level_value='H1',
                   nid_path="root", graph_all_toggle=None, fiscal_toggle='Gregorian', input_method='all-time',
-                  num_periods='5', period_type='last-years', df_const=None):
+                  num_periods='5', period_type='last-years', prev_selection=None, df_const=None):
     # if df_name is None:
     #     df_name = session['dataset_list'][0]
     content = [
@@ -161,7 +165,7 @@ def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Fi
             className='boxclose',
             style={'position': 'relative', 'left': '3px'},
             id={'type': 'data-menu-close', 'index': tile}),
-        html.Div(get_data_set_picker(tile, df_name)),
+        html.Div(get_data_set_picker(tile, df_name, prev_selection)),
         html.Div([
             html.Div(
                 get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle, nid_path,
@@ -477,11 +481,12 @@ def get_layout_dashboard():
             id='prompt-obscure',
             className='prompt-obscure'
         ),
-        dcc.Store(id={'type': 'prompt-trigger', 'index': 0}),
-        dcc.Store(id={'type': 'prompt-trigger', 'index': 1}),
-        dcc.Store(id={'type': 'prompt-trigger', 'index': 2}),
-        dcc.Store(id={'type': 'prompt-trigger', 'index': 3}),
-        dcc.Store(id={'type': 'prompt-trigger', 'index': 4}),
+        dcc.Store(id={'type': 'prompt-trigger', 'index': 0}),  # tile 0
+        dcc.Store(id={'type': 'prompt-trigger', 'index': 1}),  # tile 1
+        dcc.Store(id={'type': 'prompt-trigger', 'index': 2}),  # tile 2
+        dcc.Store(id={'type': 'prompt-trigger', 'index': 3}),  # tile 3
+        dcc.Store(id={'type': 'prompt-trigger', 'index': 4}),  # dashboard
+        dcc.Store(id={'type': 'prompt-trigger', 'index': 5}),  # sidemenus
         dcc.Store(id='prompt-result'),
         # Floating Menu
         html.Div(

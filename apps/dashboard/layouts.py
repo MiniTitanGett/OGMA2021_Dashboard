@@ -585,12 +585,6 @@ def get_layout_dashboard():
         dcc.Store(id={'type': 'set-tile-link-trigger', 'index': 1}),
         dcc.Store(id={'type': 'set-tile-link-trigger', 'index': 2}),
         dcc.Store(id={'type': 'set-tile-link-trigger', 'index': 3}),
-        # set-date-picker-trigger is used by the update data menu callback to trigger the date picker loading in an
-        # unlinked tile due to a mismatch of graph type
-        dcc.Store(id={'type': 'set-date-picker-trigger', 'index': 0}),
-        dcc.Store(id={'type': 'set-date-picker-trigger', 'index': 1}),
-        dcc.Store(id={'type': 'set-date-picker-trigger', 'index': 2}),
-        dcc.Store(id={'type': 'set-date-picker-trigger', 'index': 3}),
         # num-tile-2 / 3 / 4 temporarily store the number of tiles before they are inserted into the primary num-tiles
         dcc.Store(
             id='num-tiles-2',

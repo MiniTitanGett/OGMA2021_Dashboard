@@ -747,7 +747,13 @@ for x in range(4):
      Output({'type': 'set-graph-options-trigger', 'index': 0}, 'options-'),
      Output({'type': 'set-graph-options-trigger', 'index': 1}, 'options-'),
      Output({'type': 'set-graph-options-trigger', 'index': 2}, 'options-'),
-     Output({'type': 'set-graph-options-trigger', 'index': 3}, 'options-'), ],
+     Output({'type': 'set-graph-options-trigger', 'index': 3}, 'options-'),
+     Output({'type': 'update-date-picker-trigger', 'index': 0}, 'data-boolean'),
+     Output({'type': 'update-date-picker-trigger', 'index': 1}, 'data-boolean'),
+     Output({'type': 'update-date-picker-trigger', 'index': 2}, 'data-boolean'),
+     Output({'type': 'update-date-picker-trigger', 'index': 3}, 'data-boolean'),
+     Output({'type': 'update-date-picker-trigger', 'index': 4}, 'data-boolean'),
+     ],
     [Input('dashboard-reset-trigger', 'data-'),
      Input('tile-closed-trigger', 'data-'),
      Input('select-dashboard-dropdown', 'value'),
@@ -960,8 +966,13 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                                                  'margin-right': '10px', 'margin-left': '10px',
                                                  'vertical-align': 'top'}
                             if parent_timeframe == "select-range":
-                                date_picker_triggers[i] = "triggered"
-
+                                date_picker_triggers[i] = {"Input Method": parent_timeframe,
+                                                           "Start Year Selection": _parent_start_year,
+                                                           "End Year Selection": _parent_end_year,
+                                                           "Start Secondary Selection": _parent_start_secondary,
+                                                           "End Secondary Selection": _parent_end_secondary,
+                                                           "Tab": _parent_secondary_type
+                                                           }
                         elif df_name == "OPG010":
                             df_names[i] = "OPG001"
                             df_const[df_names[i]] = generate_constants(df_names[i])
@@ -978,7 +989,13 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                                                  'margin-right': '10px', 'margin-left': '10px',
                                                  'vertical-align': 'top'}
                             if parent_timeframe == "select-range":
-                                date_picker_triggers[i] = "triggered"
+                                date_picker_triggers[i] = {"Input Method": parent_timeframe,
+                                                           "Start Year Selection": _parent_start_year,
+                                                           "End Year Selection": _parent_end_year,
+                                                           "Start Secondary Selection": _parent_start_secondary,
+                                                           "End Secondary Selection": _parent_end_secondary,
+                                                           "Tab": _parent_secondary_type
+                                                           }
                         options_triggers[i] = 'fa fa-unlink'
         else:
             graph_triggers[changed_index] = df_name
@@ -1033,7 +1050,8 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
             confirm_button[0], confirm_button[1], confirm_button[2], confirm_button[3], confirm_button[4],
             refresh_button[0], refresh_button[1], refresh_button[2], refresh_button[3], refresh_button[4],
             prev_selection[0], prev_selection[1], prev_selection[2], prev_selection[3], prev_selection[4],
-            options_triggers[0], options_triggers[1], options_triggers[2], options_triggers[3])
+            options_triggers[0], options_triggers[1], options_triggers[2], options_triggers[3], date_picker_triggers[0],
+            date_picker_triggers[1], date_picker_triggers[2], date_picker_triggers[3], date_picker_triggers[4])
 
 
 """

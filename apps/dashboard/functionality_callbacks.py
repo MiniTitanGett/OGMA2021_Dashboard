@@ -23,7 +23,6 @@ from apps.dashboard.app import app
 from apps.dashboard.data import data_filter, CLR, get_label, GRAPH_OPTIONS
 from apps.dashboard.datepicker import get_date_box, update_date_columns, get_secondary_data
 
-
 # ***************************************************GRAPH************************************************************
 
 # update graph
@@ -312,7 +311,9 @@ app.clientside_callback(
      Input({'type': 'start-year-input', 'index': MATCH}, 'value'),
      Input({'type': 'end-year-input', 'index': MATCH}, 'value'),
      Input({'type': 'start-secondary-input', 'index': MATCH}, 'value'),
-     Input({'type': 'end-secondary-input', 'index': MATCH}, 'value')],
+     Input({'type': 'end-secondary-input', 'index': MATCH}, 'value'),
+     Input({'type': 'update-date-picker-trigger', 'index': MATCH}, 'data-boolean')
+     ],
     [State({'type': 'start-year-input', 'index': MATCH}, 'name'),
      State({'type': 'data-set', 'index': MATCH}, 'value'),
      State('df-constants-storage', 'data')],
@@ -320,11 +321,19 @@ app.clientside_callback(
 )
 def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quarter_button_clicks,
                         _month_button_clicks, _week_button_clicks, start_year_selection, end_year_selection,
-                        start_secondary_selection, end_secondary_selection, tab, df_name, df_const):
+                        start_secondary_selection, end_secondary_selection, _update_trigger, tab, df_name, df_const):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':
         raise PreventUpdate
+
+    if 'update-date-picker-trigger' in changed_id:
+        input_method = _update_trigger["Input Method"]
+        start_year_selection = _update_trigger["Start Year Selection"]
+        end_year_selection = _update_trigger["End Year Selection"]
+        start_secondary_selection = _update_trigger["Start Secondary Selection"]
+        end_secondary_selection = _update_trigger["End Secondary Selection"]
+        tab = _update_trigger["Tab"]
 
     tile = dash.callback_context.inputs_list[0]['id']['index']
 
@@ -389,8 +398,8 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
         elif 'n_clicks' in changed_id:
             conditions = ['date-picker-quarter-button' in changed_id, 'date-picker-month-button' in changed_id]
             quarter_classname, quarter_disabled, month_classname, month_disabled, week_classname, week_disabled, \
-                fringe_min, fringe_max, default_max, max_year, \
-                new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
+            fringe_min, fringe_max, default_max, max_year, \
+            new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
             # set min_year according to user selected fiscal/gregorian time type
             if fiscal_toggle == 'Gregorian':
                 min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
@@ -446,8 +455,8 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                 selected_secondary_max = end_secondary_selection
                 conditions = [tab == 'Quarter', tab == 'Month']
                 quarter_classname, quarter_disabled, month_classname, month_disabled, week_classname, week_disabled, \
-                    fringe_min, fringe_max, default_max, max_year, \
-                    new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
+                fringe_min, fringe_max, default_max, max_year, \
+                new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
             # set min_year according to user selected time type (gregorian/fiscal)
             if fiscal_toggle == 'Gregorian':
                 min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
@@ -706,7 +715,7 @@ for x in range(4):
                 inplace=False)
 
         return dff.iloc[page_current * page_size: (page_current + 1) * page_size].to_dict('records'), \
-            math.ceil(dff.iloc[:, 0].size / page_size)
+               math.ceil(dff.iloc[:, 0].size / page_size)
 
 # *************************************************DATA-FITTING******************************************************
 # update the data fitting section of the edit graph menu
@@ -742,4 +751,3 @@ for x in range(4):
         [Input({'type': 'args-value: {}'.replace("{}", str(x)), 'index': 4}, 'value')],
         prevent_initial_call=True
     )
-

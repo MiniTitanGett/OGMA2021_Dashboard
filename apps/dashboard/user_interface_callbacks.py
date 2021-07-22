@@ -903,8 +903,8 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                 # data[changed_index] = get_data_menu(changed_index, df_name, df_const=df_const)
             # send out a prompt
             elif changed_index == 4:  # prompt with trip prompt
-                prompt_trigger = [['loaded_dataset_swap', changed_index], {}, get_label('LBL_Loaded_Dataset_Swap'),
-                                  get_label('LBL_Loaded_Dataset_Swap_Prompt'), True]
+                prompt_trigger = [['loaded_dataset_swap', changed_index], {}, get_label('LBL_Load_Dataset'),
+                                  get_label('LBL_Load_Dataset_Prompt'), True]
                 for i in range(len(links_style)):
                     if links_style[i] == 'fa fa-link':
                         # graph_triggers[i] = df_name
@@ -912,8 +912,8 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                         refresh_button[i] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
                                              'position': 'relative', 'vertical-align': 'top'}
             else:  # prompt with only two options
-                prompt_trigger = [['loaded_dataset_swap', changed_index], {}, get_label('LBL_Loaded_Dataset_Swap'),
-                                  get_label('LBL_Loaded_Dataset_Swap_Prompt'), False]
+                prompt_trigger = [['loaded_dataset_swap', changed_index], {}, get_label('LBL_Load_Dataset'),
+                                  get_label('LBL_Load_Dataset_Duo_Prompt'), False]
         else:
             # trigger update for all tiles that are linked to the active data menu
             if changed_index == 4:
@@ -935,10 +935,10 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                 and (prev_selection[changed_index] in session):
             if changed_index == 4:  # prompt with trip prompt
                 prompt_trigger = [['load_dataset', changed_index], {}, get_label('LBL_Load_Dataset'),
-                                  get_label('LBL_Loaded_Dataset_Swap_Prompt'), True]
+                                  get_label('LBL_Load_Dataset_Prompt'), True]
             else:  # prompt with only two options
                 prompt_trigger = [['load_dataset', changed_index], {}, get_label('LBL_Load_Dataset'),
-                                  get_label('LBL_Load_Dataset_Prompt'), False]
+                                  get_label('LBL_Load_Dataset_Duo_Prompt'), False]
         else:
             df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
 
@@ -1044,9 +1044,6 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                         data_set_val[tile] = prev_selection[tile]
                 else:
                     # set previous
-                    for i in range(len(links_style)):
-                        if links_style[i] == 'fa fa-link':
-                            prev_selection[i] = df_name
                     prev_selection[tile] = df_name
 
                     df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
@@ -1129,9 +1126,10 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                                 if prompt_result == 'op-3':
                                     options_triggers[i] = 'fa fa-link'
                                     sidemenu_styles[tile] = DATA_CONTENT_SHOW
+                                    prev_selection[i] = df_name
                                 else:
                                     options_triggers[i] = 'fa fa-unlink'
-                                prev_selection[i] = df_name
+
             # duo options
             else:
                 if prompt_result == 'ok':

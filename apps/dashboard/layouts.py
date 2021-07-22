@@ -464,11 +464,11 @@ def get_layout_dashboard():
                             id='prompt-option-1',
                             style={'margin-bottom': '16px'}),
                         html.Button(
-                            get_label('LBL_Continue and unlink my graphs'),
+                            get_label('LBL_Continue_And_Unlink_My_Graphs'),
                             id='prompt-option-2',
                             style={'margin-bottom': '16px'}),
                         html.Button(
-                            get_label('LBL_Continue and modify my graphs as necessary'),
+                            get_label('LBL_Continue_And_Modify_My_Graphs_As_Necessary'),
                             id='prompt-option-3',
                             style={})],
                         className='prompt-button-wrapper-vertical',

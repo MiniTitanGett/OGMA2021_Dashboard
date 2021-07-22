@@ -579,11 +579,14 @@ for x in range(4):
 
         # prevents update if hierarchy toggle or graph all children is selected when the graph type is not line or
         # scatter
-        if ('"type":"graph_children_toggle"}.value' in changed_id
-            or '"type":"hierarchy-toggle"}.value' in changed_id) and (
-                selected_graph_type != "Line" or selected_graph_type != "Scatter"):
+        # if ('"type":"graph_children_toggle"}.value' in changed_id
+        #     or '"type":"hierarchy-toggle"}.value' in changed_id) and (
+        #         selected_graph_type != "Line" or selected_graph_type != "Scatter"):
+        #     raise PreventUpdate
+        if ('"type":"graph_children_toggle"}.value' in changed_id or '"type":"hierarchy-toggle"}.value' in changed_id) \
+                and (selected_graph_type == "Bubble" or selected_graph_type == "Bar" or selected_graph_type == "Table"
+                     or selected_graph_type == 'Box_Plot' or selected_graph_type == 'Sandkey'):
             raise PreventUpdate
-
         # sets boolean to allow data fitting as a customization option
         if hierarchy_toggle == 'Specific Item' and graph_all == []:
             data_fitting = True

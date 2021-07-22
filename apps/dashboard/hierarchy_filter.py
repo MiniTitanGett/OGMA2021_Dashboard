@@ -25,7 +25,6 @@ def generate_dropdown(tile, df_name, nid_path):
         # using a subset of our dataframe, turn it into a multiindex df, and access unique values for option
         df = session[df_name][['H1', 'H2', 'H3', 'H4', 'H5', 'H6']]
         hierarchy_nid_list = list(nid_path.split("^||^"))[1:]
-        print(hierarchy_nid_list)
         llen = len(hierarchy_nid_list)
         if llen == 6:
             option_list = []
@@ -36,7 +35,6 @@ def generate_dropdown(tile, df_name, nid_path):
             option_list = df['H1'].unique()
         options = [{'label': i, 'value': i} for i in option_list]
         options = sorted(options, key=lambda k: k['label'])
-        print(option_list)
         if llen >= 1:
             if hierarchy_nid_list[-1] in option_list:
                 options = []

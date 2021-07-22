@@ -186,8 +186,7 @@ def generate_constants(df_name):
             df['Week of Event'][df['Year of Event'] == GREGORIAN_WEEK_MAX_YEAR].max())
     else:
         GREGORIAN_WEEK_AVAILABLE = False  # not currently used, so set fake values
-        GREGORIAN_WEEK_MAX_YEAR = int(df['Year of Event'][df['Calendar Entry Type'] == 'Week'].max())
-        # GREGORIAN_WEEK_MAX_YEAR = 52
+        GREGORIAN_WEEK_MAX_YEAR = 52
         GREGORIAN_WEEK_FRINGE_MIN = 1
         GREGORIAN_WEEK_FRINGE_MAX = 52
 

@@ -539,17 +539,17 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             else:
                 # Generate title if there is no user entered title
                 if arg_value[0] == 'Variable Names':
-                    title = '{}: {} vs {}'.format(get_label(hierarchy_specific_dropdown, df_name), arg_value[1],
+                    title = '{}: {} vs {}'.format(get_label('LBL_'+hierarchy_specific_dropdown.replace(" ","_"), df_name), arg_value[1],
                                                   get_label('LBL_Variable_Names'))
                 else:
                     if hierarchy_specific_dropdown:
-                        title = '{}: {} vs {}'.format(get_label(hierarchy_specific_dropdown, df_name), arg_value[1],
+                        title = '{}: {} vs {}'.format(get_label('LBL_'+hierarchy_specific_dropdown.replace(" ","_"), df_name), arg_value[1],
                                                       get_label('LBL_Time'))
                     else:
                         if len(hierarchy_path) == 0:
                             title = ""
                         else:
-                            title = '{}: {} vs {}'.format(get_label(hierarchy_path[-1], df_name), arg_value[1],
+                            title = '{}: {} vs {}'.format(get_label('LBL_'+hierarchy_path[-1].replace(" ","_"), df_name), arg_value[1],
                                                           get_label('LBL_Time'))
 
         group_by_item = arg_value[0] != 'Variable Names'

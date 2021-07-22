@@ -129,7 +129,14 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
             html.Div(
                 id={'type': 'date-picker-trigger', 'index': tile},
                 **{'data-boolean': True},
-                style={'display': 'none'})]
+                style={'display': 'none'}),
+            # date picker trigger that stores master select range data for use in setting select range when
+            # forced un-linking
+            html.Div(
+                id={'type': 'update-date-picker-trigger', 'index': tile},
+                **{'data-boolean': {}},
+                style={'display': 'none'})
+        ]
     else:
         children = [
             html.H6(
@@ -200,7 +207,7 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                     disabled=input_method != 'to-current',
                     clearable=False,
                     style={'width': '110px', 'height': '26px', 'margin': '0', 'padding': '0', 'font-size': '15px',
-                            'text-align': 'center', 'border-radius': '5px', 'color': '#333', 'max-height': '26px'})
+                           'text-align': 'center', 'border-radius': '5px', 'color': '#333', 'max-height': '26px'})
             ], style={'width': '0', 'height': '0', 'position': 'relative', 'bottom': '55px',
                       'left': '125px' if language == 'En' else '150px'}),
             html.P("{}: {} - {}".format(get_label('LBL_Available'), '_', '_'),
@@ -232,7 +239,14 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
             html.Div(
                 id={'type': 'date-picker-trigger', 'index': tile},
                 **{'data-boolean': True},
-                style={'display': 'none'})]
+                style={'display': 'none'}),
+            # date picker trigger that stores master select range data for use in setting select range when
+            # forced un-linking
+            html.Div(
+                id={'type': 'update-date-picker-trigger', 'index': tile},
+                **{'data-boolean': {}},
+                style={'display': 'none'})
+        ]
     return children
 
 

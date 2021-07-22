@@ -1027,7 +1027,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
             popup_text = get_label('LBL_Your_Dashboard_Has_Been_Deleted').format(dashboard_title)
             popup_is_open = True
         # if reset confirmed, trigger reset
-        elif prompt_data[0] == 'reset' and prompt_result == 'ok':
+        elif prompt_data[0] == 'reset' and 'prompt-result.children' in changed_id and prompt_result == 'ok':
             dashboard_reset_trigger = 'trigger'
             popup_text = get_label('LBL_Your_Dashboard_Has_Been_Reset')
             popup_is_open = True

@@ -149,6 +149,8 @@ EXEC InsertOPRef @ref_table = 'OPG010', @ref_value = 'LBL_empty_column',        
 EXEC InsertOPRef @ref_table = 'OPG010', @ref_value = 'LBL_Comment',                 @language = 'Fr', @ref_desc = 'Fr: Comment'
 EXEC InsertOPRef @ref_table = 'OPG010', @ref_value = 'LBL_Hierarchy_One_Name',      @language = 'En', @ref_desc = 'Hierarchy One Name'
 EXEC InsertOPRef @ref_table = 'OPG010', @ref_value = 'LBL_Hierarchy_One_Name',      @language = 'Fr', @ref_desc = 'Hiérarchie un Nom'
+
+
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_H1', @language = 'Fr', @ref_desc = 'Niveau d''Organisation 1 (Haut)'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_H1', @language = 'En', @ref_desc = 'Organization Level 1 (Top)'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_H2', @language = 'En', @ref_desc = 'Organization Level 2'
@@ -166,7 +168,7 @@ EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_OPG_Data_Set',        
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Variable_Name',           @language = 'En', @ref_desc = 'Document Type'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Variable_Name_Qualifier', @language = 'En', @ref_desc = 'Document Type Qualifier'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Variable_Name_Sub_Qualifier', @language = 'En', @ref_desc = 'Document Type Sub Qualifier'
-EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Date_of_Event',           @language = 'En', @ref_desc = 'Date of Event'
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Date_Of_Event',           @language = 'En', @ref_desc = 'Date of Event'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Calendar_Entry_Type',     @language = 'En', @ref_desc = 'Calendar Entry Type'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Year_of_Event',           @language = 'En', @ref_desc = 'Year of Event'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Quarter',                 @language = 'En', @ref_desc = 'Quarter'
@@ -184,7 +186,7 @@ EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_OPG_Data_Set',        
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Variable_Name',           @language = 'Fr', @ref_desc = 'Fr: Document Type'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Variable_Name_Qualifier', @language = 'Fr', @ref_desc = 'Fr: Document Type Qualifier'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Variable_Name_Sub_Qualifier', @language = 'Fr', @ref_desc = 'Fr: Document Type Sub Qualifier'
-EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Date_of_Event',           @language = 'Fr', @ref_desc = 'Date de l''évènement'
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Date_Of_Event',           @language = 'Fr', @ref_desc = 'Date de l''évènement'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Calendar_Entry_Type',     @language = 'Fr', @ref_desc = 'Type d''entrée d''Agenda'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Year_of_Event',           @language = 'Fr', @ref_desc = 'Année de l''événement'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Quarter',                 @language = 'Fr', @ref_desc = 'Trimestre'
@@ -204,6 +206,9 @@ EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Gen_Hover_Data',      
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Gen_Hover_Data',          @language = 'Fr', @ref_desc = '<b>%{customdata[0]}</b><br><b>%{customdata[1]}</b><br><b>%AXIS-TITLE-A%</b>: %AXIS-A%<br><b>%AXIS-TITLE-B%</b>: %AXIS-B%<extra></extra>'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Bubble_Hover_Data',       @language = 'En', @ref_desc = '<b>%{customdata[0]}</b><br><b>%{customdata[1]}</b><br><b>%AXIS-X-A% %AXIS-X-B%</b>: %X-AXIS% <br><b>%AXIS-Y-A% %AXIS-Y-B%</b>: %Y-AXIS% <br><b>%AXIS-Z-A% %AXIS-Z-B%</b>: %Z-AXIS% <extra></extra>'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Bubble_Hover_Data',       @language = 'Fr', @ref_desc = '<b>%{customdata[0]}</b><br><b>%{customdata[1]}</b><br><b>%AXIS-X-A% %AXIS-X-B%</b>: %X-AXIS% <br><b>%AXIS-Y-A% %AXIS-Y-B%</b>: %Y-AXIS% <br><b>%AXIS-Z-A% %AXIS-Z-B%</b>: %Z-AXIS% <extra></extra>'
+
+
+
 
 EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG001', @language = 'En', @ref_desc = 'OPG 001 Time Series Measures'
 EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG001', @language = 'Fr', @ref_desc = 'OPG 001 Mesures de Séries Chronologiques'
@@ -542,12 +547,10 @@ EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Edit_Graph',@language 
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Edit_Graph',@language = 'Fr', @ref_desc = 'Fr: Edit Graph'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hide_Legend',@language = 'En', @ref_desc = 'Hide Legend'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hide_Legend',@language = 'Fr', @ref_desc = 'Fr: Hide Legend'
-EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Load_Dashboard',@language = 'En', @ref_desc = 'Load Dashboard'
-EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Load_Dashboard',@language = 'Fr', @ref_desc = 'Fr: Load Dashboard'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Link_Graph',@language = 'En', @ref_desc = 'Link Graph'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Link_Graph',@language = 'Fr', @ref_desc = 'Fr: Link Graph'
-EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Link_Graph_Prompt',@language = 'En', @ref_desc = 'You are linking this graph to another dataset. Doing so may may have unintended results if the linked dataset does not support the used graph type. Continue?'
-EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Link_Graph_Prompt',@language = 'Fr', @ref_desc = 'Fr: You are linking this graph to another dataset. Doing so may may have unintended results if the linked dataset does not support the used graph type. Continue?'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Link_Graph_Prompt',@language = 'En', @ref_desc = 'You are linking this graph to another dataset. Doing so may have unintended results if the linked dataset does not support the used graph type. Continue?'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Link_Graph_Prompt',@language = 'Fr', @ref_desc = 'Fr: You are linking this graph to another dataset. Doing so may have unintended results if the linked dataset does not support the used graph type. Continue?'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Confidence_Interval',@language = 'En', @ref_desc = 'Fit Confidence Interval'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Confidence_Interval',@language = 'Fr', @ref_desc = 'Fr: Fit Confidence Interval'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Close_Graph',@language = 'En', @ref_desc = 'Close Graph'

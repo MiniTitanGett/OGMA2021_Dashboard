@@ -111,10 +111,6 @@ for x in range(4):
         if link_state == 'fa fa-unlink' and '"index":4' in changed_id:
             raise PreventUpdate
 
-        # if unlinked and dataset changes
-        if link_state == 'fa fa-unlink' and '"type":"date-picker-trigger"}.data-boolean' in changed_id:
-            raise PreventUpdate
-
         # if linked --> unlinked prevent update
         if link_state == 'fa fa-unlink' and '"type":"tile-link"}.className' in changed_id:
             raise PreventUpdate

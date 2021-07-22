@@ -541,175 +541,171 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
 
 
 # update graph menu to match selected graph type
-for x in range(4):
-    @app.callback(
-        [Output({'type': 'div-graph-options', 'index': x}, 'children'),
-         Output({'type': 'update-graph-trigger', 'index': x}, 'data-graph_menu_trigger'),
-         Output({'type': 'update-graph-trigger', 'index': x}, 'data-graph_menu_table_trigger'),
-         Output({'type': 'tile-customize-content', 'index': x}, 'data-loaded')],
-        [Input({'type': 'graph-menu-trigger', 'index': x}, 'data-'),
-         Input({'type': 'graph-type-dropdown', 'index': x}, 'value'),
-         Input({'type': 'tile-link', 'index': x}, 'className'),
-         Input({'type': 'graph_children_toggle', 'index': 4}, 'value'),
-         Input({'type': 'hierarchy-toggle', 'index': 4}, 'value')],
-        [State({'type': 'div-graph-options', 'index': x}, 'children'),
-         State({'type': 'graph-type-dropdown', 'index': ALL}, 'value'),
-         State({'type': 'tile-customize-content', 'index': x}, 'data-loaded'),
-         State({'type': 'data-set', 'index': x}, 'value'),
-         State({'type': 'data-set', 'index': 4}, 'value'),
-         State('df-constants-storage', 'data')],
-        prevent_initial_call=True
-    )
-    def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, hierarchy_toggle,
-                           graph_options_state, _graph_option, is_loaded, df_name,
-                           parent_df_name, df_const):
-        """
-        :param selected_graph_type: Selected graph type, ie. 'bar', 'line', etc.
-        :param graph_options_state: State of the current graph options div
-        :return: Graph menu corresponding to selected graph type
-        """
+@app.callback(
+    [Output({'type': 'div-graph-options', 'index': MATCH}, 'children'),
+     Output({'type': 'update-graph-trigger', 'index': MATCH}, 'data-graph_menu_trigger'),
+     Output({'type': 'update-graph-trigger', 'index': MATCH}, 'data-graph_menu_table_trigger'),
+     Output({'type': 'tile-customize-content', 'index': MATCH}, 'data-loaded')],
+    [Input({'type': 'graph-menu-trigger', 'index': MATCH}, 'data-'),
+     Input({'type': 'graph-type-dropdown', 'index': MATCH}, 'value'),
+     Input({'type': 'tile-link', 'index': MATCH}, 'className'),
+     Input({'type': 'graph_children_toggle', 'index': MATCH}, 'value'),
+     Input({'type': 'hierarchy-toggle', 'index': MATCH}, 'value')],
+    [State({'type': 'div-graph-options', 'index': MATCH}, 'children'),
+     State({'type': 'graph-type-dropdown', 'index': ALL}, 'value'),
+     State({'type': 'tile-customize-content', 'index': MATCH}, 'data-loaded'),
+     State({'type': 'data-set', 'index': MATCH}, 'value'),
+     State({'type': 'data-set', 'index': 4}, 'value'),
+     State('df-constants-storage', 'data')],
+    prevent_initial_call=True
+)
+def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, hierarchy_toggle,
+                       graph_options_state, _graph_option, is_loaded, df_name,
+                       parent_df_name, df_const):
+    """
+    :param selected_graph_type: Selected graph type, ie. 'bar', 'line', etc.
+    :param graph_options_state: State of the current graph options div
+    :return: Graph menu corresponding to selected graph type
+    """
 
-        changed_id = [p['prop_id'] for p in dash.callback_context.triggered][-1]
+    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][-1]
 
-        # prevents update if hierarchy toggle or graph all children is selected when the graph type is not line or
-        # scatter
-        if ('"type":"graph_children_toggle"}.value' in changed_id
-            or '"type":"hierarchy-toggle"}.value' in changed_id) and (
-                selected_graph_type != "Line" or selected_graph_type != "Scatter"):
-            raise PreventUpdate
+    # prevents update if hierarchy toggle or graph all children is selected when the graph type is not line or
+    # scatter
+    if ('"type":"graph_children_toggle"}.value' in changed_id
+        or '"type":"hierarchy-toggle"}.value' in changed_id) and \
+            selected_graph_type != "Line" and selected_graph_type != "Scatter":
+        raise PreventUpdate
+    # TODO Fix data_fitting
+    # sets boolean to allow data fitting as a customization option
+    if hierarchy_toggle == 'Specific Item' and graph_all == []:
+        data_fitting = True
+    else:
+        data_fitting = False
 
-        # sets boolean to allow data fitting as a customization option
-        if hierarchy_toggle == 'Specific Item' and graph_all == []:
-            data_fitting = True
+    # if link state has changed from linked --> unlinked the data has not changed, prevent update
+    if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink':
+        if selected_graph_type is None:
+            return None, no_update, no_update, no_update
         else:
-            data_fitting = False
-
-        # if link state has changed from linked --> unlinked the data has not changed, prevent update
-        if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink':
-            if selected_graph_type is None:
-                return None, no_update, no_update, no_update
-            else:
-                raise PreventUpdate
-
-        # if link state from unlinked --> linked and the data set has not changed, don't update menu, still update graph
-        if ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link') \
-                or ('type":"graph-type-dropdown"}.value' in changed_id and link_state == 'fa fa-link'
-                    and selected_graph_type is None):
-            if parent_df_name is None and df_name is None:
-                return None, 1, no_update, no_update
-            if selected_graph_type not in GRAPH_OPTIONS[parent_df_name] or selected_graph_type is None:
-                return None, 1, no_update, no_update
-            elif selected_graph_type in GRAPH_OPTIONS[parent_df_name]:
-                return no_update, 1, no_update, no_update
-            else:
-                raise PreventUpdate
-
-        if link_state == 'fa fa-link':
-            df_name = parent_df_name
-
-        # if graph menu trigger has value 'tile closed' then a tile was closed, don't update menu, still update table
-        if 'graph-menu-trigger"}.data-' in changed_id and gm_trigger == 'tile closed':
-            return no_update, no_update, 1, no_update
-
-        # if this has been loaded from the cancel of a graph menu edit then set to false and prevent update
-        if 'graph-type-dropdown"}.value' in changed_id and is_loaded:
-            return no_update, no_update, no_update, False
-
-        # if changed id == '.' and the graph menu already exists, prevent update
-        if changed_id == '.' and graph_options_state or df_const is None or df_name not in df_const:
             raise PreventUpdate
 
-        # stop graph_menu_update on new tile loop call
-        if '"type":"tile-link"}.className' in str(dash.callback_context.triggered) \
-                and 'type":"graph-type-dropdown"}.value' in str(dash.callback_context.triggered) \
-                and graph_options_state is not None and (gm_trigger == df_name or df_name is None):
+    # if link state from unlinked --> linked and the data set has not changed, don't update menu, still update graph
+    if ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link') \
+            or ('type":"graph-type-dropdown"}.value' in changed_id and link_state == 'fa fa-link'
+                and selected_graph_type is None):
+        if parent_df_name is None and df_name is None:
+            return None, 1, no_update, no_update
+        if selected_graph_type not in GRAPH_OPTIONS[parent_df_name] or selected_graph_type is None:
+            return None, 1, no_update, no_update
+        elif selected_graph_type in GRAPH_OPTIONS[parent_df_name]:
+            return no_update, 1, no_update, no_update
+        else:
             raise PreventUpdate
 
-        tile = int(dash.callback_context.inputs_list[0]['id']['index'])
+    if link_state == 'fa fa-link':
+        df_name = parent_df_name
 
-        # apply graph selection and generate menu
-        if selected_graph_type == 'Line' or selected_graph_type == 'Scatter':
-            menu = get_line_scatter_graph_menu(tile=tile,
-                                               x=X_AXIS_OPTIONS[0],
-                                               y=None if df_const is None else
-                                               df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
-                                               mode=selected_graph_type,
-                                               measure_type=None if df_const is None else
-                                               df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
-                                               data_fit=None,
-                                               degree=None,
-                                               gridline=None,
-                                               legend=None,
-                                               df_name=df_name,
-                                               df_const=df_const,
-                                               data_fitting=data_fitting,
-                                               ci=None)
+    # if graph menu trigger has value 'tile closed' then a tile was closed, don't update menu, still update table
+    if 'graph-menu-trigger"}.data-' in changed_id and gm_trigger == 'tile closed':
+        return no_update, no_update, 1, no_update
 
-        elif selected_graph_type == 'Bar':
-            menu = get_bar_graph_menu(tile=tile,
-                                      x=BAR_X_AXIS_OPTIONS[0],
-                                      y=None if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
-                                      measure_type=None if df_const is None else
-                                      df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
-                                      orientation=None,
-                                      animate=None,
-                                      gridline=None,
-                                      legend=None,
-                                      df_name=df_name,
-                                      df_const=df_const)
+    # if this has been loaded from the cancel of a graph menu edit then set to false and prevent update
+    if 'graph-type-dropdown"}.value' in changed_id and is_loaded:
+        return no_update, no_update, no_update, False
 
-        elif selected_graph_type == 'Bubble':
-            menu = get_bubble_graph_menu(tile=tile,
-                                         x=None if df_const is None else
-                                         df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
-                                         x_measure=None if df_const is None else
-                                         df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
-                                         y=None if df_const is None else
-                                         df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
-                                         y_measure=None if df_const is None else
-                                         df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
-                                         size=None if df_const is None else
-                                         df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
-                                         size_measure=None if df_const is None else
-                                         df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
-                                         gridline=None,
-                                         legend=None,
-                                         df_name=df_name,
-                                         df_const=df_const)
+    # if changed id == '.' and the graph menu already exists, prevent update
+    if changed_id == '.' and graph_options_state or df_const is None or df_name not in df_const:
+        raise PreventUpdate
 
-        elif selected_graph_type == 'Table':
-            menu = get_table_graph_menu(tile=tile, number_of_columns=15)
+    if '"type":"graph_children_toggle"}.value' in changed_id and df_name == gm_trigger:
+        raise PreventUpdate
 
-        elif selected_graph_type == 'Box_Plot':
-            menu = get_box_plot_menu(tile=tile,
-                                     axis_measure=None if df_const is None else
-                                     df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
-                                     graphed_variables=None if df_const is None else
+    tile = int(dash.callback_context.inputs_list[0]['id']['index'])
+
+    # apply graph selection and generate menu
+    if selected_graph_type == 'Line' or selected_graph_type == 'Scatter':
+        menu = get_line_scatter_graph_menu(tile=tile,
+                                           x=X_AXIS_OPTIONS[0],
+                                           y=None if df_const is None else
+                                           df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
+                                           mode=selected_graph_type,
+                                           measure_type=None if df_const is None else
+                                           df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
+                                           data_fit=None,
+                                           degree=None,
+                                           gridline=None,
+                                           legend=None,
+                                           df_name=df_name,
+                                           df_const=df_const,
+                                           data_fitting=data_fitting,
+                                           ci=None)
+
+    elif selected_graph_type == 'Bar':
+        menu = get_bar_graph_menu(tile=tile,
+                                  x=BAR_X_AXIS_OPTIONS[0],
+                                  y=None if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
+                                  measure_type=None if df_const is None else
+                                  df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
+                                  orientation=None,
+                                  animate=None,
+                                  gridline=None,
+                                  legend=None,
+                                  df_name=df_name,
+                                  df_const=df_const)
+
+    elif selected_graph_type == 'Bubble':
+        menu = get_bubble_graph_menu(tile=tile,
+                                     x=None if df_const is None else
                                      df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
-                                     graph_orientation='Horizontal',
-                                     df_name=df_name,
-                                     show_data_points=[],
+                                     x_measure=None if df_const is None else
+                                     df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
+                                     y=None if df_const is None else
+                                     df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
+                                     y_measure=None if df_const is None else
+                                     df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
+                                     size=None if df_const is None else
+                                     df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
+                                     size_measure=None if df_const is None else
+                                     df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
                                      gridline=None,
                                      legend=None,
+                                     df_name=df_name,
                                      df_const=df_const)
 
-        elif selected_graph_type == 'Sankey':
-            menu = get_sankey_menu(tile=tile,
-                                   graphed_options=None if df_const is None else
-                                   df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
-                                   df_name=df_name,
-                                   df_const=df_const)
+    elif selected_graph_type == 'Table':
+        menu = get_table_graph_menu(tile=tile, number_of_columns=15)
 
-        else:
-            raise PreventUpdate
+    elif selected_graph_type == 'Box_Plot':
+        menu = get_box_plot_menu(tile=tile,
+                                 axis_measure=None if df_const is None else
+                                 df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
+                                 graphed_variables=None if df_const is None else
+                                 df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
+                                 graph_orientation='Horizontal',
+                                 df_name=df_name,
+                                 show_data_points=[],
+                                 gridline=None,
+                                 legend=None,
+                                 df_const=df_const)
 
-        if '"type":"tile-link"}.className' in changed_id or 'graph-menu-trigger"}.data-' in changed_id \
-                or '"type":"graph-type-dropdown"}.value' in changed_id:
-            update_graph_trigger = 1
-        else:
-            update_graph_trigger = no_update
+    elif selected_graph_type == 'Sankey':
+        menu = get_sankey_menu(tile=tile,
+                               graphed_options=None if df_const is None else
+                               df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
+                               df_name=df_name,
+                               df_const=df_const)
 
-        return menu, update_graph_trigger, no_update, no_update
+    else:
+        raise PreventUpdate
+
+    if '"type":"tile-link"}.className' in changed_id or 'graph-menu-trigger"}.data-' in changed_id \
+            or '"type":"graph-type-dropdown"}.value' in changed_id:
+        update_graph_trigger = 1
+    else:
+        update_graph_trigger = no_update
+
+    return menu, update_graph_trigger, no_update, no_update
 
 
 # ************************************************DATA SIDE-MENU******************************************************

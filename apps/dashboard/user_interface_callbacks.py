@@ -634,7 +634,10 @@ for x in range(4):
         # stop graph_menu_update on new tile loop call
         if '"type":"tile-link"}.className' in str(dash.callback_context.triggered) \
                 and 'type":"graph-type-dropdown"}.value' in str(dash.callback_context.triggered) \
-                and graph_options_state is not None and (gm_trigger == df_name or df_name is not None):
+                and graph_options_state is not None and gm_trigger == df_name:
+            raise PreventUpdate
+
+        if '"type":"graph_children_toggle"}.value' in changed_id and (df_name == gm_trigger or df_name!= gm_trigger):
             raise PreventUpdate
 
         tile = int(dash.callback_context.inputs_list[0]['id']['index'])

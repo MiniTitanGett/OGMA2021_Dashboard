@@ -35,9 +35,6 @@ def generate_dropdown(tile, df_name, nid_path):
             option_list = df['H1'].unique()
         options = [{'label': i, 'value': i} for i in option_list]
         options = sorted(options, key=lambda k: k['label'])
-        if llen >= 1:
-            if hierarchy_nid_list[-1] in option_list:
-                options = []
         return dcc.Dropdown(
             id={'type': 'hierarchy_specific_dropdown', 'index': tile},
             options=options,

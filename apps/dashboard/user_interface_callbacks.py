@@ -567,7 +567,7 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
      State({'type': 'data-set', 'index': MATCH}, 'value'),
      State({'type': 'data-set', 'index': 4}, 'value'),
      State('df-constants-storage', 'data'),
-         State({'type': 'data-set-parent', 'index': 4}, 'value')],
+     State({'type': 'data-set-parent', 'index': 4}, 'value')],
     prevent_initial_call=True
 )
 def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, hierarchy_toggle,
@@ -671,8 +671,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
                                   animate=None,
                                   gridline=None,
                                   legend=None,
-                                           xaxis=None,
-                                           yaxis=None,
+                                  xaxis=None,
+                                  yaxis=None,
                                   df_name=df_name,
                                   df_const=df_const)
 
@@ -692,8 +692,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
                                      df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
                                      gridline=None,
                                      legend=None,
-                                           xaxis=None,
-                                           yaxis=None,
+                                     xaxis=None,
+                                     yaxis=None,
                                      df_name=df_name,
                                      df_const=df_const)
 
@@ -711,8 +711,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
                                  show_data_points=[],
                                  gridline=None,
                                  legend=None,
-                                           xaxis=None,
-                                           yaxis=None,
+                                 xaxis=None,
+                                 yaxis=None,
                                  df_const=df_const)
 
     elif selected_graph_type == 'Sankey':
@@ -777,7 +777,7 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
      Output({'type': 'set-graph-options-trigger', 'index': 1}, 'options-'),
      Output({'type': 'set-graph-options-trigger', 'index': 2}, 'options-'),
      Output({'type': 'set-graph-options-trigger', 'index': 3}, 'options-'),
-     Output({'type': 'prompt-trigger', 'index': 5}, 'data-')
+     Output({'type': 'prompt-trigger', 'index': 5}, 'data-'),
      Output({'type': 'data-set-parent', 'index': 4}, 'value'),
      Output({'type': 'update-date-picker-trigger', 'index': 0}, 'data-boolean'),
      Output({'type': 'update-date-picker-trigger', 'index': 1}, 'data-boolean'),
@@ -1008,14 +1008,6 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                                 df_names[i] = "OPG010"  # TODO: hardcode is a bit worrisome
                                 df_const[df_names[i]] = generate_constants(df_names[i])
                                 data[i] = get_data_menu(i, df_names[i],
-                                                        hierarchy_toggle=parent_hierarchy_toggle,
-                                                        level_value=parent_hierarchy_drop,
-                                                        nid_path=nid_path,
-                                                        graph_all_toggle=parent_graph_child_toggle,
-                                                        fiscal_toggle=parent_fiscal_toggle,
-                                                        input_method=parent_timeframe,
-                                                        num_periods=parent_num_state,
-                                                        period_type=parent_period_type,
                                                         prev_selection=prev_selection[i],
                                                         df_const=df_const)
                                 # sidemenu_styles[i] = DATA_CONTENT_SHOW
@@ -1025,24 +1017,16 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                                                      'vertical-align': 'top'}
                                 if parent_timeframe == "select-range":
                                     date_picker_triggers[i] = {"Input Method": parent_timeframe,
-                                                           "Start Year Selection": _parent_start_year,
-                                                           "End Year Selection": _parent_end_year,
-                                                           "Start Secondary Selection": _parent_start_secondary,
-                                                           "End Secondary Selection": _parent_end_secondary,
-                                                           "Tab": _parent_secondary_type}
+                                                               "Start Year Selection": _parent_start_year,
+                                                               "End Year Selection": _parent_end_year,
+                                                               "Start Secondary Selection": _parent_start_secondary,
+                                                               "End Secondary Selection": _parent_end_secondary,
+                                                               "Tab": _parent_secondary_type}
 
                             elif df_name == "OPG010":
                                 df_names[i] = "OPG001"  # TODO: hardcode is a bit worrisome
                                 df_const[df_names[i]] = generate_constants(df_names[i])
                                 data[i] = get_data_menu(i, df_names[i],
-                                                        hierarchy_toggle=parent_hierarchy_toggle,
-                                                        level_value=parent_hierarchy_drop,
-                                                        nid_path=nid_path,
-                                                        graph_all_toggle=parent_graph_child_toggle,
-                                                        fiscal_toggle=parent_fiscal_toggle,
-                                                        input_method=parent_timeframe,
-                                                        num_periods=parent_num_state,
-                                                        period_type=parent_period_type,
                                                         prev_selection=prev_selection[i],
                                                         df_const=df_const)
                                 # sidemenu_styles[i] = DATA_CONTENT_SHOW
@@ -1052,11 +1036,11 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                                                      'vertical-align': 'top'}
                                 if parent_timeframe == "select-range":
                                     date_picker_triggers[i] = {"Input Method": parent_timeframe,
-                                                           "Start Year Selection": _parent_start_year,
-                                                           "End Year Selection": _parent_end_year,
-                                                           "Start Secondary Selection": _parent_start_secondary,
-                                                           "End Secondary Selection": _parent_end_secondary,
-                                                           "Tab": _parent_secondary_type}
+                                                               "Start Year Selection": _parent_start_year,
+                                                               "End Year Selection": _parent_end_year,
+                                                               "Start Secondary Selection": _parent_start_secondary,
+                                                               "End Secondary Selection": _parent_end_secondary,
+                                                               "Tab": _parent_secondary_type}
                             options_triggers[i] = 'fa fa-unlink'
             else:
                 graph_triggers[changed_index] = df_name
@@ -1097,7 +1081,8 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                             df_const = {}
                         df_const[df_name] = generate_constants(df_name)
                         store = df_const
-                        data[tile] = get_data_menu(tile, df_name, df_const=df_const)
+                    # reset data menu for tile no matter what
+                    data[tile] = get_data_menu(tile, df_name, df_const=df_const)
                     # op-2 is continue the dataset change but unlink my graph
                     # op-3 is continue the dataset change and modify my graph as necessary (keeping the link)
                     # trigger update for all tiles that are linked to the active data menu
@@ -1110,7 +1095,6 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                                 df_names[i] = df_name
 
                             else:
-                                links_style[i] = 'fa fa-unlink'
                                 # [i]= 'fa-fa-unlink'
                                 # set the dataset of the new menu from unlinking
                                 if type(state_of_display) == dict:
@@ -1123,14 +1107,6 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                                     df_names[i] = "OPG010"  # TODO: hardcode is a bit worrisome
                                     df_const[df_names[i]] = generate_constants(df_names[i])
                                     data[i] = get_data_menu(i, df_names[i],
-                                                            hierarchy_toggle=parent_hierarchy_toggle,
-                                                            level_value=parent_hierarchy_drop,
-                                                            nid_path=nid_path,
-                                                            graph_all_toggle=parent_graph_child_toggle,
-                                                            fiscal_toggle=parent_fiscal_toggle,
-                                                            input_method=parent_timeframe,
-                                                            num_periods=parent_num_state,
-                                                            period_type=parent_period_type,
                                                             prev_selection=prev_selection[i],
                                                             df_const=df_const)
                                     # sidemenu_styles[i] = DATA_CONTENT_SHOW
@@ -1146,14 +1122,6 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                                     df_names[i] = "OPG001"  # TODO: hardcode is a bit worrisome
                                     df_const[df_names[i]] = generate_constants(df_names[i])
                                     data[i] = get_data_menu(i, df_names[i],
-                                                            hierarchy_toggle=parent_hierarchy_toggle,
-                                                            level_value=parent_hierarchy_drop,
-                                                            nid_path=nid_path,
-                                                            graph_all_toggle=parent_graph_child_toggle,
-                                                            fiscal_toggle=parent_fiscal_toggle,
-                                                            input_method=parent_timeframe,
-                                                            num_periods=parent_num_state,
-                                                            period_type=parent_period_type,
                                                             prev_selection=prev_selection[i],
                                                             df_const=df_const)
                                     # sidemenu_styles[i] = DATA_CONTENT_SHOW
@@ -1183,7 +1151,6 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                             df_const = {}
                         df_const[df_name] = generate_constants(df_name)
                         store = df_const
-                        data[tile] = get_data_menu(tile, df_name, df_const=df_const)
                     # [i]= 'fa-fa-unlink'
                     # set the dataset of the new menu from unlinking
                     if type(state_of_display) == dict:
@@ -1194,14 +1161,6 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
 
                     df_const[df_names[tile]] = generate_constants(df_names[tile])
                     data[tile] = get_data_menu(tile, df_names[tile],
-                                               hierarchy_toggle=parent_hierarchy_toggle,
-                                               level_value=parent_hierarchy_drop,
-                                               nid_path=nid_path,
-                                               graph_all_toggle=parent_graph_child_toggle,
-                                               fiscal_toggle=parent_fiscal_toggle,
-                                               input_method=parent_timeframe,
-                                               num_periods=parent_num_state,
-                                               period_type=parent_period_type,
                                                prev_selection=prev_selection[tile],
                                                df_const=df_const)
                     # sidemenu_styles[i] = DATA_CONTENT_SHOW
@@ -1429,7 +1388,7 @@ for x in range(4):
 #     """
 #     function datasetLoadScreen(n_click_load, n_click_reset, float_menu_result, float_menu_data, selected_dashboard) {
 #         if (n_click_load != ',,,,' || n_click_reset != ',,,,' || (typeof float_menu_data != 'undefined'
-#              && float_menu_data[0] == 'dashboard_layouts' && selected_dashboard != null && float_menu_result == 'ok')){
+#             && float_menu_data[0] == 'dashboard_layouts' && selected_dashboard != null && float_menu_result == 'ok')){
 #             var newDiv = document.createElement('div');
 #             newDiv.className = '_data-loading';
 #             newDiv.id = 'loading';

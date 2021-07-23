@@ -92,7 +92,7 @@ def recursive_to_plotly_json(document):
 
 
 # get Data set picker for data menu
-def get_data_set_picker(tile, df_name, prev_selection=None, confirm_parent):
+def get_data_set_picker(tile, df_name, confirm_parent, prev_selection=None):
     """
     :param tile: Index of the created data side-menu.
     :param df_name: Dataframe name.
@@ -173,7 +173,7 @@ def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Fi
             className='boxclose',
             style={'position': 'relative', 'left': '3px'},
             id={'type': 'data-menu-close', 'index': tile}),
-        html.Div(get_data_set_picker(tile, df_name, prev_selection, confirm_parent)),
+        html.Div(get_data_set_picker(tile, df_name, confirm_parent, prev_selection)),
         html.Div([
             html.Div(
                 get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle, nid_path,

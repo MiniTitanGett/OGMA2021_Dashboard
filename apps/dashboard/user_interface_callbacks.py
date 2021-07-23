@@ -85,11 +85,12 @@ app.clientside_callback(
      State('num-tiles', 'data-num-tiles'),
      State('button-new', 'disabled'),
      State('df-constants-storage', 'data'),
-     State({'type': 'data-set', 'index': 4}, 'value')],
+     State({'type': 'data-set', 'index': 4}, 'value'),
+     State({'type': 'data-set-parent', 'index': 4}, 'value')],
     prevent_initial_call=True
 )
 def _new_and_delete(_new_clicks, close_id, _dashboard_reset, input_tiles, num_tiles, new_disabled, _df_const,
-                    parent_df):
+                    parent_df, confirm_parent):
     """
     :param _new_clicks: Detects user clicking 'NEW' button in parent navigation bar and encodes the number of tiles to
     display
@@ -123,8 +124,10 @@ def _new_and_delete(_new_clicks, close_id, _dashboard_reset, input_tiles, num_ti
     elif 'button-new' in changed_id:
         if num_tiles == 4:
             raise PreventUpdate
+        if confirm_parent:
+            parent_df=confirm_parent
         num_tiles += 1
-        children = get_tile_layout(num_tiles, input_tiles, parent_df=parent_df)
+        children = get_tile_layout(num_tiles, input_tiles, parent_df=parent_df if _df_const is not None else None)
     # if RESET dashboard requested, set dashboard to default appearance
     elif 'dashboard-reset' in changed_id:
         num_tiles = 1
@@ -480,7 +483,7 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
         raise PreventUpdate
 
     if '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-unlink' or \
-            (changed_value == 'fa fa-link' and df_name is None and df_name_parent is None):
+            (changed_value == 'fa fa-link' and df_name is None and df_name_parent is None) or (trigger is None and df_confirm is None):
         raise PreventUpdate
 
     graph_options = no_update
@@ -994,54 +997,6 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                             options_triggers[i] = df_name
                             df_names[i] = df_name
 
-                        else:
-                            links_style[i] = 'fa fa-unlink'
-                            # [i]= 'fa-fa-unlink'
-                            # set the dataset of the new menu from unlinking
-                            if type(state_of_display) == dict:
-                                state_of_display = [state_of_display]
-                            nid_path = "root"
-                            for button in state_of_display:
-                                nid_path += '^||^{}'.format(button['props']['children'])
-
-                            if df_name == "OPG001":
-                                df_names[i] = "OPG010"  # TODO: hardcode is a bit worrisome
-                                df_const[df_names[i]] = generate_constants(df_names[i])
-                                data[i] = get_data_menu(i, df_names[i],
-                                                        prev_selection=prev_selection[i],
-                                                        df_const=df_const)
-                                # sidemenu_styles[i] = DATA_CONTENT_SHOW
-                                refresh_button[i] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
-                                                     'position': 'relative',
-                                                     'margin-right': '10px', 'margin-left': '10px',
-                                                     'vertical-align': 'top'}
-                                if parent_timeframe == "select-range":
-                                    date_picker_triggers[i] = {"Input Method": parent_timeframe,
-                                                               "Start Year Selection": _parent_start_year,
-                                                               "End Year Selection": _parent_end_year,
-                                                               "Start Secondary Selection": _parent_start_secondary,
-                                                               "End Secondary Selection": _parent_end_secondary,
-                                                               "Tab": _parent_secondary_type}
-
-                            elif df_name == "OPG010":
-                                df_names[i] = "OPG001"  # TODO: hardcode is a bit worrisome
-                                df_const[df_names[i]] = generate_constants(df_names[i])
-                                data[i] = get_data_menu(i, df_names[i],
-                                                        prev_selection=prev_selection[i],
-                                                        df_const=df_const)
-                                # sidemenu_styles[i] = DATA_CONTENT_SHOW
-                                refresh_button[i] = {'padding': '10px 0', 'width': '15px', 'height': '15px',
-                                                     'position': 'relative',
-                                                     'margin-right': '10px', 'margin-left': '10px',
-                                                     'vertical-align': 'top'}
-                                if parent_timeframe == "select-range":
-                                    date_picker_triggers[i] = {"Input Method": parent_timeframe,
-                                                               "Start Year Selection": _parent_start_year,
-                                                               "End Year Selection": _parent_end_year,
-                                                               "Start Secondary Selection": _parent_start_secondary,
-                                                               "End Secondary Selection": _parent_end_secondary,
-                                                               "Tab": _parent_secondary_type}
-                            options_triggers[i] = 'fa fa-unlink'
             else:
                 graph_triggers[changed_index] = df_name
                 options_triggers[changed_index] = df_name
@@ -1107,8 +1062,18 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                                     df_names[i] = "OPG010"  # TODO: hardcode is a bit worrisome
                                     df_const[df_names[i]] = generate_constants(df_names[i])
                                     data[i] = get_data_menu(i, df_names[i],
-                                                            prev_selection=prev_selection[i],
-                                                            df_const=df_const)
+                                                        hierarchy_toggle=parent_hierarchy_toggle,
+                                                        level_value=parent_hierarchy_drop,
+                                                        nid_path=nid_path,
+                                                        graph_all_toggle=parent_graph_child_toggle,
+                                                        fiscal_toggle=parent_fiscal_toggle,
+                                                        input_method=parent_timeframe,
+                                                        num_periods=parent_num_state,
+                                                        period_type=parent_period_type,
+                                                        prev_selection=prev_selection[i],
+                                                        df_const=df_const) if prompt_result == 'op-2' else get_data_menu(i, df_names[i],
+                                                        prev_selection=prev_selection[i],
+                                                        df_const=df_const)
                                     # sidemenu_styles[i] = DATA_CONTENT_SHOW
                                     refresh_button[i] = {'padding': '10px 0', 'width': '15px',
                                                          'height': '15px',
@@ -1122,8 +1087,18 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                                     df_names[i] = "OPG001"  # TODO: hardcode is a bit worrisome
                                     df_const[df_names[i]] = generate_constants(df_names[i])
                                     data[i] = get_data_menu(i, df_names[i],
-                                                            prev_selection=prev_selection[i],
-                                                            df_const=df_const)
+                                                        hierarchy_toggle=parent_hierarchy_toggle,
+                                                        level_value=parent_hierarchy_drop,
+                                                        nid_path=nid_path,
+                                                        graph_all_toggle=parent_graph_child_toggle,
+                                                        fiscal_toggle=parent_fiscal_toggle,
+                                                        input_method=parent_timeframe,
+                                                        num_periods=parent_num_state,
+                                                        period_type=parent_period_type,
+                                                        prev_selection=prev_selection[i],
+                                                        df_const=df_const) if prompt_result == 'op-2' else get_data_menu(i, df_names[i],
+                                                        prev_selection=prev_selection[i],
+                                                        df_const=df_const)
                                     # sidemenu_styles[i] = DATA_CONTENT_SHOW
                                     refresh_button[i] = {'padding': '10px 0', 'width': '15px',
                                                          'height': '15px',

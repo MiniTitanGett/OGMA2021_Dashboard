@@ -84,12 +84,10 @@ app.clientside_callback(
     [State({'type': 'tile', 'index': ALL}, 'children'),
      State('num-tiles', 'data-num-tiles'),
      State('button-new', 'disabled'),
-     State('df-constants-storage', 'data'),
      State({'type': 'data-set', 'index': 4}, 'value')],
     prevent_initial_call=True
 )
-def _new_and_delete(_new_clicks, close_id, _dashboard_reset, input_tiles, num_tiles, new_disabled, _df_const,
-                    parent_df):
+def _new_and_delete(_new_clicks, close_id, _dashboard_reset, input_tiles, num_tiles, new_disabled, parent_df):
     """
     :param _new_clicks: Detects user clicking 'NEW' button in parent navigation bar and encodes the number of tiles to
     display
@@ -469,10 +467,9 @@ app.clientside_callback(
     [State({'type': 'data-set', 'index': MATCH}, 'value'),
      State({'type': 'data-set', 'index': 4}, 'value'),
      State({'type': 'graph-type-dropdown', 'index': MATCH}, 'value'),
-     State({'type': 'graph-type-dropdown', 'index': MATCH}, 'options'),
      State({'type': 'data-set-parent', 'index': 4}, 'value')]
 )
-def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, graph_type, _type_options, df_confirm):
+def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, graph_type, df_confirm):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     changed_value = [p['value'] for p in dash.callback_context.triggered][0]
 
@@ -562,7 +559,6 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
      Input({'type': 'graph_children_toggle', 'index': MATCH}, 'value'),
      Input({'type': 'hierarchy-toggle', 'index': MATCH}, 'value')],
     [State({'type': 'div-graph-options', 'index': MATCH}, 'children'),
-     State({'type': 'graph-type-dropdown', 'index': ALL}, 'value'),
      State({'type': 'tile-customize-content', 'index': MATCH}, 'data-loaded'),
      State({'type': 'data-set', 'index': MATCH}, 'value'),
      State({'type': 'data-set', 'index': 4}, 'value'),
@@ -570,9 +566,8 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
      State({'type': 'data-set-parent', 'index': 4}, 'value')],
     prevent_initial_call=True
 )
-def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, hierarchy_toggle,
-                       graph_options_state, _graph_option, is_loaded, df_name,
-                       parent_df_name, df_const, df_confirm):
+def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, hierarchy_toggle, graph_options_state,
+                       is_loaded, df_name, parent_df_name, df_const, df_confirm):
     """
     :param selected_graph_type: Selected graph type, ie. 'bar', 'line', etc.
     :param graph_options_state: State of the current graph options div
@@ -589,7 +584,7 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
         raise PreventUpdate
     # if ('"type":"graph_children_toggle"}.value' in changed_id or '"type":"hierarchy-toggle"}.value' in changed_id) \
     #         and (selected_graph_type == "Bubble" or selected_graph_type == "Bar" or selected_graph_type == "Table"
-    #              or selected_graph_type == 'Box_Plot' or selected_graph_type == 'Sandkey'):
+    #              or selected_graph_type == 'Box_Plot' or selected_graph_type == 'Sankey'):
     #     raise PreventUpdate
     # TODO Fix data_fitting
     # sets boolean to allow data fitting as a customization option
@@ -819,16 +814,16 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
      # Date picker states for parent data menu
      State({'type': 'start-year-input', 'index': 4}, 'name'),
      State({'type': 'radio-timeframe', 'index': 4}, 'value'),
-     State({'type': 'fiscal-year-toggle', 'index': 4}, 'value'),
+     State({'type': 'fiscal-year-toggle', 'index': 4}, 'value'),  # TODO: unused state
      State({'type': 'start-year-input', 'index': 4}, 'value'),
      State({'type': 'end-year-input', 'index': 4}, 'value'),
      State({'type': 'start-secondary-input', 'index': 4}, 'value'),
      State({'type': 'end-secondary-input', 'index': 4}, 'value'),
-     State({'type': 'hierarchy-toggle', 'index': 4}, 'value'),
-     State({'type': 'hierarchy_level_dropdown', 'index': 4}, 'value'),
-     State({'type': 'num-periods', 'index': 4}, 'value'),
-     State({'type': 'period-type', 'index': 4}, 'value'),
-     State({'type': 'graph_children_toggle', 'index': 4}, 'value'),  # graph all toggle
+     State({'type': 'hierarchy-toggle', 'index': 4}, 'value'),  # TODO: unused state
+     State({'type': 'hierarchy_level_dropdown', 'index': 4}, 'value'),  # TODO: unused state
+     State({'type': 'num-periods', 'index': 4}, 'value'),  # TODO: unused state
+     State({'type': 'period-type', 'index': 4}, 'value'),  # TODO: unused state
+     State({'type': 'graph_children_toggle', 'index': 4}, 'value'),  # graph all toggle  # TODO: unused state
      State({'type': 'hierarchy_display_button', 'index': 4}, 'children')],
     prevent_initial_call=True
 )
@@ -839,9 +834,9 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                            _refresh_clicks_4, prompt_result, prompt_data, data_states, sidemenu_style_states, df_const,
                            prev_selection_0, prev_selection_1, prev_selection_2, prev_selection_3, prev_selection_4,
                            graph_types,
-                           _parent_secondary_type, parent_timeframe, parent_fiscal_toggle, _parent_start_year,
-                           _parent_end_year, _parent_start_secondary, _parent_end_secondary, parent_hierarchy_toggle,
-                           parent_hierarchy_drop, parent_num_state, parent_period_type, parent_graph_child_toggle,
+                           parent_secondary_type, parent_timeframe, _parent_fiscal_toggle, parent_start_year,
+                           parent_end_year, parent_start_secondary, parent_end_secondary, _parent_hierarchy_toggle,
+                           _parent_hierarchy_drop, _parent_num_state, _parent_period_type, _parent_graph_child_toggle,
                            state_of_display):
     """
     :param closed_tile: Detects when a tile has been deleted and encodes the index of the deleted tile
@@ -1017,11 +1012,11 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                                                      'vertical-align': 'top'}
                                 if parent_timeframe == "select-range":
                                     date_picker_triggers[i] = {"Input Method": parent_timeframe,
-                                                               "Start Year Selection": _parent_start_year,
-                                                               "End Year Selection": _parent_end_year,
-                                                               "Start Secondary Selection": _parent_start_secondary,
-                                                               "End Secondary Selection": _parent_end_secondary,
-                                                               "Tab": _parent_secondary_type}
+                                                               "Start Year Selection": parent_start_year,
+                                                               "End Year Selection": parent_end_year,
+                                                               "Start Secondary Selection": parent_start_secondary,
+                                                               "End Secondary Selection": parent_end_secondary,
+                                                               "Tab": parent_secondary_type}
 
                             elif df_name == "OPG010":
                                 df_names[i] = "OPG001"  # TODO: hardcode is a bit worrisome
@@ -1036,11 +1031,11 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                                                      'vertical-align': 'top'}
                                 if parent_timeframe == "select-range":
                                     date_picker_triggers[i] = {"Input Method": parent_timeframe,
-                                                               "Start Year Selection": _parent_start_year,
-                                                               "End Year Selection": _parent_end_year,
-                                                               "Start Secondary Selection": _parent_start_secondary,
-                                                               "End Secondary Selection": _parent_end_secondary,
-                                                               "Tab": _parent_secondary_type}
+                                                               "Start Year Selection": parent_start_year,
+                                                               "End Year Selection": parent_end_year,
+                                                               "Start Secondary Selection": parent_start_secondary,
+                                                               "End Secondary Selection": parent_end_secondary,
+                                                               "Tab": parent_secondary_type}
                             options_triggers[i] = 'fa fa-unlink'
             else:
                 graph_triggers[changed_index] = df_name

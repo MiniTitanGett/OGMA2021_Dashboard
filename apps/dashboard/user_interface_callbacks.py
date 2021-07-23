@@ -1364,7 +1364,7 @@ for x in range(4):
             function_name='graphLoadScreen{}'.format(x)
         ),
         Output({'type': 'tile-menu-header', 'index': x}, 'n_clicks'),
-        [Input({'type': 'tile-save-trigger', 'index': x}, 'value')],
+        [Input({'type': 'tile-save-trigger', 'index': x}, 'data')],
         prevent_initial_call=True
     )
 

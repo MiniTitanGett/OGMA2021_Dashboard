@@ -965,7 +965,7 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
             '"type":"confirm-load-data"}.n_clicks' in changed_id:
         changed_index = int(search(r'\d+', changed_id).group())
         if '"type":"confirm-load-data"}.n_clicks' in changed_id \
-                and (prev_selection[changed_index] in session):
+                and (prev_selection[changed_index] is not None):
             if changed_index == 4:  # prompt with trip prompt
                 prompt_trigger = [['load_dataset', changed_index], {}, get_label('LBL_Load_Dataset'),
                                   get_label('LBL_Load_Dataset_Prompt'), True]
@@ -1337,77 +1337,93 @@ for x in range(4):
 # *************************************************LOADSCREEN*********************************************************
 # TODO: FIX ALL OF THE LOAD SCREENS
 # All clientside callback functions referred to are stored in /assets/ClientsideCallbacks.js
-# for x in range(4):
-#     app.clientside_callback(
-#         ClientsideFunction(
-#             namespace='clientside',
-#             function_name='graphLoadScreen{}'.format(x)
-#         ),
-#         Output({'type': 'tile-menu-header', 'index': x}, 'n_clicks'),
-#         [Input({'type': 'tile-save-trigger', 'index': x}, 'value')],
-#         prevent_initial_call=True
-#     )
-#
-#     app.clientside_callback(
-#         ClientsideFunction(
-#             namespace='clientside',
-#             function_name='graphRemoveLoadScreen{}'.format(x)
-#         ),
-#         Output({'type': 'graph_display', 'index': x}, 'n_clicks'),
-#         [Input({'type': 'graph_display', 'index': x}, 'children')],
-#         State('num-tiles', 'data-num-tiles'),
-#         prevent_initial_call=True
-#     )
+for x in range(4):
+    app.clientside_callback(
+        ClientsideFunction(
+            namespace='clientside',
+            function_name='graphLoadScreen{}'.format(x)
+        ),
+        Output({'type': 'tile-menu-header', 'index': x}, 'n_clicks'),
+        [Input({'type': 'tile-save-trigger', 'index': x}, 'data')],
+        prevent_initial_call=True
+    )
 
-# app.clientside_callback(
-#     """
-#     function datasetLoadScreen(n_click_load, n_click_reset, float_menu_result, float_menu_data, selected_dashboard) {
-#         if (n_click_load != ',,,,' || n_click_reset != ',,,,' || (typeof float_menu_data != 'undefined'
-#             && float_menu_data[0] == 'dashboard_layouts' && selected_dashboard != null && float_menu_result == 'ok')){
-#             var newDiv = document.createElement('div');
-#             newDiv.className = '_data-loading';
-#             newDiv.id = 'loading';
-#             document.body.appendChild(newDiv, document.getElementById('content'));
-#         }
-#         return 0;
-#     }
-#     """,
-#     Output('dataset-confirmation-symbols', 'n_clicks'),
-#     [Input({'type': 'confirm-load-data', 'index': ALL}, 'n_clicks'),
-#      Input({'type': 'confirm-data-set-refresh', 'index': ALL}, 'n_clicks'),
-#      Input('float-menu-result', 'children')],
-#     [State('float-menu-title', 'data-'),
-#      State('select-dashboard-dropdown', 'value')],
-#     prevent_initial_call=True
-# )
-#
-# app.clientside_callback(
-#     """
-#     function datasetRemoveLoadScreen(data, graph_displays, num_tiles) {
-#         var triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
-#         if (triggered.includes("df-constants-storage.data")){
-#             try{
-#                 document.getElementById('loading').remove();
-#             }catch{ /* Do Nothing */ }
-#         }
-#         else {
-#             triggered = triggered[triggered.length - 1];
-#             var tile = parseInt(triggered.match(/\d+/)[0]) + 1;
-#             if (tile == num_tiles){
-#                 try{
-#                     document.getElementById('loading').remove();
-#                 }catch{ /* Do Nothing */ }
-#             }
-#         }
-#         return 0;
-#     }
-#     """,
-#     Output('df-constants-storage', 'n_clicks'),
-#     [Input('df-constants-storage', 'data'),
-#      Input({'type': 'graph_display', 'index': ALL}, 'children')],
-#     State('num-tiles', 'data-num-tiles'),
-#     prevent_initial_call=True
-# )
+    app.clientside_callback(
+        ClientsideFunction(
+            namespace='clientside',
+            function_name='graphRemoveLoadScreen{}'.format(x)
+        ),
+        Output({'type': 'graph_display', 'index': x}, 'n_clicks'),
+        [Input({'type': 'graph_display', 'index': x}, 'children')],
+        State('num-tiles', 'data-num-tiles'),
+        prevent_initial_call=True
+    )
+
+app.clientside_callback(
+    """
+    function datasetLoadScreen(n_click_load, n_click_reset, float_menu_result, prompt_result, float_menu_data, 
+                               selected_dashboard, prompt_data, prev_selected) {
+        const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
+        var changed_index = null;
+        if (triggered.match(/\d+/)){
+            changed_index = parseInt(triggered.match(/\d+/)[0]);
+        }
+        if (triggered != "" && 
+             (changed_index != null && n_click_load != ',,,,' && prev_selected[changed_index] == null ||
+             n_click_reset != ',,,,' || 
+             (typeof float_menu_data != 'undefined' && float_menu_data[0] == 'dashboard_layouts' && 
+              selected_dashboard != null && float_menu_result == 'ok') || 
+             (typeof prompt_data != 'undefined' && prompt_data[0] == 'load_dataset' && prompt_result != 'op-1' && 
+              prompt_result != 'close'))){
+              
+            var newDiv = document.createElement('div');
+            newDiv.className = '_data-loading';
+            newDiv.id = 'loading';
+            document.body.appendChild(newDiv, document.getElementById('content'));
+            
+        }
+        return 0;
+    }
+    """,
+    Output('dataset-confirmation-symbols', 'n_clicks'),
+    [Input({'type': 'confirm-load-data', 'index': ALL}, 'n_clicks'),
+     Input({'type': 'confirm-data-set-refresh', 'index': ALL}, 'n_clicks'),
+     Input('float-menu-result', 'children'),
+     Input('prompt-result', 'children')],
+    [State('float-menu-title', 'data-'),
+     State('select-dashboard-dropdown', 'value'),
+     State('prompt-title', 'data-'),
+     State({'type': 'data-set-prev-selected', 'index': ALL}, 'data')],
+    prevent_initial_call=True
+)
+
+app.clientside_callback(
+    """
+    function datasetRemoveLoadScreen(data, graph_displays, num_tiles) {
+        var triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
+        if (triggered.includes("df-constants-storage.data")){
+            try{
+                document.getElementById('loading').remove();
+            }catch{ /* Do Nothing */ }
+        }
+        else {
+            triggered = triggered[triggered.length - 1];
+            var tile = parseInt(triggered.match(/\d+/)[0]) + 1;
+            if (tile == num_tiles){
+                try{
+                    document.getElementById('loading').remove();
+                }catch{ /* Do Nothing */ }
+            }
+        }
+        return 0;
+    }
+    """,
+    Output('df-constants-storage', 'n_clicks'),
+    [Input('df-constants-storage', 'data'),
+     Input({'type': 'graph_display', 'index': ALL}, 'children')],
+    State('num-tiles', 'data-num-tiles'),
+    prevent_initial_call=True
+)
 
 # *************************************************PROMPT*********************************************************
 

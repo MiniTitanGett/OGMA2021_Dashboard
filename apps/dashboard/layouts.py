@@ -97,6 +97,7 @@ def get_data_set_picker(tile, df_name, confirm_parent, prev_selection=None):
     :param tile: Index of the created data side-menu.
     :param df_name: Dataframe name.
     :param prev_selection: takes in last selected dataframe
+    :param confirm_parent: the loaded dataset
     :return: Drop down of the possible data sets.
     """
     return [
@@ -312,8 +313,10 @@ def get_layout_graph(report_name):
                            j.get('Start Year'),  # j['Start Year'],
                            j.get('End Year'),  # j['End Year'],
                            j.get('Start Secondary'),  # j['Start Secondary'],
-                           j.get('End Secondary'),
-                           j.get('df_const'))  # j['End Secondary'])
+                           j.get('End Secondary'),  # j['End Secondary']
+                           j.get('df_const'),
+                           None,  # xtitle
+                           None)  # ytitle
 
     if graph is None:
         raise PreventUpdate
@@ -987,6 +990,8 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
     :param df_const: Dataframe constants
     :param data_fit: data_fit value
     :param degree: degree value
+    :param xaxis: the title of the xaxis
+    :param yaxis: the title of the yaxis
     :return: Menu with options to modify a line graph.
     """
     # arg_value[0] = xaxis selector
@@ -1185,6 +1190,8 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
     :param tile: Index of the tile the bar graph menu corresponds to.
     :param df_name: Name of the data set being used.
     :param df_const: Dataframe constants
+    :param xaxis: the title of the xaxis
+    :param yaxis: the title of the yaxis
     :return: Menu with options to modify a bar graph.
     """
     # (args-value: {})[0] = x-axis

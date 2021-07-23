@@ -102,7 +102,7 @@ def get_hierarchy_col(hierarchy_type, hierarchy_level_dropdown, hierarchy_graph_
 # line graph layout
 def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
                             hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const,
-                            xaxis_title, yaxis_title):
+                            _xaxis_title, _yaxis_title):
     # arg_value[0] = xaxis selector
     # arg_value[1] = measure type selector
     # arg_value[2] = variable names selector
@@ -197,8 +197,8 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                 fig.update_traces(mode='lines+markers')
 
             hovertemplate = get_label('LBL_Gen_Hover_Data', df_name)
-            hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event',df_name)).replace('%AXIS-A%',
-                                                                                                            '%{x}')
+            hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event', df_name)).replace(
+                '%AXIS-A%', '%{x}')
             hovertemplate = hovertemplate.replace('%AXIS-TITLE-B%', arg_value[1]).replace('%AXIS-B%', '%{y}')
             fig.update_traces(hovertemplate=hovertemplate)
             fig = set_partial_periods(fig, filtered_df, 'Line')
@@ -322,7 +322,7 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
 # animated bubble layout
 def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
                       hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const,
-                      xaxis_title, yaxis_title):
+                      _xaxis_title, _yaxis_title):
     # (args-value: {})[0] = x-axis
     # (args-value: {})[1] = x-axis measure
     # (args-value: {})[2] = y-axis
@@ -477,7 +477,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
 
 # bar graph layout TODO: VERTICAL TICKS OVERLAPPING WITH THE ANIMATION SLIDER
 def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
-                   hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const, xaxis_title, yaxis_title):
+                   hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const, _xaxis_title, _yaxis_title):
     # arg_value[0] = group by (x axis)
     # arg_value[1] = measure type selector
     # arg_value[2] = variable names selector
@@ -678,7 +678,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
 
 
 def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
-                   hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const, xaxis_title, yaxis_title):
+                   hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const, _xaxis_title, _yaxis_title):
     # arg_value[0] = measure type selector
     # arg_value[1] = variable selector
     # arg_value[2] = orientation toggle

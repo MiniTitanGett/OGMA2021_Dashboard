@@ -328,7 +328,7 @@ def get_secondary_data(conditions, fiscal_toggle, df_name, df_const):
         else:
             fringe_max += 1
     return quarter_class_name, quarter_disabled, month_class_name, month_disabled, week_class_name, week_disabled, \
-           fringe_min, fringe_max, default_max, max_year, new_tab
+        fringe_min, fringe_max, default_max, max_year, new_tab
 
 
 # create left and right columns for tabs with secondary time options (beneath years)

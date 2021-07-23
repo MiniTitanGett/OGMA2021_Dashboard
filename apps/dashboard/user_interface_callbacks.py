@@ -574,6 +574,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
     :return: Graph menu corresponding to selected graph type
     """
 
+    print("In _update_graph_menu")
+
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][-1]
 
     # prevents update if hierarchy toggle or graph all children is selected when the graph type is not line or
@@ -586,11 +588,16 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
     #         and (selected_graph_type == "Bubble" or selected_graph_type == "Bar" or selected_graph_type == "Table"
     #              or selected_graph_type == 'Box_Plot' or selected_graph_type == 'Sankey'):
     #     raise PreventUpdate
+
     # TODO Fix data_fitting
     # sets boolean to allow data fitting as a customization option
+    print(hierarchy_toggle)
+    print(graph_all)
     if hierarchy_toggle == 'Specific Item' and graph_all == []:
+        print("Data fitting True")
         data_fitting = True
     else:
+        print("Data fitting False")
         data_fitting = False
 
     # if link state has changed from linked --> unlinked the data has not changed, prevent update
@@ -729,7 +736,33 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
     return menu, update_graph_trigger, no_update, no_update
 
 
+@app.callback(
+    Output({'type': 'data-fitting-wrapper', 'index': ALL}, 'style'),
+    [Input({'type': 'graph_children_toggle', 'index': 4}, 'value'),
+     Input({'type': 'hierarchy-toggle', 'index': 4}, 'value')],
+    [State({'type': 'graph-type-dropdown', 'index': ALL}, 'value'),
+     State({'type': 'tile-link', 'index': ALL}, 'className')],
+    prevent_initial_call=True
+)
+def _update_data_fitting(graph_all, hierarchy_toggle, selected_graph_type, link_state):
+
+    print("_update_data_fitting")
+
+    style = [no_update] * 5
+
+    if hierarchy_toggle == 'Specific Item' and graph_all == []:
+        for i in range(5):
+            if link_state[i] == "fa fa-link" and (selected_graph_type[i] == "Line" or selected_graph_type == "Scatter"):
+                style[i] = {'display': 'inline-block', 'width': '80%', 'max-width': '125px'}
+
+    else:
+        raise PreventUpdate
+
+    return style
+
+
 # ************************************************DATA SIDE-MENU******************************************************
+
 
 # manage data sidemenu appearance and content
 @app.callback(

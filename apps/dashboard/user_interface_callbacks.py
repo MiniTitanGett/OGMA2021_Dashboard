@@ -125,7 +125,7 @@ def _new_and_delete(_new_clicks, close_id, _dashboard_reset, input_tiles, num_ti
         if num_tiles == 4:
             raise PreventUpdate
         if confirm_parent:
-            parent_df=confirm_parent
+            parent_df = confirm_parent
         num_tiles += 1
         children = get_tile_layout(num_tiles, input_tiles, parent_df=parent_df if _df_const is not None else None)
     # if RESET dashboard requested, set dashboard to default appearance
@@ -482,7 +482,8 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
         raise PreventUpdate
 
     if '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-unlink' or \
-            (changed_value == 'fa fa-link' and df_name is None and df_name_parent is None) or (trigger is None and df_confirm is None):
+            (changed_value == 'fa fa-link' and df_name is None and df_name_parent is None) or (
+            trigger is None and df_confirm is None):
         raise PreventUpdate
 
     graph_options = no_update
@@ -817,18 +818,18 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
      State({'type': 'data-set-prev-selected', 'index': 4}, 'data'),
      State({'type': 'graph-type-dropdown', 'index': ALL}, 'value'),
      # Date picker states for parent data menu
-     State({'type': 'start-year-input', 'index': 4}, 'name'),
+     State({'type': 'start-year-input', 'index': 4}, 'name'),  # TODO: unused state
      State({'type': 'radio-timeframe', 'index': 4}, 'value'),
-     State({'type': 'fiscal-year-toggle', 'index': 4}, 'value'),  # TODO: unused state
-     State({'type': 'start-year-input', 'index': 4}, 'value'),
-     State({'type': 'end-year-input', 'index': 4}, 'value'),
-     State({'type': 'start-secondary-input', 'index': 4}, 'value'),
-     State({'type': 'end-secondary-input', 'index': 4}, 'value'),
-     State({'type': 'hierarchy-toggle', 'index': 4}, 'value'),  # TODO: unused state
-     State({'type': 'hierarchy_level_dropdown', 'index': 4}, 'value'),  # TODO: unused state
-     State({'type': 'num-periods', 'index': 4}, 'value'),  # TODO: unused state
-     State({'type': 'period-type', 'index': 4}, 'value'),  # TODO: unused state
-     State({'type': 'graph_children_toggle', 'index': 4}, 'value'),  # graph all toggle  # TODO: unused state
+     State({'type': 'fiscal-year-toggle', 'index': 4}, 'value'),
+     State({'type': 'start-year-input', 'index': 4}, 'value'),  # TODO: unused state
+     State({'type': 'end-year-input', 'index': 4}, 'value'),  # TODO: unused state
+     State({'type': 'start-secondary-input', 'index': 4}, 'value'),  # TODO: unused state
+     State({'type': 'end-secondary-input', 'index': 4}, 'value'),  # TODO: unused state
+     State({'type': 'hierarchy-toggle', 'index': 4}, 'value'),
+     State({'type': 'hierarchy_level_dropdown', 'index': 4}, 'value'),
+     State({'type': 'num-periods', 'index': 4}, 'value'),
+     State({'type': 'period-type', 'index': 4}, 'value'),
+     State({'type': 'graph_children_toggle', 'index': 4}, 'value'),  # graph all toggle
      State({'type': 'hierarchy_display_button', 'index': 4}, 'children')],
     prevent_initial_call=True
 )
@@ -839,9 +840,9 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                            _refresh_clicks_4, prompt_result, prompt_data, data_states, sidemenu_style_states, df_const,
                            prev_selection_0, prev_selection_1, prev_selection_2, prev_selection_3, prev_selection_4,
                            graph_types,
-                           parent_secondary_type, parent_timeframe, _parent_fiscal_toggle, parent_start_year,
-                           parent_end_year, parent_start_secondary, parent_end_secondary, _parent_hierarchy_toggle,
-                           _parent_hierarchy_drop, _parent_num_state, _parent_period_type, _parent_graph_child_toggle,
+                           _parent_secondary_type, parent_timeframe, parent_fiscal_toggle, _parent_start_year,
+                           _parent_end_year, _parent_start_secondary, _parent_end_secondary, parent_hierarchy_toggle,
+                           parent_hierarchy_drop, parent_num_state, parent_period_type, parent_graph_child_toggle,
                            state_of_display):
     """
     :param closed_tile: Detects when a tile has been deleted and encodes the index of the deleted tile
@@ -1059,18 +1060,19 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                                     df_names[i] = "OPG010"  # TODO: hardcode is a bit worrisome
                                     df_const[df_names[i]] = generate_constants(df_names[i])
                                     data[i] = get_data_menu(i, df_names[i],
-                                                        hierarchy_toggle=_parent_hierarchy_toggle,
-                                                        level_value=_parent_hierarchy_drop,
-                                                        nid_path=nid_path,
-                                                        graph_all_toggle=_parent_graph_child_toggle,
-                                                        fiscal_toggle=_parent_fiscal_toggle,
-                                                        input_method=parent_timeframe,
-                                                        num_periods=_parent_num_state,
-                                                        period_type=_parent_period_type,
-                                                        prev_selection=prev_selection[i],
-                                                        df_const=df_const) if prompt_result == 'op-2' else get_data_menu(i, df_names[i],
-                                                        prev_selection=prev_selection[i],
-                                                        df_const=df_const)
+                                                            hierarchy_toggle=parent_hierarchy_toggle,
+                                                            level_value=parent_hierarchy_drop,
+                                                            nid_path=nid_path,
+                                                            graph_all_toggle=parent_graph_child_toggle,
+                                                            fiscal_toggle=parent_fiscal_toggle,
+                                                            input_method=parent_timeframe,
+                                                            num_periods=parent_num_state,
+                                                            period_type=parent_period_type,
+                                                            prev_selection=prev_selection[i],
+                                                            df_const=df_const) if prompt_result == 'op-2' \
+                                        else get_data_menu(i, df_names[i],
+                                                           prev_selection=prev_selection[i],
+                                                           df_const=df_const)
                                     # sidemenu_styles[i] = DATA_CONTENT_SHOW
                                     refresh_button[i] = {'padding': '10px 0', 'width': '15px',
                                                          'height': '15px',
@@ -1084,18 +1086,19 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                                     df_names[i] = "OPG001"  # TODO: hardcode is a bit worrisome
                                     df_const[df_names[i]] = generate_constants(df_names[i])
                                     data[i] = get_data_menu(i, df_names[i],
-                                                        hierarchy_toggle=_parent_hierarchy_toggle,
-                                                        level_value=_parent_hierarchy_drop,
-                                                        nid_path=nid_path,
-                                                        graph_all_toggle=_parent_graph_child_toggle,
-                                                        fiscal_toggle=_parent_fiscal_toggle,
-                                                        input_method=parent_timeframe,
-                                                        num_periods=_parent_num_state,
-                                                        period_type=_parent_period_type,
-                                                        prev_selection=prev_selection[i],
-                                                        df_const=df_const) if prompt_result == 'op-2' else get_data_menu(i, df_names[i],
-                                                        prev_selection=prev_selection[i],
-                                                        df_const=df_const)
+                                                            hierarchy_toggle=parent_hierarchy_toggle,
+                                                            level_value=parent_hierarchy_drop,
+                                                            nid_path=nid_path,
+                                                            graph_all_toggle=parent_graph_child_toggle,
+                                                            fiscal_toggle=parent_fiscal_toggle,
+                                                            input_method=parent_timeframe,
+                                                            num_periods=parent_num_state,
+                                                            period_type=parent_period_type,
+                                                            prev_selection=prev_selection[i],
+                                                            df_const=df_const) if prompt_result == 'op-2' \
+                                        else get_data_menu(i, df_names[i],
+                                                           prev_selection=prev_selection[i],
+                                                           df_const=df_const)
                                     # sidemenu_styles[i] = DATA_CONTENT_SHOW
                                     refresh_button[i] = {'padding': '10px 0', 'width': '15px',
                                                          'height': '15px',

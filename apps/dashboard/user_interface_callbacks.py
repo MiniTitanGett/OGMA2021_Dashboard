@@ -76,8 +76,7 @@ app.clientside_callback(
     [Output('div-body', 'children'),
      Output('button-new-wrapper', 'children'),
      Output('tile-closed-trigger', 'data-'),
-     Output('num-tiles-2', 'data-num-tiles'),
-     Output('dashboard-reset-trigger', 'data-')],
+     Output('num-tiles-2', 'data-num-tiles')],
     [Input('button-new', 'n_clicks'),
      Input('tile-closed-input-trigger', 'data'),
      Input('dashboard-reset-confirmation', 'data-')],
@@ -106,7 +105,6 @@ def _new_and_delete(_new_clicks, close_id, _dashboard_reset, input_tiles, num_ti
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     changed_value = [p['value'] for p in dash.callback_context.triggered][0]
     deleted_tile = no_update
-    dashboard_reset_trigger = no_update
 
     # if DELETE button pressed: pop deleted input_tile index and shift following indices left and adjust main layout
     if 'tile-close' in changed_id and num_tiles != 1 and changed_value is not None:
@@ -132,14 +130,13 @@ def _new_and_delete(_new_clicks, close_id, _dashboard_reset, input_tiles, num_ti
     elif 'dashboard-reset' in changed_id:
         num_tiles = 1
         children = get_tile_layout(num_tiles, [], parent_df=parent_df)
-        dashboard_reset_trigger = 'trigger'
     # else, a tab change was made, prevent update
     else:
         raise PreventUpdate
     # disable the NEW button
     new_button = html.Button(
         className='parent-nav', n_clicks=0, children=get_label('LBL_Add_Tile'), id='button-new', disabled=True)
-    return children, new_button, deleted_tile, num_tiles, dashboard_reset_trigger
+    return children, new_button, deleted_tile, num_tiles
 
 
 # unlock NEW button after end of callback chain
@@ -785,8 +782,7 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
      Output({'type': 'update-date-picker-trigger', 'index': 2}, 'data-boolean'),
      Output({'type': 'update-date-picker-trigger', 'index': 3}, 'data-boolean'),
      Output({'type': 'update-date-picker-trigger', 'index': 4}, 'data-boolean')],
-    [Input('dashboard-reset-trigger', 'data-'),
-     Input('tile-closed-trigger', 'data-'),
+    [Input('tile-closed-trigger', 'data-'),
      Input('select-dashboard-dropdown', 'value'),
      Input({'type': 'tile-link', 'index': ALL}, 'className'),
      Input({'type': 'tile-data', 'index': ALL}, 'n_clicks'),
@@ -833,7 +829,7 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
      State({'type': 'hierarchy_display_button', 'index': 4}, 'children')],
     prevent_initial_call=True
 )
-def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, links_style, data_clicks,
+def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_clicks,
                            _data_close_clicks, df_name_0, df_name_1, df_name_2, df_name_3, df_name_4, _confirm_clicks_0,
                            _confirm_clicks_1, _confirm_clicks_2, _confirm_clicks_3, _confirm_clicks_4,
                            _refresh_clicks_0, _refresh_clicks_1, _refresh_clicks_2, _refresh_clicks_3,
@@ -925,12 +921,30 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
         df_name = df_names[changed_index]
         sidemenu_styles[changed_index] = DATA_CONTENT_SHOW
         if df_name in session:
-            # if returning to last loaded un-hide data
+            # if returning to last loaded un-hide data (generally after look, cancel, then return to start)
             if df_name == prev_selection[changed_index] and prev_selection[changed_index] is not None:
                 confirm_button[changed_index] = DATA_CONTENT_HIDE
                 refresh_button[changed_index] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
                                                  'position': 'relative', 'vertical-align': 'top'}
-                # data[changed_index] = get_data_menu(changed_index, df_name, df_const=df_const)
+            # if tile has been reset and the dataset is loaded
+            elif prev_selection[changed_index] is None:
+                data[changed_index] = get_data_menu(changed_index, df_name, df_const=df_const)
+                graph_triggers[changed_index] = df_name
+                options_triggers[changed_index] = df_name
+                df_names[changed_index] = df_name
+                prev_selection[changed_index] = df_name
+                # set up required triggers
+                if changed_index == 4:
+                    for i in range(len(links_style)):
+                        if links_style[i] == 'fa fa-link':
+                            prev_selection[i] = df_name
+                            if graph_types[i] is None or graph_types[i] in GRAPH_OPTIONS[df_name]:
+                                graph_triggers[i] = df_name
+                                options_triggers[i] = df_name
+                                df_names[i] = df_name
+                else:
+                    graph_triggers[changed_index] = df_name
+                    options_triggers[changed_index] = df_name
             # send out a prompt
             elif changed_index == 4:  # prompt with trip prompt
                 prompt_trigger = [['loaded_dataset_swap', changed_index], {}, get_label('LBL_Load_Dataset'),
@@ -986,7 +1000,6 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
             sidemenu_styles[changed_index] = DATA_CONTENT_SHOW
             # trigger update for all tiles that are linked to the active data menu
             if changed_index == 4:
-                prev_selection[changed_index] = df_name
                 for i in range(len(links_style)):
                     if links_style[i] == 'fa fa-link':
                         prev_selection[i] = df_name
@@ -1002,11 +1015,6 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
             confirm_button[changed_index] = DATA_CONTENT_HIDE
             refresh_button[changed_index] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
                                              'position': 'relative', 'vertical-align': 'top'}
-
-    # elif 'RESET' dashboard requested, hide and reset all data tiles
-    elif 'dashboard-reset-trigger' in changed_id:
-        for i in range(len(data)):
-            data[i] = get_data_menu(i, df_const=df_const)
 
     # elif prompt has been received, handle request for cancel, load, swap dataset, link, unlink
     elif 'prompt-result' in changed_id:
@@ -1170,6 +1178,13 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                     sidemenu_styles[tile] = DATA_CONTENT_SHOW
                     if prompt_data[0] == 'loaded_dataset_swap':
                         data_set_val[tile] = prev_selection[tile]
+
+        # elif 'RESET' dashboard requested, hide and reset all data tiles
+        elif prompt_data[0] == 'reset' and prompt_result == 'ok':
+            for i in range(len(data)):
+                data[i] = get_data_menu(i, df_const=df_const)
+                prev_selection[i] = None
+
         else:
             raise PreventUpdate
 

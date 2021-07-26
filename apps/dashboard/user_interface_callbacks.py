@@ -836,10 +836,11 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
                            _refresh_clicks_4, prompt_result, prompt_data, data_states, sidemenu_style_states, df_const,
                            prev_selection_0, prev_selection_1, prev_selection_2, prev_selection_3, prev_selection_4,
                            graph_types,
-                           _parent_secondary_type, parent_timeframe, parent_fiscal_toggle, _parent_start_year,
-                           _parent_end_year, _parent_start_secondary, _parent_end_secondary, parent_hierarchy_toggle,
+                           parent_secondary_type, parent_timeframe, parent_fiscal_toggle, parent_start_year,
+                           parent_end_year, parent_start_secondary, parent_end_secondary, parent_hierarchy_toggle,
                            parent_hierarchy_drop, parent_num_state, parent_period_type, parent_graph_child_toggle,
                            state_of_display):
+
     """
     :param closed_tile: Detects when a tile has been deleted and encodes the index of the deleted tile
     param links_style: State of all link/unlink icons and detects user clicking a link icon
@@ -873,7 +874,9 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
     # random ways
     prev_selection = [prev_selection_0, prev_selection_1, prev_selection_2, prev_selection_3, prev_selection_4]
     # if 'data-menu-close' or 'select-dashboard-dropdown' requested, close all data menus
-    if 'data-menu-close' in changed_id or 'select-dashboard-dropdown' in changed_id:
+    if ('data-menu-close' in changed_id or 'select-dashboard-dropdown' in changed_id) and \
+            (df_name_0 is not None or df_name_1 is not None or df_name_2 is not None or df_name_3 is not None or
+             df_name_4 is not None):
         pass
 
     # if 'tile-closed-trigger' requested
@@ -1089,11 +1092,11 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
                                                          'vertical-align': 'top'}
                                     if parent_timeframe == "select-range":
                                         date_picker_triggers[i] = {"Input Method": parent_timeframe,
-                                                           "Start Year Selection": _parent_start_year,
-                                                           "End Year Selection": _parent_end_year,
-                                                           "Start Secondary Selection": _parent_start_secondary,
-                                                           "End Secondary Selection": _parent_end_secondary,
-                                                           "Tab": _parent_secondary_type}
+                                                                   "Start Year Selection": parent_start_year,
+                                                                   "End Year Selection": parent_end_year,
+                                                                   "Start Secondary Selection": parent_start_secondary,
+                                                                   "End Secondary Selection": parent_end_secondary,
+                                                                   "Tab": parent_secondary_type}
 
                                 elif df_name == "OPG010":
                                     df_names[i] = "OPG001"  # TODO: hardcode is a bit worrisome
@@ -1120,11 +1123,11 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
                                                          'vertical-align': 'top'}
                                     if parent_timeframe == "select-range":
                                         date_picker_triggers[i] = {"Input Method": parent_timeframe,
-                                                           "Start Year Selection": _parent_start_year,
-                                                           "End Year Selection": _parent_end_year,
-                                                           "Start Secondary Selection": _parent_start_secondary,
-                                                           "End Secondary Selection": _parent_end_secondary,
-                                                           "Tab": _parent_secondary_type}
+                                                                   "Start Year Selection": parent_start_year,
+                                                                   "End Year Selection": parent_end_year,
+                                                                   "Start Secondary Selection": parent_start_secondary,
+                                                                   "End Secondary Selection": parent_end_secondary,
+                                                                   "Tab": parent_secondary_type}
 
                                 if prompt_result == 'op-3':
                                     options_triggers[i] = 'fa fa-link'
@@ -1164,11 +1167,11 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
                                             'vertical-align': 'top'}
                     if parent_timeframe == "select-range":
                         date_picker_triggers[tile] = {"Input Method": parent_timeframe,
-                                                           "Start Year Selection": _parent_start_year,
-                                                           "End Year Selection": _parent_end_year,
-                                                           "Start Secondary Selection": _parent_start_secondary,
-                                                           "End Secondary Selection": _parent_end_secondary,
-                                                           "Tab": _parent_secondary_type}
+                                                           "Start Year Selection": parent_start_year,
+                                                           "End Year Selection": parent_end_year,
+                                                           "Start Secondary Selection": parent_start_secondary,
+                                                           "End Secondary Selection": parent_end_secondary,
+                                                           "Tab": parent_secondary_type}
 
                     options_triggers[tile] = df_name
                     sidemenu_styles[tile] = DATA_CONTENT_SHOW

@@ -1080,7 +1080,12 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                                                          'margin-right': '10px', 'margin-left': '10px',
                                                          'vertical-align': 'top'}
                                     if parent_timeframe == "select-range":
-                                        date_picker_triggers[i] = "triggered"
+                                        date_picker_triggers[i] = {"Input Method": parent_timeframe,
+                                                           "Start Year Selection": _parent_start_year,
+                                                           "End Year Selection": _parent_end_year,
+                                                           "Start Secondary Selection": _parent_start_secondary,
+                                                           "End Secondary Selection": _parent_end_secondary,
+                                                           "Tab": _parent_secondary_type}
 
                                 elif df_name == "OPG010":
                                     df_names[i] = "OPG001"  # TODO: hardcode is a bit worrisome
@@ -1106,7 +1111,12 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                                                          'margin-right': '10px', 'margin-left': '10px',
                                                          'vertical-align': 'top'}
                                     if parent_timeframe == "select-range":
-                                        date_picker_triggers[i] = "triggered"
+                                        date_picker_triggers[i] = {"Input Method": parent_timeframe,
+                                                           "Start Year Selection": _parent_start_year,
+                                                           "End Year Selection": _parent_end_year,
+                                                           "Start Secondary Selection": _parent_start_secondary,
+                                                           "End Secondary Selection": _parent_end_secondary,
+                                                           "Tab": _parent_secondary_type}
 
                                 if prompt_result == 'op-3':
                                     options_triggers[i] = 'fa fa-link'
@@ -1145,7 +1155,12 @@ def _manage_data_sidemenus(_dashboard_reset, closed_tile, _loaded_dashboard, lin
                                             'margin-right': '10px', 'margin-left': '10px',
                                             'vertical-align': 'top'}
                     if parent_timeframe == "select-range":
-                        date_picker_triggers[tile] = "triggered"
+                        date_picker_triggers[tile] = {"Input Method": parent_timeframe,
+                                                           "Start Year Selection": _parent_start_year,
+                                                           "End Year Selection": _parent_end_year,
+                                                           "Start Secondary Selection": _parent_start_secondary,
+                                                           "End Secondary Selection": _parent_end_secondary,
+                                                           "Tab": _parent_secondary_type}
 
                     options_triggers[tile] = df_name
                     sidemenu_styles[tile] = DATA_CONTENT_SHOW

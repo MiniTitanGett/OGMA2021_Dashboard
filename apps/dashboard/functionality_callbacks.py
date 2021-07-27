@@ -114,6 +114,10 @@ for x in range(4):
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
         tile = dash.callback_context.inputs_list[0]['id']['index']
 
+        print("i am in _update_graph")
+        print(changed_id)
+        print(tile)
+
         xaxis = None
         yaxis = None
         # TODO have to finish hooking up plotly axes title edits to hidden div so we are able to save
@@ -149,7 +153,7 @@ for x in range(4):
             return None
 
         # if unlinked and parent changes, prevent update
-        if link_state == 'fa fa-unlink' and '"index":4' in changed_id:
+        if (link_state == 'fa fa-unlink' and '"index":4' in changed_id) and 'args-value' not in changed_id:
             raise PreventUpdate
 
         # if linked --> unlinked prevent update
@@ -172,6 +176,7 @@ for x in range(4):
 
         # account for tile being linked or not
         if link_state == 'fa fa-link':
+            print("Here")
             secondary_type = parent_secondary_type
             timeframe = parent_timeframe
             fiscal_toggle = parent_fiscal_toggle
@@ -203,6 +208,15 @@ for x in range(4):
             session['tile_edited'][tile] = False
         else:
             session['tile_edited'][tile] = True
+
+        if graph_type == "Line":
+            print(tile)
+            print(arg_value[4])
+            print(hierarchy_toggle)
+            print(hierarchy_graph_children)
+            if arg_value[4] != 'no-fit' and (hierarchy_toggle != 'Specific Item' or hierarchy_graph_children != []):
+                print("HERE 4")
+                arg_value[4] = 'no-fit'
 
         graph = __update_graph(df_name, arg_value, graph_type, tile_title, num_periods, period_type, hierarchy_toggle,
                                hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options, state_of_display,
@@ -362,19 +376,19 @@ app.clientside_callback(
 )
 def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quarter_button_clicks,
                         _month_button_clicks, _week_button_clicks, start_year_selection, end_year_selection,
-                        start_secondary_selection, end_secondary_selection, _update_trigger, tab, df_name, df_const):
+                        start_secondary_selection, end_secondary_selection, update_trigger, tab, df_name, df_const):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':
         raise PreventUpdate
 
     if 'update-date-picker-trigger' in changed_id:
-        input_method = _update_trigger["Input Method"]
-        start_year_selection = _update_trigger["Start Year Selection"]
-        end_year_selection = _update_trigger["End Year Selection"]
-        start_secondary_selection = _update_trigger["Start Secondary Selection"]
-        end_secondary_selection = _update_trigger["End Secondary Selection"]
-        tab = _update_trigger["Tab"]
+        input_method = update_trigger["Input Method"]
+        start_year_selection = update_trigger["Start Year Selection"]
+        end_year_selection = update_trigger["End Year Selection"]
+        start_secondary_selection = update_trigger["Start Secondary Selection"]
+        end_secondary_selection = update_trigger["End Secondary Selection"]
+        tab = update_trigger["Tab"]
 
     tile = dash.callback_context.inputs_list[0]['id']['index']
 

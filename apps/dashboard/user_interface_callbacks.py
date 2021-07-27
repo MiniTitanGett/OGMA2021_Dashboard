@@ -547,6 +547,66 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
     return link_trigger, options, graph_value, type_style, message_style
 
 
+@app.callback(
+    Output({'type': 'data-fitting-wrapper', 'index': ALL}, 'style'),
+    [Input({'type': 'graph_children_toggle', 'index': 4}, 'value'),
+     Input({'type': 'hierarchy-toggle', 'index': 4}, 'value'),
+     Input({'type': 'graph-type-dropdown', 'index': ALL}, 'value'), ],
+    [State({'type': 'tile-link', 'index': ALL}, 'className'),
+     State({'type': 'data-fitting-wrapper', 'index': ALL}, 'style')]
+)
+def _update_data_fitting(graph_all, hierarchy_toggle, selected_graph_type, link_state, style):
+
+    print("_update_data_fitting")
+    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+
+    print(changed_id)
+
+    if '"type":"graph-type-dropdown"}.value' in changed_id:
+        deleted_tab_index = int(search(r'\d+', changed_id).group())
+        print("deleted_tab_index")
+        print(deleted_tab_index)
+
+    print("hierarchy_toggle")
+    print(hierarchy_toggle)
+    print("graph_all")
+    print(graph_all)
+    print("selected graph")
+    print(selected_graph_type)
+    print('style')
+    print(style)  # the style div that needs to be targeted gets created when line is selected from the graph options
+
+    if hierarchy_toggle == 'Specific Item' and graph_all == []:
+        for i in range(len(style)):
+            print(i)
+            print(link_state)
+            print(selected_graph_type)
+            if style[i] == {'display': 'inline-block', 'width': '80%', 'max-width': '125px'}:
+                style[i] = no_update
+            else:
+                if link_state[i] == "fa fa-link" and (
+                        selected_graph_type[i] == "Line" or selected_graph_type[i] == "Scatter"):
+                    style[i] = {'display': 'inline-block', 'width': '80%', 'max-width': '125px'}
+                elif link_state[i] == "fa fa-unlink" and (
+                        selected_graph_type[i] == "Line" or selected_graph_type[i] == "Scatter"):
+                    style[i] = no_update
+    elif hierarchy_toggle == 'Level Filter' or graph_all != []:
+        for i in range(len(style)):
+            if style[i] == {'display': 'inline-block', 'width': '80%', 'max-width': '125px'}:
+                style[i] = no_update
+            else:
+                if link_state[i] == "fa fa-link" and (
+                        selected_graph_type[i] == "Line" or selected_graph_type[i] == "Scatter"):
+                    style[i] = DATA_CONTENT_HIDE
+                elif link_state[i] == "fa fa-unlink" and (
+                        selected_graph_type[i] == "Line" or selected_graph_type[i] == "Scatter"):
+                    style[i] = no_update
+    else:
+        raise PreventUpdate
+
+    return style
+
+
 # update graph menu to match selected graph type
 @app.callback(
     [Output({'type': 'div-graph-options', 'index': MATCH}, 'children'),
@@ -577,9 +637,14 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
     print("In _update_graph_menu")
 
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][-1]
+    print("Changed ID: " + str(changed_id))
 
     # prevents update if hierarchy toggle or graph all children is selected when the graph type is not line or
     # scatter
+
+    print("selected_graph_type")
+    print(selected_graph_type)
+
     if ('"type":"graph_children_toggle"}.value' in changed_id
         or '"type":"hierarchy-toggle"}.value' in changed_id) and \
             selected_graph_type != "Line" and selected_graph_type != "Scatter":
@@ -645,6 +710,7 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
 
     # apply graph selection and generate menu
     if selected_graph_type == 'Line' or selected_graph_type == 'Scatter':
+        print("I am here")
         menu = get_line_scatter_graph_menu(tile=tile,
                                            x=X_AXIS_OPTIONS[0],
                                            y=None if df_const is None else
@@ -734,31 +800,6 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
         update_graph_trigger = no_update
 
     return menu, update_graph_trigger, no_update, no_update
-
-
-@app.callback(
-    Output({'type': 'data-fitting-wrapper', 'index': ALL}, 'style'),
-    [Input({'type': 'graph_children_toggle', 'index': 4}, 'value'),
-     Input({'type': 'hierarchy-toggle', 'index': 4}, 'value')],
-    [State({'type': 'graph-type-dropdown', 'index': ALL}, 'value'),
-     State({'type': 'tile-link', 'index': ALL}, 'className')],
-    prevent_initial_call=True
-)
-def _update_data_fitting(graph_all, hierarchy_toggle, selected_graph_type, link_state):
-
-    print("_update_data_fitting")
-
-    style = [no_update] * 5
-
-    if hierarchy_toggle == 'Specific Item' and graph_all == []:
-        for i in range(5):
-            if link_state[i] == "fa fa-link" and (selected_graph_type[i] == "Line" or selected_graph_type == "Scatter"):
-                style[i] = {'display': 'inline-block', 'width': '80%', 'max-width': '125px'}
-
-    else:
-        raise PreventUpdate
-
-    return style
 
 
 # ************************************************DATA SIDE-MENU******************************************************

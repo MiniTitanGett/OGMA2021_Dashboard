@@ -204,6 +204,8 @@ for x in range(4):
         else:
             session['tile_edited'][tile] = True
 
+        # added to remove the the data-fitting traces from the graph when the hierarchy toggle is changed or
+        # graph all in dropdown is selected
         if graph_type == "Line" or graph_type == "Scatter":
             if arg_value[4] != 'no-fit' and (hierarchy_toggle != 'Specific Item' or hierarchy_graph_children != []):
                 arg_value[4] = 'no-fit'

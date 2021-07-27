@@ -550,6 +550,7 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
     return link_trigger, options, graph_value, type_style, message_style
 
 
+# Reveals the data-fitting options when conditions needed for data-fitting are met
 @app.callback(
     Output({'type': 'data-fitting-wrapper', 'index': ALL}, 'style'),
     [Input({'type': 'graph_children_toggle', 'index': 4}, 'value'),
@@ -618,6 +619,9 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
     :return: Graph menu corresponding to selected graph type
     """
 
+    # TODO: Callback seems to be generating a new graph-options-menu for tiles with existing menus and selections on
+    #  the addition of a new tile
+
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][-1]
 
     changed_index = int(search(r'\d+', changed_id).group())
@@ -633,8 +637,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
     #              or selected_graph_type == 'Box_Plot' or selected_graph_type == 'Sankey'):
     #     raise PreventUpdate
 
-    # TODO: Callback seems to be generating a new graph-options-menu for tiles with existing menus and selections on
-    #  the addition of a new tile
+    # Sets the data_fitting boolean to true or false dependant on the link-state of the tile being modified and then the
+    # tiles associated data menu
     if link_state[changed_index] == 'fa fa-link':
         if parent_hierarchy_toggle == 'Specific Item' and parent_graph_all == []:
             data_fitting = True

@@ -572,8 +572,7 @@ def get_layout_dashboard():
             color='dark',
             style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px', 'z-index': '500'},
             duration=4000),
-        # dashboard-reset-trigger is used by NEW/DELETE to trigger MANAGE DATA SIDEMENUS to reset the data menus
-        dcc.Store(id='dashboard-reset-trigger'),
+        # dashboard-reset-confirmation is used by the prompts to reset the viewport
         dcc.Store(id='dashboard-reset-confirmation'),
         # select-range-trigger is used by the load callbacks to load the select range datepicker section
         dcc.Store(id={'type': 'select-range-trigger', 'index': 0}),

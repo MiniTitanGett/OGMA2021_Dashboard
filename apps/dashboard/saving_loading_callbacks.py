@@ -1102,10 +1102,10 @@ def _load_select_range_inputs(tile_tab, dashboard_tab, tile_start_year, tile_end
 app.clientside_callback(
     """
     function(_trigger){
-        return '';
+        return null;
     }
     """,
     Output('select-dashboard-dropdown', 'value'),
-    [Input({'type': 'select-range-trigger', 'index': ALL}, 'data-dashboard-tab')],
+    [Input({'type': 'data-menu-dashboard-loading', 'index': ALL}, 'children')],
     prevent_initial_call=True
 )

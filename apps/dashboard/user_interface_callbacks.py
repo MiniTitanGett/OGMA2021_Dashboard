@@ -557,30 +557,8 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
 )
 def _update_data_fitting(graph_all, hierarchy_toggle, selected_graph_type, link_state, style):
 
-    print("_update_data_fitting")
-    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-
-    print(changed_id)
-
-    if '"type":"graph-type-dropdown"}.value' in changed_id:
-        deleted_tab_index = int(search(r'\d+', changed_id).group())
-        print("deleted_tab_index")
-        print(deleted_tab_index)
-
-    print("hierarchy_toggle")
-    print(hierarchy_toggle)
-    print("graph_all")
-    print(graph_all)
-    print("selected graph")
-    print(selected_graph_type)
-    print('style')
-    print(style)  # the style div that needs to be targeted gets created when line is selected from the graph options
-
     if hierarchy_toggle == 'Specific Item' and graph_all == []:
         for i in range(len(style)):
-            print(i)
-            print(link_state)
-            print(selected_graph_type)
             if style[i] == {'display': 'inline-block', 'width': '80%', 'max-width': '125px'}:
                 style[i] = no_update
             else:
@@ -623,28 +601,26 @@ def _update_data_fitting(graph_all, hierarchy_toggle, selected_graph_type, link_
      State({'type': 'data-set', 'index': MATCH}, 'value'),
      State({'type': 'data-set', 'index': 4}, 'value'),
      State('df-constants-storage', 'data'),
-     State({'type': 'data-set-parent', 'index': 4}, 'value')],
+     State({'type': 'data-set-parent', 'index': 4}, 'value'),
+     State({'type': 'graph_children_toggle', 'index': 4}, 'value'),
+     State({'type': 'hierarchy-toggle', 'index': 4}, 'value')],
     prevent_initial_call=True
 )
 def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, hierarchy_toggle, graph_options_state,
-                       is_loaded, df_name, parent_df_name, df_const, df_confirm):
+                       is_loaded, df_name, parent_df_name, df_const, df_confirm, parent_graph_all,
+                       parent_hierarchy_toggle):
     """
     :param selected_graph_type: Selected graph type, ie. 'bar', 'line', etc.
     :param graph_options_state: State of the current graph options div
     :return: Graph menu corresponding to selected graph type
     """
 
-    print("In _update_graph_menu")
-
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][-1]
-    print("Changed ID: " + str(changed_id))
+
+    changed_index = int(search(r'\d+', changed_id).group())
 
     # prevents update if hierarchy toggle or graph all children is selected when the graph type is not line or
     # scatter
-
-    print("selected_graph_type")
-    print(selected_graph_type)
-
     if ('"type":"graph_children_toggle"}.value' in changed_id
         or '"type":"hierarchy-toggle"}.value' in changed_id) and \
             selected_graph_type != "Line" and selected_graph_type != "Scatter":
@@ -654,16 +630,18 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
     #              or selected_graph_type == 'Box_Plot' or selected_graph_type == 'Sankey'):
     #     raise PreventUpdate
 
-    # TODO Fix data_fitting
-    # sets boolean to allow data fitting as a customization option
-    print(hierarchy_toggle)
-    print(graph_all)
-    if hierarchy_toggle == 'Specific Item' and graph_all == []:
-        print("Data fitting True")
-        data_fitting = True
+    # TODO: Callback seems to be generating a new graph-options-menu for tiles with existing menus and selections on
+    #  the addition of a new tile
+    if link_state[changed_index] == 'fa fa-link':
+        if parent_hierarchy_toggle == 'Specific Item' and parent_graph_all == []:
+            data_fitting = True
+        else:
+            data_fitting = False
     else:
-        print("Data fitting False")
-        data_fitting = False
+        if hierarchy_toggle == 'Specific Item' and graph_all == []:
+            data_fitting = True
+        else:
+            data_fitting = False
 
     # if link state has changed from linked --> unlinked the data has not changed, prevent update
     if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink':
@@ -703,14 +681,14 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
     if changed_id == '.' and graph_options_state or df_const is None or df_name not in df_const:
         raise PreventUpdate
 
-    if '"type":"graph_children_toggle"}.value' in changed_id and df_name == gm_trigger:
+        # if changed id == '.' and the graph menu already exists, prevent update
+    if changed_id == '.' and graph_options_state or df_const is None or df_name not in df_const:
         raise PreventUpdate
 
     tile = int(dash.callback_context.inputs_list[0]['id']['index'])
 
     # apply graph selection and generate menu
     if selected_graph_type == 'Line' or selected_graph_type == 'Scatter':
-        print("I am here")
         menu = get_line_scatter_graph_menu(tile=tile,
                                            x=X_AXIS_OPTIONS[0],
                                            y=None if df_const is None else

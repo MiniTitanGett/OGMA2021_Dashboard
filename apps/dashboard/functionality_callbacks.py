@@ -114,10 +114,6 @@ for x in range(4):
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
         tile = dash.callback_context.inputs_list[0]['id']['index']
 
-        print("i am in _update_graph")
-        print(changed_id)
-        print(tile)
-
         xaxis = None
         yaxis = None
         # TODO have to finish hooking up plotly axes title edits to hidden div so we are able to save
@@ -176,7 +172,6 @@ for x in range(4):
 
         # account for tile being linked or not
         if link_state == 'fa fa-link':
-            print("Here")
             secondary_type = parent_secondary_type
             timeframe = parent_timeframe
             fiscal_toggle = parent_fiscal_toggle
@@ -209,13 +204,8 @@ for x in range(4):
         else:
             session['tile_edited'][tile] = True
 
-        if graph_type == "Line":
-            print(tile)
-            print(arg_value[4])
-            print(hierarchy_toggle)
-            print(hierarchy_graph_children)
+        if graph_type == "Line" or graph_type == "Scatter":
             if arg_value[4] != 'no-fit' and (hierarchy_toggle != 'Specific Item' or hierarchy_graph_children != []):
-                print("HERE 4")
                 arg_value[4] = 'no-fit'
 
         graph = __update_graph(df_name, arg_value, graph_type, tile_title, num_periods, period_type, hierarchy_toggle,

@@ -1574,3 +1574,15 @@ app.clientside_callback(
     State('prompt-title', 'data-'),
     prevent_initial_call=True
 )
+
+app.clientside_callback(
+    """
+    function
+    """
+,
+    [Output({'type': 'args-value: {}'.replace("{}", str(x)), 'index': ALL}, 'value')],
+    Input({'class':'plugin-editable editable','index': 'match'},'style'),
+    State({'type': 'args-value: {}'.replace("{}", str(x)), 'index': ALL}, 'value')
+
+)
+

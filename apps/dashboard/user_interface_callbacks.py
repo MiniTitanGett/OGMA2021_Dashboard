@@ -1223,11 +1223,11 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
                                             'vertical-align': 'top'}
                     if parent_timeframe == "select-range":
                         date_picker_triggers[tile] = {"Input Method": parent_timeframe,
-                                                           "Start Year Selection": parent_start_year,
-                                                           "End Year Selection": parent_end_year,
-                                                           "Start Secondary Selection": parent_start_secondary,
-                                                           "End Secondary Selection": parent_end_secondary,
-                                                           "Tab": parent_secondary_type}
+                                                      "Start Year Selection": parent_start_year,
+                                                      "End Year Selection": parent_end_year,
+                                                      "Start Secondary Selection": parent_start_secondary,
+                                                      "End Secondary Selection": parent_end_secondary,
+                                                      "Tab": parent_secondary_type}
 
                     options_triggers[tile] = df_name
                     sidemenu_styles[tile] = DATA_CONTENT_SHOW

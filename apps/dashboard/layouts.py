@@ -1038,7 +1038,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                                'top': '-15px',
                                'margin-right': '5px'})
                 ], style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}
-                if len(X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
+                   if len(X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
                 html.Div([
                     html.P(
                         "{}".format(X_AXIS_OPTIONS[0]),

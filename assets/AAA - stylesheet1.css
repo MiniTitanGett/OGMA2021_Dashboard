@@ -969,7 +969,7 @@ there.
     height: 100%;
     border: 0;
     color: white;
-    padding: 0 45px 0 50px;
+    padding: 0 45px 0 40px;
 }
 .dashboard-tab-button:disabled {
     color: black

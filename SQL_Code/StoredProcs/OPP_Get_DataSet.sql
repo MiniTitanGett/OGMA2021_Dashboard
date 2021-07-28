@@ -25,6 +25,38 @@ begin
   else if (@pr_dataset_name = 'OPG010')
     select * from dbo.OPG010
 
+  else if (@pr_dataset_name = 'OPG011')
+    select --null [OPG Data Set],
+           --null [Hierarchy One Name],
+           --null [Hierarchy One Top],
+           --null [Hierarchy One -1],
+           --null [Hierarchy One -2],
+           --null [Hierarchy One -3],
+           --null [Hierarchy One -4],
+           [Hierarchy One Leaf],
+           [Variable Name],
+           [Variable Name Qualifier],
+           [Variable Name Sub Qualifier],
+           [Date of Event],
+           [Calendar Entry Type],
+           --null [Year of Event],
+           --null [Quarter],
+           --null [Month of Event],
+           --null [Week of Event],
+           --null [Fiscal Year of Event],
+           --null [Fiscal Quarter],
+           --null [Fiscal Month of Event],
+           --null [Fiscal Week of Event],
+           --null [Julian Day],
+           [Activity Event Id],
+           [Measure Value],
+           [Measure Type],
+           [Partial Period]
+      from dbo.OPG001 with (nolock)
+     where trim(isnull([Hierarchy One Leaf], '')) <> ''
+       and trim(isnull([Variable Name Qualifier], '')) <> ''
+       and [Calendar Entry Type] = 'Week'
+
   else
   begin
     set @p_result_status = 'OPP_Get_Dataset001|Invalid dataset name: ' + @pr_dataset_name

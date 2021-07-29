@@ -33,7 +33,7 @@ begin
            --null [Hierarchy One -2],
            --null [Hierarchy One -3],
            --null [Hierarchy One -4],
-           [Hierarchy One Leaf], -- as [Hierarchy Value],
+           [Hierarchy One Leaf] as [Hierarchy Value],
            5 as [Hierarchy Level],
            [Variable Name],
            [Variable Name Qualifier],

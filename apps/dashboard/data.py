@@ -102,6 +102,7 @@ def dataset_to_df(df_name):
             "Hierarchy One -2",
             "Hierarchy One -3",
             "Hierarchy One -4",
+            "Hierarchy One Leaf",
             "Year of Event",
             "Quarter",
             "Month of Event",
@@ -181,53 +182,47 @@ def generate_constants(df_name):
     MEASURE_TYPE_OPTIONS = df['Measure Type'].dropna().unique().tolist()
     MEASURE_TYPE_OPTIONS.sort()
 
-    # New date picker values
-    GREGORIAN_MIN_YEAR = int(df['Year of Event'].min())
-    GREGORIAN_YEAR_MAX = int(df['Year of Event'][df['Calendar Entry Type'] == 'Year'].max())
-    GREGORIAN_QUARTER_MAX_YEAR = int(df['Year of Event'][df['Calendar Entry Type'] == 'Quarter'].max())
-    GREGORIAN_QUARTER_FRINGE_MIN = int(df['Quarter'][df['Year of Event'] == GREGORIAN_MIN_YEAR].min())
-    GREGORIAN_QUARTER_FRINGE_MAX = \
-        int(df['Quarter'][df['Year of Event'] == GREGORIAN_QUARTER_MAX_YEAR].max())
-    GREGORIAN_MONTH_MAX_YEAR = int(df['Year of Event'][df['Calendar Entry Type'] == 'Month'].max())
-    GREGORIAN_MONTH_FRINGE_MIN = \
-        int(df['Month of Event'][df['Year of Event'] == GREGORIAN_MIN_YEAR].min())
-    GREGORIAN_MONTH_FRINGE_MAX = \
-        int(df['Month of Event'][df['Year of Event'] == GREGORIAN_MONTH_MAX_YEAR].max())
+    if df_name == 'OPG011':
+        try:
+            MIN_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(),
+                                                    'Date of Event'], '%Y/%m/%d')
+        except TypeError:
+            MIN_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(),
+                                  'Date of Event'].strftime('%m/%d/%Y')
 
-    if len(df[df['Calendar Entry Type'] == 'Week']) > 0:
-        GREGORIAN_WEEK_AVAILABLE = True  # not currently used
-        GREGORIAN_WEEK_MAX_YEAR = int(df['Year of Event'][df['Calendar Entry Type'] == 'Week'].max())
-        GREGORIAN_WEEK_FRINGE_MIN = int(
-            df['Week of Event'][df['Year of Event'] == GREGORIAN_MIN_YEAR].min())
-        GREGORIAN_WEEK_FRINGE_MAX = int(
-            df['Week of Event'][df['Year of Event'] == GREGORIAN_WEEK_MAX_YEAR].max())
-    else:
-        GREGORIAN_WEEK_AVAILABLE = False  # not currently used, so set fake values
-        GREGORIAN_WEEK_MAX_YEAR = 52
-        GREGORIAN_WEEK_FRINGE_MIN = 1
-        GREGORIAN_WEEK_FRINGE_MAX = 52
+        try:
+            MAX_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64[ns]').idxmax(),
+                                                    'Date of Event'], '%Y/%m/%d')
+        except TypeError:
+            MAX_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmax(),
+                                  'Date of Event'].strftime('%m/%d/%Y')
 
-    if len(df['Fiscal Year of Event'].unique()) != 1 and df['Fiscal Year of Event'].unique()[0] is not None:
-        FISCAL_AVAILABLE = True
+        # New date picker values
+        GREGORIAN_MIN_YEAR = int(df['Year of Event'].min())
+        GREGORIAN_YEAR_MAX = int(df['Year of Event'][df['Calendar Entry Type'] == 'Year'].max())
+        GREGORIAN_QUARTER_MAX_YEAR = int(df['Year of Event'][df['Calendar Entry Type'] == 'Quarter'].max())
+        GREGORIAN_QUARTER_FRINGE_MIN = int(df['Quarter'][df['Year of Event'] == GREGORIAN_MIN_YEAR].min())
+        GREGORIAN_QUARTER_FRINGE_MAX = \
+            int(df['Quarter'][df['Year of Event'] == GREGORIAN_QUARTER_MAX_YEAR].max())
+        GREGORIAN_MONTH_MAX_YEAR = int(df['Year of Event'][df['Calendar Entry Type'] == 'Month'].max())
+        GREGORIAN_MONTH_FRINGE_MIN = \
+            int(df['Month of Event'][df['Year of Event'] == GREGORIAN_MIN_YEAR].min())
+        GREGORIAN_MONTH_FRINGE_MAX = \
+            int(df['Month of Event'][df['Year of Event'] == GREGORIAN_MONTH_MAX_YEAR].max())
 
-        FISCAL_MIN_YEAR = int(df['Fiscal Year of Event'].min())
-        FISCAL_YEAR_MAX = int(df['Fiscal Year of Event'][df['Calendar Entry Type'] == 'Fiscal Year'].max())
-        FISCAL_QUARTER_MAX_YEAR = int(df['Fiscal Year of Event'][df['Calendar Entry Type'] == 'Quarter'].max())
-        FISCAL_QUARTER_FRINGE_MIN = \
-            int(df['Fiscal Quarter'][df['Fiscal Year of Event'] == FISCAL_MIN_YEAR].min())
-        FISCAL_QUARTER_FRINGE_MAX = int(
-            df['Fiscal Quarter'][df['Fiscal Year of Event'] == FISCAL_QUARTER_MAX_YEAR].max())
-        FISCAL_MONTH_MAX_YEAR = int(df['Fiscal Year of Event'][df['Calendar Entry Type'] == 'Month'].max())
-        FISCAL_MONTH_FRINGE_MIN = \
-            int(df['Fiscal Month of Event'][df['Fiscal Year of Event'] == FISCAL_MIN_YEAR].min())
-        FISCAL_MONTH_FRINGE_MAX = int(
-            df['Fiscal Month of Event'][df['Fiscal Year of Event'] == FISCAL_MONTH_MAX_YEAR].max())
-        FISCAL_WEEK_MAX_YEAR = int(df['Fiscal Year of Event'][df['Calendar Entry Type'] == 'Week'].max())
-        FISCAL_WEEK_FRINGE_MIN = int(df['Fiscal Week of Event'][df['Fiscal Year of Event']
-                                                                == FISCAL_MIN_YEAR].min())
-        FISCAL_WEEK_FRINGE_MAX = int(df['Fiscal Week of Event'][df['Fiscal Year of Event']
-                                                                == FISCAL_WEEK_MAX_YEAR].max())
-    else:
+        if len(df[df['Calendar Entry Type'] == 'Week']) > 0:
+            GREGORIAN_WEEK_AVAILABLE = True  # not currently used
+            GREGORIAN_WEEK_MAX_YEAR = int(df['Year of Event'][df['Calendar Entry Type'] == 'Week'].max())
+            GREGORIAN_WEEK_FRINGE_MIN = int(
+                df['Week of Event'][df['Year of Event'] == GREGORIAN_MIN_YEAR].min())
+            GREGORIAN_WEEK_FRINGE_MAX = int(
+                df['Week of Event'][df['Year of Event'] == GREGORIAN_WEEK_MAX_YEAR].max())
+        else:
+            GREGORIAN_WEEK_AVAILABLE = False  # not currently used, so set fake values
+            GREGORIAN_WEEK_MAX_YEAR = 52
+            GREGORIAN_WEEK_FRINGE_MIN = 1
+            GREGORIAN_WEEK_FRINGE_MAX = 52
+
         FISCAL_AVAILABLE = False
         FISCAL_MIN_YEAR = None
         FISCAL_YEAR_MAX = None
@@ -241,42 +236,125 @@ def generate_constants(df_name):
         FISCAL_WEEK_FRINGE_MIN = None
         FISCAL_WEEK_FRINGE_MAX = None
 
-    # MIN_DATE_UNF = datetime.strptime(str(df.loc[df['Date of Event'].idxmin(), 'Date of Event']), '%Y%m%d')
-    # MAX_DATE_UNF = datetime.strptime(str(df.loc[df['Date of Event'].idxmax(), 'Date of Event']), '%Y%m%d')
+        # MIN_DATE_UNF = datetime.strptime(str(df.loc[df['Date of Event'].idxmin(), 'Date of Event']), '%Y%m%d')
+        # MAX_DATE_UNF = datetime.strptime(str(df.loc[df['Date of Event'].idxmax(), 'Date of Event']), '%Y%m%d')
 
-    # this is a hack until we get the data delivered from the database
-    try:
-        MIN_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(),
-                                                'Date of Event'], '%Y/%m/%d')
-    except TypeError:
-        MIN_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(),
-                              'Date of Event'].strftime('%m/%d/%Y')
 
-    try:
-        MAX_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64[ns]').idxmax(),
-                                                'Date of Event'], '%Y/%m/%d')
-    except TypeError:
-        MAX_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmax(),
-                              'Date of Event'].strftime('%m/%d/%Y')
+        # replaces all Y in Partial Period with True & False
+        df['Partial Period'] = df['Partial Period'].transform(lambda x: x == 'Y')
 
-    # replaces all Y in Partial Period with True & False
-    df['Partial Period'] = df['Partial Period'].transform(lambda x: x == 'Y')
+        # Sets the Date of Event in the df to be in the correct format for Plotly
+        # df['Date of Event'] = df['Date of Event'].transform(
+        #     lambda x: pd.to_datetime(x, format='%Y%m%d', errors='ignore'))
 
-    # Sets the Date of Event in the df to be in the correct format for Plotly
-    # df['Date of Event'] = df['Date of Event'].transform(
-    #     lambda x: pd.to_datetime(x, format='%Y%m%d', errors='ignore'))
+        options = []
 
-    options = []
+        unique_vars = df[VARIABLE_LEVEL].unique()
+        cleaned_list = [x for x in unique_vars if str(x) != 'nan']
+        cleaned_list.sort()
 
-    unique_vars = df[VARIABLE_LEVEL].unique()
-    cleaned_list = [x for x in unique_vars if str(x) != 'nan']
-    cleaned_list.sort()
+        for unique_var in cleaned_list:
+            options.append(
+                {'label': "  " * unique_var.count("|") + str(unique_var).replace('|', ', '), 'value': unique_var})
 
-    for unique_var in cleaned_list:
-        options.append(
-            {'label': "  " * unique_var.count("|") + str(unique_var).replace('|', ', '), 'value': unique_var})
+        VARIABLE_OPTIONS = options
+    else:
+        # New date picker values
+        GREGORIAN_MIN_YEAR = int(df['Year of Event'].min())
+        GREGORIAN_YEAR_MAX = int(df['Year of Event'][df['Calendar Entry Type'] == 'Year'].max())
+        GREGORIAN_QUARTER_MAX_YEAR = int(df['Year of Event'][df['Calendar Entry Type'] == 'Quarter'].max())
+        GREGORIAN_QUARTER_FRINGE_MIN = int(df['Quarter'][df['Year of Event'] == GREGORIAN_MIN_YEAR].min())
+        GREGORIAN_QUARTER_FRINGE_MAX = \
+            int(df['Quarter'][df['Year of Event'] == GREGORIAN_QUARTER_MAX_YEAR].max())
+        GREGORIAN_MONTH_MAX_YEAR = int(df['Year of Event'][df['Calendar Entry Type'] == 'Month'].max())
+        GREGORIAN_MONTH_FRINGE_MIN = \
+            int(df['Month of Event'][df['Year of Event'] == GREGORIAN_MIN_YEAR].min())
+        GREGORIAN_MONTH_FRINGE_MAX = \
+            int(df['Month of Event'][df['Year of Event'] == GREGORIAN_MONTH_MAX_YEAR].max())
 
-    VARIABLE_OPTIONS = options
+        if len(df[df['Calendar Entry Type'] == 'Week']) > 0:
+            GREGORIAN_WEEK_AVAILABLE = True  # not currently used
+            GREGORIAN_WEEK_MAX_YEAR = int(df['Year of Event'][df['Calendar Entry Type'] == 'Week'].max())
+            GREGORIAN_WEEK_FRINGE_MIN = int(
+                df['Week of Event'][df['Year of Event'] == GREGORIAN_MIN_YEAR].min())
+            GREGORIAN_WEEK_FRINGE_MAX = int(
+                df['Week of Event'][df['Year of Event'] == GREGORIAN_WEEK_MAX_YEAR].max())
+        else:
+            GREGORIAN_WEEK_AVAILABLE = False  # not currently used, so set fake values
+            GREGORIAN_WEEK_MAX_YEAR = 52
+            GREGORIAN_WEEK_FRINGE_MIN = 1
+            GREGORIAN_WEEK_FRINGE_MAX = 52
+
+        if len(df['Fiscal Year of Event'].unique()) != 1 and df['Fiscal Year of Event'].unique()[0] is not None:
+            FISCAL_AVAILABLE = True
+
+            FISCAL_MIN_YEAR = int(df['Fiscal Year of Event'].min())
+            FISCAL_YEAR_MAX = int(df['Fiscal Year of Event'][df['Calendar Entry Type'] == 'Fiscal Year'].max())
+            FISCAL_QUARTER_MAX_YEAR = int(df['Fiscal Year of Event'][df['Calendar Entry Type'] == 'Quarter'].max())
+            FISCAL_QUARTER_FRINGE_MIN = \
+                int(df['Fiscal Quarter'][df['Fiscal Year of Event'] == FISCAL_MIN_YEAR].min())
+            FISCAL_QUARTER_FRINGE_MAX = int(
+                df['Fiscal Quarter'][df['Fiscal Year of Event'] == FISCAL_QUARTER_MAX_YEAR].max())
+            FISCAL_MONTH_MAX_YEAR = int(df['Fiscal Year of Event'][df['Calendar Entry Type'] == 'Month'].max())
+            FISCAL_MONTH_FRINGE_MIN = \
+                int(df['Fiscal Month of Event'][df['Fiscal Year of Event'] == FISCAL_MIN_YEAR].min())
+            FISCAL_MONTH_FRINGE_MAX = int(
+                df['Fiscal Month of Event'][df['Fiscal Year of Event'] == FISCAL_MONTH_MAX_YEAR].max())
+            FISCAL_WEEK_MAX_YEAR = int(df['Fiscal Year of Event'][df['Calendar Entry Type'] == 'Week'].max())
+            FISCAL_WEEK_FRINGE_MIN = int(df['Fiscal Week of Event'][df['Fiscal Year of Event']
+                                                                    == FISCAL_MIN_YEAR].min())
+            FISCAL_WEEK_FRINGE_MAX = int(df['Fiscal Week of Event'][df['Fiscal Year of Event']
+                                                                    == FISCAL_WEEK_MAX_YEAR].max())
+        else:
+            FISCAL_AVAILABLE = False
+            FISCAL_MIN_YEAR = None
+            FISCAL_YEAR_MAX = None
+            FISCAL_QUARTER_MAX_YEAR = None
+            FISCAL_QUARTER_FRINGE_MIN = None
+            FISCAL_QUARTER_FRINGE_MAX = None
+            FISCAL_MONTH_MAX_YEAR = None
+            FISCAL_MONTH_FRINGE_MIN = None
+            FISCAL_MONTH_FRINGE_MAX = None
+            FISCAL_WEEK_MAX_YEAR = None
+            FISCAL_WEEK_FRINGE_MIN = None
+            FISCAL_WEEK_FRINGE_MAX = None
+
+        # MIN_DATE_UNF = datetime.strptime(str(df.loc[df['Date of Event'].idxmin(), 'Date of Event']), '%Y%m%d')
+        # MAX_DATE_UNF = datetime.strptime(str(df.loc[df['Date of Event'].idxmax(), 'Date of Event']), '%Y%m%d')
+
+        # this is a hack until we get the data delivered from the database
+        try:
+            MIN_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(),
+                                                    'Date of Event'], '%Y/%m/%d')
+        except TypeError:
+            MIN_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(),
+                                  'Date of Event'].strftime('%m/%d/%Y')
+
+        try:
+            MAX_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64[ns]').idxmax(),
+                                                    'Date of Event'], '%Y/%m/%d')
+        except TypeError:
+            MAX_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmax(),
+                                  'Date of Event'].strftime('%m/%d/%Y')
+
+        # replaces all Y in Partial Period with True & False
+        df['Partial Period'] = df['Partial Period'].transform(lambda x: x == 'Y')
+
+        # Sets the Date of Event in the df to be in the correct format for Plotly
+        # df['Date of Event'] = df['Date of Event'].transform(
+        #     lambda x: pd.to_datetime(x, format='%Y%m%d', errors='ignore'))
+
+        options = []
+
+        unique_vars = df[VARIABLE_LEVEL].unique()
+        cleaned_list = [x for x in unique_vars if str(x) != 'nan']
+        cleaned_list.sort()
+
+        for unique_var in cleaned_list:
+            options.append(
+                {'label': "  " * unique_var.count("|") + str(unique_var).replace('|', ', '), 'value': unique_var})
+
+        VARIABLE_OPTIONS = options
 
     storage = {
         'HIERARCHY_LEVELS': HIERARCHY_LEVELS,

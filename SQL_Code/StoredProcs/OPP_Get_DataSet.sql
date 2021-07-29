@@ -2,7 +2,7 @@ if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[OPP_Get_Da
 drop procedure [dbo].[OPP_Get_DataSet]
 go
 
--- Copyright © OGMA Consulting Corp.
+-- Copyright ï¿½ OGMA Consulting Corp.
 -- $Id$
 Create Procedure dbo.OPP_Get_DataSet
 
@@ -33,7 +33,7 @@ begin
            --null [Hierarchy One -2],
            --null [Hierarchy One -3],
            --null [Hierarchy One -4],
-           [Hierarchy One Leaf] as [Hierarchy Value],
+           [Hierarchy One Leaf], -- as [Hierarchy Value],
            5 as [Hierarchy Level],
            [Variable Name],
            [Variable Name Qualifier],

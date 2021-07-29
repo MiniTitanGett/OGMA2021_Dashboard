@@ -22,7 +22,6 @@ from sklearn.preprocessing import PolynomialFeatures
 # import config
 from conn import get_ref, exec_storedproc_results
 
-
 # ***********************************************ARBITRARY CONSTANTS*************************************************
 
 GRAPH_OPTIONS = {
@@ -82,6 +81,37 @@ def dataset_to_df(df_name):
     """.format(session["sessionID"], session["language"], df_name)
 
     df = exec_storedproc_results(query)
+
+    if df_name == 'OPG010':
+        query = """\
+        declare @p_result_status varchar(255)
+        exec dbo.opp_get_dataset_nodedata {}, \'{}\', \'{}\', @p_result_status output
+        select @p_result_status as result_status
+        """.format(session["sessionID"], session["language"], df_name)
+
+        node_df = exec_storedproc_results(query)
+        node_df[['x_coord', 'y_coord']] = node_df[['x_coord', 'y_coord']].apply(pd.to_numeric)
+
+        session[df_name + "_NodeData"] = node_df
+
+    if df_name == 'OPG011':
+        df[["OPG Data Set",
+            "Hierarchy One Name",
+            "Hierarchy One Top",
+            "Hierarchy One -1",
+            "Hierarchy One -2",
+            "Hierarchy One -3",
+            "Hierarchy One -4",
+            "Year of Event",
+            "Quarter",
+            "Month of Event",
+            "Week of Event",
+            "Fiscal Year of Event",
+            "Fiscal Quarter",
+            "Fiscal Month of Event",
+            "Fiscal Week of Event",
+            "Julian Day"]] = np.NaN
+
     df[['Year of Event',
         'Quarter',
         'Month of Event',
@@ -103,19 +133,6 @@ def dataset_to_df(df_name):
                                 'Julian Day',
                                 'Activity Event Id',
                                 'Measure Value']].apply(pd.to_numeric)
-
-    if df_name == 'OPG010':
-        query = """\
-        declare @p_result_status varchar(255)
-        exec dbo.opp_get_dataset_nodedata {}, \'{}\', \'{}\', @p_result_status output
-        select @p_result_status as result_status
-        """.format(session["sessionID"], session["language"], df_name)
-
-        node_df = exec_storedproc_results(query)
-        node_df[['x_coord', 'y_coord']] = node_df[['x_coord', 'y_coord']].apply(pd.to_numeric)
-
-        session[df_name + "_NodeData"] = node_df
-
     # add all variable names without qualifiers to col
     col = pd.Series(df['Variable Name'][df['Variable Name Qualifier'].isna()])
     # combine variable hierarchy columns into col for rows with qualifiers

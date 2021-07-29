@@ -522,12 +522,10 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
     else:
         if trigger == "OPG001":
             graph_options = GRAPH_OPTIONS["OPG001"]
-            # if graph_type is not None and graph_type not in graph_options:
-            #     link_trigger = "fa fa-unlink"
         elif trigger == "OPG010":
             graph_options = GRAPH_OPTIONS["OPG010"]
-            # if graph_type is not None and graph_type not in graph_options:
-            #     link_trigger = "fa fa-unlink"
+        elif trigger == "OPG011":
+            graph_options = GRAPH_OPTIONS["OPG011"]
         else:
             graph_options = []
         graph_options.sort()

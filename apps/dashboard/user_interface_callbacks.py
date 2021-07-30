@@ -328,11 +328,12 @@ for x in range(4):
          Input({'type': 'tile-layouts', 'index': x}, 'n_clicks'),
          Input('float-menu-result', 'children')],
         [State('float-menu-title', 'data-'),
-         State({'type': 'tile-customize-content', 'index': x}, 'children')],
+         State({'type': 'tile-customize-content', 'index': x}, 'children'),
+         State({'type': 'graph_display', 'index': x}, 'children')],
         prevent_initial_call=True
     )
     def _serve_float_menu_and_take_result(_customize_n_clicks, _layouts_n_clicks, float_menu_result, float_menu_data,
-                                          customize_menu):
+                                          customize_menu, graph):
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
         if changed_id == '.' or len(dash.callback_context.triggered) > 1 \
@@ -560,7 +561,6 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
      State({'type': 'data-fitting-wrapper', 'index': ALL}, 'style')]
 )
 def _update_data_fitting(graph_all, hierarchy_toggle, selected_graph_type, link_state, style):
-
     if hierarchy_toggle == 'Specific Item' and graph_all == []:
         for i in range(len(style)):
             if style[i] == {'display': 'inline-block', 'width': '80%', 'max-width': '125px'}:
@@ -870,13 +870,13 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
      State({'type': 'data-set-prev-selected', 'index': 4}, 'data'),
      State({'type': 'graph-type-dropdown', 'index': ALL}, 'value'),
      # Date picker states for parent data menu
-     State({'type': 'start-year-input', 'index': 4}, 'name'),  # TODO: unused state
+     State({'type': 'start-year-input', 'index': 4}, 'name'),
      State({'type': 'radio-timeframe', 'index': 4}, 'value'),
      State({'type': 'fiscal-year-toggle', 'index': 4}, 'value'),
-     State({'type': 'start-year-input', 'index': 4}, 'value'),  # TODO: unused state
-     State({'type': 'end-year-input', 'index': 4}, 'value'),  # TODO: unused state
-     State({'type': 'start-secondary-input', 'index': 4}, 'value'),  # TODO: unused state
-     State({'type': 'end-secondary-input', 'index': 4}, 'value'),  # TODO: unused state
+     State({'type': 'start-year-input', 'index': 4}, 'value'),
+     State({'type': 'end-year-input', 'index': 4}, 'value'),
+     State({'type': 'start-secondary-input', 'index': 4}, 'value'),
+     State({'type': 'end-secondary-input', 'index': 4}, 'value'),
      State({'type': 'hierarchy-toggle', 'index': 4}, 'value'),
      State({'type': 'hierarchy_level_dropdown', 'index': 4}, 'value'),
      State({'type': 'num-periods', 'index': 4}, 'value'),
@@ -896,7 +896,6 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
                            parent_end_year, parent_start_secondary, parent_end_secondary, parent_hierarchy_toggle,
                            parent_hierarchy_drop, parent_num_state, parent_period_type, parent_graph_child_toggle,
                            state_of_display):
-
     """
     :param closed_tile: Detects when a tile has been deleted and encodes the index of the deleted tile
     param links_style: State of all link/unlink icons and detects user clicking a link icon
@@ -1223,11 +1222,11 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
                                             'vertical-align': 'top'}
                     if parent_timeframe == "select-range":
                         date_picker_triggers[tile] = {"Input Method": parent_timeframe,
-                                                           "Start Year Selection": parent_start_year,
-                                                           "End Year Selection": parent_end_year,
-                                                           "Start Secondary Selection": parent_start_secondary,
-                                                           "End Secondary Selection": parent_end_secondary,
-                                                           "Tab": parent_secondary_type}
+                                                      "Start Year Selection": parent_start_year,
+                                                      "End Year Selection": parent_end_year,
+                                                      "Start Secondary Selection": parent_start_secondary,
+                                                      "End Secondary Selection": parent_end_secondary,
+                                                      "Tab": parent_secondary_type}
 
                     options_triggers[tile] = df_name
                     sidemenu_styles[tile] = DATA_CONTENT_SHOW
@@ -1574,15 +1573,42 @@ app.clientside_callback(
     State('prompt-title', 'data-'),
     prevent_initial_call=True
 )
+for x in range(4):
+    app.clientside_callback(
+        """
+        function _update_axes_titles(graph, xaxis_title, yaxis_title){
+            var yaxis = "";
+            var xaxis = "";
+    
+            if ('figure' in graph['props']){
+                if ('yaxis' in graph['props']['figure']['layout']){
+                    if ('title' in graph['props']['figure']['layout']['yaxis']){
+                        yaxis = graph['props']['figure']['layout']['yaxis']['title']['text'];
+                    }
+                    if ('title' in graph['props']['figure']['layout']['xaxis']){
+                        xaxis = graph['props']['figure']['layout']['xaxis']['title']['text'];
+                    }
+                }
+            }
+            if ( typeof(x_axis_title) == "undefined" ){
+                x_axis_title = "";
+            }
+            if ( typeof(y_axis_title) == "undefined" ){
+                y_axis_title = "";
+            }
+            // if changed id == '.' due to NEW being requested, preserve data menu display.
+            if (xaxis == xaxis_title && yaxis == yaxis_title){
+                throw window.dash_clientside.PreventUpdate;
+            }
+            return [xaxis, yaxis];
+        }
+        """,
+        [Output({'type': 'xaxis-title', 'index': x}, 'value'),
+         Output({'type': 'yaxis-title', 'index': x}, 'value')],
+         Input({'type': 'graph_display', 'index': x}, 'children'),
+        [State({'type': 'xaxis-title', 'index': x}, 'value'),
+         State({'type': 'yaxis-title', 'index': x}, 'value')]
+    )
 
-app.clientside_callback(
-    """
-    function
-    """
-,
-    [Output({'type': 'args-value: {}'.replace("{}", str(x)), 'index': ALL}, 'value')],
-    Input({'class':'plugin-editable editable','index': 'match'},'style'),
-    State({'type': 'args-value: {}'.replace("{}", str(x)), 'index': ALL}, 'value')
 
-)
 

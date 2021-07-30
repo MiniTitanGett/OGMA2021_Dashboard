@@ -36,8 +36,10 @@ from apps.dashboard.datepicker import get_date_box, update_date_columns, get_sec
 #       - operators
 #       - split_filter_part()
 #       - _update_table()
+# ********************************************Arbitrary Constants*****************************************************
 
-
+plotly_graph = {'Line': 'line', 'Bar': 'bar', 'Scatter': 'scatter', 'Bubble': 'bubble',
+                'Box_Plot': 'box', 'Table': 'table', 'Sankey': 'sankey'}
 # ***************************************************GRAPH************************************************************
 
 # update graph
@@ -109,7 +111,8 @@ for x in range(4):
                       timeframe, fiscal_toggle, start_year, end_year, start_secondary, end_secondary,
                       parent_secondary_type, parent_timeframe, parent_fiscal_toggle, parent_start_year, parent_end_year,
                       parent_start_secondary, parent_end_secondary, graph_display, df_name, parent_df_name,
-                      link_state, hierarchy_options, parent_hierarchy_options, df_const, _result_edit_menu, df_confirm):
+                      link_state, hierarchy_options, parent_hierarchy_options, df_const, _result_edit_menu,
+                      df_confirm):
 
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
         tile = dash.callback_context.inputs_list[0]['id']['index']
@@ -119,25 +122,28 @@ for x in range(4):
         # TODO have to finish hooking up plotly axes title edits to hidden div so we are able to save
         #  and update the graph menu when ever a user edits the titles
 
-        # # check if the axes have changed take
+        # check if the axes have changed take
         # if graph_display:
-        #     if ('"type":"args-value' in changed_id and (result_edit_menu == 'ok' or result_edit_menu is None)) \
+        #     previous_graph = graph_display['props']['figure']['data'][0]['type']
+        #     if previous_graph != plotly_graph[graph_type]:
+        #         pass
+        #     elif ('"type":"args-value' in changed_id and (result_edit_menu == 'ok' or result_edit_menu is None)) \
         #             or ((result_edit_menu == 'ok' or result_edit_menu == 'cancel' or result_edit_menu is None)
         #                 and ('hierarchy-toggle' in changed_id or 'hierarchy_level_dropdown' in changed_id or
         #                      'date-picker-trigger' in changed_id or 'hierarchy_display' in changed_id or
-        #                    'tile-title' in changed_id or 'graph_children' in changed_id or 'num-periods' in changed_id
-        #                     or 'period-type' in changed_id))\
+        #                      'tile-title' in changed_id or 'graph_children' in changed_id or 'num-periods' in changed_id
+        #                      or 'period-type' in changed_id)) \
         #             or 'update-graph-trigger' in changed_id:
         #
         #         if 'figure' in graph_display['props']:
-        #             for j in graph_display['props']['figure']['layout']:
-        #                 if j == 'yaxis':
-        #                     if 'title' in graph_display['props']['figure']['layout']['yaxis']:
-        #                         yaxis = graph_display['props']['figure']['layout']['yaxis']['title']['text']
-        #                     if 'title' in graph_display['props']['figure']['layout']['xaxis']:
-        #                         xaxis = graph_display['props']['figure']['layout']['xaxis']['title']['text']
-        #                         break
-
+        #             if 'yaxis' in graph_display['props']['figure']['layout']:
+        #                 if 'title' in graph_display['props']['figure']['layout']['yaxis']:
+        #                     yaxis = graph_display['props']['figure']['layout']['yaxis']['title']['text']
+        #                 if 'title' in graph_display['props']['figure']['layout']['xaxis']:
+        #                     xaxis = graph_display['props']['figure']['layout']['xaxis']['title']['text']
+        #     else:
+        #         xaxis=axes_title[0]
+        #         yaxis=axes_title[1]
         if '"type":"tile-view"}.className' in changed_id and df_name is None and parent_df_name is None:
             return None
 
@@ -445,8 +451,8 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
         elif 'n_clicks' in changed_id:
             conditions = ['date-picker-quarter-button' in changed_id, 'date-picker-month-button' in changed_id]
             quarter_classname, quarter_disabled, month_classname, month_disabled, week_classname, week_disabled, \
-                fringe_min, fringe_max, default_max, max_year, \
-                new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
+            fringe_min, fringe_max, default_max, max_year, \
+            new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
             # set min_year according to user selected fiscal/gregorian time type
             if fiscal_toggle == 'Gregorian':
                 min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
@@ -502,8 +508,8 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                 selected_secondary_max = end_secondary_selection
                 conditions = [tab == 'Quarter', tab == 'Month']
                 quarter_classname, quarter_disabled, month_classname, month_disabled, week_classname, week_disabled, \
-                    fringe_min, fringe_max, default_max, max_year, \
-                    new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
+                fringe_min, fringe_max, default_max, max_year, \
+                new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
             # set min_year according to user selected time type (gregorian/fiscal)
             if fiscal_toggle == 'Gregorian':
                 min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
@@ -766,7 +772,7 @@ for x in range(4):
                 inplace=False)
 
         return dff.iloc[page_current * page_size: (page_current + 1) * page_size].to_dict('records'), \
-            math.ceil(dff.iloc[:, 0].size / page_size)
+               math.ceil(dff.iloc[:, 0].size / page_size)
 
 # *************************************************DATA-FITTING******************************************************
 # update the data fitting section of the edit graph menu

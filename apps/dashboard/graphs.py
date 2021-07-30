@@ -282,12 +282,16 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
             title=get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, arg_value[2],
                                            df_name, df_const))
 
-    if arg_value[9]:
-        xaxis = {'title': arg_value[9]}
+    # if arg_value[9]:
+    #     xaxis = {'title': arg_value[9]}
+    if _xaxis_title:
+        xaxis = {'title': _xaxis_title}
     else:
         xaxis = {'title': 'Date of Event', 'type': 'date'}
-    if arg_value[10]:
-        yaxis = {'title': arg_value[10]}
+    # if arg_value[10]:
+    #     yaxis = {'title': arg_value[10]}
+    if _yaxis_title:
+        yaxis = {'title': _yaxis_title}
     else:
         yaxis = {'title': arg_value[1]}
 
@@ -438,14 +442,14 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
             title=get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, arg_value[2],
                                            df_name, df_const))
 
-    if arg_value[8]:
-        xaxis = arg_value[8]
-    else:
-        xaxis = '{} ({})'.format(arg_value[0], arg_value[1])
-    if arg_value[9]:
-        yaxis = arg_value[9]
-    else:
-        yaxis = '{} ({})'.format(arg_value[2], arg_value[3])
+    # if arg_value[8]:
+    #     xaxis = arg_value[8]
+    # else:
+    xaxis = '{} ({})'.format(arg_value[0], arg_value[1])
+    # if arg_value[9]:
+    #     yaxis = arg_value[9]
+    # else:
+    yaxis = '{} ({})'.format(arg_value[2], arg_value[3])
 
     fig.update_layout(
         xaxis_title=xaxis,
@@ -640,11 +644,14 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             title=get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, arg_value[2],
                                            df_name, df_const))
 
-    if arg_value[7]:
-        xaxis = {'title': arg_value[7]}
-    if arg_value[8]:
-        yaxis = {'title': arg_value[8]}
-
+    # if arg_value[7]:
+    #     xaxis = {'title': arg_value[7]}
+    if _xaxis_title:
+        xaxis = {'title': _xaxis_title}
+    # if arg_value[8]:
+    #     yaxis = {'title': arg_value[8]}
+    if _yaxis_title:
+        yaxis = {'title': _yaxis_title}
     else:
         yaxis = {'title': arg_value[1]}
 
@@ -781,10 +788,10 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             title=get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, arg_value[2],
                                            df_name, df_const))
 
-    if arg_value[6]:
-        xaxis = {'title': arg_value[6]}
-    if arg_value[7]:
-        yaxis = {'title': arg_value[7]}
+    # if arg_value[6]:
+    #     xaxis = {'title': arg_value[6]}
+    # if arg_value[7]:
+    #     yaxis = {'title': arg_value[7]}
 
     fig.update_layout(
         xaxis=xaxis if arg_value[2] == 'Horizontal' else yaxis,

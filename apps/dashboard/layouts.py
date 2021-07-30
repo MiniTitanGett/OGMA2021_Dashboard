@@ -729,57 +729,57 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
             id={'type': 'div-graph-options', 'index': tile})]
 
 # create customize content
-def get_customize_view(tile, graph_type, df_name):
-    if df_name == 'OPG010':
-        graphs = GRAPH_OPTIONS['OPG010']
-    elif df_name == 'OPG001':
-        graphs = GRAPH_OPTIONS['OPG001']
-    else:
-        graphs = []
-
-    options = []
-    for i in graphs:
-        options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
-
-    return [
-        html.Div(
-            id={'type': 'div-customize-warning-message', 'index': tile},
-            children=[
-                dcc.Markdown(
-                    get_label("LBL_Please_Select_A_Data_Set_To_View_Customization_Options")
-                )],
-            style={'margin-left': '15px'} if df_name is None else
-            DATA_CONTENT_HIDE),
-        html.Div(
-            id={'type': 'div-graph-type', 'index': tile},
-            children=[
-                html.Div(
-                    children=[
-                        html.P(
-                            "{}:".format(get_label('LBL_Graph_Type')),
-                            style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px',
-                                   'display': 'inline-block', 'text-align': 'none'}),
-                        html.I(
-                            html.Span(
-                                get_label("LBL_Graph_Type_Info"),
-                                className='save-symbols-tooltip'),
-                            className='fa fa-question-circle-o',
-                            id={'type': 'graph-type-info', 'index': tile},
-                            style={'position': 'relative'})],
-                    id={'type': 'graph-type-info-wrapper', 'index': tile}),
-                html.Div(
-                    dcc.Dropdown(
-                        id={'type': 'graph-type-dropdown', 'index': tile},
-                        clearable=False,
-                        options=[{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in graphs],
-                        value=graph_type if graph_type is not None else options[0]['value'] if len(options) != 0 else
-                        None,  # graph_type,
-                        style={'max-width': '405px', 'width': '100%', 'font-size': '13px'}),
-                ),
-            ],
-            style=DATA_CONTENT_HIDE if df_name is None else
-            {'margin-left': '15px'}),
-        ]
+# def get_customize_view(tile, graph_type, df_name):
+#     if df_name == 'OPG010':
+#         graphs = GRAPH_OPTIONS['OPG010']
+#     elif df_name == 'OPG001':
+#         graphs = GRAPH_OPTIONS['OPG001']
+#     else:
+#         graphs = []
+#
+#     options = []
+#     for i in graphs:
+#         options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+#
+#     return [
+#         html.Div(
+#             id={'type': 'div-customize-warning-message', 'index': tile},
+#             children=[
+#                 dcc.Markdown(
+#                     get_label("LBL_Please_Select_A_Data_Set_To_View_Customization_Options")
+#                 )],
+#             style={'margin-left': '15px'} if df_name is None else
+#             DATA_CONTENT_HIDE),
+#         html.Div(
+#             id={'type': 'div-graph-type', 'index': tile},
+#             children=[
+#                 html.Div(
+#                     children=[
+#                         html.P(
+#                             "{}:".format(get_label('LBL_Graph_Type')),
+#                             style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px',
+#                                    'display': 'inline-block', 'text-align': 'none'}),
+#                         html.I(
+#                             html.Span(
+#                                 get_label("LBL_Graph_Type_Info"),
+#                                 className='save-symbols-tooltip'),
+#                             className='fa fa-question-circle-o',
+#                             id={'type': 'graph-type-info', 'index': tile},
+#                             style={'position': 'relative'})],
+#                     id={'type': 'graph-type-info-wrapper', 'index': tile}),
+#                 html.Div(
+#                     dcc.Dropdown(
+#                         id={'type': 'graph-type-dropdown', 'index': tile},
+#                         clearable=False,
+#                         options=[{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in graphs],
+#                         value=graph_type if graph_type is not None else options[0]['value'] if len(options) != 0 else
+#                         None,  # graph_type,
+#                         style={'max-width': '405px', 'width': '100%', 'font-size': '13px'}),
+#                 ),
+#             ],
+#             style=DATA_CONTENT_HIDE if df_name is None else
+#             {'margin-left': '15px'}),
+#         ]
 
 # create default tile
 def get_tile(tile, tile_keys=None, df_name=None):
@@ -809,10 +809,10 @@ def get_tile(tile, tile_keys=None, df_name=None):
                     [get_label('LBL_Edit')],
                     id={'type': 'tile-customize', 'index': tile},
                     className='tile-nav tile-nav--customize'),
-                html.Button(
-                    ['Edit View'],
-                    id={'type': 'tile-custom', 'index': tile},
-                    className='tile-nav tile-nav-custom'),
+                # html.Button(
+                #     ['Edit View'],
+                #     id={'type': 'tile-custom', 'index': tile},
+                #     className='tile-nav tile-nav-custom'),
                 html.Button(
                     [get_label('LBL_Save')],
                     id={'type': 'save-button', 'index': tile},
@@ -861,15 +861,15 @@ def get_tile(tile, tile_keys=None, df_name=None):
                     className='customize-content'),
                 id={'type': 'tile-customize-content-wrapper', 'index': tile},
                 className='customize-content'),
-            html.Div(
-                html.Div(
-                    tile_keys['Customize view'] if tile_keys
-                    else get_customize_view(tile=tile, graph_type=None, df_name=df_name),
-                    style=CUSTOMIZE_CONTENT_HIDE,
-                    id={'type': 'tile-customize-view', 'index': tile},
-                    className='customize-content'),
-                id={'type': 'tile-customize-view-wrapper', 'index': tile},
-                className='customize-view'),
+            # html.Div(
+            #     html.Div(
+            #         tile_keys['Customize view'] if tile_keys
+            #         else get_customize_view(tile=tile, graph_type=None, df_name=df_name),
+            #         style=CUSTOMIZE_CONTENT_HIDE,
+            #         id={'type': 'tile-customize-view', 'index': tile},
+            #         className='customize-content'),
+            #     id={'type': 'tile-customize-view-wrapper', 'index': tile},
+            #     className='customize-view'),
             html.Div([
                 html.P(get_label('LBL_Load_A_Saved_Graph'),
                        style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
@@ -1230,13 +1230,13 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                     style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
                 html.Div([
                     dcc.Input(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 9},
+                        id={'type': 'xaxis-title', 'index': tile},
                         type="text",
                         value=xaxis,
                         style={'display': 'None'},
                         debounce=True),
                     dcc.Input(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 10},
+                        id={'type': 'yaxis-title' , 'index': tile},
                         type="text",
                         value=yaxis,
                         style={'display': 'None'},
@@ -1369,13 +1369,13 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
                 style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
             html.Div([
                 dcc.Input(
-                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 7},
+                    id={'type': 'xaxis-title', 'index': tile},
                     type="text",
                     value=xaxis,
                     style={'display': 'None'},
                     debounce=True),
                 dcc.Input(
-                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 8},
+                    id={'type': 'yaxis-title', 'index': tile},
                     type="text",
                     value=yaxis,
                     style={'display': 'None'},
@@ -1520,13 +1520,13 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                 style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
             html.Div([
                 dcc.Input(
-                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 8},
+                    id={'type': 'xaxis-title', 'index': tile},
                     type="text",
                     value=xaxis,
                     style={'display': 'None'},
                     debounce=True),
                 dcc.Input(
-                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 9},
+                    id={'type': 'yaxis-title', 'index': tile},
                     type="text",
                     value=yaxis,
                     style={'display': 'None'},
@@ -1625,13 +1625,13 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                 style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
             html.Div([
                 dcc.Input(
-                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 6},
+                    id={'type': 'xaxis-title', 'index': tile},
                     type="text",
                     value=xaxis,
                     style={'display': 'None'},
                     debounce=True),
                 dcc.Input(
-                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 7},
+                    id={'type': 'yaxis-title', 'index': tile},
                     type="text",
                     value=yaxis,
                     style={'display': 'None'},

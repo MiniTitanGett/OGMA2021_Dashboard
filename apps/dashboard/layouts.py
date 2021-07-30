@@ -164,7 +164,7 @@ def get_data_set_picker(tile, df_name, confirm_parent, prev_selection=None):
 
 
 # get DATA side-menu
-def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Filter', level_value='H1',
+def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Filter', level_value='H0',
                   nid_path="root", graph_all_toggle=None, fiscal_toggle='Gregorian', input_method='all-time',
                   num_periods='5', period_type='last-years', prev_selection=None, confirm_parent=None, df_const=None):
     # if df_name is None:

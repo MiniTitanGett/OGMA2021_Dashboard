@@ -23,16 +23,16 @@ from apps.dashboard.data import get_label, session, CLR
 def generate_dropdown(tile, df_name, nid_path):
     if df_name:
         # using a subset of our dataframe, turn it into a multiindex df, and access unique values for option
-        df = session[df_name][['H1', 'H2', 'H3', 'H4', 'H5', 'H6']]
+        df = session[df_name][['H0', 'H1', 'H2', 'H3', 'H4', 'H5']]
         hierarchy_nid_list = list(nid_path.split("^||^"))[1:]
         llen = len(hierarchy_nid_list)
         if llen == 6:
             option_list = []
         elif llen != 0:
-            df = df.set_index(['H{}'.format(i + 1) for i in range(llen)])
-            option_list = df.loc[tuple(hierarchy_nid_list)]['H{}'.format(llen + 1)].dropna().unique()
+            df = df.set_index(['H{}'.format(i) for i in range(llen)])
+            option_list = df.loc[tuple(hierarchy_nid_list)]['H{}'.format(llen)].dropna().unique()
         else:
-            option_list = df['H1'].unique()
+            option_list = df['H0'].unique()
         options = [{'label': i, 'value': i} for i in option_list]
         options = sorted(options, key=lambda k: k['label'])
         return dcc.Dropdown(

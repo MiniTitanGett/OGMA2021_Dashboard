@@ -23,6 +23,7 @@ from sklearn.preprocessing import PolynomialFeatures
 from conn import get_ref, exec_storedproc_results
 
 # ***********************************************ARBITRARY CONSTANTS*************************************************
+from server import get_org_parent
 
 GRAPH_OPTIONS = {
     'OPG001': ['Line', 'Bar', 'Scatter', 'Bubble', 'Box_Plot', 'Table'],
@@ -146,19 +147,39 @@ def dataset_to_df(df_name):
     df['Variable Name'] = col
 
     # Can be redone to exclude hierarchy one name and to include more levels
-    df = df.rename(columns={'Hierarchy One Top': 'H1',
-                            'Hierarchy One -1': 'H2',
-                            'Hierarchy One -2': 'H3',
-                            'Hierarchy One -3': 'H4',
-                            'Hierarchy One -4': 'H5',
-                            'Hierarchy One Leaf': 'H6'})
-
-    # Shrinks Data Size
-    df = create_categories(df, ['H1', 'H2', 'H3', 'H4', 'H5', 'H6'])
+    df = df.rename(columns={'Hierarchy One Top': 'H0',
+                            'Hierarchy One -1': 'H1',
+                            'Hierarchy One -2': 'H2',
+                            'Hierarchy One -3': 'H3',
+                            'Hierarchy One -4': 'H4',
+                            'Hierarchy One Leaf': 'H5'})
 
     # replaces all strings that are just spaces with NaN
     df.replace(to_replace=r'^\s*$', value=np.NaN, regex=True, inplace=True)
     df.replace(to_replace='', value=np.NaN, inplace=True)
+
+    # if OPG011 we need to construct the tree by asking for the parents of unique values
+    if df_name == "OPG011":
+        list_of_depths = [[], [], [], [], [], []]
+        dff = df[["Hierarchy Value", "Hierarchy Level"]].drop_duplicates()
+        # init the depth lists
+        for x in dff["Hierarchy Value"]:
+            depth = int(dff.loc[dff["Hierarchy Value"] == x]["Hierarchy Level"].iloc[0])
+            list_of_depths[depth].append(x)
+            df.loc[df["Hierarchy Value"] == x, "H{}".format(depth)] = x
+
+        # begin reverse breadth first traversal, filling hierarchy along the way
+        depth = 6
+        for nodes_at_depth in reversed(list_of_depths):
+            depth = depth - 1
+            for node in nodes_at_depth:
+                parent = get_org_parent(node, depth)
+                if parent not in list_of_depths[depth - 1]:
+                    list_of_depths[depth - 1].append(parent)
+                # insert parent into table
+                df.loc[df["H{}".format(depth)] == node, "H{}".format(depth-1)] = parent
+
+    df = create_categories(df, ['H0', 'H1', 'H2', 'H3', 'H4', 'H5'])
 
     logging.debug("dataset {} loaded.".format(df_name))
 
@@ -169,7 +190,7 @@ def dataset_to_df(df_name):
 
 # generates the constants required to be stored for the given dataset
 def generate_constants(df_name):
-    HIERARCHY_LEVELS = ['H{}'.format(i + 1) for i in range(6)]
+    HIERARCHY_LEVELS = ['H{}'.format(i) for i in range(6)]
 
     df = session[df_name]
 
@@ -202,8 +223,8 @@ def generate_constants(df_name):
         GREGORIAN_MIN_YEAR = int(min_date_unf.year)
         GREGORIAN_YEAR_MAX = int(max_date_unf.year)
         GREGORIAN_QUARTER_MAX_YEAR = int(max_date_unf.year)
-        GREGORIAN_QUARTER_FRINGE_MIN = int((min_date_unf.month-1) // 3 + 1)
-        GREGORIAN_QUARTER_FRINGE_MAX = int((max_date_unf.month-1) // 3 + 1)
+        GREGORIAN_QUARTER_FRINGE_MIN = int((min_date_unf.month - 1) // 3 + 1)
+        GREGORIAN_QUARTER_FRINGE_MAX = int((max_date_unf.month - 1) // 3 + 1)
         GREGORIAN_MONTH_MAX_YEAR = int(max_date_unf.year)
         GREGORIAN_MONTH_FRINGE_MIN = int(min_date_unf.month)
         GREGORIAN_MONTH_FRINGE_MAX = int(max_date_unf.month)

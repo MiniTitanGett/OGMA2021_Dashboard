@@ -502,6 +502,8 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
             graph_options = GRAPH_OPTIONS["OPG001"]
         elif df_name_parent == "OPG010":
             graph_options = GRAPH_OPTIONS["OPG010"]
+        elif df_name_parent == "OPG011":
+            graph_options = GRAPH_OPTIONS["OPG011"]
         else:
             graph_options = []
         graph_options.sort()
@@ -1089,7 +1091,6 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
                 else:
                     # set previous
                     prev_selection[tile] = df_name
-
                     df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
                     df_name = df_names[tile]
                     # if load called, load dataset here
@@ -1111,7 +1112,6 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
                                 graph_triggers[i] = df_name
                                 options_triggers[i] = df_name
                                 df_names[i] = df_name
-
                             else:
                                 # [i]= 'fa-fa-unlink'
                                 # set the dataset of the new menu from unlinking
@@ -1122,7 +1122,10 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
                                     nid_path += '^||^{}'.format(button['props']['children'])
 
                                 if df_name == "OPG001":
-                                    df_names[i] = "OPG010"  # TODO: hardcode is a bit worrisome
+                                    if graph_types[i] in GRAPH_OPTIONS["OPG010"] and prev_selection[i] == "OPG010":
+                                        df_names[i] = "OPG010"  # TODO: hardcode is a bit worrisome
+                                    else:
+                                        df_names[i] = "OPG011"
                                     df_const[df_names[i]] = generate_constants(df_names[i])
                                     data[i] = get_data_menu(i, df_names[i],
                                                             hierarchy_toggle=parent_hierarchy_toggle,
@@ -1153,7 +1156,43 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
                                                                    "Tab": parent_secondary_type}
 
                                 elif df_name == "OPG010":
-                                    df_names[i] = "OPG001"  # TODO: hardcode is a bit worrisome
+                                    if graph_types[i] in GRAPH_OPTIONS["OPG001"] and prev_selection[i] == "OPG001":
+                                        df_names[i] = "OPG001"  # TODO: hardcode is a bit worrisome
+                                    else:
+                                        df_names[i] = "OPG011"
+                                    df_const[df_names[i]] = generate_constants(df_names[i])
+                                    data[i] = get_data_menu(i, df_names[i],
+                                                            hierarchy_toggle=parent_hierarchy_toggle,
+                                                            level_value=parent_hierarchy_drop,
+                                                            nid_path=nid_path,
+                                                            graph_all_toggle=parent_graph_child_toggle,
+                                                            fiscal_toggle=parent_fiscal_toggle,
+                                                            input_method=parent_timeframe,
+                                                            num_periods=parent_num_state,
+                                                            period_type=parent_period_type,
+                                                            prev_selection=prev_selection[i],
+                                                            df_const=df_const) if prompt_result == 'op-2' \
+                                        else get_data_menu(i, df_names[i],
+                                                           prev_selection=prev_selection[i],
+                                                           df_const=df_const)
+                                    # sidemenu_styles[i] = DATA_CONTENT_SHOW
+                                    refresh_button[i] = {'padding': '10px 0', 'width': '15px',
+                                                         'height': '15px',
+                                                         'position': 'relative',
+                                                         'margin-right': '10px', 'margin-left': '10px',
+                                                         'vertical-align': 'top'}
+                                    if parent_timeframe == "select-range":
+                                        date_picker_triggers[i] = {"Input Method": parent_timeframe,
+                                                                   "Start Year Selection": parent_start_year,
+                                                                   "End Year Selection": parent_end_year,
+                                                                   "Start Secondary Selection": parent_start_secondary,
+                                                                   "End Secondary Selection": parent_end_secondary,
+                                                                   "Tab": parent_secondary_type}
+                                elif df_name == "OPG011":
+                                    if graph_types[i] in GRAPH_OPTIONS["OPG001"] and prev_selection[i] == "OPG001":
+                                        df_names[i] = "OPG001"  # TODO: hardcode is a bit worrisome
+                                    else:
+                                        df_names[i] = "OPG010"
                                     df_const[df_names[i]] = generate_constants(df_names[i])
                                     data[i] = get_data_menu(i, df_names[i],
                                                             hierarchy_toggle=parent_hierarchy_toggle,
@@ -1189,7 +1228,6 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
                                     prev_selection[i] = df_name
                                 else:
                                     options_triggers[i] = 'fa fa-unlink'
-
             # duo options
             else:
                 if prompt_result == 'ok':

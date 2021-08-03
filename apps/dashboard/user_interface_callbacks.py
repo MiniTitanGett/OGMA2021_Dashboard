@@ -931,10 +931,6 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
     if changed_id == '.':
         raise PreventUpdate
 
-    # if 'tile-data' in changed id but n_clicks == 0, meaning a tile was created from blank display, prevent update
-    if '{"index":0,"type":"tile-data"}.n_clicks' == changed_id and not data_clicks[0]:
-        raise PreventUpdate
-
     # initialize return variables, data is NONE and sidemenus are hidden by default
     data = [None] * 5
     sidemenu_styles = [DATA_CONTENT_HIDE] * 5
@@ -947,11 +943,23 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
     df_name_confirm = None
     prompt_trigger = no_update
     data_set_val = [no_update] * 5
+    df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
     # unknown why but this has to be done this way instead of using ALL since ALL was changing the order in seemingly
     # random ways
     prev_selection = [prev_selection_0, prev_selection_1, prev_selection_2, prev_selection_3, prev_selection_4]
+
+    # if 'tile-data' in changed id but n_clicks == 0, meaning a tile was created from blank display, prevent update
+    if '{"index":0,"type":"tile-data"}.n_clicks' == changed_id and not data_clicks[0]:
+        for i in range(len(links_style)):
+            if links_style[i] == 'fa fa-link':
+                prev_selection[i] = df_names[4]
+            else:
+                prev_selection[i] = df_names[i]
+        if 'fa fa-link' in links_style:
+            prev_selection[4] = df_names[4]
+
     # if 'data-menu-close' or 'select-dashboard-dropdown' requested, close all data menus
-    if ('data-menu-close' in changed_id or 'select-dashboard-dropdown' in changed_id) and \
+    elif ('data-menu-close' in changed_id or 'select-dashboard-dropdown' in changed_id) and \
             (df_name_0 is not None or df_name_1 is not None or df_name_2 is not None or df_name_3 is not None or
              df_name_4 is not None):
         pass
@@ -997,7 +1005,6 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
     # elif 'data-set' in changed id keep shown and show confirmation button
     elif '"type":"data-set"}.value' in changed_id:
         changed_index = int(search(r'\d+', changed_id).group())
-        df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
         df_name = df_names[changed_index]
         sidemenu_styles[changed_index] = DATA_CONTENT_SHOW
         if df_name in session:
@@ -1067,7 +1074,6 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                 prompt_trigger = [['load_dataset', changed_index], {}, get_label('LBL_Load_Dataset'),
                                   get_label('LBL_Load_Dataset_Duo_Prompt'), False]
         else:
-            df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
 
             df_name = df_names[changed_index]
             session[df_name] = dataset_to_df(df_name)
@@ -1100,7 +1106,6 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
     elif 'prompt-result' in changed_id:
         if prompt_data[0] == 'loaded_dataset_swap' or prompt_data[0] == 'load_dataset':
             tile = prompt_data[1]
-            df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
             df_name = df_names[tile]
             # see if a trip option or not
             if tile == 4:
@@ -1113,7 +1118,6 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                     # set previous
                     prev_selection[tile] = df_name
 
-                    df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
                     df_name = df_names[tile]
                     # if load called, load dataset here
                     if prompt_data[0] == 'load_dataset':

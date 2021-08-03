@@ -498,7 +498,10 @@ def get_layout_dashboard():
         dcc.Store(id={'type': 'prompt-trigger', 'index': 3}),  # tile 3
         dcc.Store(id={'type': 'prompt-trigger', 'index': 4}),  # dashboard
         dcc.Store(id={'type': 'prompt-trigger', 'index': 5}),  # sidemenus
-        dcc.Store(id='prompt-result'),
+        # separated result stores for specific callback chains
+        dcc.Store(id={'type': 'prompt-result', 'index': 0}),  # _manage_tile_save_load_trigger() callback
+        dcc.Store(id={'type': 'prompt-result', 'index': 1}),  # _manage_dashboard_saves_and_reset() callback
+        dcc.Store(id={'type': 'prompt-result', 'index': 2}),  # _manage_data_sidemenus() callback
         # Floating Menu
         html.Div(
             html.Div([
@@ -530,12 +533,15 @@ def get_layout_dashboard():
             style=DATA_CONTENT_HIDE,
             id='float-menu-obscure',
             className='prompt-obscure'),
-        dcc.Store(id={'type': 'float-menu-trigger', 'index': 0}),
-        dcc.Store(id={'type': 'float-menu-trigger', 'index': 1}),
-        dcc.Store(id={'type': 'float-menu-trigger', 'index': 2}),
-        dcc.Store(id={'type': 'float-menu-trigger', 'index': 3}),
-        dcc.Store(id={'type': 'float-menu-trigger', 'index': 4}),
-        dcc.Store(id='float-menu-result'),
+        dcc.Store(id={'type': 'float-menu-trigger', 'index': 0}),  # tile 0
+        dcc.Store(id={'type': 'float-menu-trigger', 'index': 1}),  # tile 1
+        dcc.Store(id={'type': 'float-menu-trigger', 'index': 2}),  # tile 2
+        dcc.Store(id={'type': 'float-menu-trigger', 'index': 3}),  # tile 3
+        dcc.Store(id={'type': 'float-menu-trigger', 'index': 4}),  # linked tiles
+        # separated result stores for specific callback chains
+        dcc.Store(id={'type': 'float-menu-result', 'index': 0}),  # _manage_tile_save_load_trigger() callback
+        dcc.Store(id={'type': 'float-menu-result', 'index': 1}),  # _manage_dashboard_saves_and_reset() callback
+        dcc.Store(id={'type': 'float-menu-result', 'index': 2}),  # _serve_float_menu_and_take_result() callback
         # Popups
         dbc.Alert(
             'Your Tile Has Been Saved',

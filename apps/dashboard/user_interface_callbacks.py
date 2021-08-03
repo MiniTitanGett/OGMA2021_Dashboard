@@ -326,7 +326,7 @@ for x in range(4):
          Output({'type': 'tile-customize-content-wrapper', 'index': x}, 'children')],
         [Input({'type': 'tile-customize', 'index': x}, 'n_clicks'),
          Input({'type': 'tile-layouts', 'index': x}, 'n_clicks'),
-         Input('float-menu-result', 'children')],
+         Input({'type': 'float-menu-result', 'index': 2}, 'children')],
         [State('float-menu-title', 'data-'),
          State({'type': 'tile-customize-content', 'index': x}, 'children')],
         prevent_initial_call=True
@@ -350,6 +350,7 @@ for x in range(4):
             raise PreventUpdate
 
         customize_menu_output = no_update
+        float_menu_trigger = no_update
 
         # switch statement
         if 'tile-customize' in changed_id:
@@ -364,12 +365,10 @@ for x in range(4):
             customize_className = 'tile-nav tile-nav--customize'
             layouts_className = 'tile-nav tile-nav--layout tile-nav--selected'
         elif float_menu_result == 'ok':
-            float_menu_trigger = [None, {'display': 'hide'}, None]
             customize_className = 'tile-nav tile-nav--customize'
             layouts_className = 'tile-nav tile-nav--layout'
         # cancel
         else:
-            float_menu_trigger = [None, {'display': 'hide'}, None]
             customize_className = 'tile-nav tile-nav--customize'
             layouts_className = 'tile-nav tile-nav--layout'
             if float_menu_data[0] == 'customize':
@@ -387,10 +386,14 @@ app.clientside_callback(
     """
     function _init_float_menu(menu_trigger_0, menu_trigger_1, menu_trigger_2, menu_trigger_3, menu_trigger_4, 
              close_n_clicks, cancel_n_clicks, ok_n_clicks, float_menu_data) {
+        // init variables
         const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
+        var float_menu_trigger = dash_clientside.no_update;
+        var result = dash_clientside.no_update;
+        var result_0 = dash_clientside.no_update;
+        var result_1 = dash_clientside.no_update;
         
-        var float_menu_trigger = null;
-        var result = null;
+        // serve the menu by taking the tile and retrieving what was requested to put into body
         if (triggered.includes('float-menu-trigger')) {
             var trigger_arr = [menu_trigger_0, menu_trigger_1, menu_trigger_2, menu_trigger_3, menu_trigger_4]
             var tile = triggered.match(/\d+/)[0];
@@ -413,6 +416,7 @@ app.clientside_callback(
                 document.getElementById(`{"index":${tile},"type":"tile-layouts-warning"}`).style.display = 'none';
             }
         }
+        // otherwise, input from menu needs to be handled to output to correct callback chain
         else {
             float_menu_trigger = [float_menu_data, {'display': 'none'}, '', ''];
             var tile = float_menu_data[1];
@@ -435,14 +439,22 @@ app.clientside_callback(
                 result = 'cancel';
             }
             if (triggered == 'float-menu-ok.n_clicks') {result = 'ok';}
+            
+            // ensure result gets sent to correct callbacks
+            // result always get sent to _serve_float_menu_and_take_result() for styles
+            if (float_menu_trigger[0][0] == 'layouts') {result_0 = result;} 
+            if (float_menu_trigger[0][0] == 'dashboard_layouts') {result_1 = result;} 
+            
         }
-        return [float_menu_trigger[0], float_menu_trigger[1], float_menu_trigger[2], result];
+        return [float_menu_trigger[0], float_menu_trigger[1], float_menu_trigger[2], result_0, result_1, result];
     }
     """,
     [Output('float-menu-title', 'data-'),  # index value and reason for prompt
      Output('float-menu-obscure', 'style'),
      Output('float-menu-title', 'children'),
-     Output('float-menu-result', 'children')],
+     Output({'type': 'float-menu-result', 'index': 0}, 'children'),   # _manage_tile_save_load_trigger() callback
+     Output({'type': 'float-menu-result', 'index': 1}, 'children'),   # _manage_dashboard_saves_and_reset() callback
+     Output({'type': 'float-menu-result', 'index': 2}, 'children')],  # _serve_float_menu_and_take_result() callback
     [Input({'type': 'float-menu-trigger', 'index': 0}, 'data-'),
      Input({'type': 'float-menu-trigger', 'index': 1}, 'data-'),
      Input({'type': 'float-menu-trigger', 'index': 2}, 'data-'),
@@ -839,7 +851,6 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
      Output({'type': 'update-date-picker-trigger', 'index': 3}, 'data-boolean'),
      Output({'type': 'update-date-picker-trigger', 'index': 4}, 'data-boolean')],
     [Input('tile-closed-trigger', 'data-'),
-     Input('select-dashboard-dropdown', 'value'),
      Input({'type': 'tile-link', 'index': ALL}, 'className'),
      Input({'type': 'tile-data', 'index': ALL}, 'n_clicks'),
      Input({'type': 'data-menu-close', 'index': ALL}, 'n_clicks'),
@@ -858,7 +869,7 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
      Input({'type': 'confirm-data-set-refresh', 'index': 2}, 'n_clicks'),
      Input({'type': 'confirm-data-set-refresh', 'index': 3}, 'n_clicks'),
      Input({'type': 'confirm-data-set-refresh', 'index': 4}, 'n_clicks'),
-     Input('prompt-result', 'children')],
+     Input({'type': 'prompt-result', 'index': 2}, 'children')],
     [State('prompt-title', 'data-'),
      State({'type': 'data-tile', 'index': ALL}, 'children'),
      State({'type': 'data-tile', 'index': ALL}, 'style'),
@@ -885,7 +896,7 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
      State({'type': 'hierarchy_display_button', 'index': 4}, 'children')],
     prevent_initial_call=True
 )
-def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_clicks,
+def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                            _data_close_clicks, df_name_0, df_name_1, df_name_2, df_name_3, df_name_4, _confirm_clicks_0,
                            _confirm_clicks_1, _confirm_clicks_2, _confirm_clicks_3, _confirm_clicks_4,
                            _refresh_clicks_0, _refresh_clicks_1, _refresh_clicks_2, _refresh_clicks_3,
@@ -1424,7 +1435,7 @@ for x in range(4):
     )
 
 # *************************************************LOADSCREEN*********************************************************
-# TODO: FIX ALL OF THE LOAD SCREENS
+
 # All clientside callback functions referred to are stored in /assets/ClientsideCallbacks.js
 for x in range(4):
     app.clientside_callback(
@@ -1450,26 +1461,26 @@ for x in range(4):
 
 app.clientside_callback(
     """
-    function datasetLoadScreen(n_click_load, n_click_reset, float_menu_result, prompt_result, float_menu_data, 
+    function datasetLoadScreen(n_click_load, n_click_reset, float_menu_result, prompt_result, float_menu_data,
                                selected_dashboard, prompt_data, prev_selected) {
         const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
         var changed_index = null;
         if (triggered.match(/\d+/)){
             changed_index = parseInt(triggered.match(/\d+/)[0]);
         }
-        if (triggered != "" && 
+        if (triggered != "" &&
              (changed_index != null && n_click_load != ',,,,' && prev_selected[changed_index] == null ||
-             n_click_reset != ',,,,' || 
-             (typeof float_menu_data != 'undefined' && float_menu_data[0] == 'dashboard_layouts' && 
-              selected_dashboard != null && float_menu_result == 'ok') || 
-             (typeof prompt_data != 'undefined' && prompt_data[0] == 'load_dataset' && prompt_result != 'op-1' && 
+             n_click_reset != ',,,,' ||
+             (typeof float_menu_data != 'undefined' && float_menu_data[0] == 'dashboard_layouts' &&
+              selected_dashboard != null && float_menu_result == 'ok') ||
+             (typeof prompt_data != 'undefined' && prompt_data[0] == 'load_dataset' && prompt_result != 'op-1' &&
               prompt_result != 'close'))){
-              
+
             var newDiv = document.createElement('div');
             newDiv.className = '_data-loading';
             newDiv.id = 'loading';
             document.body.appendChild(newDiv, document.getElementById('content'));
-            
+
         }
         return 0;
     }
@@ -1477,8 +1488,8 @@ app.clientside_callback(
     Output('dataset-confirmation-symbols', 'n_clicks'),
     [Input({'type': 'confirm-load-data', 'index': ALL}, 'n_clicks'),
      Input({'type': 'confirm-data-set-refresh', 'index': ALL}, 'n_clicks'),
-     Input('float-menu-result', 'children'),
-     Input('prompt-result', 'children')],
+     Input({'type': 'float-menu-result', 'index': 1}, 'children'),
+     Input({'type': 'prompt-result', 'index': 2}, 'children')],
     [State('float-menu-title', 'data-'),
      State('select-dashboard-dropdown', 'value'),
      State('prompt-title', 'data-'),
@@ -1522,12 +1533,17 @@ app.clientside_callback(
     function _serve_prompt(prompt_trigger_0, prompt_trigger_1, prompt_trigger_2, prompt_trigger_3, prompt_trigger_4,
              prompt_trigger_5, close_n_clicks, cancel_n_clicks, ok_n_clicks, op1_n_clicks, op2_n_clicks, op3_n_clicks, 
              prompt_data){
+        // init variables
         const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
         var prompt_trigger = dash_clientside.no_update;
         var result = dash_clientside.no_update;
+        var result_0 = dash_clientside.no_update;
+        var result_1 = dash_clientside.no_update;
+        var result_2 = dash_clientside.no_update;
         var duo_style = {};
         var trip_style = {'display': 'none'};
         
+        // if input, serve the prompt
         if (triggered.includes('prompt-trigger')){
             var trigger_arr = [prompt_trigger_0, prompt_trigger_1, prompt_trigger_2, prompt_trigger_3, prompt_trigger_4,
                                prompt_trigger_5];
@@ -1538,6 +1554,7 @@ app.clientside_callback(
                 trip_style = {};
             } 
         }
+        // else, return what was clicked
         else {
             if (triggered == 'prompt-close.n_clicks') {result = 'close';}
             else if (triggered == 'prompt-cancel.n_clicks'){result = 'cancel';}
@@ -1547,16 +1564,41 @@ app.clientside_callback(
             else if (triggered == 'prompt-option-3.n_clicks'){result = 'op-3';}
             
             prompt_trigger = [prompt_data, {'display': 'none'}, '', ''];
+            
+            // ensure it gets returned to correct callback
+            switch(prompt_data[0]){
+                case 'delete':
+                case 'overwrite':
+                case 'link':
+                    result_0 = result;
+                    break;
+                case 'delete_dashboard':
+                case 'overwrite_dashboard':
+                    result_1 = result;
+                    break;
+                case 'close':
+                case 'reset':
+                    result_1 = result;
+                    result_2 = result;
+                    break;
+                case 'loaded_dataset_swap':
+                case 'load_dataset':
+                    result_2 = result;
+                    break;
+            }
         }
+        
         return [prompt_trigger[0], prompt_trigger[1], prompt_trigger[2], prompt_trigger[3], 
-                result, duo_style, trip_style];
+                result_0, result_1, result_2, duo_style, trip_style];
     }
     """,
     [Output('prompt-title', 'data-'),  # index value and reason for prompt
      Output('prompt-obscure', 'style'),
      Output('prompt-title', 'children'),
      Output('prompt-body', 'children'),
-     Output('prompt-result', 'children'),
+     Output({'type': 'prompt-result', 'index': 0}, 'children'),  # _manage_tile_save_load_trigger() callback
+     Output({'type': 'prompt-result', 'index': 1}, 'children'),  # _manage_dashboard_saves_and_reset() callback
+     Output({'type': 'prompt-result', 'index': 2}, 'children'),  # _manage_data_sidemenus() callback
      Output('prompt-button-wrapper-duo', 'style'),
      Output('prompt-button-wrapper-trip', 'style')],
     [Input({'type': 'prompt-trigger', 'index': 0}, 'data-'),  # tile 0

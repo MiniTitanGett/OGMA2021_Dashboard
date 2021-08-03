@@ -97,7 +97,6 @@ for x in range(4):
          # Constants
          State('df-constants-storage', 'data'),
          # Float menu result
-         State('float-menu-result', 'children'),  # TODO: unused state
          State({'type': 'data-set-parent', 'index': 4}, 'value')],
         prevent_initial_call=True
     )
@@ -109,7 +108,7 @@ for x in range(4):
                       timeframe, fiscal_toggle, start_year, end_year, start_secondary, end_secondary,
                       parent_secondary_type, parent_timeframe, parent_fiscal_toggle, parent_start_year, parent_end_year,
                       parent_start_secondary, parent_end_secondary, graph_display, df_name, parent_df_name,
-                      link_state, hierarchy_options, parent_hierarchy_options, df_const, _result_edit_menu, df_confirm):
+                      link_state, hierarchy_options, parent_hierarchy_options, df_const, df_confirm):
 
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
         tile = dash.callback_context.inputs_list[0]['id']['index']

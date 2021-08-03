@@ -85,8 +85,8 @@ def _update_tile_loading_dropdown_options(_tile_saving_trigger, _dashboard_savin
      Input({'type': 'delete-button', 'index': ALL}, 'n_clicks'),
      Input({'type': 'tile-link', 'index': ALL}, 'n_clicks'),
      Input({'type': 'set-tile-link-trigger', 'index': ALL}, 'link-'),
-     Input('float-menu-result', 'children'),
-     Input('prompt-result', 'children')],
+     Input({'type': 'float-menu-result', 'index': 0}, 'children'),
+     Input({'type': 'prompt-result', 'index': 0}, 'children')],
     [State('prompt-title', 'data-'),
      State('float-menu-title', 'data-'),
      State({'type': 'select-layout-dropdown', 'index': ALL}, 'value'),
@@ -118,7 +118,7 @@ def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, _link_clicks,
 
         if not isinstance(load_state, list):
             load_state = [load_state]
-        if 'float-menu-result.children' in changed_id \
+        if 'float-menu-result' in changed_id \
                 and (float_menu_data[0] != 'layouts' or load_state[changed_index] is None or float_menu_result != 'ok'):
             raise PreventUpdate
         # do not call if we aren't dealing with tiles
@@ -140,7 +140,7 @@ def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, _link_clicks,
                 mode = 'fa fa-link'
         elif '"type":"set-tile-link-trigger"}.link-' in changed_id and link_trigger is not None:
             mode = 'fa fa-unlink'
-        elif 'float-menu-result.children' in changed_id:
+        elif 'float-menu-result' in changed_id:
             mode = "confirm-load"
         elif prompt_data[0] == 'delete' and prompt_result == 'ok':
             mode = "confirm-delete"
@@ -515,8 +515,8 @@ for y in range(4):
     [Input('save-dashboard', 'n_clicks'),
      Input('delete-dashboard', 'n_clicks'),
      Input('load-dashboard', 'n_clicks'),
-     Input('float-menu-result', 'children'),
-     Input('prompt-result', 'children'),
+     Input({'type': 'float-menu-result', 'index': 1}, 'children'),
+     Input({'type': 'prompt-result', 'index': 1}, 'children'),
      Input('dashboard-reset', 'n_clicks'),
      Input({'type': 'tile-close', 'index': ALL}, 'n_clicks')],
     # prompt and menu info
@@ -707,7 +707,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
         else:
             close_trigger = int(search(r'\d+', changed_id).group())
     # if confirm load, load dashboard
-    elif 'float-menu-result.children' in changed_id \
+    elif 'float-menu-result' in changed_id \
             and float_menu_data[0] == 'dashboard_layouts' and selected_dashboard is not None \
             and float_menu_result == 'ok':
         tile_keys = [{}] * 4

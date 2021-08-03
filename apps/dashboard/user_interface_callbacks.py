@@ -227,7 +227,7 @@ def _change_tab(_tab_clicks, _tab_close_clicks, _tab_add_nclicks,
         del data[deleted_tab_index]
         # shift all tab button indices down one following deleted tab
         for i in tab_toggle_children[deleted_tab_index:]:
-            # decremement close button index
+            # decrement close button index
             i['props']['children'][0]['props']['id']['index'] -= 1
             # decrement tab button index
             i['props']['children'][1]['props']['id']['index'] -= 1
@@ -418,7 +418,7 @@ app.clientside_callback(
         }
         // otherwise, input from menu needs to be handled to output to correct callback chain
         else {
-            float_menu_trigger = [float_menu_data, {'display': 'none'}, '', ''];
+            float_menu_trigger = [float_menu_data, {'display': 'none'}, dash_clientside.no_update, ''];
             var tile = float_menu_data[1];
             if (float_menu_trigger[0][0] == 'customize') {
                 var menu = document.getElementById(`{"index":${tile},"type":"tile-customize-content"}`);
@@ -505,7 +505,6 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
     # if new tile is created and is on a dataset that is not confirmed use previous data set that has been confirmed
     if '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-link' and df_confirm is not None:
         graph_options = GRAPH_OPTIONS[df_confirm]
-        graph_options.sort()
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
 
@@ -516,19 +515,16 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
             graph_options = GRAPH_OPTIONS["OPG010"]
         else:
             graph_options = []
-        graph_options.sort()
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
     elif trigger == 'fa fa-unlink':
         link_trigger = "fa fa-unlink"
         if df_name is not None:
             graph_options = GRAPH_OPTIONS[df_name]
-            graph_options.sort()
             for i in graph_options:
                 options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
     elif trigger == 'fa fa-link':
         graph_options = GRAPH_OPTIONS[df_name_parent]
-        graph_options.sort()
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
     else:
@@ -542,7 +538,6 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
             #     link_trigger = "fa fa-unlink"
         else:
             graph_options = []
-        graph_options.sort()
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
 
@@ -563,42 +558,57 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
 
 
 # Reveals the data-fitting options when conditions needed for data-fitting are met
-@app.callback(
+app.clientside_callback(
+    """
+    function _update_data_fitting(graph_all, hierarchy_toggle, selected_graph_type, link_state, style){
+
+        if (hierarchy_toggle == 'Specific Item' && graph_all.equals([])){
+            for (let i = 0; i < style.length; i++){
+                if (isEquivalent(style[i], {'display': 'inline-block', 'width': '80%', 'max-width': '125px'})){
+                    style[i] = no_update;
+                } else {
+                    if (link_state[i] == "fa fa-link" && (
+                            selected_graph_type[i] == "Line" || selected_graph_type[i] == "Scatter")){
+                        style[i] = {'display': 'inline-block', 'width': '80%', 'max-width': '125px'};
+                    }
+                    else if (link_state[i] == "fa fa-unlink" && (
+                            selected_graph_type[i] == "Line" || selected_graph_type[i] == "Scatter")){
+                        style[i] = dash_clientside.no_update;
+                    }
+                }
+            }
+        }
+        else if (hierarchy_toggle == 'Level Filter' && !graph_all.equals([])){
+            for (let i = 0; i < style.length; i++){
+                if (isEquivalent(style[i], {'display': 'inline-block', 'width': '80%', 'max-width': '125px'})){
+                    style[i] = dash_clientside.no_update;
+                } else {
+                    if (link_state[i] == "fa fa-link" && (
+                            selected_graph_type[i] == "Line" || selected_graph_type[i] == "Scatter")){
+                        style[i] = {'display': 'none'};
+                    }
+                    else if (link_state[i] == "fa fa-unlink" && (
+                            selected_graph_type[i] == "Line" || selected_graph_type[i] == "Scatter")){
+                        style[i] = dash_clientside.no_update;
+                    }
+                }
+            }
+        }
+        else {
+            throw dash_clientside.PreventUpdate;
+        }
+
+        return style;
+    }
+    """,
     Output({'type': 'data-fitting-wrapper', 'index': ALL}, 'style'),
     [Input({'type': 'graph_children_toggle', 'index': 4}, 'value'),
      Input({'type': 'hierarchy-toggle', 'index': 4}, 'value'),
      Input({'type': 'graph-type-dropdown', 'index': ALL}, 'value'), ],
     [State({'type': 'tile-link', 'index': ALL}, 'className'),
-     State({'type': 'data-fitting-wrapper', 'index': ALL}, 'style')]
+     State({'type': 'data-fitting-wrapper', 'index': ALL}, 'style')],
+    prevent_initial_call=True
 )
-def _update_data_fitting(graph_all, hierarchy_toggle, selected_graph_type, link_state, style):
-
-    if hierarchy_toggle == 'Specific Item' and graph_all == []:
-        for i in range(len(style)):
-            if style[i] == {'display': 'inline-block', 'width': '80%', 'max-width': '125px'}:
-                style[i] = no_update
-            else:
-                if link_state[i] == "fa fa-link" and (
-                        selected_graph_type[i] == "Line" or selected_graph_type[i] == "Scatter"):
-                    style[i] = {'display': 'inline-block', 'width': '80%', 'max-width': '125px'}
-                elif link_state[i] == "fa fa-unlink" and (
-                        selected_graph_type[i] == "Line" or selected_graph_type[i] == "Scatter"):
-                    style[i] = no_update
-    elif hierarchy_toggle == 'Level Filter' or graph_all != []:
-        for i in range(len(style)):
-            if style[i] == {'display': 'inline-block', 'width': '80%', 'max-width': '125px'}:
-                style[i] = no_update
-            else:
-                if link_state[i] == "fa fa-link" and (
-                        selected_graph_type[i] == "Line" or selected_graph_type[i] == "Scatter"):
-                    style[i] = DATA_CONTENT_HIDE
-                elif link_state[i] == "fa fa-unlink" and (
-                        selected_graph_type[i] == "Line" or selected_graph_type[i] == "Scatter"):
-                    style[i] = no_update
-    else:
-        raise PreventUpdate
-
-    return style
 
 
 # update graph menu to match selected graph type
@@ -1337,31 +1347,6 @@ def _date_picker_inputs(trigger, tile_tab, tile_start_year, tile_end_year, tile_
 app.clientside_callback(
     """
        function _data_set_confirmation_visuals(load_data_trigger, refresh_data_trigger){
-            function isEquivalent(a, b) {
-                // Create arrays of property names
-                var aProps = Object.getOwnPropertyNames(a);
-                var bProps = Object.getOwnPropertyNames(b);
-
-                // If number of properties is different,
-                // objects are not equivalent
-                if (aProps.length != bProps.length) {
-                    return false;
-                }
-
-                for (var i = 0; i < aProps.length; i++) {
-                    var propName = aProps[i];
-
-                    // If values of same property are not equal,
-                    // objects are not equivalent
-                    if (a[propName] !== b[propName]) {
-                        return false;
-                    }
-                }
-
-                // If we made it this far, objects
-                // are considered equivalent
-                return true;
-            }
             var DATA_CONTENT_HIDE = {'display': 'none'};  
             if (isEquivalent(load_data_trigger, DATA_CONTENT_HIDE) 
                 && !isEquivalent(refresh_data_trigger, DATA_CONTENT_HIDE)){
@@ -1382,32 +1367,6 @@ for x in range(4):
     app.clientside_callback(
         """
         function _highlight_tiles(_sidebar_styles, link_state, sidebar_style, parent_sidebar_style){
-            function isEquivalent(a, b) {
-                // Create arrays of property names
-                var aProps = Object.getOwnPropertyNames(a);
-                var bProps = Object.getOwnPropertyNames(b);
-
-                // If number of properties is different,
-                // objects are not equivalent
-                if (aProps.length != bProps.length) {
-                    return false;
-                }
-
-                for (var i = 0; i < aProps.length; i++) {
-                    var propName = aProps[i];
-
-                    // If values of same property are not equal,
-                    // objects are not equivalent
-                    if (a[propName] !== b[propName]) {
-                        return false;
-                    }
-                }
-
-                // If we made it this far, objects
-                // are considered equivalent
-                return true;
-            }
-
             var DATA_CONTENT_SHOW = {
                 'max-width': '300px', 
                 'min-width': '300px',

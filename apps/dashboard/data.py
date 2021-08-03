@@ -29,6 +29,8 @@ GRAPH_OPTIONS = {
     'OPG001': ['Line', 'Bar', 'Scatter', 'Bubble', 'Box_Plot', 'Table'],
     'OPG010': ['Sankey', 'Table']
 }
+for x in GRAPH_OPTIONS.values():
+    x.sort()
 
 X_AXIS_OPTIONS = ['Time']
 

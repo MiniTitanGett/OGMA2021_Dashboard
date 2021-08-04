@@ -124,7 +124,7 @@ def dataset_to_df(df_name):
     col = col.append(
         pd.Series(
             df['Variable Name'][df['Variable Name Qualifier'].notna()]
-            + "|"
+            + " "
             + df['Variable Name Qualifier'][df['Variable Name Qualifier'].notna()]))
     df['Variable Name'] = col
 

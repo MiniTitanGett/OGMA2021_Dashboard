@@ -30,9 +30,12 @@ from apps.dashboard.data import get_label, data_filter, customize_menu_filter, l
 # mark partial periods on graph
 def set_partial_periods(fig, dataframe, graph_type):
     # Annotate partial data points
+    # ---------------------------------------Variable Declarations------------------------------------------------------
     partial_data_points = dataframe[dataframe['Partial Period'] == get_label('LBL_TRUE')]
     index_vals = list(partial_data_points.index.values)
     partial_pos = {}  # Key: x_val, Value: list of y_vals
+    # ------------------------------------------------------------------------------------------------------------------
+
     for i in range(len(partial_data_points)):
         # Co-ordinates of marker to be labeled
         x_val = partial_data_points.loc[index_vals[i], 'Date of Event']
@@ -323,12 +326,15 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
 def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
                       hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const,
                       _xaxis_title, _yaxis_title):
-    # (args-value: {})[0] = x-axis
-    # (args-value: {})[1] = x-axis measure
-    # (args-value: {})[2] = y-axis
-    # (args-value: {})[3] = y-axis measure
-    # (args-value: {})[4] = size
-    # (args-value: {})[5] = size measure
+    # args_value[0] = x-axis
+    # args_value[1] = x-axis measure
+    # args_value[2] = y-axis
+    # args_value[3] = y-axis measure
+    # args_value[4] = size
+    # args_value[5] = size measure
+    # args_value[6] = grid line toggle
+    # args_value[7] = legend toggle
+
     language = session["language"]
 
     # Check whether we have enough information to attempt getting data for a graph
@@ -483,9 +489,12 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
     # arg_value[2] = variable names selector
     # arg_value[3] = orientation
     # arg_value[4] = animation bool
+    # arg_value[5] = grid line toggle
+    # arg_value[6] = legend toggle
+    # ---------------------------------------Variable Declarations------------------------------------------------------
     language = session["language"]
     xaxis = {'type': 'category'}
-
+    # ------------------------------------------------------------------------------------------------------------------
     # Check whether we have enough information to attempt getting data for a graph
     if hierarchy_type == 'Level Filter' and None not in [arg_value, hierarchy_level_dropdown, hierarchy_type,
                                                          hierarchy_graph_children, df_name, df_const] \
@@ -683,9 +692,13 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
     # arg_value[1] = variable selector
     # arg_value[2] = orientation toggle
     # arg_value[3] = data points toggle
+    # arg_value[4] = grid line toggle
+    # arg_value[5] = legend toggle
+    # ---------------------------------------Variable Declarations------------------------------------------------------
     language = session["language"]
     xaxis = {'title': arg_value[0]}
     yaxis = {'type': 'category'}
+    # ------------------------------------------------------------------------------------------------------------------
 
     # Check on whether we have enough information to attempt to get data for a graph
     if hierarchy_type == 'Level Filter' and None not in [arg_value, hierarchy_level_dropdown, hierarchy_type,
@@ -821,11 +834,12 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
                      hierarchy_type, hierarchy_graph_children, tile_title, df_name):
     # arg_value[0] = tile index
     # arg_value[1] = page_size
+    # ---------------------------------------Variable Declarations------------------------------------------------------
     language = session["language"]
     title = ''
-
     # Clean dataframe to display nicely
     dff = dff.dropna(how='all', axis=1)
+    # ------------------------------------------------------------------------------------------------------------------
 
     # use special data title if no data
     if hierarchy_type == 'Level Filter' and None in [arg_value, hierarchy_level_dropdown, hierarchy_type,
@@ -929,12 +943,15 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
 # sankey graph layout
 def get_sankey_figure(arg_value, dff, hierarchy_level_dropdown, hierarchy_path, hierarchy_type, tile_title, df_name,
                       df_const):
+
+    # ------------------------------------------Variable Declarations---------------------------------------------------
     # arg_value[0] = variable selector
     language = session["language"]
     title = tile_title
 
     # Specialty filtering
     filtered_df = customize_menu_filter(dff, df_name, 'Link', arg_value[0], df_const)
+    # ------------------------------------------------------------------------------------------------------------------
 
     # if df is not empty, create empty sankey graph
     if filtered_df.empty:
@@ -961,7 +978,7 @@ def get_sankey_figure(arg_value, dff, hierarchy_level_dropdown, hierarchy_path, 
 
     for index, row in node_df.iterrows():
         label_numpy.append(get_label("LBL_" + row['node_id'], df_name))
-        custom_numpy.append(get_label("LBL_" + row['node_id'] + '_Long', df_name))
+        custom_numpy.append(get_label("".join(["LBL_", row['node_id'], '_Long']), df_name))
         x_numpy.append(row['x_coord'])
         y_numpy.append(row['y_coord'])
         node_colour_numpy.append(row['colour'])

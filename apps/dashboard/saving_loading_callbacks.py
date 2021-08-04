@@ -95,12 +95,14 @@ def _update_tile_loading_dropdown_options(_tile_saving_trigger, _dashboard_savin
 )
 def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, _link_clicks, link_trigger, float_menu_result,
                                        prompt_result, prompt_data, float_menu_data, load_state, link_state):
+
+    # -------------------------------------------Variable Declaration---------------------------------------------------
     changed_ids = [p['prop_id'] for p in dash.callback_context.triggered]
+    children = []
+    # ------------------------------------------------------------------------------------------------------------------
 
     if changed_ids == '.':
         raise PreventUpdate
-
-    children = []
 
     for changed_id in changed_ids:
         if 'prompt-result' in changed_id:
@@ -382,7 +384,7 @@ for y in range(4):
             customize_content = get_customize_content(tile=tile, graph_type=graph_type, graph_menu=graph_menu,
                                                       df_name=df_name)
 
-            #  --------- create data sidemenu ---------
+            #  --------- create data side menu ---------
 
             # set hierarchy toggle value (level vs specific)
             hierarchy_toggle = session['saved_layouts'][selected_layout]['Hierarchy Toggle']
@@ -643,11 +645,9 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                                       num_periods_0, num_periods_1, num_periods_2, num_periods_3, num_periods_4,
                                       period_type_0, period_type_1, period_type_2, period_type_3, period_type_4,
                                       date_tab_0, date_tab_1, date_tab_2, date_tab_3, date_tab_4, df_const):
+
+    # ---------------------------------------Variable Declarations------------------------------------------------------
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-
-    if changed_id == '.':
-        raise PreventUpdate
-
     # Outputs
     options = no_update
     update_graph_options_trigger = no_update
@@ -676,6 +676,10 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
     df_const_wrapper = no_update
     dashboard_reset_trigger = no_update
     close_trigger = no_update
+    # ------------------------------------------------------------------------------------------------------------------
+
+    if changed_id == '.':
+        raise PreventUpdate
 
     # if delete button was pressed, prompt delete
     if 'delete-dashboard' in changed_id:

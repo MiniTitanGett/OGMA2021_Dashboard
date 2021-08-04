@@ -167,8 +167,7 @@ def get_data_set_picker(tile, df_name, confirm_parent, prev_selection=None):
 def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Filter', level_value='H1',
                   nid_path="root", graph_all_toggle=None, fiscal_toggle='Gregorian', input_method='all-time',
                   num_periods='5', period_type='last-years', prev_selection=None, confirm_parent=None, df_const=None):
-    # if df_name is None:
-    #     df_name = session['dataset_list'][0]
+
     content = [
         html.A(
             className='boxclose',
@@ -1202,11 +1201,13 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
     :param yaxis: the title of the yaxis
     :return: Menu with options to modify a bar graph.
     """
-    # (args-value: {})[0] = x-axis
-    # (args-value: {})[1] = y-axis (measure type)
-    # (args-value: {})[2] = graphed variables
-    # (args-value: {})[3] = orientation
-    # (args-value: {})[4] = animate graph
+    # arg_value[0] = group by (x axis)
+    # arg_value[1] = measure type selector
+    # arg_value[2] = variable names selector
+    # arg_value[3] = orientation
+    # arg_value[4] = animation bool
+    # arg_value[5] = grid line toggle
+    # arg_value[6] = legend toggle
 
     return [
         html.Div(
@@ -1327,12 +1328,14 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
 # bubble graph menu layout
 def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, gridline, legend, df_name, df_const,
                           xaxis, yaxis):
-    # (args-value: {})[0] = x-axis
-    # (args-value: {})[1] = x-axis measure
-    # (args-value: {})[2] = y-axis
-    # (args-value: {})[3] = y-axis measure
-    # (args-value: {})[4] = size
-    # (args-value: {})[5] = size measure
+    # args_value[0] = x-axis
+    # args_value[1] = x-axis measure
+    # args_value[2] = y-axis
+    # args_value[3] = y-axis measure
+    # args_value[4] = size
+    # args_value[5] = size measure
+    # args_value[6] = grid line toggle
+    # args_value[7] = legend toggle
 
     return [
         html.Div(
@@ -1477,10 +1480,12 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
 # box plot menu layout
 def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, df_name, show_data_points, gridline,
                       legend, df_const, xaxis, yaxis):
-    # (args-value: {})[0] = graphed variables
-    # (args-value: {})[1] = measure type
-    # (args-value: {})[2] = points toggle
-    # (args-value: {})[3] = orientation
+    # arg_value[0] = measure type selector
+    # arg_value[1] = variable selector
+    # arg_value[2] = orientation toggle
+    # arg_value[3] = data points toggle
+    # arg_value[4] = grid line toggle
+    # arg_value[5] = legend toggle
 
     return [
         html.Div(

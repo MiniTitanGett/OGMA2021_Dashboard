@@ -1526,7 +1526,7 @@ app.clientside_callback(
             else if (triggered == 'prompt-option-2.n_clicks'){result = 'op-2';}
             else if (triggered == 'prompt-option-3.n_clicks'){result = 'op-3';}
             
-            prompt_trigger = [prompt_data, {'display': 'none'}, '', ''];
+            prompt_trigger = [prompt_data, {'display': 'none'}, dash_clientside.no_update, dash_clientside.no_update];
             
             // ensure it gets returned to correct callback
             switch(prompt_data[0]){

@@ -687,7 +687,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
         # if tile exists in session, send delete prompt
         if intermediate_pointer in session['saved_dashboards'] \
                 and session['saved_dashboards'][intermediate_pointer]['Dashboard Title'] == dashboard_title:
-            prompt_trigger = [['delete-dashboard', 4], {}, get_label('LBL_Delete_Dashboard'),
+            prompt_trigger = [['delete_dashboard', 4], {}, get_label('LBL_Delete_Dashboard'),
                               get_label('LBL_Delete_Dashboard_Prompt').format(dashboard_title), False]
 
     elif 'dashboard-reset' in changed_id:
@@ -822,7 +822,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
     elif prompt_data is not None or 'save-dashboard' in changed_id:
 
         # if save requested or the overwrite was confirmed, check for exceptions and save
-        if 'save-dashboard' in changed_id or (prompt_data[0] == 'overwrite-dashboard' and prompt_result == 'ok'):
+        if 'save-dashboard' in changed_id or (prompt_data[0] == 'overwrite_dashboard' and prompt_result == 'ok'):
 
             dashboard_pointer = DASHBOARD_POINTER_PREFIX + dashboard_title.replace(" ", "")
             # regex.sub('[^A-Za-z0-9]+', '', dashboard_title)
@@ -871,19 +871,19 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                             conflicting_graphs += ', '
                     # if conflicting graph titles and dashboard title
                     if dashboard_title in used_dashboard_titles:  # was session['saved_dashboards']
-                        prompt_trigger = [['overwrite-dashboard', 4], {},
+                        prompt_trigger = [['overwrite_dashboard', 4], {},
                                           get_label('LBL_Overwrite_Dashboard'),
                                           get_label('LBL_Overwrite_Dashboard_C_Title_Graph_Prompt').format(
                                               dashboard_title, conflicting_graphs_list), False]
                     # else, just conflicting graph titles
                     else:
-                        prompt_trigger = [['overwrite-dashboard', 4], {}, get_label('LBL_Overwrite_Dashboard'),
+                        prompt_trigger = [['overwrite_dashboard', 4], {}, get_label('LBL_Overwrite_Dashboard'),
                                           get_label('LBL_Overwrite_Dashboard_C_Graph_Prompt').format(
                                               conflicting_graphs_list), False]
 
                 # else, just conflicting dashboard title
                 else:
-                    prompt_trigger = [['overwrite-dashboard', 4], {}, get_label('LBL_Overwrite_Dashboard'),
+                    prompt_trigger = [['overwrite_dashboard', 4], {}, get_label('LBL_Overwrite_Dashboard'),
                                       get_label('LBL_Overwrite_Dashboard_C_Title_Prompt').format(dashboard_title),
                                       False]
 

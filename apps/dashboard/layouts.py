@@ -1,4 +1,4 @@
-######################################################################################################################
+﻿######################################################################################################################
 """
 layouts.py
 
@@ -1201,13 +1201,11 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
     :param yaxis: the title of the yaxis
     :return: Menu with options to modify a bar graph.
     """
-    # arg_value[0] = group by (x axis)
-    # arg_value[1] = measure type selector
-    # arg_value[2] = variable names selector
-    # arg_value[3] = orientation
-    # arg_value[4] = animation bool
-    # arg_value[5] = grid line toggle
-    # arg_value[6] = legend toggle
+    # (args-value: {})[0] = x-axis
+    # (args-value: {})[1] = y-axis (measure type)
+    # (args-value: {})[2] = graphed variables
+    # (args-value: {})[3] = orientation
+    # (args-value: {})[4] = animate graph
 
     return [
         html.Div(
@@ -1480,12 +1478,10 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
 # box plot menu layout
 def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, df_name, show_data_points, gridline,
                       legend, df_const, xaxis, yaxis):
-    # arg_value[0] = measure type selector
-    # arg_value[1] = variable selector
-    # arg_value[2] = orientation toggle
-    # arg_value[3] = data points toggle
-    # arg_value[4] = grid line toggle
-    # arg_value[5] = legend toggle
+    # (args-value: {})[0] = graphed variables
+    # (args-value: {})[1] = measure type
+    # (args-value: {})[2] = points toggle
+    # (args-value: {})[3] = orientation
 
     return [
         html.Div(

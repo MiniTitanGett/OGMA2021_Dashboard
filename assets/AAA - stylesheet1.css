@@ -969,6 +969,7 @@ there.
     height: 100%;
     border: 0;
     color: white;
+    width: 40px;
     padding: 0 45px 0 40px;
 }
 .dashboard-tab-button:disabled {
@@ -979,7 +980,7 @@ there.
 .dashboard-tab-selected,
 .dashboard-tab-selected:hover,
 .dashboard-tab-selected:focus {
-    width: 130px;
+    width: 160px;
     height: 30px;
     display: inline-block;
     border: 0;
@@ -995,7 +996,7 @@ there.
 
 .dashboard-tab,
 .dashboard-tab:focus {
-    width: 130px;
+    width: 160px;
     height: 30px;
     display: inline-block;
     border: 0;

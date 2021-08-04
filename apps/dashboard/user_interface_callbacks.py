@@ -73,9 +73,11 @@ app.clientside_callback(
 
 # NEW and DELETE button functionality
 @app.callback(
-    [Output('div-body', 'children'),
+    # change the firing order to fire the tile close first to solve a bug
+    # causing the tile close trigger to never fire in the data menu
+    [Output('tile-closed-trigger', 'data-'),
+     Output('div-body', 'children'),
      Output('button-new-wrapper', 'children'),
-     Output('tile-closed-trigger', 'data-'),
      Output('num-tiles-2', 'data-num-tiles')],
     [Input('button-new', 'n_clicks'),
      Input('tile-closed-input-trigger', 'data'),
@@ -136,7 +138,7 @@ def _new_and_delete(_new_clicks, close_id, _dashboard_reset, input_tiles, num_ti
     # disable the NEW button
     new_button = html.Button(
         className='parent-nav', n_clicks=0, children=get_label('LBL_Add_Tile'), id='button-new', disabled=True)
-    return children, new_button, deleted_tile, num_tiles
+    return deleted_tile, children, new_button, num_tiles
 
 
 # unlock NEW button after end of callback chain
@@ -707,10 +709,6 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
         return no_update, no_update, no_update, False
 
     # if changed id == '.' and the graph menu already exists, prevent update
-    if changed_id == '.' and graph_options_state or df_const is None or df_name not in df_const:
-        raise PreventUpdate
-
-        # if changed id == '.' and the graph menu already exists, prevent update
     if changed_id == '.' and graph_options_state or df_const is None or df_name not in df_const:
         raise PreventUpdate
 
@@ -1537,9 +1535,9 @@ app.clientside_callback(
                     break;
                 case 'delete_dashboard':
                 case 'overwrite_dashboard':
+                case 'close':
                     result_1 = result;
                     break;
-                case 'close':
                 case 'reset':
                     result_1 = result;
                     result_2 = result;

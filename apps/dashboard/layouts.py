@@ -1201,11 +1201,13 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
     :param yaxis: the title of the yaxis
     :return: Menu with options to modify a bar graph.
     """
-    # (args-value: {})[0] = x-axis
-    # (args-value: {})[1] = y-axis (measure type)
-    # (args-value: {})[2] = graphed variables
-    # (args-value: {})[3] = orientation
-    # (args-value: {})[4] = animate graph
+    # args_value[0] = x-axis
+    # args_value[1] = y-axis (measure type)
+    # args_value[2] = graphed variables
+    # args_value[3] = orientation
+    # args_value[4] = animate graph
+    # args_value[5] = grid lines
+    # args_value[6] = legend
 
     return [
         html.Div(
@@ -1478,10 +1480,12 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
 # box plot menu layout
 def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, df_name, show_data_points, gridline,
                       legend, df_const, xaxis, yaxis):
-    # (args-value: {})[0] = graphed variables
-    # (args-value: {})[1] = measure type
-    # (args-value: {})[2] = points toggle
-    # (args-value: {})[3] = orientation
+    # args_value[0] = graphed variables
+    # args_value[1] = measure type
+    # args_value[2] = points toggle
+    # arg_value[3] = orientation
+    # arg_value[4] = grid lines
+    # arg_value[5] = legend
 
     return [
         html.Div(

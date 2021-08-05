@@ -1573,42 +1573,52 @@ app.clientside_callback(
     State('prompt-title', 'data-'),
     prevent_initial_call=True
 )
-for x in range(4):
-    app.clientside_callback(
-        """
-        function _update_axes_titles(graph, xaxis_title, yaxis_title){
-            var yaxis = "";
-            var xaxis = "";
-    
-            if ('figure' in graph['props']){
-                if ('yaxis' in graph['props']['figure']['layout']){
-                    if ('title' in graph['props']['figure']['layout']['yaxis']){
-                        yaxis = graph['props']['figure']['layout']['yaxis']['title']['text'];
-                    }
-                    if ('title' in graph['props']['figure']['layout']['xaxis']){
-                        xaxis = graph['props']['figure']['layout']['xaxis']['title']['text'];
-                    }
-                }
-            }
-            if ( typeof(x_axis_title) == "undefined" ){
-                x_axis_title = "";
-            }
-            if ( typeof(y_axis_title) == "undefined" ){
-                y_axis_title = "";
-            }
-            // if changed id == '.' due to NEW being requested, preserve data menu display.
-            if (xaxis == xaxis_title && yaxis == yaxis_title){
-                throw window.dash_clientside.PreventUpdate;
-            }
-            return [xaxis, yaxis];
+
+# this function gets called on graph draw and sets a JS function to the graph display if there isn't one
+# attached function then sends edited values on plot changes (edits, clicks, moves of legend, etc.) to the following:
+# {"index":x,"type":"xaxis-title"}, {"index":x,"type":"yaxis-title"},
+# {"index":x,"type":"x-legend"}, {"index":x,"type":"y-legend"}
+app.clientside_callback(
+    """
+    function _update_axes_titles(graph, hasTrigger){
+        const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
+
+        var tile = triggered.match(/\d+/)[0];
+        
+        if (hasTrigger == null){
+            var id = `{"index":${tile},"type":"graph_display"}`;  
+            $(document.getElementById(id)).on('plotly_relayout', (e) => {  
+                // axis titles
+                try {
+                    var xaxis = document.getElementById(`{"index":${tile},"type":"xaxis-title"}`);
+                    xaxis.setAttribute("value", e.target.layout.xaxis.title.text);
+                    console.log(e.target.layout.xaxis.title.text);
+                }catch{ /* Do Nothing */}
+                try {
+                    var yaxis = document.getElementById(`{"index":${tile},"type":"yaxis-title"}`);
+                    yaxis.setAttribute("value", e.target.layout.yaxis.title.text);
+                    console.log(e.target.layout.yaxis.title.text);
+                }catch{ /* Do Nothing */}
+                
+                // legend location
+                
+                //try {
+                //    var x_legend = document.getElementById(`{"index":${tile},"type":"x-legend"}`);
+                //    x_legend.setAttribute("value", e.target.layout.legend.x);
+                //}catch{ /* Do Nothing */}
+                //try {
+                //    var y_legend = document.getElementById(`{"index":${tile},"type":"y-legend"}`);
+                //    y_legend.setAttribute("value", e.target.layout.legend.y);
+                //}catch{ /* Do Nothing */}
+                
+            });
         }
-        """,
-        [Output({'type': 'xaxis-title', 'index': x}, 'value'),
-         Output({'type': 'yaxis-title', 'index': x}, 'value')],
-         Input({'type': 'graph_display', 'index': x}, 'children'),
-        [State({'type': 'xaxis-title', 'index': x}, 'value'),
-         State({'type': 'yaxis-title', 'index': x}, 'value')]
-    )
-
-
-
+        
+        return true;
+    }
+    """,
+    Output({'type': 'graph_display', 'index': MATCH}, 'data-'),
+    Input({'type': 'graph_display', 'index': MATCH}, 'children'),
+    State({'type': 'graph_display', 'index': MATCH}, 'data-'),
+    prevent_initial_call=True
+)

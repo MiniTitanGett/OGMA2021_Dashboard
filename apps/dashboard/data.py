@@ -416,6 +416,19 @@ def data_filter(hierarchy_path, secondary_type, end_secondary, end_year, start_s
                 hierarchy_graph_children, df_name, df_const):
     # NOTE: This assumes hierarchy path is a list of all previously selected levels
 
+    """print("hierarchy_path: " + str(hierarchy_path))
+    print("hierarchy_graph_children: " + str(hierarchy_graph_children))
+    print("hierarchy_toggle: " + str(hierarchy_toggle))
+    print("hierarchy_level_dropdown: " + str(hierarchy_level_dropdown))
+    print("num_periods: " + str(num_periods))
+    print("period_type: " + str(period_type))
+    print("secondary_type: " + str(secondary_type))
+    print("start_secondary: " + str(start_secondary))
+    print("end_secondary: " + str(end_secondary))
+    print("start_year: " + str(start_year))
+    print("end_year: " + str(end_year))
+    print("timeframe: " + str(timeframe))"""
+
     if hierarchy_toggle == 'Level Filter' or (
             (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == ['graph_children'])):
         filtered_df = session[df_name].copy()

@@ -41,7 +41,7 @@ begin
            case
              when isnull([Variable Name Sub Qualifier], '') <> '' then [Variable Name Sub Qualifier]
              else [Variable Name Qualifier]
-           end as [Variable Name Value],
+           end as [Variable Value],
            case
              when isnull([Variable Name Sub Qualifier], '') <> '' then 3
              else 2

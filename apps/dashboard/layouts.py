@@ -574,6 +574,11 @@ def get_layout_dashboard():
             duration=4000),
         # dashboard-reset-confirmation is used by the prompts to reset the viewport
         dcc.Store(id='dashboard-reset-confirmation'),
+        # trigger wrappers for _update_axes_titles()
+        html.Div(id={'type': 'axes-title-trigger-wrapper', 'index': 0}, style={'display': 'none'}),
+        html.Div(id={'type': 'axes-title-trigger-wrapper', 'index': 1}, style={'display': 'none'}),
+        html.Div(id={'type': 'axes-title-trigger-wrapper', 'index': 2}, style={'display': 'none'}),
+        html.Div(id={'type': 'axes-title-trigger-wrapper', 'index': 3}, style={'display': 'none'}),
         # select-range-trigger is used by the load callbacks to load the select range datepicker section
         dcc.Store(id={'type': 'select-range-trigger', 'index': 0}),
         dcc.Store(id={'type': 'select-range-trigger', 'index': 1}),

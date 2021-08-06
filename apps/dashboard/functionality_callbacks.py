@@ -100,7 +100,10 @@ for x in range(4):
          State('df-constants-storage', 'data'),
          # Float menu result
          State('float-menu-result', 'children'),  # TODO: unused state
-         State({'type': 'data-set-parent', 'index': 4}, 'value')],
+         State({'type': 'data-set-parent', 'index': 4}, 'value'),
+         # Axes titles
+         State({'type': 'xaxis-title', 'index': x}, 'value'),
+         State({'type': 'yaxis-title', 'index': x}, 'value')],
         prevent_initial_call=True
     )
     def _update_graph(_df_trigger, arg_value, graph_type, tile_title, _datepicker_trigger,
@@ -112,7 +115,7 @@ for x in range(4):
                       parent_secondary_type, parent_timeframe, parent_fiscal_toggle, parent_start_year, parent_end_year,
                       parent_start_secondary, parent_end_secondary, graph_display, df_name, parent_df_name,
                       link_state, hierarchy_options, parent_hierarchy_options, df_const, _result_edit_menu,
-                      df_confirm):
+                      df_confirm, xaxis, yaxis):
 
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
         tile = dash.callback_context.inputs_list[0]['id']['index']

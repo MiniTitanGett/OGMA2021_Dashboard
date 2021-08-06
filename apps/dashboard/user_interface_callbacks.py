@@ -1588,17 +1588,15 @@ app.clientside_callback(
         if (hasTrigger == null){
             var id = `{"index":${tile},"type":"graph_display"}`;  
             $(document.getElementById(id)).on('plotly_relayout', (e) => {  
-                // axis titles
-                try {
-                    var xaxis = document.getElementById(`{"index":${tile},"type":"xaxis-title"}`);
-                    xaxis.setAttribute("value", e.target.layout.xaxis.title.text);
-                    console.log(e.target.layout.xaxis.title.text);
-                }catch{ /* Do Nothing */}
-                try {
-                    var yaxis = document.getElementById(`{"index":${tile},"type":"yaxis-title"}`);
-                    yaxis.setAttribute("value", e.target.layout.yaxis.title.text);
-                    console.log(e.target.layout.yaxis.title.text);
-                }catch{ /* Do Nothing */}
+                //trigger
+                var parent = document.getElementById(`{"index":${tile},"type":"axes-title-trigger-wrapper"}`);
+                try{
+                    parent.removeChild(document.getElementById(`{"index":${tile},"type":"axes-title-trigger-wrapper"}`));
+                }catch{
+                    child = document.createElement('div');
+                    child.setAttribute("id", `{"index":${tile},"type":"axes-title-trigger"}`);
+                    parent.appendChild(child);
+                }
                 
                 // legend location
                 
@@ -1621,4 +1619,51 @@ app.clientside_callback(
     Input({'type': 'graph_display', 'index': MATCH}, 'children'),
     State({'type': 'graph_display', 'index': MATCH}, 'data-'),
     prevent_initial_call=True
+)
+
+
+app.clientside_callback(
+    """
+    function tester(_children, graph){
+        const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
+        
+        if (triggered == "") {
+            return [dash_clientside.no_update, dash_clientside.no_update];
+        }
+        
+        var tile = triggered.match(/\d+/)[0];
+        var xaxis = dash_clientside.no_update;
+        var yaxis = dash_clientside.no_update;
+        //var x_legend = dash_clientside.no_update;
+        //var y_legend = dash_clientside.no_update;
+        
+        // axis titles
+    
+        if ('figure' in graph['props']){
+            if ('yaxis' in graph['props']['figure']['layout']){
+                if ('title' in graph['props']['figure']['layout']['yaxis']){
+                    yaxis = graph['props']['figure']['layout']['yaxis']['title']['text'];
+                }
+                if ('title' in graph['props']['figure']['layout']['xaxis']){
+                    xaxis = graph['props']['figure']['layout']['xaxis']['title']['text'];
+                }
+            }
+        }
+        
+        // legend location
+        
+        //try {
+        //    var x_legend = e.target.layout.legend.x;
+        //}catch{ /* Do Nothing */}
+        //try {
+        //    var y_legend = e.target.layout.legend.y;
+        //}catch{ /* Do Nothing */}
+        
+        return [xaxis, yaxis /*, x_legend, y_legend */]
+    }
+    """,
+    [Output({'type': 'xaxis-title', 'index': MATCH}, 'value'),
+     Output({'type': 'yaxis-title', 'index': MATCH}, 'value')],
+    Input({'type': 'axes-title-trigger', 'index': MATCH}, 'children'),
+    State({'type': 'graph_display', 'index': MATCH}, 'children')
 )

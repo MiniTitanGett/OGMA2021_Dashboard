@@ -35,9 +35,9 @@ begin
            --null [Hierarchy One -4],
            [Hierarchy One Leaf] as [Hierarchy Value],
            5 as [Hierarchy Level],
-           [Variable Name],
-           [Variable Name Qualifier],
-           [Variable Name Sub Qualifier],
+           --[Variable Name],
+           --[Variable Name Qualifier],
+           --[Variable Name Sub Qualifier],
            case
              when isnull([Variable Name Sub Qualifier], '') <> '' then [Variable Name Sub Qualifier]
              else [Variable Name Qualifier]

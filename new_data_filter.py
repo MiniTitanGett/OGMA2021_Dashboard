@@ -22,6 +22,10 @@ def get_last_day_of_quarter(day):
     return quarter_start + relativedelta(months=3, days=-1)
 
 
+def get_last_day_of_year(year):
+    return date(year, 12, 31)
+
+
 def data_filter(hierarchy_path, secondary_type, end_secondary, end_year, start_secondary, start_year,
                 timeframe, fiscal_toggle, num_periods, period_type, hierarchy_toggle, hierarchy_level_dropdown,
                 hierarchy_graph_children, df_name, df_const):
@@ -134,10 +138,7 @@ def data_filter(hierarchy_path, secondary_type, end_secondary, end_year, start_s
                             unique_data = yearly_data[yearly_data[division_column] == secondary]
                             measure_value = unique_data['Measure Value'].sum()
                             if current_filter == "Year":
-                                # TODO: need to implement last_day_of_year function instead of pulling value for
-                                #  year
-                                # TODO: need the month
-                                date_of_event = get_last_day_of_month(date(year, int(secondary), 1))
+                                date_of_event = get_last_day_of_year(year)
                                 year_of_event = year
                                 quarter = ""
                                 month_of_event = ""
@@ -295,10 +296,7 @@ def data_filter(hierarchy_path, secondary_type, end_secondary, end_year, start_s
                             secondary = unique_secondary[w]
                             unique_data = yearly_data[yearly_data['Year of Event'] == secondary]
                             measure_value = unique_data['Measure Value'].sum()
-                            # TODO: need to implement last_day_of_year function instead of pulling value for
-                            #  year
-                            date_of_event = get_last_day_of_month(date(year, int(secondary), 1))
-
+                            date_of_event = get_last_day_of_year(year)
                             row_list.append(
                                 [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
                                  hierarchy_path[0] if len(hierarchy_path) >= 1 else '',

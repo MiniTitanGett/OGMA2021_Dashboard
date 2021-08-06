@@ -4,7 +4,7 @@ import pandas as pd
 from flask import session
 
 
-def last_day_of_month(day):
+def get_last_day_of_month(day):
     next_month = day.replace(day=28) + timedelta(days=4)
     return next_month - timedelta(days=next_month.day)
 
@@ -13,10 +13,18 @@ def week_number_of_month(date_value):
     return date_value.isocalendar()[1] - date_value.replace(day=1).isocalendar()[1] + 1
 
 
+def get_quarter_start(day):
+    return date(day.year, (day.month - 1) // 3 * 3 + 1, 1)
+
+
+def get_last_day_of_quarter(day):
+    quarter_start = get_quarter_start(day)
+    return quarter_start + relativedelta(months=3, days=-1)
+
+
 def data_filter(hierarchy_path, secondary_type, end_secondary, end_year, start_secondary, start_year,
                 timeframe, fiscal_toggle, num_periods, period_type, hierarchy_toggle, hierarchy_level_dropdown,
                 hierarchy_graph_children, df_name, df_const):
-
     if hierarchy_toggle == 'Level Filter' or (
             (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == ['graph_children'])):
         filtered_df = session[df_name].copy()
@@ -99,7 +107,7 @@ def data_filter(hierarchy_path, secondary_type, end_secondary, end_year, start_s
             start_date = end_date - timedelta(weeks=num_periods)
             current_filter = 'Week'
 
-        if df_name == "OPG011" and current_filter is not 'Week':
+        if df_name == "OPG011" and current_filter != 'Week':
             if current_filter == 'Year':
                 division_column = '{}Year of Event'.format(year_prefix)
             elif current_filter == 'Quarter':
@@ -128,22 +136,22 @@ def data_filter(hierarchy_path, secondary_type, end_secondary, end_year, start_s
                             if current_filter == "Year":
                                 # TODO: need to implement last_day_of_year function instead of pulling value for
                                 #  year
-                                date_of_event = last_day_of_month(date(year, int(secondary), 1))
+                                # TODO: need the month
+                                date_of_event = get_last_day_of_month(date(year, int(secondary), 1))
                                 year_of_event = year
                                 quarter = ""
                                 month_of_event = ""
                                 week_of_event = ""
                             elif current_filter == "Quarter":
-                                # TODO: need to implement last_day_of_quarter function instead of pulling value for
-                                #  quarter
-                                date_of_event = last_day_of_month(date(year, int(secondary), 1))
+                                # TODO: secondary should be month not the quarter
+                                date_of_event = get_last_day_of_quarter(date(year, int(secondary), 1))
                                 year_of_event = year
                                 quarter = secondary_type
                                 month_of_event = ""
                                 week_of_event = ""
                             # secondary_type == "Month"
                             else:
-                                date_of_event = last_day_of_month(date(year, int(secondary), 1))
+                                date_of_event = get_last_day_of_month(date(year, int(secondary), 1))
                                 year_of_event = year
                                 quarter = unique_data['Quarter'].iloc[0]
                                 month_of_event = secondary_type
@@ -168,7 +176,7 @@ def data_filter(hierarchy_path, secondary_type, end_secondary, end_year, start_s
                                             'Month of Event', 'Week of Event', 'Fiscal Year of Event', 'Fiscal Quarter',
                                             'Fiscal Month of Event', 'Fiscal Week of Event', 'Julian Day',
                                             'Activity Event Id', 'Measure Value', 'Measure Type', 'Partial Period'])
-        elif df_name == "OPG011" and current_filter is 'Week':
+        elif df_name == "OPG011" and current_filter == 'Week':
             time_df = filtered_df.copy()
         else:
             # Filters out unused calender values
@@ -215,10 +223,9 @@ def data_filter(hierarchy_path, secondary_type, end_secondary, end_year, start_s
                                  hierarchy_path[5] if len(hierarchy_path) >= 6 else '',
                                  variable_name, unique_data['Variable Name Qualifier'].iloc[0],
                                  unique_data['Variable Name Sub Qualifier'].iloc[0],
-                                 # TODO: need to implement last_day_of_quarter function instead of pulling value for
-                                 #  quarter
-                                 last_day_of_month(date(year, int(secondary), 1)) if secondary_type == "Month" else
-                                 unique_data['Date of Event'].iloc[0],
+                                 # TODO: secondary should be month not the quarter
+                                 get_last_day_of_month(date(year, int(secondary), 1)) if secondary_type == "Month" else
+                                 get_last_day_of_quarter(date(year, int(secondary), 1)),
                                  secondary_type, year,
                                  secondary if secondary_type == "Quarter" else unique_data['Quarter'].iloc[0],
                                  secondary if secondary_type == "Month" else "",
@@ -290,7 +297,7 @@ def data_filter(hierarchy_path, secondary_type, end_secondary, end_year, start_s
                             measure_value = unique_data['Measure Value'].sum()
                             # TODO: need to implement last_day_of_year function instead of pulling value for
                             #  year
-                            date_of_event = last_day_of_month(date(year, int(secondary), 1))
+                            date_of_event = get_last_day_of_month(date(year, int(secondary), 1))
 
                             row_list.append(
                                 [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],

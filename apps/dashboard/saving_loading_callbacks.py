@@ -787,7 +787,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
 
                 # create tile keys
                 graph_menu = load_graph_menu(graph_type=graph_type, tile=tile_index, df_name=df_name,
-                                             args_list=args_list, axes_title= axes_title,
+                                             args_list=args_list, axes_title=axes_title,
                                              df_const=df_const)
                 # TODO: Need to add df name
                 customize_content = get_customize_content(tile=tile_index, graph_type=graph_type, graph_menu=graph_menu,

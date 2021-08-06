@@ -709,6 +709,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
                                            legend=None,
                                            xaxis=None,
                                            yaxis=None,
+                                           xpos=None,
+                                           ypos=None,
                                            df_name=df_name,
                                            df_const=df_const,
                                            data_fitting=data_fitting,
@@ -726,6 +728,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
                                   legend=None,
                                   xaxis=None,
                                   yaxis=None,
+                                  xpos=None,
+                                  ypos=None,
                                   df_name=df_name,
                                   df_const=df_const)
 
@@ -747,6 +751,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
                                      legend=None,
                                      xaxis=None,
                                      yaxis=None,
+                                     xpos=None,
+                                     ypos=None,
                                      df_name=df_name,
                                      df_const=df_const)
 
@@ -766,6 +772,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
                                  legend=None,
                                  xaxis=None,
                                  yaxis=None,
+                                 xpos=None,
+                                 ypos=None,
                                  df_const=df_const)
 
     elif selected_graph_type == 'Sankey':
@@ -1592,8 +1600,8 @@ app.clientside_callback(
                 $(document.getElementById(target)).on('plotly_relayout', (e) => {  
                     var x_axis = dash_clientside.no_update;
                     var y_axis = dash_clientside.no_update;
-                    // var x_legend = dash_clientside.no_update;
-                    // var y_legend = dash_clientside.no_update;
+                    var x_legend = dash_clientside.no_update;
+                    var y_legend = dash_clientside.no_update;
                     
                     // try setting the values if they exist
                     try { 
@@ -1603,16 +1611,18 @@ app.clientside_callback(
                         y_axis = e.target.layout.yaxis.title.text;
                     } catch { /* Do Nothing */}
                     
-                    // try { 
-                    //     x_legend = e.target.layout.legend.x;
-                    // } catch { /* Do Nothing */}
-                    // try { 
-                    //     y_legend = e.target.layout.legend.y;
-                    // } catch { /* Do Nothing */}
+                    try { 
+                        x_legend = e.target.layout.legend.x;
+                    } catch { /* Do Nothing */}
+                    try { 
+                        y_legend = e.target.layout.legend.y;
+                    } catch { /* Do Nothing */}
                     
                     setProps({ 
                         'event': {'x_axis': x_axis, 
-                                  'y_axis': y_axis }
+                                  'y_axis': y_axis,
+                                  'x_legend': x_legend,
+                                  'y_legend': y_legend}
                     })
                 });
             `
@@ -1628,15 +1638,17 @@ app.clientside_callback(
     prevent_initial_call=True
 )
 
-# the above function set on the graph_display sets a prop as an event to the javascript object which will set the axis_titles
+# the above function set on the graph_display sets a prop as an event to the javascript object which will set the
+# axis_titles
 app.clientside_callback(
     """
     function _update_axes_titles(event){
-        return [event.x_axis, event.y_axis];
+        return [event.x_axis, event.y_axis, event.x_legend, event.y_legend];
     }
     """,
     [Output({"type": "xaxis-title", "index": MATCH}, 'value'),
-     Output({"type": "yaxis-title", "index": MATCH}, 'value')],
-    # {"index":x,"type":"x-legend"}, {"index":x,"type":"y-legend"}
+     Output({"type": "yaxis-title", "index": MATCH}, 'value'),
+     Output({'type': 'x-pos-legend', 'index': MATCH}, 'value'),
+     Output({'type': 'y-pos-legend', 'index': MATCH}, 'value')],
     Input({'type': 'javascript', 'index': MATCH}, 'event')
 )

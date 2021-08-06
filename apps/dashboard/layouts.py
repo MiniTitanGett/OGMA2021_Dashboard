@@ -1365,7 +1365,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
-                        options=[] if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
+                        options=[] if df_const is None else df_const[df_name]['VARIABLE_OPTIONS']+[{'label': 'Time', 'value': 'Time'}],
                         value=x,
                         clearable=False,
                         style={'font-size': '13px'})],

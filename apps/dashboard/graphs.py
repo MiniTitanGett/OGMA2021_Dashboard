@@ -351,19 +351,32 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                                                          hierarchy_graph_children, df_name, df_const] \
             or hierarchy_type == 'Specific Item' and None not in [arg_value, hierarchy_path, hierarchy_type,
                                                                   hierarchy_graph_children, df_name, df_const]:
-        # Specialty filtering
-        filtered_df = dff.copy().query(
-            "(`Variable Name` == @arg_value[0] and `Measure Type` == @arg_value[1]) or "
-            "(`Variable Name` == @arg_value[2] and `Measure Type` == @arg_value[3]) or "
-            "(`Variable Name` == @arg_value[4] and `Measure Type` == @arg_value[5])")
+
         color = get_hierarchy_col(hierarchy_type, hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_path,
                                   df_name, df_const)
 
-        filtered_df[['Date of Event', 'Measure Type', 'Variable Name', 'Partial Period', color]] = filtered_df[
-            ['Date of Event', 'Measure Type', 'Variable Name', 'Partial Period', color]].astype(str)
-        filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color],
-                                              columns=['Variable Name', 'Measure Type'],
-                                              values='Measure Value').reset_index()
+        if arg_value[0] == 'Time':
+            filtered_df = dff.copy().query(
+                "`Variable Name` == @arg_value[0] or "
+                "`Variable Name` == @arg_value[2] or "
+                "`Variable Name` == @arg_value[4]")
+            filtered_df[['Date of Event', 'Variable Name', 'Partial Period', color]] = \
+            filtered_df[
+                ['Date of Event', 'Variable Name', 'Partial Period', color]].astype(str)
+            filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color],
+                                                  columns=['Variable Name'],
+                                                  values='Measure Value').reset_index()
+        else:
+            # Specialty filtering
+            filtered_df = dff.copy().query(
+                "(`Variable Name` == @arg_value[0] and `Measure Type` == @arg_value[1]) or "
+                "(`Variable Name` == @arg_value[2] and `Measure Type` == @arg_value[3]) or "
+                "(`Variable Name` == @arg_value[4] and `Measure Type` == @arg_value[5])")
+            filtered_df[['Date of Event', 'Measure Type', 'Variable Name', 'Partial Period', color]] = filtered_df[
+                ['Date of Event', 'Measure Type', 'Variable Name', 'Partial Period', color]].astype(str)
+            filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color],
+                                                columns=['Variable Name', 'Measure Type'],
+                                                values='Measure Value').reset_index()
         filtered_df = filtered_df.dropna()
 
         # if hierarchy type is "Level Filter", or "Specific Item" while "Graph all in Dropdown" is selected
@@ -417,34 +430,54 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
 
             filtered_df['Date of Event'] = filtered_df['Date of Event'].astype(str)
 
+            if arg_value[0] == 'Time':
+                fig= px.scatter(
+                    title=title,
+                    x=filtered_df['Date of Event'],
+                    y=filtered_df[arg_value[2]],
+                    size=filtered_df[arg_value[4]],
+                    color=filtered_df[color],
+                    custom_data=[filtered_df[color], filtered_df['Date of Event'], filtered_df[arg_value[4]]])
+                fig.update_layout(
+                    legend_title_text='Size: <br> &#9; {}<br> <br>{}'.format(arg_value[4],
+                                                                                  legend_title_text))
+                # set up hover label
+
+                hovertemplate = get_label('LBL_Gen_Hover_Data', df_name)
+                hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event', df_name)).replace(
+                    '%AXIS-A%', '%{x}')
+                hovertemplate = hovertemplate.replace('%AXIS-TITLE-B%', arg_value[4]).replace('%AXIS-B%', '%{size}')
+
+                fig.update_traces(hovertemplate=hovertemplate)
+            else:
             # generate graph
-            fig = px.scatter(
-                title=title,
-                x=filtered_df[arg_value[0], arg_value[1]],
-                y=filtered_df[arg_value[2], arg_value[3]],
-                size=filtered_df[arg_value[4], arg_value[5]],
-                animation_frame=filtered_df['Date of Event'],
-                color=filtered_df[color],
-                range_x=[0, filtered_df[arg_value[0], arg_value[1]].max()],
-                range_y=[0, filtered_df[arg_value[2], arg_value[3]].max()],
-                labels={'animation_frame': 'Date of Event'},
-                custom_data=[filtered_df[color], filtered_df['Date of Event'], filtered_df[arg_value[4], arg_value[5]]]
-            )
-            fig.update_layout(
-                legend_title_text='Size: <br> &#9; {} ({})<br> <br>{}'.format(arg_value[4], arg_value[5],
+                fig = px.scatter(
+                    title=title,
+                    x=filtered_df[arg_value[0], arg_value[1]],
+                    y=filtered_df[arg_value[2], arg_value[3]],
+                    size=filtered_df[arg_value[4], arg_value[5]],
+                    animation_frame=filtered_df['Date of Event'],
+                    color=filtered_df[color],
+                    range_x=[0, filtered_df[arg_value[0], arg_value[1]].max()],
+                    range_y=[0, filtered_df[arg_value[2], arg_value[3]].max()],
+                    labels={'animation_frame': 'Date of Event'},
+                    custom_data=[filtered_df[color], filtered_df['Date of Event'], filtered_df[arg_value[4], arg_value[5]]]
+                )
+                fig.update_layout(
+                    legend_title_text='Size: <br> &#9; {} ({})<br> <br>{}'.format(arg_value[4], arg_value[5],
                                                                               legend_title_text))
-            # set up hover label
-            hovertemplate = get_label('LBL_Bubble_Hover_Data', df_name)
-            hovertemplate = hovertemplate.replace('%AXIS-X-A%', arg_value[0]).replace('%AXIS-X-B%',
+                # set up hover label
+                hovertemplate = get_label('LBL_Bubble_Hover_Data', df_name)
+                hovertemplate = hovertemplate.replace('%AXIS-X-A%', arg_value[0]).replace('%AXIS-X-B%',
                                                                                       arg_value[1]).replace(
-                '%X-AXIS%', '%{x}')
-            hovertemplate = hovertemplate.replace('%AXIS-Y-A%', arg_value[2]).replace('%AXIS-Y-B%',
+                    '%X-AXIS%', '%{x}')
+                hovertemplate = hovertemplate.replace('%AXIS-Y-A%', arg_value[2]).replace('%AXIS-Y-B%',
                                                                                       arg_value[3]).replace(
-                '%Y-AXIS%', '%{y}')
-            hovertemplate = hovertemplate.replace('%AXIS-Z-A%', arg_value[4]).replace('%AXIS-Z-B%',
+                    '%Y-AXIS%', '%{y}')
+                hovertemplate = hovertemplate.replace('%AXIS-Z-A%', arg_value[4]).replace('%AXIS-Z-B%',
                                                                                       arg_value[5]).replace(
-                '%Z-AXIS%', '%{customdata[2]}')
-            fig.update_traces(hovertemplate=hovertemplate)
+                    '%Z-AXIS%', '%{customdata[2]}')
+                fig.update_traces(hovertemplate=hovertemplate)
         # else, filtered is empty, create default empty graph
         else:
             fig = px.scatter(
@@ -457,10 +490,14 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
 
     if arg_value[8]:
         xaxis = arg_value[8]
+    elif arg_value[0] == 'Time':
+        xaxis = '{} '.format(arg_value[0])
     else:
         xaxis = '{} ({})'.format(arg_value[0], arg_value[1])
     if arg_value[9]:
         yaxis = arg_value[9]
+    elif arg_value[0] == 'Time':
+        yaxis = '{} '.format(arg_value[2])
     else:
         yaxis = '{} ({})'.format(arg_value[2], arg_value[3])
 

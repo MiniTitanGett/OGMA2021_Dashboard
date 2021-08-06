@@ -120,8 +120,6 @@ for x in range(4):
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
         tile = dash.callback_context.inputs_list[0]['id']['index']
 
-        xaxis = None
-        yaxis = None
         # TODO have to finish hooking up plotly axes title edits to hidden div so we are able to save
         #  and update the graph menu when ever a user edits the titles
 

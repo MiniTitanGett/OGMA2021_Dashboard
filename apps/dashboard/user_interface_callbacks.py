@@ -1584,86 +1584,59 @@ app.clientside_callback(
         const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
 
         var tile = triggered.match(/\d+/)[0];
+        var javascript = dash_clientside.no_update;
         
         if (hasTrigger == null){
-            var id = `{"index":${tile},"type":"graph_display"}`;  
-            $(document.getElementById(id)).on('plotly_relayout', (e) => {  
-                //trigger
-                var parent = document.getElementById(`{"index":${tile},"type":"axes-title-trigger-wrapper"}`);
-                try{
-                    parent.removeChild(document.getElementById(`{"index":${tile},"type":"axes-title-trigger-wrapper"}`));
-                }catch{
-                    child = document.createElement('div');
-                    child.setAttribute("id", `{"index":${tile},"type":"axes-title-trigger"}`);
-                    parent.appendChild(child);
-                }
-                
-                // legend location
-                
-                //try {
-                //    var x_legend = document.getElementById(`{"index":${tile},"type":"x-legend"}`);
-                //    x_legend.setAttribute("value", e.target.layout.legend.x);
-                //}catch{ /* Do Nothing */}
-                //try {
-                //    var y_legend = document.getElementById(`{"index":${tile},"type":"y-legend"}`);
-                //    y_legend.setAttribute("value", e.target.layout.legend.y);
-                //}catch{ /* Do Nothing */}
-                
-            });
+            javascript = `
+                var target = '{"index":${tile},"type":"graph_display"}';  
+                $(document.getElementById(target)).on('plotly_relayout', (e) => {  
+                    var x_axis = dash_clientside.no_update;
+                    var y_axis = dash_clientside.no_update;
+                    // var x_legend = dash_clientside.no_update;
+                    // var y_legend = dash_clientside.no_update;
+                    
+                    // try setting the values if they exist
+                    try { 
+                        x_axis = e.target.layout.xaxis.title.text;
+                    } catch { /* Do Nothing */}
+                    try { 
+                        y_axis = e.target.layout.yaxis.title.text;
+                    } catch { /* Do Nothing */}
+                    
+                    // try { 
+                    //     x_legend = e.target.layout.legend.x;
+                    // } catch { /* Do Nothing */}
+                    // try { 
+                    //     y_legend = e.target.layout.legend.y;
+                    // } catch { /* Do Nothing */}
+                    
+                    setProps({ 
+                        'event': {'x_axis': x_axis, 
+                                  'y_axis': y_axis }
+                    })
+                });
+            `
         }
         
-        return true;
+        return [true, javascript];
     }
     """,
-    Output({'type': 'graph_display', 'index': MATCH}, 'data-'),
+    [Output({'type': 'graph_display', 'index': MATCH}, 'data-'),
+     Output({'type': 'javascript', 'index': MATCH}, 'run')],
     Input({'type': 'graph_display', 'index': MATCH}, 'children'),
     State({'type': 'graph_display', 'index': MATCH}, 'data-'),
     prevent_initial_call=True
 )
 
-
+# the above function set on the graph_display sets a prop as an event to the javascript object which will set the axis_titles
 app.clientside_callback(
     """
-    function tester(_children, graph){
-        const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
-        
-        if (triggered == "") {
-            return [dash_clientside.no_update, dash_clientside.no_update];
-        }
-        
-        var tile = triggered.match(/\d+/)[0];
-        var xaxis = dash_clientside.no_update;
-        var yaxis = dash_clientside.no_update;
-        //var x_legend = dash_clientside.no_update;
-        //var y_legend = dash_clientside.no_update;
-        
-        // axis titles
-    
-        if ('figure' in graph['props']){
-            if ('yaxis' in graph['props']['figure']['layout']){
-                if ('title' in graph['props']['figure']['layout']['yaxis']){
-                    yaxis = graph['props']['figure']['layout']['yaxis']['title']['text'];
-                }
-                if ('title' in graph['props']['figure']['layout']['xaxis']){
-                    xaxis = graph['props']['figure']['layout']['xaxis']['title']['text'];
-                }
-            }
-        }
-        
-        // legend location
-        
-        //try {
-        //    var x_legend = e.target.layout.legend.x;
-        //}catch{ /* Do Nothing */}
-        //try {
-        //    var y_legend = e.target.layout.legend.y;
-        //}catch{ /* Do Nothing */}
-        
-        return [xaxis, yaxis /*, x_legend, y_legend */]
+    function _update_axes_titles(event){
+        return [event.x_axis, event.y_axis];
     }
     """,
-    [Output({'type': 'xaxis-title', 'index': MATCH}, 'value'),
-     Output({'type': 'yaxis-title', 'index': MATCH}, 'value')],
-    Input({'type': 'axes-title-trigger', 'index': MATCH}, 'children'),
-    State({'type': 'graph_display', 'index': MATCH}, 'children')
+    [Output({"type": "xaxis-title", "index": MATCH}, 'value'),
+     Output({"type": "yaxis-title", "index": MATCH}, 'value')],
+    # {"index":x,"type":"x-legend"}, {"index":x,"type":"y-legend"}
+    Input({'type': 'javascript', 'index': MATCH}, 'event')
 )

@@ -10,6 +10,7 @@ stores all layouts excluding hierarchy filter layout
 import inspect
 import dash_core_components as dcc
 import dash_html_components as html
+import visdcc as visdcc
 from dash.exceptions import PreventUpdate
 from flask import session
 import json
@@ -574,11 +575,11 @@ def get_layout_dashboard():
             duration=4000),
         # dashboard-reset-confirmation is used by the prompts to reset the viewport
         dcc.Store(id='dashboard-reset-confirmation'),
-        # trigger wrappers for _update_axes_titles()
-        html.Div(id={'type': 'axes-title-trigger-wrapper', 'index': 0}, style={'display': 'none'}),
-        html.Div(id={'type': 'axes-title-trigger-wrapper', 'index': 1}, style={'display': 'none'}),
-        html.Div(id={'type': 'axes-title-trigger-wrapper', 'index': 2}, style={'display': 'none'}),
-        html.Div(id={'type': 'axes-title-trigger-wrapper', 'index': 3}, style={'display': 'none'}),
+        # javascript visdcc object for running the javascript required to handle plotly_relayout events
+        visdcc.Run_js(id={'type': 'javascript', 'index': 0}),
+        visdcc.Run_js(id={'type': 'javascript', 'index': 1}),
+        visdcc.Run_js(id={'type': 'javascript', 'index': 2}),
+        visdcc.Run_js(id={'type': 'javascript', 'index': 3}),
         # select-range-trigger is used by the load callbacks to load the select range datepicker section
         dcc.Store(id={'type': 'select-range-trigger', 'index': 0}),
         dcc.Store(id={'type': 'select-range-trigger', 'index': 1}),
@@ -785,6 +786,7 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
 #             style=DATA_CONTENT_HIDE if df_name is None else
 #             {'margin-left': '15px'}),
 #         ]
+
 
 # create default tile
 def get_tile(tile, tile_keys=None, df_name=None):
@@ -1110,7 +1112,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                                'top': '-15px',
                                'margin-right': '5px'})
                 ], style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}
-                if len(X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
+                    if len(X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
                 html.Div([
                     html.P(
                         "{}".format(X_AXIS_OPTIONS[0]),
@@ -1241,7 +1243,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                         style={'display': 'None'},
                         debounce=True),
                     dcc.Input(
-                        id={'type': 'yaxis-title' , 'index': tile},
+                        id={'type': 'yaxis-title', 'index': tile},
                         type="text",
                         value=yaxis,
                         style={'display': 'None'},

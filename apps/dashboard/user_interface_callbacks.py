@@ -627,6 +627,7 @@ app.clientside_callback(
      Input({'type': 'graph_children_toggle', 'index': MATCH}, 'value'),
      Input({'type': 'hierarchy-toggle', 'index': MATCH}, 'value')],
     [State({'type': 'div-graph-options', 'index': MATCH}, 'children'),
+     State('button-new', 'disabled'),
      State({'type': 'tile-customize-content', 'index': MATCH}, 'data-loaded'),
      State({'type': 'data-set', 'index': MATCH}, 'value'),
      State({'type': 'data-set', 'index': 4}, 'value'),
@@ -636,20 +637,22 @@ app.clientside_callback(
      State({'type': 'hierarchy-toggle', 'index': 4}, 'value')],
     prevent_initial_call=True
 )
-def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, hierarchy_toggle, _graph_options_state,
-                       is_loaded, df_name, parent_df_name, df_const, df_confirm, parent_graph_all,
+def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, hierarchy_toggle, graph_options_state,
+                       is_new_disabled, is_loaded, df_name, parent_df_name, df_const, df_confirm, parent_graph_all,
                        parent_hierarchy_toggle):
     """
     :param selected_graph_type: Selected graph type, ie. 'bar', 'line', etc.
-    :param _graph_options_state: State of the current graph options div
     :return: Graph menu corresponding to selected graph type
     """
 
-    # TODO: Callback seems to be generating a new graph-options-menu for tiles with existing menus and selections on
-    #  the addition of a new tile
     # -------------------------------------------Variable Declarations--------------------------------------------------
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][-1]
     # ------------------------------------------------------------------------------------------------------------------
+
+    # prevents update if new/delete is called and the graph already has a menu
+    if graph_options_state and is_new_disabled:
+        raise PreventUpdate
+
     # prevents update if hierarchy toggle or graph all children is selected when the graph type is not line or
     # scatter
     if ('"type":"graph_children_toggle"}.value' in changed_id

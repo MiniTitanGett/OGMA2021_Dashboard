@@ -1124,7 +1124,6 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                     # op-2 is continue the dataset change but unlink my graph
                     # op-3 is continue the dataset change and modify my graph as necessary (keeping the link)
                     # trigger update for all tiles that are linked to the active data menu
-                    prev_selection[tile] = df_name
                     for i in range(len(links_style)):
                         if links_style[i] == 'fa fa-link':
                             if graph_types[i] is None or graph_types[i] in GRAPH_OPTIONS[df_name]:
@@ -1141,65 +1140,35 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                                 for button in state_of_display:
                                     nid_path += '^||^{}'.format(button['props']['children'])
 
-                                if df_name == "OPG001":
-                                    df_names[i] = "OPG010"  # TODO: hardcode is a bit worrisome
-                                    df_const[df_names[i]] = generate_constants(df_names[i])
-                                    data[i] = get_data_menu(i, df_names[i],
-                                                            hierarchy_toggle=parent_hierarchy_toggle,
-                                                            level_value=parent_hierarchy_drop,
-                                                            nid_path=nid_path,
-                                                            graph_all_toggle=parent_graph_child_toggle,
-                                                            fiscal_toggle=parent_fiscal_toggle,
-                                                            input_method=parent_timeframe,
-                                                            num_periods=parent_num_state,
-                                                            period_type=parent_period_type,
-                                                            prev_selection=prev_selection[i],
-                                                            df_const=df_const) if prompt_result == 'op-2' \
-                                        else get_data_menu(i, df_names[i],
-                                                           prev_selection=prev_selection[i],
-                                                           df_const=df_const)
-                                    refresh_button[i] = {'padding': '10px 0', 'width': '15px',
-                                                         'height': '15px',
-                                                         'position': 'relative',
-                                                         'margin-right': '10px', 'margin-left': '10px',
-                                                         'vertical-align': 'top'}
-                                    if parent_timeframe == "select-range":
-                                        date_picker_triggers[i] = {"Input Method": parent_timeframe,
-                                                                   "Start Year Selection": parent_start_year,
-                                                                   "End Year Selection": parent_end_year,
-                                                                   "Start Secondary Selection": parent_start_secondary,
-                                                                   "End Secondary Selection": parent_end_secondary,
-                                                                   "Tab": parent_secondary_type}
+                                df_names[i] = prev_selection[i]
+                                df_const[df_names[i]] = generate_constants(df_names[i])
+                                data[i] = get_data_menu(i, df_names[i],
+                                                        hierarchy_toggle=parent_hierarchy_toggle,
+                                                        level_value=parent_hierarchy_drop,
+                                                        nid_path=nid_path,
+                                                        graph_all_toggle=parent_graph_child_toggle,
+                                                        fiscal_toggle=parent_fiscal_toggle,
+                                                        input_method=parent_timeframe,
+                                                        num_periods=parent_num_state,
+                                                        period_type=parent_period_type,
+                                                        prev_selection=prev_selection[i],
+                                                        df_const=df_const) if prompt_result == 'op-2' \
+                                    else get_data_menu(i, df_names[i],
+                                                        prev_selection=prev_selection[i],
+                                                        df_const=df_const)
+                                refresh_button[i] = {'padding': '10px 0', 'width': '15px',
+                                                     'height': '15px',
+                                                     'position': 'relative',
+                                                     'margin-right': '10px', 'margin-left': '10px',
+                                                     'vertical-align': 'top'}
+                                if parent_timeframe == "select-range":
+                                    date_picker_triggers[i] = {"Input Method": parent_timeframe,
+                                                               "Start Year Selection": parent_start_year,
+                                                               "End Year Selection": parent_end_year,
+                                                               "Start Secondary Selection": parent_start_secondary,
+                                                               "End Secondary Selection": parent_end_secondary,
+                                                               "Tab": parent_secondary_type}
 
-                                elif df_name == "OPG010":
-                                    df_names[i] = "OPG001"  # TODO: hardcode is a bit worrisome
-                                    df_const[df_names[i]] = generate_constants(df_names[i])
-                                    data[i] = get_data_menu(i, df_names[i],
-                                                            hierarchy_toggle=parent_hierarchy_toggle,
-                                                            level_value=parent_hierarchy_drop,
-                                                            nid_path=nid_path,
-                                                            graph_all_toggle=parent_graph_child_toggle,
-                                                            fiscal_toggle=parent_fiscal_toggle,
-                                                            input_method=parent_timeframe,
-                                                            num_periods=parent_num_state,
-                                                            period_type=parent_period_type,
-                                                            prev_selection=prev_selection[i],
-                                                            df_const=df_const) if prompt_result == 'op-2' \
-                                        else get_data_menu(i, df_names[i],
-                                                           prev_selection=prev_selection[i],
-                                                           df_const=df_const)
-                                    refresh_button[i] = {'padding': '10px 0', 'width': '15px',
-                                                         'height': '15px',
-                                                         'position': 'relative',
-                                                         'margin-right': '10px', 'margin-left': '10px',
-                                                         'vertical-align': 'top'}
-                                    if parent_timeframe == "select-range":
-                                        date_picker_triggers[i] = {"Input Method": parent_timeframe,
-                                                                   "Start Year Selection": parent_start_year,
-                                                                   "End Year Selection": parent_end_year,
-                                                                   "Start Secondary Selection": parent_start_secondary,
-                                                                   "End Secondary Selection": parent_end_secondary,
-                                                                   "Tab": parent_secondary_type}
                                 # continue the dataset change and modify my graph as necessary (keeping the link)
                                 if prompt_result == 'op-3':
                                     options_triggers[i] = 'fa fa-link'

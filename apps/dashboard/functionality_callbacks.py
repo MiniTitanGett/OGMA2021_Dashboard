@@ -804,3 +804,29 @@ for x in range(4):
         [Input({'type': 'args-value: {}'.replace("{}", str(x)), 'index': 4}, 'value')],
         prevent_initial_call=True
     )
+
+for x in range(4):
+    app.clientside_callback(
+        """
+        function _update_data_fitting_options(xaxis, graph_type){
+            if (xaxis == 'Time' && graph_type == 'Bubble'){
+                var hide_xaxis_measure = {'display': 'none'};
+                var hide_yaxis_measure = {'display': 'none'};
+                var hide_size_measure = {'display': 'none'};
+                }
+            else{
+                var hide_xaxis_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
+                var hide_yaxis_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
+                var hide_size_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
+                }
+            return [hide_xaxis_measure, hide_yaxis_measure, hide_size_measure];
+        }
+            """,
+
+        [Output({'type': 'hide-xaxis-measure', 'index': x}, 'style'),
+         Output({'type': 'hide-yaxis-measure', 'index': x}, 'style'),
+         Output({'type': 'hide-size-measure', 'index': x}, 'style')],
+        Input({'type': 'args-value: {}'.replace("{}", str(x)), 'index': 0}, 'value'),
+        State({'type': 'graph-type-dropdown', 'index': x}, 'value'),
+        prevent_initial_call=True
+    )

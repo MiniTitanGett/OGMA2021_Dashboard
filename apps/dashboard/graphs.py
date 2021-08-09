@@ -446,7 +446,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 hovertemplate = get_label('LBL_Gen_Hover_Data', df_name)
                 hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event', df_name)).replace(
                     '%AXIS-A%', '%{x}')
-                hovertemplate = hovertemplate.replace('%AXIS-TITLE-B%', arg_value[4]).replace('%AXIS-B%', '%{size}')
+                hovertemplate = hovertemplate.replace('%AXIS-TITLE-B%', arg_value[4]).replace('%AXIS-B%', '%{customdata[2]}')
 
                 fig.update_traces(hovertemplate=hovertemplate)
             else:

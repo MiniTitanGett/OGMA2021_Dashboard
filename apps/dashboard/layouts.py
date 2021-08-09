@@ -1370,7 +1370,9 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                         clearable=False,
                         style={'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
-            html.Div([
+            html.Div(
+                id={'type': 'hide-xaxis-measure', 'index': tile},
+                children=[
                 html.Div([
                     html.P(
                         "{}:".format(get_label('LBL_X_Axis_Measure')),
@@ -1385,7 +1387,8 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                         value=x_measure,
                         clearable=False,
                         style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})],
+            style={'display': 'inline-block', 'width': '80%','max-width': '350px'}),
             html.Div([
                 html.Div([
                     html.P(
@@ -1401,7 +1404,9 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                         clearable=False,
                         style={'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
-            html.Div([
+            html.Div(
+                id={'type': 'hide-yaxis-measure', 'index': tile},
+                children=[
                 html.Div([
                     html.P(
                         "{}:".format(get_label('LBL_Y_Axis_Measure')),
@@ -1416,7 +1421,8 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                         value=y_measure,
                         clearable=False,
                         style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})],
+            style={'display': 'inline-block', 'width': '80%','max-width': '350px'}),
             html.Div([
                 html.Div([
                     html.P(
@@ -1432,7 +1438,9 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                         clearable=False,
                         style={'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
-            html.Div([
+            html.Div(
+                id={'type': 'hide-size-measure', 'index': tile},
+                children=[
                 html.Div([
                     html.P(
                         "{}:".format(get_label('LBL_Size_Measure')),
@@ -1447,7 +1455,8 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                         value=size_measure,
                         clearable=False,
                         style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})],
+            style={'display': 'inline-block', 'width': '80%','max-width': '350px'}),
             dcc.Checklist(
                 id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 6},
                 options=[{'label': get_label('LBL_Show_Grid_Lines'),

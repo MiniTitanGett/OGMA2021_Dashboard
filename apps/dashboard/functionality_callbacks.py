@@ -36,8 +36,10 @@ from apps.dashboard.datepicker import get_date_box, update_date_columns, get_sec
 #       - operators
 #       - split_filter_part()
 #       - _update_table()
+# ********************************************Arbitrary Constants*****************************************************
 
-
+plotly_graph = {'Line': 'line', 'Bar': 'bar', 'Scatter': 'scatter', 'Bubble': 'bubble',
+                'Box_Plot': 'box', 'Table': 'table', 'Sankey': 'sankey'}
 # ***************************************************GRAPH************************************************************
 
 # update graph
@@ -97,7 +99,13 @@ for x in range(4):
          # Constants
          State('df-constants-storage', 'data'),
          # Float menu result
-         State({'type': 'data-set-parent', 'index': 4}, 'value')],
+         State({'type': 'data-set-parent', 'index': 4}, 'value'),
+         # Axes titles
+         State({'type': 'xaxis-title', 'index': x}, 'value'),
+         State({'type': 'yaxis-title', 'index': x}, 'value'),
+         # Legend Position
+         State({'type': 'x-pos-legend', 'index': x}, 'value'),
+         State({'type': 'y-pos-legend', 'index': x}, 'value')],
         prevent_initial_call=True
     )
     def _update_graph(_df_trigger, arg_value, graph_type, tile_title, _datepicker_trigger,
@@ -108,35 +116,13 @@ for x in range(4):
                       timeframe, fiscal_toggle, start_year, end_year, start_secondary, end_secondary,
                       parent_secondary_type, parent_timeframe, parent_fiscal_toggle, parent_start_year, parent_end_year,
                       parent_start_secondary, parent_end_secondary, graph_display, df_name, parent_df_name,
-                      link_state, hierarchy_options, parent_hierarchy_options, df_const, df_confirm):
+                      link_state, hierarchy_options, parent_hierarchy_options, df_const, df_confirm, xaxis, yaxis,
+                      xlegend, ylegend):
 
         # -------------------------------------------Variable Declarations----------------------------------------------
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
         tile = dash.callback_context.inputs_list[0]['id']['index']
-        xaxis = None
-        yaxis = None
         # --------------------------------------------------------------------------------------------------------------
-        # TODO have to finish hooking up plotly axes title edits to hidden div so we are able to save
-        #  and update the graph menu when ever a user edits the titles
-
-        # # check if the axes have changed take
-        # if graph_display:
-        #     if ('"type":"args-value' in changed_id and (result_edit_menu == 'ok' or result_edit_menu is None)) \
-        #             or ((result_edit_menu == 'ok' or result_edit_menu == 'cancel' or result_edit_menu is None)
-        #                 and ('hierarchy-toggle' in changed_id or 'hierarchy_level_dropdown' in changed_id or
-        #                      'date-picker-trigger' in changed_id or 'hierarchy_display' in changed_id or
-        #                    'tile-title' in changed_id or 'graph_children' in changed_id or 'num-periods' in changed_id
-        #                     or 'period-type' in changed_id))\
-        #             or 'update-graph-trigger' in changed_id:
-        #
-        #         if 'figure' in graph_display['props']:
-        #             for j in graph_display['props']['figure']['layout']:
-        #                 if j == 'yaxis':
-        #                     if 'title' in graph_display['props']['figure']['layout']['yaxis']:
-        #                         yaxis = graph_display['props']['figure']['layout']['yaxis']['title']['text']
-        #                     if 'title' in graph_display['props']['figure']['layout']['xaxis']:
-        #                         xaxis = graph_display['props']['figure']['layout']['xaxis']['title']['text']
-        #                         break
 
         if '"type":"tile-view"}.className' in changed_id and df_name is None and parent_df_name is None:
             return None
@@ -167,7 +153,7 @@ for x in range(4):
                                    hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options,
                                    state_of_display,
                                    secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
-                                   end_secondary, df_const, xaxis, yaxis)
+                                   end_secondary, df_const, xaxis, yaxis, xlegend, ylegend)
             return graph
 
         # account for tile being linked or not
@@ -213,7 +199,7 @@ for x in range(4):
         graph = __update_graph(df_name, arg_value, graph_type, tile_title, num_periods, period_type, hierarchy_toggle,
                                hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options, state_of_display,
                                secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
-                               end_secondary, df_const, xaxis, yaxis)
+                               end_secondary, df_const, xaxis, yaxis, xlegend, ylegend)
 
         if graph is None:
             raise PreventUpdate

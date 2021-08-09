@@ -554,7 +554,7 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
     elif '"type":"set-graph-options-trigger"}.options-' in changed_id and graph_type is not None \
             and graph_type not in graph_options:
         graph_value = options[0]['value']
-    # unlink and dont change graph option
+    # unlink and don't change graph option
     else:
         graph_value = no_update
 
@@ -627,6 +627,7 @@ app.clientside_callback(
      Input({'type': 'graph_children_toggle', 'index': MATCH}, 'value'),
      Input({'type': 'hierarchy-toggle', 'index': MATCH}, 'value')],
     [State({'type': 'div-graph-options', 'index': MATCH}, 'children'),
+     State('button-new', 'disabled'),
      State({'type': 'tile-customize-content', 'index': MATCH}, 'data-loaded'),
      State({'type': 'data-set', 'index': MATCH}, 'value'),
      State({'type': 'data-set', 'index': 4}, 'value'),
@@ -636,20 +637,22 @@ app.clientside_callback(
      State({'type': 'hierarchy-toggle', 'index': 4}, 'value')],
     prevent_initial_call=True
 )
-def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, hierarchy_toggle, _graph_options_state,
-                       is_loaded, df_name, parent_df_name, df_const, df_confirm, parent_graph_all,
+def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, hierarchy_toggle, graph_options_state,
+                       is_new_disabled, is_loaded, df_name, parent_df_name, df_const, df_confirm, parent_graph_all,
                        parent_hierarchy_toggle):
     """
     :param selected_graph_type: Selected graph type, ie. 'bar', 'line', etc.
-    :param _graph_options_state: State of the current graph options div
     :return: Graph menu corresponding to selected graph type
     """
 
-    # TODO: Callback seems to be generating a new graph-options-menu for tiles with existing menus and selections on
-    #  the addition of a new tile
     # -------------------------------------------Variable Declarations--------------------------------------------------
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][-1]
     # ------------------------------------------------------------------------------------------------------------------
+
+    # prevents update if new/delete is called and the graph already has a menu
+    if graph_options_state and is_new_disabled:
+        raise PreventUpdate
+
     # prevents update if hierarchy toggle or graph all children is selected when the graph type is not line or
     # scatter
     if ('"type":"graph_children_toggle"}.value' in changed_id
@@ -721,6 +724,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
                                            legend=None,
                                            xaxis=None,
                                            yaxis=None,
+                                           xpos=None,
+                                           ypos=None,
                                            df_name=df_name,
                                            df_const=df_const,
                                            data_fitting=data_fitting,
@@ -738,6 +743,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
                                   legend=None,
                                   xaxis=None,
                                   yaxis=None,
+                                  xpos=None,
+                                  ypos=None,
                                   df_name=df_name,
                                   df_const=df_const)
 
@@ -759,6 +766,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
                                      legend=None,
                                      xaxis=None,
                                      yaxis=None,
+                                     xpos=None,
+                                     ypos=None,
                                      df_name=df_name,
                                      df_const=df_const)
 
@@ -778,6 +787,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
                                  legend=None,
                                  xaxis=None,
                                  yaxis=None,
+                                 xpos=None,
+                                 ypos=None,
                                  df_const=df_const)
 
     elif selected_graph_type == 'Sankey':
@@ -907,7 +918,6 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                            parent_end_year, parent_start_secondary, parent_end_secondary, parent_hierarchy_toggle,
                            parent_hierarchy_drop, parent_num_state, parent_period_type, parent_graph_child_toggle,
                            state_of_display):
-
     """
     :param closed_tile: Detects when a tile has been deleted and encodes the index of the deleted tile
     param links_style: State of all link/unlink icons and detects user clicking a link icon
@@ -949,7 +959,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
             prev_selection[4] = df_names[4]
 
     # if 'data-menu-close' or 'select-dashboard-dropdown' requested, close all data menus
-    # dont close if no data set has been chosen
+    # don't close if no data set has been chosen
     elif ('data-menu-close' in changed_id or 'select-dashboard-dropdown' in changed_id) and \
             (df_name_0 is not None or df_name_1 is not None or df_name_2 is not None or df_name_3 is not None or
              df_name_4 is not None):
@@ -1542,5 +1552,77 @@ app.clientside_callback(
      Input('prompt-option-2', 'n_clicks'),
      Input('prompt-option-3', 'n_clicks')],
     State('prompt-title', 'data-'),
+    prevent_initial_call=True
+)
+
+# this function gets called on graph draw and sets a JS function to the graph display if there isn't one
+# attached function then sends edited values on plot changes (edits, clicks, moves of legend, etc.) to the following:
+# {"index":x,"type":"xaxis-title"}, {"index":x,"type":"yaxis-title"},
+# {"index":x,"type":"x-legend"}, {"index":x,"type":"y-legend"}
+app.clientside_callback(
+    """
+    function _update_axes_titles(graph, hasTrigger){
+        const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
+
+        var tile = triggered.match(/\d+/)[0];
+        var javascript = dash_clientside.no_update;
+        
+        if (hasTrigger == null){
+            javascript = `
+                var target = '{"index":${tile},"type":"graph_display"}';  
+                $(document.getElementById(target)).on('plotly_relayout', (e) => {  
+                    var x_axis = dash_clientside.no_update;
+                    var y_axis = dash_clientside.no_update;
+                    var x_legend = dash_clientside.no_update;
+                    var y_legend = dash_clientside.no_update;
+                    
+                    // try setting the values if they exist
+                    try { 
+                        x_axis = e.target.layout.xaxis.title.text;
+                    } catch { /* Do Nothing */}
+                    try { 
+                        y_axis = e.target.layout.yaxis.title.text;
+                    } catch { /* Do Nothing */}
+                    
+                    try { 
+                        x_legend = e.target.layout.legend.x;
+                    } catch { /* Do Nothing */}
+                    try { 
+                        y_legend = e.target.layout.legend.y;
+                    } catch { /* Do Nothing */}
+                    
+                    setProps({ 
+                        'event': {'x_axis': x_axis, 
+                                  'y_axis': y_axis,
+                                  'x_legend': x_legend,
+                                  'y_legend': y_legend}
+                    })
+                });
+            `
+        }
+        
+        return [true, javascript];
+    }
+    """,
+    [Output({'type': 'graph_display', 'index': MATCH}, 'data-'),
+     Output({'type': 'javascript', 'index': MATCH}, 'run')],
+    Input({'type': 'graph_display', 'index': MATCH}, 'children'),
+    State({'type': 'graph_display', 'index': MATCH}, 'data-'),
+    prevent_initial_call=True
+)
+
+# the above function set on the graph_display sets a prop as an event to the javascript object which will set the
+# axis_titles
+app.clientside_callback(
+    """
+    function _update_axes_titles(event){
+        return [event.x_axis, event.y_axis, event.x_legend, event.y_legend];
+    }
+    """,
+    [Output({"type": "xaxis-title", "index": MATCH}, 'value'),
+     Output({"type": "yaxis-title", "index": MATCH}, 'value'),
+     Output({'type': 'x-pos-legend', 'index': MATCH}, 'value'),
+     Output({'type': 'y-pos-legend', 'index': MATCH}, 'value')],
+    Input({'type': 'javascript', 'index': MATCH}, 'event'),
     prevent_initial_call=True
 )

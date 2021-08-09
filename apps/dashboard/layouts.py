@@ -1,4 +1,4 @@
-######################################################################################################################
+﻿######################################################################################################################
 """
 layouts.py
 
@@ -168,8 +168,7 @@ def get_data_set_picker(tile, df_name, confirm_parent, prev_selection=None):
 def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Filter', level_value='H1',
                   nid_path="root", graph_all_toggle=None, fiscal_toggle='Gregorian', input_method='all-time',
                   num_periods='5', period_type='last-years', prev_selection=None, confirm_parent=None, df_const=None):
-    # if df_name is None:
-    #     df_name = session['dataset_list'][0]
+
     content = [
         html.A(
             className='boxclose',
@@ -499,7 +498,10 @@ def get_layout_dashboard():
         dcc.Store(id={'type': 'prompt-trigger', 'index': 3}),  # tile 3
         dcc.Store(id={'type': 'prompt-trigger', 'index': 4}),  # dashboard
         dcc.Store(id={'type': 'prompt-trigger', 'index': 5}),  # sidemenus
-        dcc.Store(id='prompt-result'),
+        # separated result stores for specific callback chains
+        dcc.Store(id={'type': 'prompt-result', 'index': 0}),  # _manage_tile_save_load_trigger() callback
+        dcc.Store(id={'type': 'prompt-result', 'index': 1}),  # _manage_dashboard_saves_and_reset() callback
+        dcc.Store(id={'type': 'prompt-result', 'index': 2}),  # _manage_data_sidemenus() callback
         # Floating Menu
         html.Div(
             html.Div([
@@ -531,12 +533,15 @@ def get_layout_dashboard():
             style=DATA_CONTENT_HIDE,
             id='float-menu-obscure',
             className='prompt-obscure'),
-        dcc.Store(id={'type': 'float-menu-trigger', 'index': 0}),
-        dcc.Store(id={'type': 'float-menu-trigger', 'index': 1}),
-        dcc.Store(id={'type': 'float-menu-trigger', 'index': 2}),
-        dcc.Store(id={'type': 'float-menu-trigger', 'index': 3}),
-        dcc.Store(id={'type': 'float-menu-trigger', 'index': 4}),
-        dcc.Store(id='float-menu-result'),
+        dcc.Store(id={'type': 'float-menu-trigger', 'index': 0}),  # tile 0
+        dcc.Store(id={'type': 'float-menu-trigger', 'index': 1}),  # tile 1
+        dcc.Store(id={'type': 'float-menu-trigger', 'index': 2}),  # tile 2
+        dcc.Store(id={'type': 'float-menu-trigger', 'index': 3}),  # tile 3
+        dcc.Store(id={'type': 'float-menu-trigger', 'index': 4}),  # linked tiles
+        # separated result stores for specific callback chains
+        dcc.Store(id={'type': 'float-menu-result', 'index': 0}),  # _manage_tile_save_load_trigger() callback
+        dcc.Store(id={'type': 'float-menu-result', 'index': 1}),  # _manage_dashboard_saves_and_reset() callback
+        dcc.Store(id={'type': 'float-menu-result', 'index': 2}),  # _serve_float_menu_and_take_result() callback
         # Popups
         dbc.Alert(
             'Your Tile Has Been Saved',
@@ -734,59 +739,6 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
             children=graph_menu,
             id={'type': 'div-graph-options', 'index': tile})]
 
-# create customize content
-# def get_customize_view(tile, graph_type, df_name):
-#     if df_name == 'OPG010':
-#         graphs = GRAPH_OPTIONS['OPG010']
-#     elif df_name == 'OPG001':
-#         graphs = GRAPH_OPTIONS['OPG001']
-#     else:
-#         graphs = []
-#
-#     options = []
-#     for i in graphs:
-#         options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
-#
-#     return [
-#         html.Div(
-#             id={'type': 'div-customize-warning-message', 'index': tile},
-#             children=[
-#                 dcc.Markdown(
-#                     get_label("LBL_Please_Select_A_Data_Set_To_View_Customization_Options")
-#                 )],
-#             style={'margin-left': '15px'} if df_name is None else
-#             DATA_CONTENT_HIDE),
-#         html.Div(
-#             id={'type': 'div-graph-type', 'index': tile},
-#             children=[
-#                 html.Div(
-#                     children=[
-#                         html.P(
-#                             "{}:".format(get_label('LBL_Graph_Type')),
-#                             style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px',
-#                                    'display': 'inline-block', 'text-align': 'none'}),
-#                         html.I(
-#                             html.Span(
-#                                 get_label("LBL_Graph_Type_Info"),
-#                                 className='save-symbols-tooltip'),
-#                             className='fa fa-question-circle-o',
-#                             id={'type': 'graph-type-info', 'index': tile},
-#                             style={'position': 'relative'})],
-#                     id={'type': 'graph-type-info-wrapper', 'index': tile}),
-#                 html.Div(
-#                     dcc.Dropdown(
-#                         id={'type': 'graph-type-dropdown', 'index': tile},
-#                         clearable=False,
-#                         options=[{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in graphs],
-#                         value=graph_type if graph_type is not None else options[0]['value'] if len(options) != 0 else
-#                         None,  # graph_type,
-#                         style={'max-width': '405px', 'width': '100%', 'font-size': '13px'}),
-#                 ),
-#             ],
-#             style=DATA_CONTENT_HIDE if df_name is None else
-#             {'margin-left': '15px'}),
-#         ]
-
 
 # create default tile
 def get_tile(tile, tile_keys=None, df_name=None):
@@ -816,10 +768,6 @@ def get_tile(tile, tile_keys=None, df_name=None):
                     [get_label('LBL_Edit')],
                     id={'type': 'tile-customize', 'index': tile},
                     className='tile-nav tile-nav--customize'),
-                # html.Button(
-                #     ['Edit View'],
-                #     id={'type': 'tile-custom', 'index': tile},
-                #     className='tile-nav tile-nav-custom'),
                 html.Button(
                     [get_label('LBL_Save')],
                     id={'type': 'save-button', 'index': tile},
@@ -868,15 +816,6 @@ def get_tile(tile, tile_keys=None, df_name=None):
                     className='customize-content'),
                 id={'type': 'tile-customize-content-wrapper', 'index': tile},
                 className='customize-content'),
-            # html.Div(
-            #     html.Div(
-            #         tile_keys['Customize view'] if tile_keys
-            #         else get_customize_view(tile=tile, graph_type=None, df_name=df_name),
-            #         style=CUSTOMIZE_CONTENT_HIDE,
-            #         id={'type': 'tile-customize-view', 'index': tile},
-            #         className='customize-content'),
-            #     id={'type': 'tile-customize-view-wrapper', 'index': tile},
-            #     className='customize-view'),
             html.Div([
                 html.P(get_label('LBL_Load_A_Saved_Graph'),
                        style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
@@ -1112,7 +1051,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                                'top': '-15px',
                                'margin-right': '5px'})
                 ], style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}
-                    if len(X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
+                   if len(X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
                 html.Div([
                     html.P(
                         "{}".format(X_AXIS_OPTIONS[0]),
@@ -1282,11 +1221,13 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
     :param yaxis: the title of the yaxis
     :return: Menu with options to modify a bar graph.
     """
-    # (args-value: {})[0] = x-axis
-    # (args-value: {})[1] = y-axis (measure type)
-    # (args-value: {})[2] = graphed variables
-    # (args-value: {})[3] = orientation
-    # (args-value: {})[4] = animate graph
+    # args_value[0] = x-axis
+    # args_value[1] = y-axis (measure type)
+    # args_value[2] = graphed variables
+    # args_value[3] = orientation
+    # args_value[4] = animate graph
+    # args_value[5] = grid lines
+    # args_value[6] = legend
 
     return [
         html.Div(
@@ -1419,12 +1360,14 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
 # bubble graph menu layout
 def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, gridline, legend, df_name, df_const,
                           xaxis, yaxis, xpos, ypos):
-    # (args-value: {})[0] = x-axis
-    # (args-value: {})[1] = x-axis measure
-    # (args-value: {})[2] = y-axis
-    # (args-value: {})[3] = y-axis measure
-    # (args-value: {})[4] = size
-    # (args-value: {})[5] = size measure
+    # args_value[0] = x-axis
+    # args_value[1] = x-axis measure
+    # args_value[2] = y-axis
+    # args_value[3] = y-axis measure
+    # args_value[4] = size
+    # args_value[5] = size measure
+    # args_value[6] = grid line toggle
+    # args_value[7] = legend toggle
 
     return [
         html.Div(
@@ -1581,10 +1524,12 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
 # box plot menu layout
 def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, df_name, show_data_points, gridline,
                       legend, df_const, xaxis, yaxis, xpos, ypos):
-    # (args-value: {})[0] = graphed variables
-    # (args-value: {})[1] = measure type
-    # (args-value: {})[2] = points toggle
-    # (args-value: {})[3] = orientation
+    # args_value[0] = graphed variables
+    # args_value[1] = measure type
+    # args_value[2] = points toggle
+    # arg_value[3] = orientation
+    # arg_value[4] = grid lines
+    # arg_value[5] = legend
 
     return [
         html.Div(

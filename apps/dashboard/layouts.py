@@ -316,7 +316,9 @@ def get_layout_graph(report_name):
                            j.get('End Secondary'),  # j['End Secondary']
                            j.get('df_const'),
                            None,  # xtitle
-                           None)  # ytitle
+                           None,  # ytitle
+                           None,  # xlegpos
+                           None)  # ylegpos
 
     if graph is None:
         raise PreventUpdate
@@ -1004,6 +1006,8 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
     :param degree: degree value
     :param xaxis: the title of the xaxis
     :param yaxis: the title of the yaxis
+    :param xpos: the x position of the legend
+    :param ypos: the y position of the legend
     :return: Menu with options to modify a line graph.
     """
     # arg_value[0] = xaxis selector
@@ -1207,18 +1211,20 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
 def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline, legend, df_name, df_const, xaxis,
                        yaxis, xpos, ypos):
     """
-    :param measure_type: the measure type value
-    :param y: the y-axis value
+    :param tile: Index of the tile the bar graph menu corresponds to.
     :param x: the x-axis value
+    :param y: the y-axis value
+    :param measure_type: the measure type value
     :param orientation: the orientation value
     :param animate: the animate graph value
     :param gridline: Show gridline or not
     :param legend: Show legend or not
-    :param tile: Index of the tile the bar graph menu corresponds to.
     :param df_name: Name of the data set being used.
     :param df_const: Dataframe constants
     :param xaxis: the title of the xaxis
     :param yaxis: the title of the yaxis
+    :param xpos: the x position of the legend
+    :param ypos: the y position of the legend
     :return: Menu with options to modify a bar graph.
     """
     # args_value[0] = x-axis
@@ -1360,6 +1366,24 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
 # bubble graph menu layout
 def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, gridline, legend, df_name, df_const,
                           xaxis, yaxis, xpos, ypos):
+    """
+    :param tile: Index of the tile the bar graph menu corresponds to.
+    :param x: the x-axis value
+    :param x_measure: the x-axis measure
+    :param y: the y-axis value
+    :param y_measure: the y-axis measure
+    :param size: the size value
+    :param size_measure: the size measure
+    :param gridline: Show gridline or not
+    :param legend: Show legend or not
+    :param df_name: Name of the data set being used.
+    :param df_const: Dataframe constants
+    :param xaxis: the title of the xaxis
+    :param yaxis: the title of the yaxis
+    :param xpos: the x position of the legend
+    :param ypos: the y position of the legend
+    :return: Menu with options to modify a bubble graph.
+    """
     # args_value[0] = x-axis
     # args_value[1] = x-axis measure
     # args_value[2] = y-axis
@@ -1524,6 +1548,22 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
 # box plot menu layout
 def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, df_name, show_data_points, gridline,
                       legend, df_const, xaxis, yaxis, xpos, ypos):
+    """
+        :param tile: Index of the tile the bar graph menu corresponds to.
+        :param axis_measure: the measure for the axis
+        :param graphed_variables: the variables to be graphed
+        :param graph_orientation: the orientation value
+        :param df_name: Name of the data set being used.
+        :param show_data_points: the animate graph value
+        :param gridline: Show gridline or not
+        :param legend: Show legend or not
+        :param df_const: Dataframe constants
+        :param xaxis: the title of the xaxis
+        :param yaxis: the title of the yaxis
+        :param xpos: the x position of the legend
+        :param ypos: the y position of the legend
+        :return: Menu with options to modify a bar graph.
+        """
     # args_value[0] = graphed variables
     # args_value[1] = measure type
     # args_value[2] = points toggle

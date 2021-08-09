@@ -326,12 +326,11 @@ for x in range(4):
          Input({'type': 'tile-layouts', 'index': x}, 'n_clicks'),
          Input({'type': 'float-menu-result', 'index': 2}, 'children')],
         [State('float-menu-title', 'data-'),
-         State({'type': 'tile-customize-content', 'index': x}, 'children'),
-         State({'type': 'graph_display', 'index': x}, 'children')],
+         State({'type': 'tile-customize-content', 'index': x}, 'children')],
         prevent_initial_call=True
     )
     def _serve_float_menu_and_take_result(_customize_n_clicks, _layouts_n_clicks, float_menu_result, float_menu_data,
-                                          customize_menu, graph):
+                                          customize_menu):
         # -------------------------------------------Variable Declarations----------------------------------------------
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
         customize_menu_output = no_update
@@ -1621,5 +1620,6 @@ app.clientside_callback(
      Output({"type": "yaxis-title", "index": MATCH}, 'value'),
      Output({'type': 'x-pos-legend', 'index': MATCH}, 'value'),
      Output({'type': 'y-pos-legend', 'index': MATCH}, 'value')],
-    Input({'type': 'javascript', 'index': MATCH}, 'event')
+    Input({'type': 'javascript', 'index': MATCH}, 'event'),
+    prevent_initial_call=True
 )

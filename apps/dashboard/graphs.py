@@ -523,6 +523,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
     # ---------------------------------------Variable Declarations------------------------------------------------------
     language = session["language"]
     xaxis = {'type': 'category'}
+    filtered_df = None
     # ------------------------------------------------------------------------------------------------------------------
     # Check whether we have enough information to attempt getting data for a graph
     if hierarchy_type == 'Level Filter' and None not in [arg_value, hierarchy_level_dropdown, hierarchy_type,
@@ -712,6 +713,13 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
     else:
         fig.update_xaxes(showgrid=False, zeroline=False)
         fig.update_yaxes(showgrid=False, zeroline=False)
+
+    # set ranges
+    if arg_value[4]:
+        if arg_value[3] == 'Vertical':
+            fig.update_yaxes(range=[0, filtered_df['Measure Value'].max()])
+        else:
+            fig.update_xaxes(range=[0, filtered_df['Measure Value'].max()])
 
     graph = dcc.Graph(
         id='graph-display',
@@ -999,7 +1007,6 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
 # sankey graph layout
 def get_sankey_figure(arg_value, dff, hierarchy_level_dropdown, hierarchy_path, hierarchy_type, tile_title, df_name,
                       df_const):
-
     # ------------------------------------------Variable Declarations---------------------------------------------------
     # arg_value[0] = variable selector
     language = session["language"]
@@ -1050,7 +1057,7 @@ def get_sankey_figure(arg_value, dff, hierarchy_level_dropdown, hierarchy_path, 
         value_numpy.append(row['MeasQual2'])
         link_colour_numpy.append(node_colour_numpy[int(row['Measure Id'])])
 
-    #set up hover labels
+    # set up hover labels
     node_hover_template = get_label('LBL_Node_HoverTemplate', df_name)
     node_hover_template = node_hover_template.replace("%VALUE%", "%{value}")
     node_hover_template = node_hover_template.replace("%NODE%", "%{customdata}")

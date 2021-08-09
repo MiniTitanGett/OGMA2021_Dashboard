@@ -431,7 +431,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
             filtered_df['Date of Event'] = filtered_df['Date of Event'].astype(str)
 
             if arg_value[0] == 'Time':
-                fig= px.scatter(
+                fig = px.scatter(
                     title=title,
                     x=filtered_df['Date of Event'],
                     y=filtered_df[arg_value[2]],
@@ -444,13 +444,14 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 # set up hover label
 
                 hovertemplate = get_label('LBL_Gen_Hover_Data', df_name)
-                hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event', df_name)).replace(
-                    '%AXIS-A%', '%{x}')
-                hovertemplate = hovertemplate.replace('%AXIS-TITLE-B%', arg_value[4]).replace('%AXIS-B%', '%{customdata[2]}')
+                hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event', df_name)).\
+                    replace('%AXIS-A%', '%{x}')
+                hovertemplate = hovertemplate.replace('%AXIS-TITLE-B%', arg_value[4]).replace('%AXIS-B%',
+                                                                                              '%{customdata[2]}')
 
                 fig.update_traces(hovertemplate=hovertemplate)
             else:
-            # generate graph
+                # generate graph
                 fig = px.scatter(
                     title=title,
                     x=filtered_df[arg_value[0], arg_value[1]],
@@ -461,7 +462,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                     range_x=[0, filtered_df[arg_value[0], arg_value[1]].max()],
                     range_y=[0, filtered_df[arg_value[2], arg_value[3]].max()],
                     labels={'animation_frame': 'Date of Event'},
-                    custom_data=[filtered_df[color], filtered_df['Date of Event'], filtered_df[arg_value[4], arg_value[5]]]
+                    custom_data=[filtered_df[color], filtered_df['Date of Event'], filtered_df[arg_value[4],
+                                                                                               arg_value[5]]]
                 )
                 fig.update_layout(
                     legend_title_text='Size: <br> &#9; {} ({})<br> <br>{}'.format(arg_value[4], arg_value[5],
@@ -1054,7 +1056,7 @@ def get_sankey_figure(arg_value, dff, hierarchy_level_dropdown, hierarchy_path, 
         value_numpy.append(row['MeasQual2'])
         link_colour_numpy.append(node_colour_numpy[int(row['Measure Id'])])
 
-    #set up hover labels
+    # set up hover labels
     node_hover_template = get_label('LBL_Node_HoverTemplate', df_name)
     node_hover_template = node_hover_template.replace("%VALUE%", "%{value}")
     node_hover_template = node_hover_template.replace("%NODE%", "%{customdata}")

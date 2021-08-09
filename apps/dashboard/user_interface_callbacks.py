@@ -86,7 +86,7 @@ app.clientside_callback(
      State({'type': 'data-set-parent', 'index': 4}, 'value')],
     prevent_initial_call=True
 )
-def _new_and_delete(_new_clicks, close_id, _dashboard_reset, input_tiles, num_tiles, new_disabled, _df_const,
+def _new_and_delete(_new_clicks, close_id, _dashboard_reset, input_tiles, num_tiles, new_disabled, df_const,
                     parent_df, confirm_parent):
     """
     :param _new_clicks: Detects user clicking 'NEW' button in parent navigation bar and encodes the number of tiles to
@@ -123,7 +123,7 @@ def _new_and_delete(_new_clicks, close_id, _dashboard_reset, input_tiles, num_ti
         if confirm_parent:
             parent_df = confirm_parent
         num_tiles += 1
-        children = get_tile_layout(num_tiles, input_tiles, parent_df=parent_df if _df_const is not None else None)
+        children = get_tile_layout(num_tiles, input_tiles, parent_df=parent_df if df_const is not None else None)
     # if RESET dashboard requested, set dashboard to default appearance
     elif 'dashboard-reset' in changed_id:
         num_tiles = 1

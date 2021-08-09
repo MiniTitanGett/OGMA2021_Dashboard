@@ -15,6 +15,8 @@ from dash.exceptions import PreventUpdate
 from flask import session
 import json
 import dash_bootstrap_components as dbc
+import dash_responsive_grid_layout as drgl
+
 
 # Internal Modules
 from conn import exec_storedproc_results
@@ -168,7 +170,6 @@ def get_data_set_picker(tile, df_name, confirm_parent, prev_selection=None):
 def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Filter', level_value='H1',
                   nid_path="root", graph_all_toggle=None, fiscal_toggle='Gregorian', input_method='all-time',
                   num_periods='5', period_type='last-years', prev_selection=None, confirm_parent=None, df_const=None):
-
     content = [
         html.A(
             className='boxclose',
@@ -205,13 +206,23 @@ def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Fi
 
 # get div body
 def get_div_body(num_tiles=1, input_tiles=None, tile_keys=None):
+    layouts = {
+        'lg': [
+            {'i': '{"index": 0, "type": "tile"}', 'x': 0, 'y': 0, 'w': 24, 'h': 24}
+        ]
+    }
+    cols = {'lg': 24}
+    breakpoints = {'lg': 1200}
     return [
         # body div
-        html.Div(
+        drgl.ResponsiveGridLayout(
             get_tile_layout(num_tiles, input_tiles, tile_keys),
             id='div-body',
-            style={'overflow-x': 'hidden', 'overflow-y': 'hidden'},
-            className='graph-container')]
+            cols=cols,
+            layouts=layouts,
+            breakpoints=breakpoints,
+            draggableHandle='.dragbar')
+    ]
 
 
 # default tab layout
@@ -750,7 +761,7 @@ def get_tile(tile, tile_keys=None, df_name=None):
     :param df_name: Name of the data set being used.
     :return: New tile with index values matching the specified tile index.
     """
-    return [html.Div([
+    return html.Div([
         # flex container
         html.Div([
             html.Header([
@@ -794,6 +805,7 @@ def get_tile(tile, tile_keys=None, df_name=None):
                         id={'type': 'tile-link', 'index': tile},
                         style={'position': 'relative'}),
                     id={'type': 'tile-link-wrapper', 'index': tile})],
+                className='dragbar',
                 id={'type': 'tile-menu-header', 'index': tile},
                 style={'margin-right': '25px'}),
             html.A(
@@ -843,7 +855,7 @@ def get_tile(tile, tile_keys=None, df_name=None):
             className='flex-container fill-container')
     ], className='tile-container',
         id={'type': 'tile', 'index': tile},
-        style={'z-index': '{}'.replace("{}", str(tile))})]
+        style={'z-index': '{}'.replace("{}", str(tile))})
 
 
 # arrange tiles on the page for 1-4 tiles
@@ -860,34 +872,14 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, parent_df=None):
     # for each case, prioritize reusing existing input_tiles, otherwise create default tiles where needed
     if num_tiles == 0:
         children = []
-    elif num_tiles == 1:
+    elif 5 > num_tiles:
         if input_tiles:
-            tile[0] = [
-                html.Div(
-                    children=input_tiles[0],
+            for i in range(len(input_tiles)):
+                tile[i] = html.Div(
+                    children=input_tiles[i],
                     className='tile-container',
-                    id={'type': 'tile', 'index': 0}, style={'z-index': '0'})]
-        elif tile_keys:
-            tile[0] = get_tile(0, tile_keys[0], df_name=parent_df)
-        else:
-            tile[0] = get_tile(0, df_name=parent_df)
-        children = [
-            html.Div([
-                html.Div(
-                    children=tile[0],
-                    style={'grid-row': '1', 'grid-column': '1', '-ms-grid-row': '1', '-ms-grid-column': '1'})],
-                className='grid-container fill-container',
-                style={'grid-template-rows': '100%', 'grid-template-columns': '100%',
-                       '-ms-grid-rows': '100%', '-ms-grid-columns': '100%'})]
-    elif num_tiles == 2:
-        if input_tiles:
-            for i in range(len(input_tiles)):
-                tile[i] = [
-                    html.Div(
-                        children=input_tiles[i],
-                        className='tile-container',
-                        id={'type': 'tile', 'index': i},
-                        style={'z-index': '{}'.replace("{}", str(i))})]
+                    id={'type': 'tile', 'index': i},
+                    style={'z-index': '{}'.replace("{}", str(i))})
             for i in range(len(input_tiles), num_tiles):
                 tile[i] = get_tile(i, df_name=parent_df)
         elif tile_keys:
@@ -896,90 +888,130 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, parent_df=None):
         else:
             for i in range(num_tiles):
                 tile[i] = get_tile(i, df_name=parent_df)
-        children = [
-            html.Div([
-                html.Div(
-                    children=tile[0],
-                    style={'grid-row': '1', 'grid-column': '1', '-ms-grid-row': '1', '-ms-grid-column': '1'}),
-                html.Div(
-                    children=tile[1],
-                    style={'border-left': '1px solid {}'.format(CLR['lightergray']),
-                           'grid-row': '1', 'grid-column': '2', '-ms-grid-row': '1', '-ms-grid-column': '2'})
-            ], className='grid-container fill-container',
-                style={'grid-template-rows': '100%', 'grid-template-columns': '50% 50%',
-                       '-ms-grid-rows': '100%', '-ms-grid-columns': '50% 50%'})]
-    elif num_tiles == 3:
-        if input_tiles:
-            for i in range(len(input_tiles)):
-                tile[i] = [
-                    html.Div(
-                        children=input_tiles[i],
-                        className='tile-container',
-                        id={'type': 'tile', 'index': i},
-                        style={'z-index': '{}'.replace("{}", str(i))})]
-            for i in range(len(input_tiles), num_tiles):
-                tile[i] = get_tile(i, df_name=parent_df)
-        elif tile_keys:
-            for i in range(num_tiles):
-                tile[i] = get_tile(i, tile_keys[i], df_name=parent_df)
-        else:
-            for i in range(num_tiles):
-                tile[i] = get_tile(i, df_name=parent_df)
-        children = [
-            html.Div([
-                html.Div(
-                    children=tile[0],
-                    style={'grid-row': '1', 'grid-column': '1', '-ms-grid-row': '1', '-ms-grid-column': '1'}),
-                html.Div(
-                    children=tile[1],
-                    style={'border-left': '1px solid {}'.format(CLR['lightergray']),
-                           'grid-row': '1', 'grid-column': '2', '-ms-grid-row': '1', '-ms-grid-column': '2'}),
-                html.Div(
-                    children=tile[2],
-                    style={'border-top': '1px solid {}'.format(CLR['lightergray']), 'grid-row': '2',
-                           'grid-column-start': '1', 'grid-column-end': '-1', '-ms-grid-row': '2',
-                           '-ms-grid-column': '1', '-ms-grid-column-span': '2'})
-            ], className='grid-container fill-container',
-                style={'grid-template-rows': '50% 50%', 'grid-template-columns': '50% 50%',
-                       '-ms-grid-rows': '50% 50%', '-ms-grid-columns': '50% 50%'})]
-    elif num_tiles == 4:
-        if input_tiles:
-            for i in range(len(input_tiles)):
-                tile[i] = [
-                    html.Div(
-                        children=input_tiles[i],
-                        className='tile-container',
-                        id={'type': 'tile', 'index': i},
-                        style={'z-index': '{}'.replace("{}", str(i))})]
-            for i in range(len(input_tiles), num_tiles):
-                tile[i] = get_tile(i, df_name=parent_df)
-        elif tile_keys:
-            for i in range(num_tiles):
-                tile[i] = get_tile(i, tile_keys[i], df_name=parent_df)
-        else:
-            for i in range(num_tiles):
-                tile[i] = get_tile(i, df_name=parent_df)
-        children = [
-            html.Div([
-                html.Div(
-                    children=tile[0],
-                    style={'grid-row': '1', 'grid-column': '1', '-ms-grid-row': '1', '-ms-grid-column': '1'}),
-                html.Div(
-                    children=tile[1],
-                    style={'border-left': '1px solid {}'.format(CLR['lightergray']),
-                           'grid-row': '1', 'grid-column': '2', '-ms-grid-row': '1', '-ms-grid-column': '2'}),
-                html.Div(
-                    children=tile[2],
-                    style={'border-top': '1px solid {}'.format(CLR['lightergray']),
-                           'grid-row': '2', 'grid-column': '1', '-ms-grid-row': '2', '-ms-grid-column': '1'}),
-                html.Div(
-                    children=tile[3],
-                    style={'border-top': '1px solid {}'.format(CLR['lightergray']),
-                           'border-left': '1px solid {}'.format(CLR['lightergray']),
-                           'grid-row': '2', 'grid-column': '2', '-ms-grid-row': '2', '-ms-grid-column': '2'})
-            ], className='grid-container fill-container',
-                style={'grid-template-rows': '50% 50%', 'grid-template-columns': '50% 50%',
-                       '-ms-grid-rows': '50% 50%', '-ms-grid-columns': '50% 50%'})]
+        children = tile
+
+    # if num_tiles == 0:
+    #     children = []
+    # elif num_tiles == 1:
+    #     if input_tiles:
+    #         tile[0] = [
+    #             html.Div(
+    #                 children=input_tiles[0],
+    #                 className='tile-container',
+    #                 id={'type': 'tile', 'index': 0}, style={'z-index': '0'})]
+    #     elif tile_keys:
+    #         tile[0] = get_tile(0, tile_keys[0], df_name=parent_df)
+    #     else:
+    #         tile[0] = get_tile(0, df_name=parent_df)
+    #     children = [
+    #         html.Div([
+    #             html.Div(
+    #                 children=tile[0],
+    #                 style={'grid-row': '1', 'grid-column': '1', '-ms-grid-row': '1', '-ms-grid-column': '1'})],
+    #             className='grid-container fill-container',
+    #             style={'grid-template-rows': '100%', 'grid-template-columns': '100%',
+    #                    '-ms-grid-rows': '100%', '-ms-grid-columns': '100%'})]
+    # elif num_tiles == 2:
+    #     if input_tiles:
+    #         for i in range(len(input_tiles)):
+    #             tile[i] = [
+    #                 html.Div(
+    #                     children=input_tiles[i],
+    #                     className='tile-container',
+    #                     id={'type': 'tile', 'index': i},
+    #                     style={'z-index': '{}'.replace("{}", str(i))})]
+    #         for i in range(len(input_tiles), num_tiles):
+    #             tile[i] = get_tile(i, df_name=parent_df)
+    #     elif tile_keys:
+    #         for i in range(num_tiles):
+    #             tile[i] = get_tile(i, tile_keys[i], df_name=parent_df)
+    #     else:
+    #         for i in range(num_tiles):
+    #             tile[i] = get_tile(i, df_name=parent_df)
+    #     children = [
+    #         html.Div([
+    #             html.Div(
+    #                 children=tile[0],
+    #                 style={'grid-row': '1', 'grid-column': '1', '-ms-grid-row': '1', '-ms-grid-column': '1'}),
+    #             html.Div(
+    #                 children=tile[1],
+    #                 style={'border-left': '1px solid {}'.format(CLR['lightergray']),
+    #                        'grid-row': '1', 'grid-column': '2', '-ms-grid-row': '1', '-ms-grid-column': '2'})
+    #         ], className='grid-container fill-container',
+    #             style={'grid-template-rows': '100%', 'grid-template-columns': '50% 50%',
+    #                    '-ms-grid-rows': '100%', '-ms-grid-columns': '50% 50%'})]
+    # elif num_tiles == 3:
+    #     if input_tiles:
+    #         for i in range(len(input_tiles)):
+    #             tile[i] = [
+    #                 html.Div(
+    #                     children=input_tiles[i],
+    #                     className='tile-container',
+    #                     id={'type': 'tile', 'index': i},
+    #                     style={'z-index': '{}'.replace("{}", str(i))})]
+    #         for i in range(len(input_tiles), num_tiles):
+    #             tile[i] = get_tile(i, df_name=parent_df)
+    #     elif tile_keys:
+    #         for i in range(num_tiles):
+    #             tile[i] = get_tile(i, tile_keys[i], df_name=parent_df)
+    #     else:
+    #         for i in range(num_tiles):
+    #             tile[i] = get_tile(i, df_name=parent_df)
+    #     children = [
+    #         html.Div([
+    #             html.Div(
+    #                 children=tile[0],
+    #                 style={'grid-row': '1', 'grid-column': '1', '-ms-grid-row': '1', '-ms-grid-column': '1'}),
+    #             html.Div(
+    #                 children=tile[1],
+    #                 style={'border-left': '1px solid {}'.format(CLR['lightergray']),
+    #                        'grid-row': '1', 'grid-column': '2', '-ms-grid-row': '1', '-ms-grid-column': '2'}),
+    #             html.Div(
+    #                 children=tile[2],
+    #                 style={'border-top': '1px solid {}'.format(CLR['lightergray']), 'grid-row': '2',
+    #                        'grid-column-start': '1', 'grid-column-end': '-1', '-ms-grid-row': '2',
+    #                        '-ms-grid-column': '1', '-ms-grid-column-span': '2'})
+    #         ], className='grid-container fill-container',
+    #             style={'grid-template-rows': '50% 50%', 'grid-template-columns': '50% 50%',
+    #                    '-ms-grid-rows': '50% 50%', '-ms-grid-columns': '50% 50%'})]
+    # elif num_tiles == 4:
+    #     if input_tiles:
+    #         for i in range(len(input_tiles)):
+    #             tile[i] = [
+    #                 html.Div(
+    #                     children=input_tiles[i],
+    #                     className='tile-container',
+    #                     id={'type': 'tile', 'index': i},
+    #                     style={'z-index': '{}'.replace("{}", str(i))})]
+    #         for i in range(len(input_tiles), num_tiles):
+    #             tile[i] = get_tile(i, df_name=parent_df)
+    #     elif tile_keys:
+    #         for i in range(num_tiles):
+    #             tile[i] = get_tile(i, tile_keys[i], df_name=parent_df)
+    #     else:
+    #         for i in range(num_tiles):
+    #             tile[i] = get_tile(i, df_name=parent_df)
+    #     children = [
+    #         html.Div([
+    #             html.Div(
+    #                 children=tile[0],
+    #                 style={'grid-row': '1', 'grid-column': '1', '-ms-grid-row': '1', '-ms-grid-column': '1'}),
+    #             html.Div(
+    #                 children=tile[1],
+    #                 style={'border-left': '1px solid {}'.format(CLR['lightergray']),
+    #                        'grid-row': '1', 'grid-column': '2', '-ms-grid-row': '1', '-ms-grid-column': '2'}),
+    #             html.Div(
+    #                 children=tile[2],
+    #                 style={'border-top': '1px solid {}'.format(CLR['lightergray']),
+    #                        'grid-row': '2', 'grid-column': '1', '-ms-grid-row': '2', '-ms-grid-column': '1'}),
+    #             html.Div(
+    #                 children=tile[3],
+    #                 style={'border-top': '1px solid {}'.format(CLR['lightergray']),
+    #                        'border-left': '1px solid {}'.format(CLR['lightergray']),
+    #                        'grid-row': '2', 'grid-column': '2', '-ms-grid-row': '2', '-ms-grid-column': '2'})
+    #         ], className='grid-container fill-container',
+    #             style={'grid-template-rows': '50% 50%', 'grid-template-columns': '50% 50%',
+    #                    '-ms-grid-rows': '50% 50%', '-ms-grid-columns': '50% 50%'})]
     else:
         raise IndexError("The number of displayed tiles cannot exceed 4, " + str(num_tiles) + " tiles were requested")
     return children
@@ -1055,7 +1087,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                                'top': '-15px',
                                'margin-right': '5px'})
                 ], style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}
-                   if len(X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
+                if len(X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
                 html.Div([
                     html.P(
                         "{}".format(X_AXIS_OPTIONS[0]),

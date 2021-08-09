@@ -73,9 +73,11 @@ app.clientside_callback(
 
 # NEW and DELETE button functionality
 @app.callback(
-    [Output('div-body', 'children'),
+    # change the firing order to fire the tile close first to solve a bug
+    # causing the tile close trigger to never fire in the data menu
+    [Output('tile-closed-trigger', 'data-'),
+     Output('div-body', 'children'),
      Output('button-new-wrapper', 'children'),
-     Output('tile-closed-trigger', 'data-'),
      Output('num-tiles-2', 'data-num-tiles')],
     [Input('button-new', 'n_clicks'),
      Input('tile-closed-input-trigger', 'data'),
@@ -97,14 +99,14 @@ def _new_and_delete(_new_clicks, close_id, _dashboard_reset, input_tiles, num_ti
     :return: Layout of tiles for the main body, a new NEW button whose n_clicks data encodes the number of tiles to
     display, and updates the tile-closed-trigger div with the index of the deleted tile
     """
-
-    # if NEW callback chain has not been completed and NEW button enabled, prevent update
-    if new_disabled:
-        raise PreventUpdate
-
+    # -------------------------------------------Variable Declarations--------------------------------------------------
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     changed_value = [p['value'] for p in dash.callback_context.triggered][0]
     deleted_tile = no_update
+    # ------------------------------------------------------------------------------------------------------------------
+    # if NEW callback chain has not been completed and NEW button enabled, prevent update
+    if new_disabled:
+        raise PreventUpdate
 
     # if DELETE button pressed: pop deleted input_tile index and shift following indices left and adjust main layout
     if 'tile-close' in changed_id and num_tiles != 1 and changed_value is not None:
@@ -136,7 +138,7 @@ def _new_and_delete(_new_clicks, close_id, _dashboard_reset, input_tiles, num_ti
     # disable the NEW button
     new_button = html.Button(
         className='parent-nav', n_clicks=0, children=get_label('LBL_Add_Tile'), id='button-new', disabled=True)
-    return children, new_button, deleted_tile, num_tiles
+    return deleted_tile, children, new_button, num_tiles
 
 
 # unlock NEW button after end of callback chain
@@ -227,7 +229,7 @@ def _change_tab(_tab_clicks, _tab_close_clicks, _tab_add_nclicks,
         del data[deleted_tab_index]
         # shift all tab button indices down one following deleted tab
         for i in tab_toggle_children[deleted_tab_index:]:
-            # decremement close button index
+            # decrement close button index
             i['props']['children'][0]['props']['id']['index'] -= 1
             # decrement tab button index
             i['props']['children'][1]['props']['id']['index'] -= 1
@@ -326,14 +328,18 @@ for x in range(4):
          Output({'type': 'tile-customize-content-wrapper', 'index': x}, 'children')],
         [Input({'type': 'tile-customize', 'index': x}, 'n_clicks'),
          Input({'type': 'tile-layouts', 'index': x}, 'n_clicks'),
-         Input('float-menu-result', 'children')],
+         Input({'type': 'float-menu-result', 'index': 2}, 'children')],
         [State('float-menu-title', 'data-'),
          State({'type': 'tile-customize-content', 'index': x}, 'children')],
         prevent_initial_call=True
     )
     def _serve_float_menu_and_take_result(_customize_n_clicks, _layouts_n_clicks, float_menu_result, float_menu_data,
                                           customize_menu):
+        # -------------------------------------------Variable Declarations----------------------------------------------
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+        customize_menu_output = no_update
+        float_menu_trigger = no_update
+        # --------------------------------------------------------------------------------------------------------------
 
         if changed_id == '.' or len(dash.callback_context.triggered) > 1 \
                 or 'float-menu-result' in changed_id and float_menu_result is None:
@@ -349,8 +355,6 @@ for x in range(4):
         if dash.callback_context.inputs_list[0]['id']['index'] != tile:
             raise PreventUpdate
 
-        customize_menu_output = no_update
-
         # switch statement
         if 'tile-customize' in changed_id:
             # [[mode/prompt_trigger, tile, stored_menu_for_cancel], menu_style/show_hide, menu_title,
@@ -364,12 +368,10 @@ for x in range(4):
             customize_className = 'tile-nav tile-nav--customize'
             layouts_className = 'tile-nav tile-nav--layout tile-nav--selected'
         elif float_menu_result == 'ok':
-            float_menu_trigger = [None, {'display': 'hide'}, None]
             customize_className = 'tile-nav tile-nav--customize'
             layouts_className = 'tile-nav tile-nav--layout'
         # cancel
         else:
-            float_menu_trigger = [None, {'display': 'hide'}, None]
             customize_className = 'tile-nav tile-nav--customize'
             layouts_className = 'tile-nav tile-nav--layout'
             if float_menu_data[0] == 'customize':
@@ -387,10 +389,14 @@ app.clientside_callback(
     """
     function _init_float_menu(menu_trigger_0, menu_trigger_1, menu_trigger_2, menu_trigger_3, menu_trigger_4, 
              close_n_clicks, cancel_n_clicks, ok_n_clicks, float_menu_data) {
+        // init variables
         const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
+        var float_menu_trigger = dash_clientside.no_update;
+        var result = dash_clientside.no_update;
+        var result_0 = dash_clientside.no_update;
+        var result_1 = dash_clientside.no_update;
         
-        var float_menu_trigger = null;
-        var result = null;
+        // serve the menu by taking the tile and retrieving what was requested to put into body
         if (triggered.includes('float-menu-trigger')) {
             var trigger_arr = [menu_trigger_0, menu_trigger_1, menu_trigger_2, menu_trigger_3, menu_trigger_4]
             var tile = triggered.match(/\d+/)[0];
@@ -413,8 +419,9 @@ app.clientside_callback(
                 document.getElementById(`{"index":${tile},"type":"tile-layouts-warning"}`).style.display = 'none';
             }
         }
+        // otherwise, input from menu needs to be handled to output to correct callback chain
         else {
-            float_menu_trigger = [float_menu_data, {'display': 'none'}, '', ''];
+            float_menu_trigger = [float_menu_data, {'display': 'none'}, dash_clientside.no_update, ''];
             var tile = float_menu_data[1];
             if (float_menu_trigger[0][0] == 'customize') {
                 var menu = document.getElementById(`{"index":${tile},"type":"tile-customize-content"}`);
@@ -435,14 +442,22 @@ app.clientside_callback(
                 result = 'cancel';
             }
             if (triggered == 'float-menu-ok.n_clicks') {result = 'ok';}
+            
+            // ensure result gets sent to correct callbacks
+            // result always get sent to _serve_float_menu_and_take_result() for styles
+            if (float_menu_trigger[0][0] == 'layouts') {result_0 = result;} 
+            if (float_menu_trigger[0][0] == 'dashboard_layouts') {result_1 = result;} 
+            
         }
-        return [float_menu_trigger[0], float_menu_trigger[1], float_menu_trigger[2], result];
+        return [float_menu_trigger[0], float_menu_trigger[1], float_menu_trigger[2], result_0, result_1, result];
     }
     """,
     [Output('float-menu-title', 'data-'),  # index value and reason for prompt
      Output('float-menu-obscure', 'style'),
      Output('float-menu-title', 'children'),
-     Output('float-menu-result', 'children')],
+     Output({'type': 'float-menu-result', 'index': 0}, 'children'),  # _manage_tile_save_load_trigger() callback
+     Output({'type': 'float-menu-result', 'index': 1}, 'children'),  # _manage_dashboard_saves_and_reset() callback
+     Output({'type': 'float-menu-result', 'index': 2}, 'children')],  # _serve_float_menu_and_take_result() callback
     [Input({'type': 'float-menu-trigger', 'index': 0}, 'data-'),
      Input({'type': 'float-menu-trigger', 'index': 1}, 'data-'),
      Input({'type': 'float-menu-trigger', 'index': 2}, 'data-'),
@@ -472,8 +487,15 @@ app.clientside_callback(
      State({'type': 'data-set-parent', 'index': 4}, 'value')]
 )
 def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, graph_type, df_confirm):
+    # -------------------------------------------Variable Declarations--------------------------------------------------
+    graph_options = no_update
+    options = []
+    link_trigger = no_update
+    type_style = {'margin-left': '15px'}
+    message_style = DATA_CONTENT_HIDE
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     changed_value = [p['value'] for p in dash.callback_context.triggered][0]
+    # ------------------------------------------------------------------------------------------------------------------
 
     if changed_id == '.' or link_states is []:
         raise PreventUpdate
@@ -483,20 +505,13 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
             trigger is None and df_confirm is None):
         raise PreventUpdate
 
-    graph_options = no_update
-    options = []
-    link_trigger = no_update
-
-    type_style = {'margin-left': '15px'}
-    message_style = DATA_CONTENT_HIDE
-
     # if new tile is created and is on a dataset that is not confirmed use previous data set that has been confirmed
     if '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-link' and df_confirm is not None:
         graph_options = GRAPH_OPTIONS[df_confirm]
-        graph_options.sort()
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
 
+    # when dataset is swapped to a different dataset get parent graph options
     elif '"type":"tile-link"}.className' in changed_id:
         if df_name_parent == "OPG001":
             graph_options = GRAPH_OPTIONS["OPG001"]
@@ -506,31 +521,31 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
             graph_options = GRAPH_OPTIONS["OPG011"]
         else:
             graph_options = []
-        graph_options.sort()
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+    # set customize menu of the unlinked tile
     elif trigger == 'fa fa-unlink':
         link_trigger = "fa fa-unlink"
         if df_name is not None:
             graph_options = GRAPH_OPTIONS[df_name]
-            graph_options.sort()
             for i in graph_options:
                 options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+    # set customize menu back to parent dataset
     elif trigger == 'fa fa-link':
         graph_options = GRAPH_OPTIONS[df_name_parent]
-        graph_options.sort()
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
     else:
         if trigger == "OPG001":
             graph_options = GRAPH_OPTIONS["OPG001"]
+            # if graph_type is not None and graph_type not in graph_options:
+            #     link_trigger = "fa fa-unlink"
         elif trigger == "OPG010":
             graph_options = GRAPH_OPTIONS["OPG010"]
         elif trigger == "OPG011":
             graph_options = GRAPH_OPTIONS["OPG011"]
         else:
             graph_options = []
-        graph_options.sort()
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
 
@@ -541,9 +556,11 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
     elif '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-link' \
             and graph_type not in graph_options:
         graph_value = options[0]['value']
+    # linked and changing the dataset of parent to a different dataset get first option of dataset
     elif '"type":"set-graph-options-trigger"}.options-' in changed_id and graph_type is not None \
             and graph_type not in graph_options:
         graph_value = options[0]['value']
+    # unlink and dont change graph option
     else:
         graph_value = no_update
 
@@ -551,42 +568,57 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
 
 
 # Reveals the data-fitting options when conditions needed for data-fitting are met
-@app.callback(
+app.clientside_callback(
+    """
+    function _update_data_fitting(graph_all, hierarchy_toggle, selected_graph_type, link_state, style){
+
+        if (hierarchy_toggle == 'Specific Item' && graph_all.equals([])){
+            for (let i = 0; i < style.length; i++){
+                if (isEquivalent(style[i], {'display': 'inline-block', 'width': '80%', 'max-width': '125px'})){
+                    style[i] = no_update;
+                } else {
+                    if (link_state[i] == "fa fa-link" && (
+                            selected_graph_type[i] == "Line" || selected_graph_type[i] == "Scatter")){
+                        style[i] = {'display': 'inline-block', 'width': '80%', 'max-width': '125px'};
+                    }
+                    else if (link_state[i] == "fa fa-unlink" && (
+                            selected_graph_type[i] == "Line" || selected_graph_type[i] == "Scatter")){
+                        style[i] = dash_clientside.no_update;
+                    }
+                }
+            }
+        }
+        else if (hierarchy_toggle == 'Level Filter' && !graph_all.equals([])){
+            for (let i = 0; i < style.length; i++){
+                if (isEquivalent(style[i], {'display': 'inline-block', 'width': '80%', 'max-width': '125px'})){
+                    style[i] = dash_clientside.no_update;
+                } else {
+                    if (link_state[i] == "fa fa-link" && (
+                            selected_graph_type[i] == "Line" || selected_graph_type[i] == "Scatter")){
+                        style[i] = {'display': 'none'};
+                    }
+                    else if (link_state[i] == "fa fa-unlink" && (
+                            selected_graph_type[i] == "Line" || selected_graph_type[i] == "Scatter")){
+                        style[i] = dash_clientside.no_update;
+                    }
+                }
+            }
+        }
+        else {
+            throw dash_clientside.PreventUpdate;
+        }
+
+        return style;
+    }
+    """,
     Output({'type': 'data-fitting-wrapper', 'index': ALL}, 'style'),
     [Input({'type': 'graph_children_toggle', 'index': 4}, 'value'),
      Input({'type': 'hierarchy-toggle', 'index': 4}, 'value'),
      Input({'type': 'graph-type-dropdown', 'index': ALL}, 'value'), ],
     [State({'type': 'tile-link', 'index': ALL}, 'className'),
-     State({'type': 'data-fitting-wrapper', 'index': ALL}, 'style')]
+     State({'type': 'data-fitting-wrapper', 'index': ALL}, 'style')],
+    prevent_initial_call=True
 )
-def _update_data_fitting(graph_all, hierarchy_toggle, selected_graph_type, link_state, style):
-
-    if hierarchy_toggle == 'Specific Item' and graph_all == []:
-        for i in range(len(style)):
-            if style[i] == {'display': 'inline-block', 'width': '80%', 'max-width': '125px'}:
-                style[i] = no_update
-            else:
-                if link_state[i] == "fa fa-link" and (
-                        selected_graph_type[i] == "Line" or selected_graph_type[i] == "Scatter"):
-                    style[i] = {'display': 'inline-block', 'width': '80%', 'max-width': '125px'}
-                elif link_state[i] == "fa fa-unlink" and (
-                        selected_graph_type[i] == "Line" or selected_graph_type[i] == "Scatter"):
-                    style[i] = no_update
-    elif hierarchy_toggle == 'Level Filter' or graph_all != []:
-        for i in range(len(style)):
-            if style[i] == {'display': 'inline-block', 'width': '80%', 'max-width': '125px'}:
-                style[i] = no_update
-            else:
-                if link_state[i] == "fa fa-link" and (
-                        selected_graph_type[i] == "Line" or selected_graph_type[i] == "Scatter"):
-                    style[i] = DATA_CONTENT_HIDE
-                elif link_state[i] == "fa fa-unlink" and (
-                        selected_graph_type[i] == "Line" or selected_graph_type[i] == "Scatter"):
-                    style[i] = no_update
-    else:
-        raise PreventUpdate
-
-    return style
 
 
 # update graph menu to match selected graph type
@@ -610,36 +642,30 @@ def _update_data_fitting(graph_all, hierarchy_toggle, selected_graph_type, link_
      State({'type': 'hierarchy-toggle', 'index': 4}, 'value')],
     prevent_initial_call=True
 )
-def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, hierarchy_toggle, graph_options_state,
+def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, hierarchy_toggle, _graph_options_state,
                        is_loaded, df_name, parent_df_name, df_const, df_confirm, parent_graph_all,
                        parent_hierarchy_toggle):
     """
     :param selected_graph_type: Selected graph type, ie. 'bar', 'line', etc.
-    :param graph_options_state: State of the current graph options div
+    :param _graph_options_state: State of the current graph options div
     :return: Graph menu corresponding to selected graph type
     """
 
     # TODO: Callback seems to be generating a new graph-options-menu for tiles with existing menus and selections on
     #  the addition of a new tile
-
+    # -------------------------------------------Variable Declarations--------------------------------------------------
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][-1]
-
-    changed_index = int(search(r'\d+', changed_id).group())
-
+    # ------------------------------------------------------------------------------------------------------------------
     # prevents update if hierarchy toggle or graph all children is selected when the graph type is not line or
     # scatter
     if ('"type":"graph_children_toggle"}.value' in changed_id
         or '"type":"hierarchy-toggle"}.value' in changed_id) and \
             selected_graph_type != "Line" and selected_graph_type != "Scatter":
         raise PreventUpdate
-    # if ('"type":"graph_children_toggle"}.value' in changed_id or '"type":"hierarchy-toggle"}.value' in changed_id) \
-    #         and (selected_graph_type == "Bubble" or selected_graph_type == "Bar" or selected_graph_type == "Table"
-    #              or selected_graph_type == 'Box_Plot' or selected_graph_type == 'Sankey'):
-    #     raise PreventUpdate
 
     # Sets the data_fitting boolean to true or false dependant on the link-state of the tile being modified and then the
     # tiles associated data menu
-    if link_state[changed_index] == 'fa fa-link':
+    if link_state == 'fa fa-link':
         if parent_hierarchy_toggle == 'Specific Item' and parent_graph_all == []:
             data_fitting = True
         else:
@@ -683,14 +709,6 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
     # if this has been loaded from the cancel of a graph menu edit then set to false and prevent update
     if 'graph-type-dropdown"}.value' in changed_id and is_loaded:
         return no_update, no_update, no_update, False
-
-    # if changed id == '.' and the graph menu already exists, prevent update
-    if changed_id == '.' and graph_options_state or df_const is None or df_name not in df_const:
-        raise PreventUpdate
-
-        # if changed id == '.' and the graph menu already exists, prevent update
-    if changed_id == '.' and graph_options_state or df_const is None or df_name not in df_const:
-        raise PreventUpdate
 
     tile = int(dash.callback_context.inputs_list[0]['id']['index'])
 
@@ -839,26 +857,25 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
      Output({'type': 'update-date-picker-trigger', 'index': 3}, 'data-boolean'),
      Output({'type': 'update-date-picker-trigger', 'index': 4}, 'data-boolean')],
     [Input('tile-closed-trigger', 'data-'),
-     Input('select-dashboard-dropdown', 'value'),
      Input({'type': 'tile-link', 'index': ALL}, 'className'),
      Input({'type': 'tile-data', 'index': ALL}, 'n_clicks'),
-     Input({'type': 'data-menu-close', 'index': ALL}, 'n_clicks'),
+     Input({'type': 'data-menu-close', 'index': ALL}, 'n_clicks'),  # TODO: unused state
      Input({'type': 'data-set', 'index': 0}, 'value'),
      Input({'type': 'data-set', 'index': 1}, 'value'),
      Input({'type': 'data-set', 'index': 2}, 'value'),
      Input({'type': 'data-set', 'index': 3}, 'value'),
      Input({'type': 'data-set', 'index': 4}, 'value'),
-     Input({'type': 'confirm-load-data', 'index': 0}, 'n_clicks'),
-     Input({'type': 'confirm-load-data', 'index': 1}, 'n_clicks'),
-     Input({'type': 'confirm-load-data', 'index': 2}, 'n_clicks'),
-     Input({'type': 'confirm-load-data', 'index': 3}, 'n_clicks'),
-     Input({'type': 'confirm-load-data', 'index': 4}, 'n_clicks'),
-     Input({'type': 'confirm-data-set-refresh', 'index': 0}, 'n_clicks'),
-     Input({'type': 'confirm-data-set-refresh', 'index': 1}, 'n_clicks'),
-     Input({'type': 'confirm-data-set-refresh', 'index': 2}, 'n_clicks'),
-     Input({'type': 'confirm-data-set-refresh', 'index': 3}, 'n_clicks'),
-     Input({'type': 'confirm-data-set-refresh', 'index': 4}, 'n_clicks'),
-     Input('prompt-result', 'children')],
+     Input({'type': 'confirm-load-data', 'index': 0}, 'n_clicks'),  # TODO: unused state
+     Input({'type': 'confirm-load-data', 'index': 1}, 'n_clicks'),  # TODO: unused state
+     Input({'type': 'confirm-load-data', 'index': 2}, 'n_clicks'),  # TODO: unused state
+     Input({'type': 'confirm-load-data', 'index': 3}, 'n_clicks'),  # TODO: unused state
+     Input({'type': 'confirm-load-data', 'index': 4}, 'n_clicks'),  # TODO: unused state
+     Input({'type': 'confirm-data-set-refresh', 'index': 0}, 'n_clicks'),  # TODO: unused state
+     Input({'type': 'confirm-data-set-refresh', 'index': 1}, 'n_clicks'),  # TODO: unused state
+     Input({'type': 'confirm-data-set-refresh', 'index': 2}, 'n_clicks'),  # TODO: unused state
+     Input({'type': 'confirm-data-set-refresh', 'index': 3}, 'n_clicks'),  # TODO: unused state
+     Input({'type': 'confirm-data-set-refresh', 'index': 4}, 'n_clicks'),  # TODO: unused state
+     Input({'type': 'prompt-result', 'index': 2}, 'children')],
     [State('prompt-title', 'data-'),
      State({'type': 'data-tile', 'index': ALL}, 'children'),
      State({'type': 'data-tile', 'index': ALL}, 'style'),
@@ -870,13 +887,13 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
      State({'type': 'data-set-prev-selected', 'index': 4}, 'data'),
      State({'type': 'graph-type-dropdown', 'index': ALL}, 'value'),
      # Date picker states for parent data menu
-     State({'type': 'start-year-input', 'index': 4}, 'name'),  # TODO: unused state
+     State({'type': 'start-year-input', 'index': 4}, 'name'),
      State({'type': 'radio-timeframe', 'index': 4}, 'value'),
      State({'type': 'fiscal-year-toggle', 'index': 4}, 'value'),
-     State({'type': 'start-year-input', 'index': 4}, 'value'),  # TODO: unused state
-     State({'type': 'end-year-input', 'index': 4}, 'value'),  # TODO: unused state
-     State({'type': 'start-secondary-input', 'index': 4}, 'value'),  # TODO: unused state
-     State({'type': 'end-secondary-input', 'index': 4}, 'value'),  # TODO: unused state
+     State({'type': 'start-year-input', 'index': 4}, 'value'),
+     State({'type': 'end-year-input', 'index': 4}, 'value'),
+     State({'type': 'start-secondary-input', 'index': 4}, 'value'),
+     State({'type': 'end-secondary-input', 'index': 4}, 'value'),
      State({'type': 'hierarchy-toggle', 'index': 4}, 'value'),
      State({'type': 'hierarchy_level_dropdown', 'index': 4}, 'value'),
      State({'type': 'num-periods', 'index': 4}, 'value'),
@@ -885,7 +902,7 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
      State({'type': 'hierarchy_display_button', 'index': 4}, 'children')],
     prevent_initial_call=True
 )
-def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_clicks,
+def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                            _data_close_clicks, df_name_0, df_name_1, df_name_2, df_name_3, df_name_4, _confirm_clicks_0,
                            _confirm_clicks_1, _confirm_clicks_2, _confirm_clicks_3, _confirm_clicks_4,
                            _refresh_clicks_0, _refresh_clicks_1, _refresh_clicks_2, _refresh_clicks_3,
@@ -904,16 +921,8 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
     :return: Data side-menus for all 5 side-menus
     """
 
+    # -------------------------------------------Variable Declarations--------------------------------------------------
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-
-    # if changed id == '.' due to NEW being requested, preserve data menu display.
-    if changed_id == '.':
-        raise PreventUpdate
-
-    # if 'tile-data' in changed id but n_clicks == 0, meaning a tile was created from blank display, prevent update
-    if '{"index":0,"type":"tile-data"}.n_clicks' == changed_id and not data_clicks[0]:
-        raise PreventUpdate
-
     # initialize return variables, data is NONE and sidemenus are hidden by default
     data = [None] * 5
     sidemenu_styles = [DATA_CONTENT_HIDE] * 5
@@ -926,11 +935,28 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
     df_name_confirm = None
     prompt_trigger = no_update
     data_set_val = [no_update] * 5
+    df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
     # unknown why but this has to be done this way instead of using ALL since ALL was changing the order in seemingly
     # random ways
     prev_selection = [prev_selection_0, prev_selection_1, prev_selection_2, prev_selection_3, prev_selection_4]
+    # ------------------------------------------------------------------------------------------------------------------
+    # if changed id == '.' due to NEW being requested, preserve data menu display.
+    if changed_id == '.':
+        raise PreventUpdate
+
+    # if 'tile-data' in changed id but n_clicks == 0, meaning a tile was created from blank display, prevent update
+    if '{"index":0,"type":"tile-data"}.n_clicks' == changed_id and not data_clicks[0]:
+        for i in range(len(links_style)):
+            if links_style[i] == 'fa fa-link':
+                prev_selection[i] = df_names[4]
+            else:
+                prev_selection[i] = df_names[i]
+        if 'fa fa-link' in links_style:
+            prev_selection[4] = df_names[4]
+
     # if 'data-menu-close' or 'select-dashboard-dropdown' requested, close all data menus
-    if ('data-menu-close' in changed_id or 'select-dashboard-dropdown' in changed_id) and \
+    # dont close if no data set has been chosen
+    elif ('data-menu-close' in changed_id or 'select-dashboard-dropdown' in changed_id) and \
             (df_name_0 is not None or df_name_1 is not None or df_name_2 is not None or df_name_3 is not None or
              df_name_4 is not None):
         pass
@@ -976,7 +1002,6 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
     # elif 'data-set' in changed id keep shown and show confirmation button
     elif '"type":"data-set"}.value' in changed_id:
         changed_index = int(search(r'\d+', changed_id).group())
-        df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
         df_name = df_names[changed_index]
         sidemenu_styles[changed_index] = DATA_CONTENT_SHOW
         if df_name in session:
@@ -993,6 +1018,7 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
                 df_names[changed_index] = df_name
                 prev_selection[changed_index] = df_name
                 # set up required triggers
+                # parent data menu
                 if changed_index == 4:
                     for i in range(len(links_style)):
                         if links_style[i] == 'fa fa-link':
@@ -1001,6 +1027,7 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
                                 graph_triggers[i] = df_name
                                 options_triggers[i] = df_name
                                 df_names[i] = df_name
+                # child data menu
                 else:
                     graph_triggers[changed_index] = df_name
                     options_triggers[changed_index] = df_name
@@ -1010,7 +1037,6 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
                                   get_label('LBL_Load_Dataset_Prompt'), True]
                 for i in range(len(links_style)):
                     if links_style[i] == 'fa fa-link':
-                        # graph_triggers[i] = df_name
                         confirm_button[i] = DATA_CONTENT_HIDE
                         refresh_button[i] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
                                              'position': 'relative', 'vertical-align': 'top'}
@@ -1045,8 +1071,8 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
             else:  # prompt with only two options
                 prompt_trigger = [['load_dataset', changed_index], {}, get_label('LBL_Load_Dataset'),
                                   get_label('LBL_Load_Dataset_Duo_Prompt'), False]
+        # The first instance that the datasets are loaded in
         else:
-            df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
 
             df_name = df_names[changed_index]
             session[df_name] = dataset_to_df(df_name)
@@ -1079,7 +1105,6 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
     elif 'prompt-result' in changed_id:
         if prompt_data[0] == 'loaded_dataset_swap' or prompt_data[0] == 'load_dataset':
             tile = prompt_data[1]
-            df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
             df_name = df_names[tile]
             # see if a trip option or not
             if tile == 4:
@@ -1141,7 +1166,6 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
                                         else get_data_menu(i, df_names[i],
                                                            prev_selection=prev_selection[i],
                                                            df_const=df_const)
-                                    # sidemenu_styles[i] = DATA_CONTENT_SHOW
                                     refresh_button[i] = {'padding': '10px 0', 'width': '15px',
                                                          'height': '15px',
                                                          'position': 'relative',
@@ -1208,7 +1232,6 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
                                         else get_data_menu(i, df_names[i],
                                                            prev_selection=prev_selection[i],
                                                            df_const=df_const)
-                                    # sidemenu_styles[i] = DATA_CONTENT_SHOW
                                     refresh_button[i] = {'padding': '10px 0', 'width': '15px',
                                                          'height': '15px',
                                                          'position': 'relative',
@@ -1221,11 +1244,12 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
                                                                    "Start Secondary Selection": parent_start_secondary,
                                                                    "End Secondary Selection": parent_end_secondary,
                                                                    "Tab": parent_secondary_type}
-
+                                # continue the dataset change and modify my graph as necessary (keeping the link)
                                 if prompt_result == 'op-3':
                                     options_triggers[i] = 'fa fa-link'
                                     sidemenu_styles[tile] = DATA_CONTENT_SHOW
                                     prev_selection[i] = df_name
+                                # unlink the graph then load new dataset in parent data menu
                                 else:
                                     options_triggers[i] = 'fa fa-unlink'
             # duo options
@@ -1251,7 +1275,6 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
                     data[tile] = get_data_menu(tile, df_names[tile],
                                                prev_selection=prev_selection[tile],
                                                df_const=df_const)
-                    # sidemenu_styles[i] = DATA_CONTENT_SHOW
                     refresh_button[tile] = {'padding': '10px 0', 'width': '15px',
                                             'height': '15px',
                                             'position': 'relative',
@@ -1330,63 +1353,12 @@ def _manage_data_sidemenus(closed_tile, _loaded_dashboard, links_style, data_cli
             date_picker_triggers[4])
 
 
-"""
-@app.callback(
-    [Output({'type': 'start-year-input', 'index': MATCH}, 'name'),
-     Output({'type': 'start-year-input', 'index': MATCH}, 'value'),
-     Output({'type': 'end-year-input', 'index': MATCH}, 'value'),
-     Output({'type': 'start-secondary-input', 'index': MATCH}, 'value'),
-     Output({'type': 'end-secondary-input', 'index': MATCH}, 'value')],
-    [Input({'type': 'set-date-picker-trigger', 'index': MATCH}, 'picker-')],
-    [State({'type': 'start-year-input', 'index': 4}, 'name'),
-     State({'type': 'start-year-input', 'index': 4}, 'value'),
-     State({'type': 'end-year-input', 'index': 4}, 'value'),
-     State({'type': 'start-secondary-input', 'index': 4}, 'value'),
-     State({'type': 'end-secondary-input', 'index': 4}, 'value')]
-)
-def _date_picker_inputs(trigger, tile_tab, tile_start_year, tile_end_year, tile_start_secondary, tile_end_secondary):
-    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-
-    if changed_id == '.':
-        raise PreventUpdate
-
-    date_tab = tile_tab
-    start_year = tile_start_year
-    end_year = tile_end_year
-    start_secondary = tile_start_secondary
-    end_secondary = tile_end_secondary
-
-    return date_tab, start_year, end_year, start_secondary, end_secondary"""
-
 # http://adripofjavascript.com/blog/drips/object-equality-in-javascript.html#:~:text=Here%20is%20a%20very%20basic,are%20not%20equivalent%20if%20(aProps.
+
+
 app.clientside_callback(
     """
        function _data_set_confirmation_visuals(load_data_trigger, refresh_data_trigger){
-            function isEquivalent(a, b) {
-                // Create arrays of property names
-                var aProps = Object.getOwnPropertyNames(a);
-                var bProps = Object.getOwnPropertyNames(b);
-
-                // If number of properties is different,
-                // objects are not equivalent
-                if (aProps.length != bProps.length) {
-                    return false;
-                }
-
-                for (var i = 0; i < aProps.length; i++) {
-                    var propName = aProps[i];
-
-                    // If values of same property are not equal,
-                    // objects are not equivalent
-                    if (a[propName] !== b[propName]) {
-                        return false;
-                    }
-                }
-
-                // If we made it this far, objects
-                // are considered equivalent
-                return true;
-            }
             var DATA_CONTENT_HIDE = {'display': 'none'};  
             if (isEquivalent(load_data_trigger, DATA_CONTENT_HIDE) 
                 && !isEquivalent(refresh_data_trigger, DATA_CONTENT_HIDE)){
@@ -1407,32 +1379,6 @@ for x in range(4):
     app.clientside_callback(
         """
         function _highlight_tiles(_sidebar_styles, link_state, sidebar_style, parent_sidebar_style){
-            function isEquivalent(a, b) {
-                // Create arrays of property names
-                var aProps = Object.getOwnPropertyNames(a);
-                var bProps = Object.getOwnPropertyNames(b);
-
-                // If number of properties is different,
-                // objects are not equivalent
-                if (aProps.length != bProps.length) {
-                    return false;
-                }
-
-                for (var i = 0; i < aProps.length; i++) {
-                    var propName = aProps[i];
-
-                    // If values of same property are not equal,
-                    // objects are not equivalent
-                    if (a[propName] !== b[propName]) {
-                        return false;
-                    }
-                }
-
-                // If we made it this far, objects
-                // are considered equivalent
-                return true;
-            }
-
             var DATA_CONTENT_SHOW = {
                 'max-width': '300px', 
                 'min-width': '300px',
@@ -1460,7 +1406,7 @@ for x in range(4):
     )
 
 # *************************************************LOADSCREEN*********************************************************
-# TODO: FIX ALL OF THE LOAD SCREENS
+
 # All clientside callback functions referred to are stored in /assets/ClientsideCallbacks.js
 for x in range(4):
     app.clientside_callback(
@@ -1486,26 +1432,26 @@ for x in range(4):
 
 app.clientside_callback(
     """
-    function datasetLoadScreen(n_click_load, n_click_reset, float_menu_result, prompt_result, float_menu_data, 
+    function datasetLoadScreen(n_click_load, n_click_reset, float_menu_result, prompt_result, float_menu_data,
                                selected_dashboard, prompt_data, prev_selected) {
         const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
         var changed_index = null;
         if (triggered.match(/\d+/)){
             changed_index = parseInt(triggered.match(/\d+/)[0]);
         }
-        if (triggered != "" && 
+        if (triggered != "" &&
              (changed_index != null && n_click_load != ',,,,' && prev_selected[changed_index] == null ||
-             n_click_reset != ',,,,' || 
-             (typeof float_menu_data != 'undefined' && float_menu_data[0] == 'dashboard_layouts' && 
-              selected_dashboard != null && float_menu_result == 'ok') || 
-             (typeof prompt_data != 'undefined' && prompt_data[0] == 'load_dataset' && prompt_result != 'op-1' && 
+             n_click_reset != ',,,,' ||
+             (typeof float_menu_data != 'undefined' && float_menu_data[0] == 'dashboard_layouts' &&
+              selected_dashboard != null && float_menu_result == 'ok') ||
+             (typeof prompt_data != 'undefined' && prompt_data[0] == 'load_dataset' && prompt_result != 'op-1' &&
               prompt_result != 'close'))){
-              
+
             var newDiv = document.createElement('div');
             newDiv.className = '_data-loading';
             newDiv.id = 'loading';
             document.body.appendChild(newDiv, document.getElementById('content'));
-            
+
         }
         return 0;
     }
@@ -1513,8 +1459,8 @@ app.clientside_callback(
     Output('dataset-confirmation-symbols', 'n_clicks'),
     [Input({'type': 'confirm-load-data', 'index': ALL}, 'n_clicks'),
      Input({'type': 'confirm-data-set-refresh', 'index': ALL}, 'n_clicks'),
-     Input('float-menu-result', 'children'),
-     Input('prompt-result', 'children')],
+     Input({'type': 'float-menu-result', 'index': 1}, 'children'),
+     Input({'type': 'prompt-result', 'index': 2}, 'children')],
     [State('float-menu-title', 'data-'),
      State('select-dashboard-dropdown', 'value'),
      State('prompt-title', 'data-'),
@@ -1558,12 +1504,17 @@ app.clientside_callback(
     function _serve_prompt(prompt_trigger_0, prompt_trigger_1, prompt_trigger_2, prompt_trigger_3, prompt_trigger_4,
              prompt_trigger_5, close_n_clicks, cancel_n_clicks, ok_n_clicks, op1_n_clicks, op2_n_clicks, op3_n_clicks, 
              prompt_data){
+        // init variables
         const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
         var prompt_trigger = dash_clientside.no_update;
         var result = dash_clientside.no_update;
+        var result_0 = dash_clientside.no_update;
+        var result_1 = dash_clientside.no_update;
+        var result_2 = dash_clientside.no_update;
         var duo_style = {};
         var trip_style = {'display': 'none'};
         
+        // if input, serve the prompt
         if (triggered.includes('prompt-trigger')){
             var trigger_arr = [prompt_trigger_0, prompt_trigger_1, prompt_trigger_2, prompt_trigger_3, prompt_trigger_4,
                                prompt_trigger_5];
@@ -1574,6 +1525,7 @@ app.clientside_callback(
                 trip_style = {};
             } 
         }
+        // else, return what was clicked
         else {
             if (triggered == 'prompt-close.n_clicks') {result = 'close';}
             else if (triggered == 'prompt-cancel.n_clicks'){result = 'cancel';}
@@ -1582,17 +1534,42 @@ app.clientside_callback(
             else if (triggered == 'prompt-option-2.n_clicks'){result = 'op-2';}
             else if (triggered == 'prompt-option-3.n_clicks'){result = 'op-3';}
             
-            prompt_trigger = [prompt_data, {'display': 'none'}, '', ''];
+            prompt_trigger = [prompt_data, {'display': 'none'}, dash_clientside.no_update, dash_clientside.no_update];
+            
+            // ensure it gets returned to correct callback
+            switch(prompt_data[0]){
+                case 'delete':
+                case 'overwrite':
+                case 'link':
+                    result_0 = result;
+                    break;
+                case 'delete_dashboard':
+                case 'overwrite_dashboard':
+                case 'close':
+                    result_1 = result;
+                    break;
+                case 'reset':
+                    result_1 = result;
+                    result_2 = result;
+                    break;
+                case 'loaded_dataset_swap':
+                case 'load_dataset':
+                    result_2 = result;
+                    break;
+            }
         }
+        
         return [prompt_trigger[0], prompt_trigger[1], prompt_trigger[2], prompt_trigger[3], 
-                result, duo_style, trip_style];
+                result_0, result_1, result_2, duo_style, trip_style];
     }
     """,
     [Output('prompt-title', 'data-'),  # index value and reason for prompt
      Output('prompt-obscure', 'style'),
      Output('prompt-title', 'children'),
      Output('prompt-body', 'children'),
-     Output('prompt-result', 'children'),
+     Output({'type': 'prompt-result', 'index': 0}, 'children'),  # _manage_tile_save_load_trigger() callback
+     Output({'type': 'prompt-result', 'index': 1}, 'children'),  # _manage_dashboard_saves_and_reset() callback
+     Output({'type': 'prompt-result', 'index': 2}, 'children'),  # _manage_data_sidemenus() callback
      Output('prompt-button-wrapper-duo', 'style'),
      Output('prompt-button-wrapper-trip', 'style')],
     [Input({'type': 'prompt-trigger', 'index': 0}, 'data-'),  # tile 0

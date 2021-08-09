@@ -30,6 +30,8 @@ GRAPH_OPTIONS = {
     'OPG010': ['Sankey', 'Table'],
     'OPG011': ['Line', 'Bar', 'Scatter', 'Bubble', 'Box_Plot', 'Table']
 }
+for k in GRAPH_OPTIONS.values():
+    k.sort()
 
 X_AXIS_OPTIONS = ['Time']
 
@@ -142,7 +144,7 @@ def dataset_to_df(df_name):
     col = col.append(
         pd.Series(
             df['Variable Name'][df['Variable Name Qualifier'].notna()]
-            + "|"
+            + " "
             + df['Variable Name Qualifier'][df['Variable Name Qualifier'].notna()]))
     df['Variable Name'] = col
 

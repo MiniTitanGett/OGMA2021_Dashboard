@@ -97,7 +97,6 @@ for x in range(4):
          # Constants
          State('df-constants-storage', 'data'),
          # Float menu result
-         State('float-menu-result', 'children'),  # TODO: unused state
          State({'type': 'data-set-parent', 'index': 4}, 'value')],
         prevent_initial_call=True
     )
@@ -109,13 +108,14 @@ for x in range(4):
                       timeframe, fiscal_toggle, start_year, end_year, start_secondary, end_secondary,
                       parent_secondary_type, parent_timeframe, parent_fiscal_toggle, parent_start_year, parent_end_year,
                       parent_start_secondary, parent_end_secondary, graph_display, df_name, parent_df_name,
-                      link_state, hierarchy_options, parent_hierarchy_options, df_const, _result_edit_menu, df_confirm):
+                      link_state, hierarchy_options, parent_hierarchy_options, df_const, df_confirm):
 
+        # -------------------------------------------Variable Declarations----------------------------------------------
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
         tile = dash.callback_context.inputs_list[0]['id']['index']
-
         xaxis = None
         yaxis = None
+        # --------------------------------------------------------------------------------------------------------------
         # TODO have to finish hooking up plotly axes title edits to hidden div so we are able to save
         #  and update the graph menu when ever a user edits the titles
 
@@ -369,7 +369,11 @@ app.clientside_callback(
 def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quarter_button_clicks,
                         _month_button_clicks, _week_button_clicks, start_year_selection, end_year_selection,
                         start_secondary_selection, end_secondary_selection, update_trigger, tab, df_name, df_const):
+
+    # ----------------------------------------------Variable Declarations-----------------------------------------------
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+    tile = dash.callback_context.inputs_list[0]['id']['index']
+    # ------------------------------------------------------------------------------------------------------------------
 
     if changed_id == '.':
         raise PreventUpdate
@@ -381,8 +385,6 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
         start_secondary_selection = update_trigger["Start Secondary Selection"]
         end_secondary_selection = update_trigger["End Secondary Selection"]
         tab = update_trigger["Tab"]
-
-    tile = dash.callback_context.inputs_list[0]['id']['index']
 
     # if "All-Time" or 'Past ___ ___' radio selected, return only hidden id placeholders
     if input_method == 'all-time' or input_method == 'to-current':

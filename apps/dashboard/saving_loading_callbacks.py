@@ -85,8 +85,8 @@ def _update_tile_loading_dropdown_options(_tile_saving_trigger, _dashboard_savin
      Input({'type': 'delete-button', 'index': ALL}, 'n_clicks'),
      Input({'type': 'tile-link', 'index': ALL}, 'n_clicks'),
      Input({'type': 'set-tile-link-trigger', 'index': ALL}, 'link-'),
-     Input('float-menu-result', 'children'),
-     Input('prompt-result', 'children')],
+     Input({'type': 'float-menu-result', 'index': 0}, 'children'),
+     Input({'type': 'prompt-result', 'index': 0}, 'children')],
     [State('prompt-title', 'data-'),
      State('float-menu-title', 'data-'),
      State({'type': 'select-layout-dropdown', 'index': ALL}, 'value'),
@@ -95,12 +95,14 @@ def _update_tile_loading_dropdown_options(_tile_saving_trigger, _dashboard_savin
 )
 def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, _link_clicks, link_trigger, float_menu_result,
                                        prompt_result, prompt_data, float_menu_data, load_state, link_state):
+
+    # -------------------------------------------Variable Declaration---------------------------------------------------
     changed_ids = [p['prop_id'] for p in dash.callback_context.triggered]
+    children = []
+    # ------------------------------------------------------------------------------------------------------------------
 
     if changed_ids == '.':
         raise PreventUpdate
-
-    children = []
 
     for changed_id in changed_ids:
         if 'prompt-result' in changed_id:
@@ -118,7 +120,7 @@ def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, _link_clicks,
 
         if not isinstance(load_state, list):
             load_state = [load_state]
-        if 'float-menu-result.children' in changed_id \
+        if 'float-menu-result' in changed_id \
                 and (float_menu_data[0] != 'layouts' or load_state[changed_index] is None or float_menu_result != 'ok'):
             raise PreventUpdate
         # do not call if we aren't dealing with tiles
@@ -140,7 +142,7 @@ def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, _link_clicks,
                 mode = 'fa fa-link'
         elif '"type":"set-tile-link-trigger"}.link-' in changed_id and link_trigger is not None:
             mode = 'fa fa-unlink'
-        elif 'float-menu-result.children' in changed_id:
+        elif 'float-menu-result' in changed_id:
             mode = "confirm-load"
         elif prompt_data[0] == 'delete' and prompt_result == 'ok':
             mode = "confirm-delete"
@@ -382,7 +384,7 @@ for y in range(4):
             customize_content = get_customize_content(tile=tile, graph_type=graph_type, graph_menu=graph_menu,
                                                       df_name=df_name)
 
-            #  --------- create data sidemenu ---------
+            #  --------- create data side menu ---------
 
             # set hierarchy toggle value (level vs specific)
             hierarchy_toggle = session['saved_layouts'][selected_layout]['Hierarchy Toggle']
@@ -515,8 +517,8 @@ for y in range(4):
     [Input('save-dashboard', 'n_clicks'),
      Input('delete-dashboard', 'n_clicks'),
      Input('load-dashboard', 'n_clicks'),
-     Input('float-menu-result', 'children'),
-     Input('prompt-result', 'children'),
+     Input({'type': 'float-menu-result', 'index': 1}, 'children'),
+     Input({'type': 'prompt-result', 'index': 1}, 'children'),
      Input('dashboard-reset', 'n_clicks'),
      Input({'type': 'tile-close', 'index': ALL}, 'n_clicks')],
     # prompt and menu info
@@ -643,11 +645,9 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                                       num_periods_0, num_periods_1, num_periods_2, num_periods_3, num_periods_4,
                                       period_type_0, period_type_1, period_type_2, period_type_3, period_type_4,
                                       date_tab_0, date_tab_1, date_tab_2, date_tab_3, date_tab_4, df_const):
+
+    # ---------------------------------------Variable Declarations------------------------------------------------------
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-
-    if changed_id == '.':
-        raise PreventUpdate
-
     # Outputs
     options = no_update
     update_graph_options_trigger = no_update
@@ -676,6 +676,10 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
     df_const_wrapper = no_update
     dashboard_reset_trigger = no_update
     close_trigger = no_update
+    # ------------------------------------------------------------------------------------------------------------------
+
+    if changed_id == '.':
+        raise PreventUpdate
 
     # if delete button was pressed, prompt delete
     if 'delete-dashboard' in changed_id:
@@ -687,7 +691,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
         # if tile exists in session, send delete prompt
         if intermediate_pointer in session['saved_dashboards'] \
                 and session['saved_dashboards'][intermediate_pointer]['Dashboard Title'] == dashboard_title:
-            prompt_trigger = [['delete-dashboard', 4], {}, get_label('LBL_Delete_Dashboard'),
+            prompt_trigger = [['delete_dashboard', 4], {}, get_label('LBL_Delete_Dashboard'),
                               get_label('LBL_Delete_Dashboard_Prompt').format(dashboard_title), False]
 
     elif 'dashboard-reset' in changed_id:
@@ -707,7 +711,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
         else:
             close_trigger = int(search(r'\d+', changed_id).group())
     # if confirm load, load dashboard
-    elif 'float-menu-result.children' in changed_id \
+    elif 'float-menu-result' in changed_id \
             and float_menu_data[0] == 'dashboard_layouts' and selected_dashboard is not None \
             and float_menu_result == 'ok':
         tile_keys = [{}] * 4
@@ -822,7 +826,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
     elif prompt_data is not None or 'save-dashboard' in changed_id:
 
         # if save requested or the overwrite was confirmed, check for exceptions and save
-        if 'save-dashboard' in changed_id or (prompt_data[0] == 'overwrite-dashboard' and prompt_result == 'ok'):
+        if 'save-dashboard' in changed_id or (prompt_data[0] == 'overwrite_dashboard' and prompt_result == 'ok'):
 
             dashboard_pointer = DASHBOARD_POINTER_PREFIX + dashboard_title.replace(" ", "")
             # regex.sub('[^A-Za-z0-9]+', '', dashboard_title)
@@ -871,19 +875,19 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                             conflicting_graphs += ', '
                     # if conflicting graph titles and dashboard title
                     if dashboard_title in used_dashboard_titles:  # was session['saved_dashboards']
-                        prompt_trigger = [['overwrite-dashboard', 4], {},
+                        prompt_trigger = [['overwrite_dashboard', 4], {},
                                           get_label('LBL_Overwrite_Dashboard'),
                                           get_label('LBL_Overwrite_Dashboard_C_Title_Graph_Prompt').format(
                                               dashboard_title, conflicting_graphs_list), False]
                     # else, just conflicting graph titles
                     else:
-                        prompt_trigger = [['overwrite-dashboard', 4], {}, get_label('LBL_Overwrite_Dashboard'),
+                        prompt_trigger = [['overwrite_dashboard', 4], {}, get_label('LBL_Overwrite_Dashboard'),
                                           get_label('LBL_Overwrite_Dashboard_C_Graph_Prompt').format(
                                               conflicting_graphs_list), False]
 
                 # else, just conflicting dashboard title
                 else:
-                    prompt_trigger = [['overwrite-dashboard', 4], {}, get_label('LBL_Overwrite_Dashboard'),
+                    prompt_trigger = [['overwrite_dashboard', 4], {}, get_label('LBL_Overwrite_Dashboard'),
                                       get_label('LBL_Overwrite_Dashboard_C_Title_Prompt').format(dashboard_title),
                                       False]
 
@@ -1027,7 +1031,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
             popup_text = get_label('LBL_Your_Dashboard_Has_Been_Deleted').format(dashboard_title)
             popup_is_open = True
         # if reset confirmed, trigger reset
-        elif prompt_data[0] == 'reset' and 'prompt-result.children' in changed_id and prompt_result == 'ok':
+        elif prompt_data[0] == 'reset' and 'prompt-result' in changed_id and prompt_result == 'ok':
             dashboard_reset_trigger = 'trigger'
             popup_text = get_label('LBL_Your_Dashboard_Has_Been_Reset')
             popup_is_open = True

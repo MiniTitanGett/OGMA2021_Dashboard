@@ -1,4 +1,4 @@
-######################################################################################################################
+﻿######################################################################################################################
 """
 layouts.py
 
@@ -167,8 +167,7 @@ def get_data_set_picker(tile, df_name, confirm_parent, prev_selection=None):
 def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Filter', level_value='H0',
                   nid_path="root", graph_all_toggle=None, fiscal_toggle='Gregorian', input_method='all-time',
                   num_periods='5', period_type='last-years', prev_selection=None, confirm_parent=None, df_const=None):
-    # if df_name is None:
-    #     df_name = session['dataset_list'][0]
+
     content = [
         html.A(
             className='boxclose',
@@ -498,7 +497,10 @@ def get_layout_dashboard():
         dcc.Store(id={'type': 'prompt-trigger', 'index': 3}),  # tile 3
         dcc.Store(id={'type': 'prompt-trigger', 'index': 4}),  # dashboard
         dcc.Store(id={'type': 'prompt-trigger', 'index': 5}),  # sidemenus
-        dcc.Store(id='prompt-result'),
+        # separated result stores for specific callback chains
+        dcc.Store(id={'type': 'prompt-result', 'index': 0}),  # _manage_tile_save_load_trigger() callback
+        dcc.Store(id={'type': 'prompt-result', 'index': 1}),  # _manage_dashboard_saves_and_reset() callback
+        dcc.Store(id={'type': 'prompt-result', 'index': 2}),  # _manage_data_sidemenus() callback
         # Floating Menu
         html.Div(
             html.Div([
@@ -530,12 +532,15 @@ def get_layout_dashboard():
             style=DATA_CONTENT_HIDE,
             id='float-menu-obscure',
             className='prompt-obscure'),
-        dcc.Store(id={'type': 'float-menu-trigger', 'index': 0}),
-        dcc.Store(id={'type': 'float-menu-trigger', 'index': 1}),
-        dcc.Store(id={'type': 'float-menu-trigger', 'index': 2}),
-        dcc.Store(id={'type': 'float-menu-trigger', 'index': 3}),
-        dcc.Store(id={'type': 'float-menu-trigger', 'index': 4}),
-        dcc.Store(id='float-menu-result'),
+        dcc.Store(id={'type': 'float-menu-trigger', 'index': 0}),  # tile 0
+        dcc.Store(id={'type': 'float-menu-trigger', 'index': 1}),  # tile 1
+        dcc.Store(id={'type': 'float-menu-trigger', 'index': 2}),  # tile 2
+        dcc.Store(id={'type': 'float-menu-trigger', 'index': 3}),  # tile 3
+        dcc.Store(id={'type': 'float-menu-trigger', 'index': 4}),  # linked tiles
+        # separated result stores for specific callback chains
+        dcc.Store(id={'type': 'float-menu-result', 'index': 0}),  # _manage_tile_save_load_trigger() callback
+        dcc.Store(id={'type': 'float-menu-result', 'index': 1}),  # _manage_dashboard_saves_and_reset() callback
+        dcc.Store(id={'type': 'float-menu-result', 'index': 2}),  # _serve_float_menu_and_take_result() callback
         # Popups
         dbc.Alert(
             'Your Tile Has Been Saved',
@@ -1196,11 +1201,13 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
     :param yaxis: the title of the yaxis
     :return: Menu with options to modify a bar graph.
     """
-    # (args-value: {})[0] = x-axis
-    # (args-value: {})[1] = y-axis (measure type)
-    # (args-value: {})[2] = graphed variables
-    # (args-value: {})[3] = orientation
-    # (args-value: {})[4] = animate graph
+    # args_value[0] = x-axis
+    # args_value[1] = y-axis (measure type)
+    # args_value[2] = graphed variables
+    # args_value[3] = orientation
+    # args_value[4] = animate graph
+    # args_value[5] = grid lines
+    # args_value[6] = legend
 
     return [
         html.Div(
@@ -1321,12 +1328,14 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
 # bubble graph menu layout
 def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, gridline, legend, df_name, df_const,
                           xaxis, yaxis):
-    # (args-value: {})[0] = x-axis
-    # (args-value: {})[1] = x-axis measure
-    # (args-value: {})[2] = y-axis
-    # (args-value: {})[3] = y-axis measure
-    # (args-value: {})[4] = size
-    # (args-value: {})[5] = size measure
+    # args_value[0] = x-axis
+    # args_value[1] = x-axis measure
+    # args_value[2] = y-axis
+    # args_value[3] = y-axis measure
+    # args_value[4] = size
+    # args_value[5] = size measure
+    # args_value[6] = grid line toggle
+    # args_value[7] = legend toggle
 
     return [
         html.Div(
@@ -1471,10 +1480,12 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
 # box plot menu layout
 def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, df_name, show_data_points, gridline,
                       legend, df_const, xaxis, yaxis):
-    # (args-value: {})[0] = graphed variables
-    # (args-value: {})[1] = measure type
-    # (args-value: {})[2] = points toggle
-    # (args-value: {})[3] = orientation
+    # args_value[0] = graphed variables
+    # args_value[1] = measure type
+    # args_value[2] = points toggle
+    # arg_value[3] = orientation
+    # arg_value[4] = grid lines
+    # arg_value[5] = legend
 
     return [
         html.Div(

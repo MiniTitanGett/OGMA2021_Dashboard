@@ -295,11 +295,11 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                                            df_name, df_const))
 
     # set title
-    if xaxis_title:
+    if xaxis_title != 'Date of Event' and xaxis_title is not None:
         xaxis = {'title': xaxis_title}
     else:
         xaxis = {'title': 'Date of Event', 'type': 'date'}
-    if yaxis_title:
+    if yaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and yaxis_title is not None:
         yaxis = {'title': yaxis_title}
     else:
         yaxis = {'title': arg_value[1]}
@@ -369,8 +369,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 "`Variable Name` == @arg_value[2] or "
                 "`Variable Name` == @arg_value[4]")
             filtered_df[['Date of Event', 'Variable Name', 'Partial Period', color]] = \
-            filtered_df[
-                ['Date of Event', 'Variable Name', 'Partial Period', color]].astype(str)
+                filtered_df[
+                    ['Date of Event', 'Variable Name', 'Partial Period', color]].astype(str)
             filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color],
                                                   columns=['Variable Name'],
                                                   values='Measure Value').reset_index()
@@ -383,8 +383,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
             filtered_df[['Date of Event', 'Measure Type', 'Variable Name', 'Partial Period', color]] = filtered_df[
                 ['Date of Event', 'Measure Type', 'Variable Name', 'Partial Period', color]].astype(str)
             filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color],
-                                                columns=['Variable Name', 'Measure Type'],
-                                                values='Measure Value').reset_index()
+                                                  columns=['Variable Name', 'Measure Type'],
+                                                  values='Measure Value').reset_index()
         filtered_df = filtered_df.dropna()
 
         # if hierarchy type is "Level Filter", or "Specific Item" while "Graph all in Dropdown" is selected
@@ -448,11 +448,11 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                     custom_data=[filtered_df[color], filtered_df['Date of Event'], filtered_df[arg_value[4]]])
                 fig.update_layout(
                     legend_title_text='Size: <br> &#9; {}<br> <br>{}'.format(arg_value[4],
-                                                                                  legend_title_text))
+                                                                             legend_title_text))
                 # set up hover label
 
                 hovertemplate = get_label('LBL_Gen_Hover_Data', df_name)
-                hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event', df_name)).\
+                hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event', df_name)). \
                     replace('%AXIS-A%', '%{x}')
                 hovertemplate = hovertemplate.replace('%AXIS-TITLE-B%', arg_value[4]).replace('%AXIS-B%',
                                                                                               '%{customdata[2]}')
@@ -475,17 +475,17 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 )
                 fig.update_layout(
                     legend_title_text='Size: <br> &#9; {} ({})<br> <br>{}'.format(arg_value[4], arg_value[5],
-                                                                              legend_title_text))
+                                                                                  legend_title_text))
                 # set up hover label
                 hovertemplate = get_label('LBL_Bubble_Hover_Data', df_name)
                 hovertemplate = hovertemplate.replace('%AXIS-X-A%', arg_value[0]).replace('%AXIS-X-B%',
-                                                                                      arg_value[1]).replace(
+                                                                                          arg_value[1]).replace(
                     '%X-AXIS%', '%{x}')
                 hovertemplate = hovertemplate.replace('%AXIS-Y-A%', arg_value[2]).replace('%AXIS-Y-B%',
-                                                                                      arg_value[3]).replace(
+                                                                                          arg_value[3]).replace(
                     '%Y-AXIS%', '%{y}')
                 hovertemplate = hovertemplate.replace('%AXIS-Z-A%', arg_value[4]).replace('%AXIS-Z-B%',
-                                                                                      arg_value[5]).replace(
+                                                                                          arg_value[5]).replace(
                     '%Z-AXIS%', '%{customdata[2]}')
                 fig.update_traces(hovertemplate=hovertemplate)
         # else, filtered is empty, create default empty graph
@@ -499,14 +499,14 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                                            df_name, df_const))
 
     # set title
-    if arg_value[0] == 'Time' and ('{} ({})'.format(arg_value[0], arg_value[1]) == xaxis_title or None == xaxis_title):
+    if arg_value[0] == 'Time' and xaxis_title is None:
         xaxis = '{} '.format(arg_value[0])
     elif xaxis_title:
         xaxis = xaxis_title
     else:
         xaxis = '{} ({})'.format(arg_value[0], arg_value[1])
 
-    if arg_value[0] == 'Time' and ('{} ({})'.format(arg_value[2], arg_value[3]) == yaxis_title or None == xaxis_title):
+    if arg_value[0] == 'Time' and yaxis_title is None:
         yaxis = '{} '.format(arg_value[2])
     elif yaxis_title:
         yaxis = yaxis_title
@@ -725,7 +725,8 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
     # set title
     if xaxis_title:
         xaxis = {'title': xaxis_title}
-    if yaxis_title:
+
+    if yaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title is not None:
         yaxis = {'title': yaxis_title}
     else:
         yaxis = {'title': arg_value[1]}
@@ -786,7 +787,6 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
     # arg_value[5] = legend toggle
     # ---------------------------------------Variable Declarations------------------------------------------------------
     language = session["language"]
-    xaxis = {'title': arg_value[0]}
     yaxis = {'type': 'category'}
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -854,7 +854,6 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             else:
                 x = 'Measure Value'
                 y = None
-                xaxis = {'title': arg_value[0]}
                 yaxis = None
                 filtered_df.sort_values(by=['Variable Name', 'Measure Value'])
 
@@ -887,8 +886,10 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                                            df_name, df_const))
 
     # set title
-    if xaxis_title:
+    if xaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title is not None:
         xaxis = {'title': xaxis_title}
+    else:
+        xaxis = {'title': arg_value[0]}
     if yaxis_title:
         yaxis = {'title': yaxis_title}
 

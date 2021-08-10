@@ -252,12 +252,14 @@ def generate_constants(df_name):
     #     lambda x: pd.to_datetime(x, format='%Y%m%d', errors='ignore'))
 
     options = []
+    Variable_Option_Lists= []
 
     unique_vars = df[VARIABLE_LEVEL].unique()
     cleaned_list = [x for x in unique_vars if str(x) != 'nan']
     cleaned_list.sort()
 
     for unique_var in cleaned_list:
+        Variable_Option_Lists.append(unique_var)
         options.append(
             {'label': "  " * unique_var.count("|") + str(unique_var).replace('|', ', '), 'value': unique_var})
 
@@ -294,7 +296,8 @@ def generate_constants(df_name):
         'FISCAL_WEEK_FRINGE_MAX': FISCAL_WEEK_FRINGE_MAX,
         'MIN_DATE_UNF': MIN_DATE_UNF,
         'MAX_DATE_UNF': MAX_DATE_UNF,
-        'VARIABLE_OPTIONS': VARIABLE_OPTIONS
+        'VARIABLE_OPTIONS': VARIABLE_OPTIONS,
+        'Variable_Option_Lists': Variable_Option_Lists
     }
     return storage
 

@@ -106,7 +106,8 @@ def load_graph_menu(graph_type, tile, df_name, args_list, axes_title, df_const):
                                         legend=args_list[6], xaxis=axes_title[0], yaxis=axes_title[1], df_name=df_name,
                                         xpos=axes_title[2], ypos=axes_title[3], df_const=df_const)
     elif graph_type == 'Table':
-        graph_menu = get_table_graph_menu(tile=tile, number_of_columns=args_list[1])
+        graph_menu = get_table_graph_menu(tile=tile, number_of_columns=args_list[1], xaxis=axes_title[0],
+                                          yaxis=axes_title[1],xpos=axes_title[2], ypos=axes_title[3])
     elif graph_type == 'Box_Plot':
         graph_menu = get_box_plot_menu(tile=tile, axis_measure=args_list[0], graphed_variables=args_list[1],
                                        graph_orientation=args_list[2], show_data_points=args_list[3],
@@ -114,7 +115,8 @@ def load_graph_menu(graph_type, tile, df_name, args_list, axes_title, df_const):
                                        yaxis=axes_title[1], df_name=df_name, df_const=df_const,
                                        xpos=axes_title[2], ypos=axes_title[3])
     elif graph_type == 'Sankey':
-        graph_menu = get_sankey_menu(tile=tile, graphed_options=args_list[0], df_name=df_name, df_const=df_const)
+        graph_menu = get_sankey_menu(tile=tile, graphed_options=args_list[0], df_name=df_name, df_const=df_const,
+                                     xaxis=axes_title[0], yaxis=axes_title[1],xpos=axes_title[2], ypos=axes_title[3])
     elif graph_type == 'Bubble':
         graph_menu = get_bubble_graph_menu(tile=tile, x=args_list[0], x_measure=args_list[1], y=args_list[2],
                                            y_measure=args_list[3], size=args_list[4], size_measure=args_list[5],

@@ -122,15 +122,14 @@ for x in range(4):
         # -------------------------------------------Variable Declarations----------------------------------------------
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
         tile = dash.callback_context.inputs_list[0]['id']['index']
-
-
+        df_tile = None
+        # --------------------------------------------------------------------------------------------------------------
         if df_name is not None:
             df_tile = df_name
             if 'OPG001' in df_name:
                 df_name = 'OPG001'
             elif 'OPG010' in df_name:
                 df_name = 'OPG010'
-        # --------------------------------------------------------------------------------------------------------------
 
         if '"type":"tile-view"}.className' in changed_id and df_name is None and parent_df_name is None:
             return None
@@ -181,6 +180,8 @@ for x in range(4):
             period_type = parent_period_type
             df_name = parent_df_name
             hierarchy_options = parent_hierarchy_options
+        else:
+            df_name = df_tile
 
         # prevent update if invalid selections exist - should be handled by update_datepicker, but double check
         if not start_year or not end_year or not start_secondary or not end_secondary or \

@@ -940,6 +940,9 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 # if any tiles are linked, save the parent data menu
                 if links.count('fa fa-link') > 0:
 
+                    if type(button_paths[4]) == dict:
+                        button_paths[4] = [button_paths[4]]
+
                     parent_nid_path = "root"
                     for button in button_paths[4]:
                         parent_nid_path += '^||^{}'.format(button['props']['children'])
@@ -1041,7 +1044,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 popup_is_open = True
 
         # if confirm delete, has been pressed
-        elif prompt_data[0] == 'delete-dashboard' and prompt_result == 'ok':
+        elif prompt_data[0] == 'delete_dashboard' and prompt_result == 'ok':
             intermediate_pointer = DASHBOARD_POINTER_PREFIX + dashboard_title.replace(" ", "")
             delete_dashboard(intermediate_pointer)
             update_graph_options_trigger = 'trigger'

@@ -2,7 +2,7 @@ if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[OPP_Get_Da
 drop procedure [dbo].[OPP_Get_DataSet]
 go
 
--- Copyright © OGMA Consulting Corp.
+-- Copyright ï¿½ OGMA Consulting Corp.
 -- $Id$
 Create Procedure dbo.OPP_Get_DataSet
 
@@ -24,6 +24,9 @@ begin
   
   else if (@pr_dataset_name = 'OPG010')
     select * from dbo.OPG010
+
+  else if (@pr_dataset_name = 'OPG001C')
+    select * from dbo.OPG001C
 
   else if (@pr_dataset_name = 'OPG011')
     select --null [OPG Data Set],

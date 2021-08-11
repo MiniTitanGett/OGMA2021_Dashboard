@@ -115,6 +115,13 @@ for x in range(4):
         tile = dash.callback_context.inputs_list[0]['id']['index']
         xaxis = None
         yaxis = None
+
+        if df_name is not None:
+            df_tile = df_name
+            if 'OPG001' in df_name:
+                df_name = 'OPG001'
+            elif 'OPG010' in df_name:
+                df_name = 'OPG010'
         # --------------------------------------------------------------------------------------------------------------
         # TODO have to finish hooking up plotly axes title edits to hidden div so we are able to save
         #  and update the graph menu when ever a user edits the titles
@@ -161,8 +168,8 @@ for x in range(4):
                                            and graph_type in GRAPH_OPTIONS[df_name] and df_name != parent_df_name) or \
                 (df_name is None and df_confirm is not None and parent_df_name != df_confirm):
             if df_confirm is not None:
-                df_name = df_confirm
-            graph = __update_graph(df_name, arg_value, graph_type, tile_title, num_periods, period_type,
+                df_tile = df_confirm
+            graph = __update_graph(df_tile, arg_value, graph_type, tile_title, num_periods, period_type,
                                    hierarchy_toggle,
                                    hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options,
                                    state_of_display,

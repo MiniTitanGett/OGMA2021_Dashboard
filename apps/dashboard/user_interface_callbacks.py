@@ -8,7 +8,7 @@ stores all callbacks for the user interface
 
 # External Packages
 import copy
-from re import search
+from re import search, match
 from urllib.parse import parse_qsl
 
 import dash
@@ -501,8 +501,22 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
             trigger is None and df_confirm is None):
         raise PreventUpdate
 
+    if 'OPG001' in df_name_parent:
+        df_name_parent = 'OPG001'
+    elif 'OPG010' in df_name_parent:
+        df_name_parent = 'OPG010'
+    if df_name is not None:
+        if 'OPG001' in df_name:
+            df_name = 'OPG001'
+        elif 'OPG010' in df_name:
+            df_name = 'OPG010'
+
     # if new tile is created and is on a dataset that is not confirmed use previous data set that has been confirmed
     if '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-link' and df_confirm is not None:
+        if 'OPG001' in df_confirm:
+            df_confirm = 'OPG001'
+        if 'OPG010' in df_confirm:
+            df_confirm = 'OPG010'
         graph_options = GRAPH_OPTIONS[df_confirm]
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
@@ -530,6 +544,11 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
     else:
+        if 'OPG001' in trigger:
+            trigger = 'OPG001'
+        elif 'OPG010' in trigger:
+            trigger = 'OPG010'
+
         if trigger == "OPG001":
             graph_options = GRAPH_OPTIONS["OPG001"]
             # if graph_type is not None and graph_type not in graph_options:
@@ -538,8 +557,6 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
             graph_options = GRAPH_OPTIONS["OPG010"]
             # if graph_type is not None and graph_type not in graph_options:
             #     link_trigger = "fa fa-unlink"
-        else:
-            graph_options = []
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
 
@@ -701,7 +718,7 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
         return no_update, no_update, 1, no_update
 
     # if this has been loaded from the cancel of a graph menu edit then set to false and prevent update
-    if 'graph-type-dropdown"}.value' in changed_id and is_loaded:
+    if 'graph-type-dropdown"}.value' in changed_id:
         return no_update, no_update, no_update, False
 
     tile = int(dash.callback_context.inputs_list[0]['id']['index'])
@@ -1126,7 +1143,11 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                     # trigger update for all tiles that are linked to the active data menu
                     for i in range(len(links_style)):
                         if links_style[i] == 'fa fa-link':
-                            if graph_types[i] is None or graph_types[i] in GRAPH_OPTIONS[df_name]:
+                            if 'OPG001' in df_name:
+                                df_tile = 'OPG001'
+                            elif 'OPG010' in df_name:
+                                df_tile = 'OPG010'
+                            if graph_types[i] is None or graph_types[i] in GRAPH_OPTIONS[df_tile]:
                                 graph_triggers[i] = df_name
                                 options_triggers[i] = df_name
                                 df_names[i] = df_name

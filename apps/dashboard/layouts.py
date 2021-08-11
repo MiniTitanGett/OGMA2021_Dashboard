@@ -10,6 +10,7 @@ stores all layouts excluding hierarchy filter layout
 import inspect
 import dash_core_components as dcc
 import dash_html_components as html
+import visdcc as visdcc
 from dash.exceptions import PreventUpdate
 from flask import session
 import json
@@ -315,7 +316,9 @@ def get_layout_graph(report_name):
                            j.get('End Secondary'),  # j['End Secondary']
                            j.get('df_const'),
                            None,  # xtitle
-                           None)  # ytitle
+                           None,  # ytitle
+                           None,  # xlegpos
+                           None)  # ylegpos
 
     if graph is None:
         raise PreventUpdate
@@ -579,6 +582,11 @@ def get_layout_dashboard():
             duration=4000),
         # dashboard-reset-confirmation is used by the prompts to reset the viewport
         dcc.Store(id='dashboard-reset-confirmation'),
+        # javascript visdcc object for running the javascript required to handle plotly_relayout events
+        visdcc.Run_js(id={'type': 'javascript', 'index': 0}),
+        visdcc.Run_js(id={'type': 'javascript', 'index': 1}),
+        visdcc.Run_js(id={'type': 'javascript', 'index': 2}),
+        visdcc.Run_js(id={'type': 'javascript', 'index': 3}),
         # select-range-trigger is used by the load callbacks to load the select range datepicker section
         dcc.Store(id={'type': 'select-range-trigger', 'index': 0}),
         dcc.Store(id={'type': 'select-range-trigger', 'index': 1}),
@@ -687,6 +695,7 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
         graphs = []
 
     options = []
+    graphs.sort()
     for i in graphs:
         options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
 
@@ -778,6 +787,7 @@ def get_tile(tile, tile_keys=None, df_name=None):
                     [get_label('LBL_Data')],
                     id={'type': 'tile-data', 'index': tile},
                     className='tile-nav tile-nav--data'),
+
                 html.Div(
                     html.I(
                         className=tile_keys['Link'] if tile_keys else 'fa fa-link',
@@ -979,7 +989,7 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, parent_df=None):
 
 # line graph menu layout
 def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridline, legend, df_const, data_fitting, ci,
-                                data_fit, degree, xaxis, yaxis):
+                                data_fit, degree, xaxis, yaxis, xpos, ypos):
     """
     :param data_fitting: boolean to determine whether to show data fitting options
     :param ci: show confidence interval or not
@@ -996,6 +1006,8 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
     :param degree: degree value
     :param xaxis: the title of the xaxis
     :param yaxis: the title of the yaxis
+    :param xpos: the x position of the legend
+    :param ypos: the y position of the legend
     :return: Menu with options to modify a line graph.
     """
     # arg_value[0] = xaxis selector
@@ -1168,15 +1180,27 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                     style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
                 html.Div([
                     dcc.Input(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 9},
+                        id={'type': 'xaxis-title', 'index': tile},
                         type="text",
-                        value=xaxis,
+                        value=xaxis if xaxis else None,
                         style={'display': 'None'},
                         debounce=True),
                     dcc.Input(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 10},
+                        id={'type': 'yaxis-title', 'index': tile},
                         type="text",
-                        value=yaxis,
+                        value=yaxis if yaxis else None,
+                        style={'display': 'None'},
+                        debounce=True),
+                    dcc.Input(
+                        id={'type': 'x-pos-legend', 'index': tile},
+                        type="text",
+                        value=xpos if xpos else None,
+                        style={'display': 'None'},
+                        debounce=True),
+                    dcc.Input(
+                        id={'type': 'y-pos-legend', 'index': tile},
+                        type="text",
+                        value=ypos if ypos else None,
                         style={'display': 'None'},
                         debounce=True)],
                     style={'display': 'None'})
@@ -1185,20 +1209,22 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
 
 # bar graph menu layout
 def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline, legend, df_name, df_const, xaxis,
-                       yaxis):
+                       yaxis, xpos, ypos):
     """
-    :param measure_type: the measure type value
-    :param y: the y-axis value
+    :param tile: Index of the tile the bar graph menu corresponds to.
     :param x: the x-axis value
+    :param y: the y-axis value
+    :param measure_type: the measure type value
     :param orientation: the orientation value
     :param animate: the animate graph value
     :param gridline: Show gridline or not
     :param legend: Show legend or not
-    :param tile: Index of the tile the bar graph menu corresponds to.
     :param df_name: Name of the data set being used.
     :param df_const: Dataframe constants
     :param xaxis: the title of the xaxis
     :param yaxis: the title of the yaxis
+    :param xpos: the x position of the legend
+    :param ypos: the y position of the legend
     :return: Menu with options to modify a bar graph.
     """
     # args_value[0] = x-axis
@@ -1309,15 +1335,27 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
                 style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
             html.Div([
                 dcc.Input(
-                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 7},
+                    id={'type': 'xaxis-title', 'index': tile},
                     type="text",
-                    value=xaxis,
+                    value=xaxis if xaxis else None,
                     style={'display': 'None'},
                     debounce=True),
                 dcc.Input(
-                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 8},
+                    id={'type': 'yaxis-title', 'index': tile},
                     type="text",
-                    value=yaxis,
+                    value=yaxis if yaxis else None,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'x-pos-legend', 'index': tile},
+                    type="text",
+                    value=xpos if xpos else None,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'y-pos-legend', 'index': tile},
+                    type="text",
+                    value=ypos if ypos else None,
                     style={'display': 'None'},
                     debounce=True)],
                 style={'display': 'None'})
@@ -1327,7 +1365,25 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
 
 # bubble graph menu layout
 def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, gridline, legend, df_name, df_const,
-                          xaxis, yaxis):
+                          xaxis, yaxis, xpos, ypos):
+    """
+    :param tile: Index of the tile the bar graph menu corresponds to.
+    :param x: the x-axis value
+    :param x_measure: the x-axis measure
+    :param y: the y-axis value
+    :param y_measure: the y-axis measure
+    :param size: the size value
+    :param size_measure: the size measure
+    :param gridline: Show gridline or not
+    :param legend: Show legend or not
+    :param df_name: Name of the data set being used.
+    :param df_const: Dataframe constants
+    :param xaxis: the title of the xaxis
+    :param yaxis: the title of the yaxis
+    :param xpos: the x position of the legend
+    :param ypos: the y position of the legend
+    :return: Menu with options to modify a bubble graph.
+    """
     # args_value[0] = x-axis
     # args_value[1] = x-axis measure
     # args_value[2] = y-axis
@@ -1471,15 +1527,27 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                 style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
             html.Div([
                 dcc.Input(
-                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 8},
+                    id={'type': 'xaxis-title', 'index': tile},
                     type="text",
-                    value=xaxis,
+                    value=xaxis if xaxis else None,
                     style={'display': 'None'},
                     debounce=True),
                 dcc.Input(
-                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 9},
+                    id={'type': 'yaxis-title', 'index': tile},
                     type="text",
-                    value=yaxis,
+                    value=yaxis if yaxis else None,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'x-pos-legend', 'index': tile},
+                    type="text",
+                    value=xpos if xpos else None,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'y-pos-legend', 'index': tile},
+                    type="text",
+                    value=ypos if ypos else None,
                     style={'display': 'None'},
                     debounce=True)],
                 style={'display': 'None'})
@@ -1488,7 +1556,23 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
 
 # box plot menu layout
 def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, df_name, show_data_points, gridline,
-                      legend, df_const, xaxis, yaxis):
+                      legend, df_const, xaxis, yaxis, xpos, ypos):
+    """
+        :param tile: Index of the tile the bar graph menu corresponds to.
+        :param axis_measure: the measure for the axis
+        :param graphed_variables: the variables to be graphed
+        :param graph_orientation: the orientation value
+        :param df_name: Name of the data set being used.
+        :param show_data_points: the animate graph value
+        :param gridline: Show gridline or not
+        :param legend: Show legend or not
+        :param df_const: Dataframe constants
+        :param xaxis: the title of the xaxis
+        :param yaxis: the title of the yaxis
+        :param xpos: the x position of the legend
+        :param ypos: the y position of the legend
+        :return: Menu with options to modify a bar graph.
+        """
     # args_value[0] = graphed variables
     # args_value[1] = measure type
     # args_value[2] = points toggle
@@ -1578,15 +1662,27 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                 style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
             html.Div([
                 dcc.Input(
-                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 6},
+                    id={'type': 'xaxis-title', 'index': tile},
                     type="text",
-                    value=xaxis,
+                    value=xaxis if xaxis else None,
                     style={'display': 'None'},
                     debounce=True),
                 dcc.Input(
-                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 7},
+                    id={'type': 'yaxis-title', 'index': tile},
                     type="text",
-                    value=yaxis,
+                    value=yaxis if yaxis else None,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'x-pos-legend', 'index': tile},
+                    type="text",
+                    value=xpos if xpos else None,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'y-pos-legend', 'index': tile},
+                    type="text",
+                    value=ypos if ypos else None,
                     style={'display': 'None'},
                     debounce=True)],
                 style={'display': 'None'})

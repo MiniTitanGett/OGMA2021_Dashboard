@@ -38,9 +38,17 @@ begin
            --null [Hierarchy One -4],
            [Hierarchy One Leaf] as [Hierarchy Value],
            5 as [Hierarchy Level],
-           [Variable Name],
-           [Variable Name Qualifier],
-           [Variable Name Sub Qualifier],
+           --[Variable Name],
+           --[Variable Name Qualifier],
+           --[Variable Name Sub Qualifier],
+           case
+             when isnull([Variable Name Sub Qualifier], '') <> '' then [Variable Name Sub Qualifier]
+             else [Variable Name Qualifier]
+           end as [Variable Value],
+           case
+             when isnull([Variable Name Sub Qualifier], '') <> '' then 3
+             else 2
+           end as [Variable Level],
            [Date of Event],
            [Calendar Entry Type],
            --null [Year of Event],
@@ -58,6 +66,8 @@ begin
            [Partial Period]
       from dbo.OPG001 with (nolock)
      where trim(isnull([Hierarchy One Leaf], '')) <> ''
+       -- we can't prune based on Sub Qualifier because the data is 'blown out',
+       -- but since the data doesn't include any values in Sub Qualifier, we are ok
        and trim(isnull([Variable Name Qualifier], '')) <> ''
        and [Calendar Entry Type] = 'Week'
 

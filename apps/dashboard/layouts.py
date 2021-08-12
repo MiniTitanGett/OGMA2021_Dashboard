@@ -686,10 +686,11 @@ def get_layout_dashboard():
 
 # create customize content
 def get_customize_content(tile, graph_type, graph_menu, df_name):
-    if df_name == 'OPG010':
-        graphs = GRAPH_OPTIONS['OPG010']
-    elif df_name == 'OPG001':
-        graphs = GRAPH_OPTIONS['OPG001']
+    if df_name is not None:
+        if 'OPG010' in df_name:
+            graphs = GRAPH_OPTIONS['OPG010']
+        elif 'OPG001' in df_name:
+            graphs = GRAPH_OPTIONS['OPG001']
     else:
         graphs = []
 

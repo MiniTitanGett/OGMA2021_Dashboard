@@ -523,9 +523,9 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
 
     # when dataset is swapped to a different dataset get parent graph options
     elif '"type":"tile-link"}.className' in changed_id:
-        if df_name_parent == "OPG001":
+        if "OPG001" in df_name_parent:
             graph_options = GRAPH_OPTIONS["OPG001"]
-        elif df_name_parent == "OPG010":
+        elif "OPG010" in df_name_parent:
             graph_options = GRAPH_OPTIONS["OPG010"]
         else:
             graph_options = []
@@ -544,16 +544,11 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
     else:
-        if 'OPG001' in trigger:
-            trigger = 'OPG001'
-        elif 'OPG010' in trigger:
-            trigger = 'OPG010'
-
-        if trigger == "OPG001":
+        if "OPG001" in trigger:
             graph_options = GRAPH_OPTIONS["OPG001"]
             # if graph_type is not None and graph_type not in graph_options:
             #     link_trigger = "fa fa-unlink"
-        elif trigger == "OPG010":
+        elif "OPG010" in trigger:
             graph_options = GRAPH_OPTIONS["OPG010"]
             # if graph_type is not None and graph_type not in graph_options:
             #     link_trigger = "fa fa-unlink"
@@ -1181,7 +1176,8 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                                 df_tile = 'OPG001'
                             elif 'OPG010' in df_name:
                                 df_tile = 'OPG010'
-                            if graph_types[i] is None or graph_types[i] in GRAPH_OPTIONS[df_tile]:
+                            if (graph_types[i] is None or graph_types[i] in GRAPH_OPTIONS[df_tile]) and \
+                                    prompt_result != 'op-2':
                                 graph_triggers[i] = df_name
                                 options_triggers[i] = df_name
                                 df_names[i] = df_name

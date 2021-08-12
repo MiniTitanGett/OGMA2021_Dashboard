@@ -499,14 +499,14 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                                            df_name, df_const))
 
     # set title
-    if arg_value[0] == 'Time' and xaxis_title == 'Time' or xaxis_title is None:
+    if arg_value[0] == 'Time' and (xaxis_title == 'Time' or xaxis_title is None):
         xaxis = '{} '.format(arg_value[0])
     elif xaxis_title:
         xaxis = xaxis_title
     else:
         xaxis = '{} ({})'.format(arg_value[0], arg_value[1])
 
-    if arg_value[0] == 'Time' and yaxis_title in df_const[df_name][Variable_Option_Lists] or yaxis_title is None:
+    if arg_value[0] == 'Time' and (yaxis_title in df_const[df_name]['VARIABLE_OPTIONS'] or yaxis_title is None):
         yaxis = '{} '.format(arg_value[2])
     elif yaxis_title:
         yaxis = yaxis_title

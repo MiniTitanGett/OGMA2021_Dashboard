@@ -21,7 +21,7 @@ from flask import url_for
 # Internal Packages
 from apps.dashboard.app import app
 from apps.dashboard.data import DATA_CONTENT_HIDE, DATA_CONTENT_SHOW, get_label, X_AXIS_OPTIONS, \
-    session, BAR_X_AXIS_OPTIONS, generate_constants, dataset_to_df, GRAPH_OPTIONS, CUSTOMIZE_CONTENT_HIDE
+    session, BAR_X_AXIS_OPTIONS, generate_constants, dataset_to_df, GRAPH_OPTIONS, CUSTOMIZE_CONTENT_HIDE, LAYOUTS
 from apps.dashboard.layouts import get_line_scatter_graph_menu, get_bar_graph_menu, get_table_graph_menu, \
     get_tile_layout, change_index, get_box_plot_menu, get_default_tab_content, get_layout_dashboard, get_layout_graph, \
     get_data_menu, get_sankey_menu, get_dashboard_title_input, get_bubble_graph_menu
@@ -73,6 +73,7 @@ app.clientside_callback(
     # causing the tile close trigger to never fire in the data menu
     [Output('tile-closed-trigger', 'data-'),
      Output('div-body', 'children'),
+     Output('div-body', 'layouts'),
      Output('button-new-wrapper', 'children'),
      Output('num-tiles-2', 'data-num-tiles')],
     [Input('button-new', 'n_clicks'),
@@ -134,7 +135,7 @@ def _new_and_delete(_new_clicks, close_id, _dashboard_reset, input_tiles, num_ti
     # disable the NEW button
     new_button = html.Button(
         className='parent-nav', n_clicks=0, children=get_label('LBL_Add_Tile'), id='button-new', disabled=True)
-    return deleted_tile, children, new_button, num_tiles
+    return deleted_tile, children, LAYOUTS[num_tiles-1], new_button, num_tiles
 
 
 # unlock NEW button after end of callback chain
@@ -1320,9 +1321,21 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
             date_picker_triggers[4])
 
 
+app.clientside_callback(
+    """
+        function _resize_for_resizable_graphs(load_data_trigger, refresh_data_trigger){
+            // This code is added to ensure the graph area is always resized to fit, 
+            // otherwise the graphing area will be squished or put to one side
+            window.dispatchEvent(new Event('resize'));
+            return dash_clientside.no_update;
+        }
+    """,
+    Output({'type': 'data-tile', 'index': 4}, 'data-throwaway'),
+    Input({'type': 'data-tile', 'index': ALL}, 'style'),
+)
+
+
 # http://adripofjavascript.com/blog/drips/object-equality-in-javascript.html#:~:text=Here%20is%20a%20very%20basic,are%20not%20equivalent%20if%20(aProps.
-
-
 app.clientside_callback(
     """
        function _data_set_confirmation_visuals(load_data_trigger, refresh_data_trigger){

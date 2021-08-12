@@ -17,11 +17,10 @@ import json
 import dash_bootstrap_components as dbc
 import dash_responsive_grid_layout as drgl
 
-
 # Internal Modules
 from conn import exec_storedproc_results
 from apps.dashboard.data import GRAPH_OPTIONS, CLR, DATA_CONTENT_SHOW, DATA_CONTENT_HIDE, VIEW_CONTENT_SHOW, \
-    BAR_X_AXIS_OPTIONS, CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LAYOUT_CONTENT_HIDE
+    BAR_X_AXIS_OPTIONS, CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LAYOUT_CONTENT_HIDE, LAYOUTS
 from apps.dashboard.hierarchy_filter import get_hierarchy_layout
 from apps.dashboard.datepicker import get_date_picker
 from apps.dashboard.graphs import __update_graph
@@ -206,20 +205,17 @@ def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Fi
 
 # get div body
 def get_div_body(num_tiles=1, input_tiles=None, tile_keys=None):
-    layouts = {
-        'lg': [
-            {'i': '{"index": 0, "type": "tile"}', 'x': 0, 'y': 0, 'w': 24, 'h': 24}
-        ]
-    }
     cols = {'lg': 24}
     breakpoints = {'lg': 1200}
     return [
         # body div
         drgl.ResponsiveGridLayout(
-            get_tile_layout(num_tiles, input_tiles, tile_keys),
+            get_tile(0, df_name=None),
+            useCSSTransforms=True,
             id='div-body',
             cols=cols,
-            layouts=layouts,
+            rowHeight=40,
+            layouts=LAYOUTS[0],
             breakpoints=breakpoints,
             draggableHandle='.dragbar')
     ]
@@ -761,101 +757,107 @@ def get_tile(tile, tile_keys=None, df_name=None):
     :param df_name: Name of the data set being used.
     :return: New tile with index values matching the specified tile index.
     """
-    return html.Div([
-        # flex container
+    return html.Div(
         html.Div([
-            html.Header([
-                dcc.Input(
-                    id={'type': 'tile-title', 'index': tile},
-                    placeholder=get_label('LBL_Enter_Graph_Title'),
-                    value=tile_keys['Tile Title'] if tile_keys else '',
-                    className='tile-title',
-                    debounce=True),
-                html.Button(
-                    [get_label('LBL_Graph')],
-                    id={'type': 'tile-view', 'index': tile},
-                    className='tile-nav tile-nav--view tile-nav--selected'),
-                dcc.Store(
-                    id={'type': 'tile-view-store', 'index': tile}),
-                html.Button(
-                    [get_label('LBL_Edit')],
-                    id={'type': 'tile-customize', 'index': tile},
-                    className='tile-nav tile-nav--customize'),
-                html.Button(
-                    [get_label('LBL_Save')],
-                    id={'type': 'save-button', 'index': tile},
-                    n_clicks=0,
-                    className='tile-nav tile-nav--save'),
-                html.Button(
-                    [get_label('LBL_Load')],
-                    id={'type': 'tile-layouts', 'index': tile},
-                    className='tile-nav tile-nav--layout'),
-                html.Button(
-                    [get_label('LBL_Delete')],
-                    id={'type': 'delete-button', 'index': tile},
-                    className='tile-nav tile-nav--delete'),
-                html.Button(
-                    [get_label('LBL_Data')],
-                    id={'type': 'tile-data', 'index': tile},
-                    className='tile-nav tile-nav--data'),
-
+            # flex container
+            html.Div([
+                html.Div([
+                    dcc.Input(
+                        id={'type': 'tile-title', 'index': tile},
+                        placeholder=get_label('LBL_Enter_Graph_Title'),
+                        value=tile_keys['Tile Title'] if tile_keys else '',
+                        className='tile-title',
+                        debounce=True),
+                    html.Header([
+                        html.Button(
+                            [get_label('LBL_Graph')],
+                            id={'type': 'tile-view', 'index': tile},
+                            className='tile-nav tile-nav--view tile-nav--selected'),
+                        dcc.Store(
+                            id={'type': 'tile-view-store', 'index': tile}),
+                        html.Button(
+                            [get_label('LBL_Edit')],
+                            id={'type': 'tile-customize', 'index': tile},
+                            className='tile-nav tile-nav--customize'),
+                        html.Button(
+                            [get_label('LBL_Save')],
+                            id={'type': 'save-button', 'index': tile},
+                            n_clicks=0,
+                            className='tile-nav tile-nav--save'),
+                        html.Button(
+                            [get_label('LBL_Load')],
+                            id={'type': 'tile-layouts', 'index': tile},
+                            className='tile-nav tile-nav--layout'),
+                        html.Button(
+                            [get_label('LBL_Delete')],
+                            id={'type': 'delete-button', 'index': tile},
+                            className='tile-nav tile-nav--delete'),
+                        html.Button(
+                            [get_label('LBL_Data')],
+                            id={'type': 'tile-data', 'index': tile},
+                            className='tile-nav tile-nav--data')],
+                        className='dragbar',
+                        id={'type': 'tile-menu-header', 'index': tile},
+                        style={'margin-right': '25px', 'flex-grow': '1'}),
+                ], style={'display': 'flex'}),
                 html.Div(
                     html.I(
                         className=tile_keys['Link'] if tile_keys else 'fa fa-link',
                         id={'type': 'tile-link', 'index': tile},
                         style={'position': 'relative'}),
-                    id={'type': 'tile-link-wrapper', 'index': tile})],
-                className='dragbar',
-                id={'type': 'tile-menu-header', 'index': tile},
-                style={'margin-right': '25px'}),
-            html.A(
-                className='boxclose',
-                id={'type': 'tile-close', 'index': tile},
-                style={'position': 'absolute', 'right': '0', 'top': '0'}),
-            html.Div(
-                style=VIEW_CONTENT_SHOW,
-                id={'type': 'tile-view-content', 'index': tile},
-                className='fill-container',
-                children=[
-                    html.Div(
-                        children=[],
-                        id={'type': 'graph_display', 'index': tile},
-                        className='fill-container')]),
-            html.Div(
+                    className='dragbar',
+                    id={'type': 'tile-link-wrapper', 'index': tile}),
+                html.A(
+                    className='boxclose',
+                    id={'type': 'tile-close', 'index': tile},
+                    style={'position': 'absolute', 'right': '0', 'top': '0'}),
                 html.Div(
-                    tile_keys['Customize Content'] if tile_keys
-                    else get_customize_content(tile=tile, graph_type=None, graph_menu=None, df_name=df_name),
-                    style=CUSTOMIZE_CONTENT_HIDE,
-                    id={'type': 'tile-customize-content', 'index': tile},
-                    className='customize-content'),
-                id={'type': 'tile-customize-content-wrapper', 'index': tile},
-                className='customize-content'),
-            html.Div([
-                html.P(get_label('LBL_Load_A_Saved_Graph'),
-                       style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
-                html.Div(
-                    id={'type': 'select-layout-dropdown-div', 'index': tile},
+                    style=VIEW_CONTENT_SHOW,
+                    id={'type': 'tile-view-content', 'index': tile},
+                    className='fill-container',
                     children=[
-                        dcc.Dropdown(id={'type': 'select-layout-dropdown', 'index': tile},
-                                     options=[{'label': session['saved_layouts'][key]['Title'], 'value': key} for key in
-                                              session['saved_layouts']],
-                                     style={'width': '400px', 'font-size': '13px'},
-                                     clearable=False,
-                                     value='',
-                                     placeholder='{}...'.format(get_label('LBL_Select')))
-                    ], style={'width': '400px'}),
-                html.P(get_label('LBL_Load_Graph_Prompt'),
-                       id={'type': 'tile-layouts-warning', 'index': tile},
-                       style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
-            ], style=LAYOUT_CONTENT_HIDE,
-                id={'type': 'tile-layouts-content', 'index': tile},
-                className='customize-content')
-        ], style={'flex-direction': 'column'},
-            id={'type': 'tile-body', 'index': tile},
-            className='flex-container fill-container')
-    ], className='tile-container',
-        id={'type': 'tile', 'index': tile},
-        style={'z-index': '{}'.replace("{}", str(tile))})
+                        html.Div(
+                            children=[],
+                            id={'type': 'graph_display', 'index': tile},
+                            className='fill-container')]),
+                html.Div(
+                    html.Div(
+                        tile_keys['Customize Content'] if tile_keys
+                        else get_customize_content(tile=tile, graph_type=None, graph_menu=None, df_name=df_name),
+                        style=CUSTOMIZE_CONTENT_HIDE,
+                        id={'type': 'tile-customize-content', 'index': tile},
+                        className='customize-content'),
+                    id={'type': 'tile-customize-content-wrapper', 'index': tile},
+                    className='customize-content'),
+                html.Div([
+                    html.P(get_label('LBL_Load_A_Saved_Graph'),
+                           style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
+                    html.Div(
+                        id={'type': 'select-layout-dropdown-div', 'index': tile},
+                        children=[
+                            dcc.Dropdown(id={'type': 'select-layout-dropdown', 'index': tile},
+                                         options=[{'label': session['saved_layouts'][key]['Title'], 'value': key} for
+                                                  key in
+                                                  session['saved_layouts']],
+                                         style={'width': '400px', 'font-size': '13px'},
+                                         clearable=False,
+                                         value='',
+                                         placeholder='{}...'.format(get_label('LBL_Select')))
+                        ], style={'width': '400px'}),
+                    html.P(get_label('LBL_Load_Graph_Prompt'),
+                           id={'type': 'tile-layouts-warning', 'index': tile},
+                           style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
+                ], style=LAYOUT_CONTENT_HIDE,
+                    id={'type': 'tile-layouts-content', 'index': tile},
+                    className='customize-content')
+            ], style={'flex-direction': 'column'},
+                id={'type': 'tile-body', 'index': tile},
+                className='flex-container fill-container')
+        ], className='tile-container',
+            id={'type': 'tile', 'index': tile}),
+        className='fill-container',
+        style={'border': '1px solid {}'.format(CLR['lightgray'])},
+        id=str({'type': 'tile-wrapper', 'index': tile}))  # added to remove errors on responsive grid layout
 
 
 # arrange tiles on the page for 1-4 tiles
@@ -868,150 +870,30 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, parent_df=None):
     :raise IndexError: If num_tiles < 0 or num_tiles > 4
     :return: Layout of specified number of tiles.
     """
-    tile = [None, None, None, None]
+    tile = []
     # for each case, prioritize reusing existing input_tiles, otherwise create default tiles where needed
     if num_tiles == 0:
         children = []
     elif 5 > num_tiles:
-        if input_tiles:
-            for i in range(len(input_tiles)):
-                tile[i] = html.Div(
-                    children=input_tiles[i],
-                    className='tile-container',
-                    id={'type': 'tile', 'index': i},
-                    style={'z-index': '{}'.replace("{}", str(i))})
-            for i in range(len(input_tiles), num_tiles):
-                tile[i] = get_tile(i, df_name=parent_df)
-        elif tile_keys:
+        # if input_tiles:
+        #     for i in range(len(input_tiles)):
+        #         tile.append(html.Div(
+        #             html.Div(
+        #                 children=input_tiles[i],
+        #                 className='tile-container',
+        #                 id={'type': 'tile', 'index': i}),
+        #             style={'border': '1px solid {}'.format(CLR['lightgray'])},
+        #             id=str({'type': 'tile-wrapper', 'index': i})))  # added to remove error on responsive grid layout
+        #     for i in range(len(input_tiles), num_tiles):
+        #         tile.append(get_tile(i, df_name=parent_df))
+        if tile_keys:
             for i in range(num_tiles):
-                tile[i] = get_tile(i, tile_keys[i], df_name=parent_df)
+                tile.append(get_tile(i, tile_keys[i], df_name=parent_df))
         else:
             for i in range(num_tiles):
-                tile[i] = get_tile(i, df_name=parent_df)
+                tile.append(get_tile(i, df_name=parent_df))
         children = tile
 
-    # if num_tiles == 0:
-    #     children = []
-    # elif num_tiles == 1:
-    #     if input_tiles:
-    #         tile[0] = [
-    #             html.Div(
-    #                 children=input_tiles[0],
-    #                 className='tile-container',
-    #                 id={'type': 'tile', 'index': 0}, style={'z-index': '0'})]
-    #     elif tile_keys:
-    #         tile[0] = get_tile(0, tile_keys[0], df_name=parent_df)
-    #     else:
-    #         tile[0] = get_tile(0, df_name=parent_df)
-    #     children = [
-    #         html.Div([
-    #             html.Div(
-    #                 children=tile[0],
-    #                 style={'grid-row': '1', 'grid-column': '1', '-ms-grid-row': '1', '-ms-grid-column': '1'})],
-    #             className='grid-container fill-container',
-    #             style={'grid-template-rows': '100%', 'grid-template-columns': '100%',
-    #                    '-ms-grid-rows': '100%', '-ms-grid-columns': '100%'})]
-    # elif num_tiles == 2:
-    #     if input_tiles:
-    #         for i in range(len(input_tiles)):
-    #             tile[i] = [
-    #                 html.Div(
-    #                     children=input_tiles[i],
-    #                     className='tile-container',
-    #                     id={'type': 'tile', 'index': i},
-    #                     style={'z-index': '{}'.replace("{}", str(i))})]
-    #         for i in range(len(input_tiles), num_tiles):
-    #             tile[i] = get_tile(i, df_name=parent_df)
-    #     elif tile_keys:
-    #         for i in range(num_tiles):
-    #             tile[i] = get_tile(i, tile_keys[i], df_name=parent_df)
-    #     else:
-    #         for i in range(num_tiles):
-    #             tile[i] = get_tile(i, df_name=parent_df)
-    #     children = [
-    #         html.Div([
-    #             html.Div(
-    #                 children=tile[0],
-    #                 style={'grid-row': '1', 'grid-column': '1', '-ms-grid-row': '1', '-ms-grid-column': '1'}),
-    #             html.Div(
-    #                 children=tile[1],
-    #                 style={'border-left': '1px solid {}'.format(CLR['lightergray']),
-    #                        'grid-row': '1', 'grid-column': '2', '-ms-grid-row': '1', '-ms-grid-column': '2'})
-    #         ], className='grid-container fill-container',
-    #             style={'grid-template-rows': '100%', 'grid-template-columns': '50% 50%',
-    #                    '-ms-grid-rows': '100%', '-ms-grid-columns': '50% 50%'})]
-    # elif num_tiles == 3:
-    #     if input_tiles:
-    #         for i in range(len(input_tiles)):
-    #             tile[i] = [
-    #                 html.Div(
-    #                     children=input_tiles[i],
-    #                     className='tile-container',
-    #                     id={'type': 'tile', 'index': i},
-    #                     style={'z-index': '{}'.replace("{}", str(i))})]
-    #         for i in range(len(input_tiles), num_tiles):
-    #             tile[i] = get_tile(i, df_name=parent_df)
-    #     elif tile_keys:
-    #         for i in range(num_tiles):
-    #             tile[i] = get_tile(i, tile_keys[i], df_name=parent_df)
-    #     else:
-    #         for i in range(num_tiles):
-    #             tile[i] = get_tile(i, df_name=parent_df)
-    #     children = [
-    #         html.Div([
-    #             html.Div(
-    #                 children=tile[0],
-    #                 style={'grid-row': '1', 'grid-column': '1', '-ms-grid-row': '1', '-ms-grid-column': '1'}),
-    #             html.Div(
-    #                 children=tile[1],
-    #                 style={'border-left': '1px solid {}'.format(CLR['lightergray']),
-    #                        'grid-row': '1', 'grid-column': '2', '-ms-grid-row': '1', '-ms-grid-column': '2'}),
-    #             html.Div(
-    #                 children=tile[2],
-    #                 style={'border-top': '1px solid {}'.format(CLR['lightergray']), 'grid-row': '2',
-    #                        'grid-column-start': '1', 'grid-column-end': '-1', '-ms-grid-row': '2',
-    #                        '-ms-grid-column': '1', '-ms-grid-column-span': '2'})
-    #         ], className='grid-container fill-container',
-    #             style={'grid-template-rows': '50% 50%', 'grid-template-columns': '50% 50%',
-    #                    '-ms-grid-rows': '50% 50%', '-ms-grid-columns': '50% 50%'})]
-    # elif num_tiles == 4:
-    #     if input_tiles:
-    #         for i in range(len(input_tiles)):
-    #             tile[i] = [
-    #                 html.Div(
-    #                     children=input_tiles[i],
-    #                     className='tile-container',
-    #                     id={'type': 'tile', 'index': i},
-    #                     style={'z-index': '{}'.replace("{}", str(i))})]
-    #         for i in range(len(input_tiles), num_tiles):
-    #             tile[i] = get_tile(i, df_name=parent_df)
-    #     elif tile_keys:
-    #         for i in range(num_tiles):
-    #             tile[i] = get_tile(i, tile_keys[i], df_name=parent_df)
-    #     else:
-    #         for i in range(num_tiles):
-    #             tile[i] = get_tile(i, df_name=parent_df)
-    #     children = [
-    #         html.Div([
-    #             html.Div(
-    #                 children=tile[0],
-    #                 style={'grid-row': '1', 'grid-column': '1', '-ms-grid-row': '1', '-ms-grid-column': '1'}),
-    #             html.Div(
-    #                 children=tile[1],
-    #                 style={'border-left': '1px solid {}'.format(CLR['lightergray']),
-    #                        'grid-row': '1', 'grid-column': '2', '-ms-grid-row': '1', '-ms-grid-column': '2'}),
-    #             html.Div(
-    #                 children=tile[2],
-    #                 style={'border-top': '1px solid {}'.format(CLR['lightergray']),
-    #                        'grid-row': '2', 'grid-column': '1', '-ms-grid-row': '2', '-ms-grid-column': '1'}),
-    #             html.Div(
-    #                 children=tile[3],
-    #                 style={'border-top': '1px solid {}'.format(CLR['lightergray']),
-    #                        'border-left': '1px solid {}'.format(CLR['lightergray']),
-    #                        'grid-row': '2', 'grid-column': '2', '-ms-grid-row': '2', '-ms-grid-column': '2'})
-    #         ], className='grid-container fill-container',
-    #             style={'grid-template-rows': '50% 50%', 'grid-template-columns': '50% 50%',
-    #                    '-ms-grid-rows': '50% 50%', '-ms-grid-columns': '50% 50%'})]
     else:
         raise IndexError("The number of displayed tiles cannot exceed 4, " + str(num_tiles) + " tiles were requested")
     return children

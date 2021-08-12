@@ -49,6 +49,20 @@ CLR = {'text1': 'black',
        'sidebar-final': '#fffafa',
        'sidebar-initial': '#9B6072'}
 
+LAYOUTS = [{'lg': [{'i': "{'type': 'tile-wrapper', 'index': 0}", 'x': 0, 'y': 0, 'w': 24, 'h': 18}]},
+           {'lg': [
+            {'i': "{'type': 'tile-wrapper', 'index': 0}", 'x': 0, 'y': 0, 'w': 12, 'h': 18},
+            {'i': "{'type': 'tile-wrapper', 'index': 1}", 'x': 12, 'y': 0, 'w': 12, 'h': 18}]},
+           {'lg': [
+            {'i': "{'type': 'tile-wrapper', 'index': 0}", 'x': 0, 'y': 0, 'w': 12, 'h': 9},
+            {'i': "{'type': 'tile-wrapper', 'index': 1}", 'x': 12, 'y': 0, 'w': 12, 'h': 9},
+            {'i': "{'type': 'tile-wrapper', 'index': 2}", 'x': 0, 'y': 9, 'w': 24, 'h': 9}]},
+           {'lg': [
+            {'i': "{'type': 'tile-wrapper', 'index': 0}", 'x': 0, 'y': 0, 'w': 12, 'h': 9},
+            {'i': "{'type': 'tile-wrapper', 'index': 1}", 'x': 12, 'y': 0, 'w': 12, 'h': 9},
+            {'i': "{'type': 'tile-wrapper', 'index': 2}", 'x': 0, 'y': 9, 'w': 12, 'h': 9},
+            {'i': "{'type': 'tile-wrapper', 'index': 3}", 'x': 12, 'y': 9, 'w': 12, 'h': 9}]}]
+
 # ******************************************STYLE RETURNS FOR CALLBACKS***********************************************
 
 VIEW_CONTENT_SHOW = {'min-height': '0', 'overflow': 'hidden'}

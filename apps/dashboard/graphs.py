@@ -296,13 +296,13 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
 
     # set title
     if xaxis_title != 'Date of Event' and xaxis_title is not None:
-        xaxis = {'title': xaxis_title}
+        xaxis = xaxis_title
     else:
-        xaxis = {'title': 'Date of Event', 'type': 'date'}
+        xaxis = 'Date of Event'
     if yaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and yaxis_title is not None:
-        yaxis = {'title': yaxis_title}
+        yaxis = yaxis_title
     else:
-        yaxis = {'title': arg_value[1]}
+        yaxis = arg_value[1]
 
     # set legend position
     if xlegend and ylegend:
@@ -312,8 +312,8 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
         ))
 
     fig.update_layout(
-        yaxis=yaxis,
-        xaxis=xaxis,
+        yaxis_title=yaxis,
+        xaxis_title=xaxis,
         showlegend=False if arg_value[8] else True,
         overwrite=True,
         plot_bgcolor='rgba(0, 0, 0, 0)',
@@ -506,7 +506,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
     else:
         xaxis = '{} ({})'.format(arg_value[0], arg_value[1])
 
-    if arg_value[0] == 'Time' and (yaxis_title in df_const[df_name]['VARIABLE_OPTIONS'] or yaxis_title is None):
+    if arg_value[0] == 'Time' and (yaxis_title in df_const[df_name]['Variable_Options_Lists'] or yaxis_title is None):
         yaxis = '{} '.format(arg_value[2])
     elif yaxis_title:
         yaxis = yaxis_title
@@ -562,7 +562,6 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
     # arg_value[6] = legend toggle
     # ---------------------------------------Variable Declarations------------------------------------------------------
     language = session["language"]
-    xaxis = {'type': 'category'}
     filtered_df = None
     # ------------------------------------------------------------------------------------------------------------------
     # Check whether we have enough information to attempt getting data for a graph
@@ -659,8 +658,8 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             x = 'Date of Event' if group_by_item and not arg_value[4] else 'Variable Name'
             legend_title_text = get_label('LBL_Variable_Name', df_name) if group_by_item else get_label(
                 'LBL_Partial_Period', df_name)
-            if group_by_item and not arg_value[4]:
-                xaxis = {'type': 'date'}
+            # if group_by_item and not arg_value[4]:
+            #     xaxis = {'type': 'date'}
 
         # if df is not empty, create graph
         if not filtered_df.empty:
@@ -724,12 +723,14 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
 
     # set title
     if xaxis_title:
-        xaxis = {'title': xaxis_title}
+        xaxis = xaxis_title
+    else:
+        xaxis = None
 
     if yaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and yaxis_title is not None:
-        yaxis = {'title': yaxis_title}
+        yaxis = yaxis_title
     else:
-        yaxis = {'title': arg_value[1]}
+        yaxis = arg_value[1]
 
     # set legend position
     if xlegend and ylegend:
@@ -740,8 +741,8 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
 
     fig.update_layout(
         # x and y axis location change depending on graph arg_value[4] orientation
-        xaxis=xaxis if arg_value[3] == 'Vertical' else yaxis,
-        yaxis=yaxis if arg_value[3] == 'Vertical' else xaxis,
+        xaxis_title=xaxis if arg_value[3] == 'Vertical' else yaxis,
+        yaxis_title=yaxis if arg_value[3] == 'Vertical' else xaxis,
         showlegend=False if arg_value[6] else True,
         overwrite=True,
         plot_bgcolor='rgba(0, 0, 0, 0)',
@@ -787,7 +788,6 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
     # arg_value[5] = legend toggle
     # ---------------------------------------Variable Declarations------------------------------------------------------
     language = session["language"]
-    yaxis = {'type': 'category'}
     # ------------------------------------------------------------------------------------------------------------------
 
     # Check on whether we have enough information to attempt to get data for a graph
@@ -854,7 +854,6 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             else:
                 x = 'Measure Value'
                 y = None
-                yaxis = None
                 filtered_df.sort_values(by=['Variable Name', 'Measure Value'])
 
             # filter the dataframe down to the partial period selected
@@ -887,11 +886,13 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
 
     # set title
     if xaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title is not None:
-        xaxis = {'title': xaxis_title}
+        xaxis = xaxis_title
     else:
-        xaxis = {'title': arg_value[0]}
+        xaxis = arg_value[0]
     if yaxis_title:
-        yaxis = {'title': yaxis_title}
+        yaxis = yaxis_title
+    else:
+        yaxis = None
 
     # set legend position
     if xlegend and ylegend:
@@ -902,8 +903,8 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
 
     fig.update_layout(
         # x and y axis location change depending on graph arg_value[2]: orientation
-        xaxis=xaxis if arg_value[2] == 'Horizontal' else yaxis,
-        yaxis=yaxis if arg_value[2] == 'Horizontal' else xaxis,
+        xaxis_title=xaxis if arg_value[2] == 'Horizontal' else yaxis,
+        yaxis_title=yaxis if arg_value[2] == 'Horizontal' else xaxis,
         legend_title_text=get_label('LBL_Variable_Names'),
         showlegend=False if arg_value[5] else True,
         boxgap=0.1,

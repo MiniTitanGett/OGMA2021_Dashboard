@@ -124,6 +124,7 @@ for x in range(4):
         tile = dash.callback_context.inputs_list[0]['id']['index']
         df_tile = None
         # --------------------------------------------------------------------------------------------------------------
+        # check if keyword in df_name
         if df_name is not None:
             df_tile = df_name
             if 'OPG001' in df_name:
@@ -803,7 +804,7 @@ for x in range(4):
 for x in range(4):
     app.clientside_callback(
         """
-        function _update_data_fitting_options(xaxis, graph_type){
+        function _hide_animated_bubble_options(xaxis, graph_type){
             if (xaxis == 'Time' && graph_type == 'Bubble'){
                 var hide_xaxis_measure = {'display': 'none'};
                 var hide_yaxis_measure = {'display': 'none'};

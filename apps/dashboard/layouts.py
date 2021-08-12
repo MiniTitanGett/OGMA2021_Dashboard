@@ -686,6 +686,7 @@ def get_layout_dashboard():
 
 # create customize content
 def get_customize_content(tile, graph_type, graph_menu, df_name):
+    # check if keyword is in df_name
     if df_name is not None:
         if 'OPG010' in df_name:
             graphs = GRAPH_OPTIONS['OPG010']

@@ -865,7 +865,7 @@ def get_tile(tile, tile_keys=None, df_name=None):
             id={'type': 'tile', 'index': tile}),
         className='fill-container',
         style={'border': '1px solid {}'.format(CLR['lightgray'])},
-        id=str({"type": "tile-wrapper", "index": tile}))  # added to remove errors on responsive grid layout
+        id="tile-wrapper: " + str(tile))  # added to remove errors on responsive grid layout
 
 
 # arrange tiles on the page for 1-4 tiles

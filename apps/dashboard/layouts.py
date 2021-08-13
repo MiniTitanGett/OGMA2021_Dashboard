@@ -861,11 +861,10 @@ def get_tile(tile, tile_keys=None, df_name=None):
 
 
 # arrange tiles on the page for 1-4 tiles
-def get_tile_layout(num_tiles, input_tiles, tile_keys=None, parent_df=None):
+def get_tile_layout(num_tiles, tile_keys=None, parent_df=None):
     """
     :param num_tiles: Desired number of tiles to display.
-    :param input_tiles: List of children of existing tiles.
-    :param tile_keys:
+    :param tile_keys: key info for building a tile
     :param parent_df: Name of the parent data set being used
     :raise IndexError: If num_tiles < 0 or num_tiles > 4
     :return: Layout of specified number of tiles.
@@ -875,17 +874,6 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, parent_df=None):
     if num_tiles == 0:
         children = []
     elif 5 > num_tiles:
-        # if input_tiles:
-        #     for i in range(len(input_tiles)):
-        #         tile.append(html.Div(
-        #             html.Div(
-        #                 children=input_tiles[i],
-        #                 className='tile-container',
-        #                 id={'type': 'tile', 'index': i}),
-        #             style={'border': '1px solid {}'.format(CLR['lightgray'])},
-        #             id=str({'type': 'tile-wrapper', 'index': i})))  # added to remove error on responsive grid layout
-        #     for i in range(len(input_tiles), num_tiles):
-        #         tile.append(get_tile(i, df_name=parent_df))
         if tile_keys:
             for i in range(num_tiles):
                 tile.append(get_tile(i, tile_keys[i], df_name=parent_df))
@@ -969,7 +957,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                                'top': '-15px',
                                'margin-right': '5px'})
                 ], style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}
-                if len(X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
+                   if len(X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
                 html.Div([
                     html.P(
                         "{}".format(X_AXIS_OPTIONS[0]),

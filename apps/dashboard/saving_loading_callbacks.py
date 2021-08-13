@@ -758,7 +758,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                     tile_title = "This Graph has been deleted"
                     tile_data = {
                         "Args List": ["", "", ""],
-                        "Axes Title": ["",""],
+                        "Axes Title": ["", ""],
                         "Data Set": "OPG001",  # "Data Set": "OPG001_2016-17_Week_v3.csv",
                         "Fiscal Toggle": "Gregorian",
                         "Graph All Toggle": [],
@@ -771,7 +771,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                         "Timeframe": "all-time",
                         "Title": "This Graph has been deleted"}
 
-                # pop graph_type/args_list/axes_title to compare the dashboard parent data menu to the saved tile data menu
+                # pop graph_type/args_list/axes_title to compare the dashboard parent data menu to the saved tile menu
                 graph_type = tile_data.pop('Graph Type')
                 args_list = tile_data.pop('Args List')
                 axes_title = tile_data.pop('Axes Title')

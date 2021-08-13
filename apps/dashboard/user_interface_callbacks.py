@@ -79,7 +79,9 @@ app.clientside_callback(
     [Input('button-new', 'n_clicks'),
      Input('tile-closed-input-trigger', 'data'),
      Input('dashboard-reset-confirmation', 'data-')],
-    [State({'type': 'tile', 'index': ALL}, 'children'),
+    [State({'type': 'tile-title', 'index': ALL}, 'value'),
+     State({'type': 'tile-link', 'index': ALL}, 'className'),
+     State({'type': 'tile-customize-content', 'index': ALL}, 'children'),
      State('num-tiles', 'data-num-tiles'),
      State('button-new', 'disabled'),
      State('df-constants-storage', 'data'),
@@ -87,12 +89,11 @@ app.clientside_callback(
      State({'type': 'data-set-parent', 'index': 4}, 'value')],
     prevent_initial_call=True
 )
-def _new_and_delete(_new_clicks, close_id, _dashboard_reset, input_tiles, num_tiles, new_disabled, df_const,
-                    parent_df, confirm_parent):
+def _new_and_delete(_new_clicks, close_id, _dashboard_reset, tile_titles, tile_links, tile_customize_menus, num_tiles,
+                    new_disabled, df_const, parent_df, confirm_parent):
     """
     :param _new_clicks: Detects user clicking 'NEW' button in parent navigation bar and encodes the number of tiles to
     display
-    :param input_tiles: State of all currently existing tiles
     :return: Layout of tiles for the main body, a new NEW button whose n_clicks data encodes the number of tiles to
     display, and updates the tile-closed-trigger div with the index of the deleted tile
     """
@@ -100,6 +101,11 @@ def _new_and_delete(_new_clicks, close_id, _dashboard_reset, input_tiles, num_ti
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     changed_value = [p['value'] for p in dash.callback_context.triggered][0]
     deleted_tile = no_update
+    input_tiles = []
+    for i in range(len(tile_titles)):
+        input_tiles.append({'Tile Title': tile_titles[i],
+                            'Link': tile_links[i],
+                            'Customize Content': tile_customize_menus[i]})
     # ------------------------------------------------------------------------------------------------------------------
     # if NEW callback chain has not been completed and NEW button enabled, prevent update
     if new_disabled:
@@ -116,7 +122,7 @@ def _new_and_delete(_new_clicks, close_id, _dashboard_reset, input_tiles, num_ti
                 deleted_tile = str(i)
             elif flag:
                 input_tiles[i - 1] = change_index(input_tiles[i - 1], i - 1)
-        children = get_tile_layout(num_tiles, input_tiles, parent_df=parent_df)
+        children = get_tile_layout(num_tiles, tile_keys=input_tiles, parent_df=parent_df)
     # if NEW button pressed: adjust main layout and disable NEW button until it is unlocked at the end of callback chain
     elif 'button-new' in changed_id:
         if num_tiles == 4:
@@ -124,7 +130,9 @@ def _new_and_delete(_new_clicks, close_id, _dashboard_reset, input_tiles, num_ti
         if confirm_parent:
             parent_df = confirm_parent
         num_tiles += 1
-        children = get_tile_layout(num_tiles, input_tiles, parent_df=parent_df if df_const is not None else None)
+        input_tiles.append(None)
+        children = get_tile_layout(num_tiles, tile_keys=input_tiles,
+                                   parent_df=parent_df if df_const is not None else None)
     # if RESET dashboard requested, set dashboard to default appearance
     elif 'dashboard-reset' in changed_id:
         num_tiles = 1
@@ -627,9 +635,7 @@ app.clientside_callback(
      Input({'type': 'tile-link', 'index': MATCH}, 'className'),
      Input({'type': 'graph_children_toggle', 'index': MATCH}, 'value'),
      Input({'type': 'hierarchy-toggle', 'index': MATCH}, 'value')],
-    [State({'type': 'div-graph-options', 'index': MATCH}, 'children'),
-     State('button-new', 'disabled'),
-     State({'type': 'tile-customize-content', 'index': MATCH}, 'data-loaded'),
+    [State({'type': 'tile-customize-content', 'index': MATCH}, 'data-loaded'),
      State({'type': 'data-set', 'index': MATCH}, 'value'),
      State({'type': 'data-set', 'index': 4}, 'value'),
      State('df-constants-storage', 'data'),
@@ -638,9 +644,8 @@ app.clientside_callback(
      State({'type': 'hierarchy-toggle', 'index': 4}, 'value')],
     prevent_initial_call=True
 )
-def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, hierarchy_toggle, graph_options_state,
-                       is_new_disabled, is_loaded, df_name, parent_df_name, df_const, df_confirm, parent_graph_all,
-                       parent_hierarchy_toggle):
+def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, hierarchy_toggle, is_loaded, df_name,
+                       parent_df_name, df_const, df_confirm, parent_graph_all, parent_hierarchy_toggle):
     """
     :param selected_graph_type: Selected graph type, ie. 'bar', 'line', etc.
     :return: Graph menu corresponding to selected graph type
@@ -649,10 +654,6 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
     # -------------------------------------------Variable Declarations--------------------------------------------------
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][-1]
     # ------------------------------------------------------------------------------------------------------------------
-
-    # prevents update if new/delete is called and the graph already has a menu
-    if graph_options_state and is_new_disabled:
-        raise PreventUpdate
 
     # prevents update if hierarchy toggle or graph all children is selected when the graph type is not line or
     # scatter

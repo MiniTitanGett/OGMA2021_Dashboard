@@ -20,7 +20,7 @@ from flask import session
 from apps.dashboard.graphs import __update_graph
 from apps.dashboard.hierarchy_filter import generate_history_button, generate_dropdown
 from apps.dashboard.app import app
-from apps.dashboard.data import data_filter, CLR, get_label, GRAPH_OPTIONS
+from apps.dashboard.data import CLR, get_label, GRAPH_OPTIONS, data_manipulator
 from apps.dashboard.datepicker import get_date_box, update_date_columns, get_secondary_data
 
 # Contents:
@@ -369,7 +369,6 @@ app.clientside_callback(
 def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quarter_button_clicks,
                         _month_button_clicks, _week_button_clicks, start_year_selection, end_year_selection,
                         start_secondary_selection, end_secondary_selection, update_trigger, tab, df_name, df_const):
-
     # ----------------------------------------------Variable Declarations-----------------------------------------------
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     tile = dash.callback_context.inputs_list[0]['id']['index']
@@ -447,8 +446,8 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
         elif 'n_clicks' in changed_id:
             conditions = ['date-picker-quarter-button' in changed_id, 'date-picker-month-button' in changed_id]
             quarter_classname, quarter_disabled, month_classname, month_disabled, week_classname, week_disabled, \
-                fringe_min, fringe_max, default_max, max_year, \
-                new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
+            fringe_min, fringe_max, default_max, max_year, \
+            new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
             # set min_year according to user selected fiscal/gregorian time type
             if fiscal_toggle == 'Gregorian':
                 min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
@@ -504,8 +503,8 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                 selected_secondary_max = end_secondary_selection
                 conditions = [tab == 'Quarter', tab == 'Month']
                 quarter_classname, quarter_disabled, month_classname, month_disabled, week_classname, week_disabled, \
-                    fringe_min, fringe_max, default_max, max_year, \
-                    new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
+                fringe_min, fringe_max, default_max, max_year, \
+                new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
             # set min_year according to user selected time type (gregorian/fiscal)
             if fiscal_toggle == 'Gregorian':
                 min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
@@ -733,9 +732,17 @@ for x in range(4):
             return [], 0
         # else, filter normally
         else:
+            """
             dff = data_filter(list_of_names, secondary_type, end_secondary, end_year, start_secondary, start_year,
                               timeframe, fiscal_toggle, num_periods, period_type, hierarchy_toggle,
-                              hierarchy_level_dropdown, hierarchy_graph_children, df_name, df_const)
+                              hierarchy_level_dropdown, hierarchy_graph_children, df_name, df_const)"""
+
+            # TODO: finish implementation
+
+            dff = data_manipulator(list_of_names, hierarchy_toggle, hierarchy_level_dropdown,
+                                   hierarchy_graph_children, df_name, df_const, secondary_type, end_secondary,
+                                   end_year, start_secondary, start_year, timeframe, fiscal_toggle, num_periods,
+                                   period_type)
 
         # Reformat date column
         dff['Date of Event'] = dff['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
@@ -768,7 +775,7 @@ for x in range(4):
                 inplace=False)
 
         return dff.iloc[page_current * page_size: (page_current + 1) * page_size].to_dict('records'), \
-            math.ceil(dff.iloc[:, 0].size / page_size)
+               math.ceil(dff.iloc[:, 0].size / page_size)
 
 # *************************************************DATA-FITTING******************************************************
 # update the data fitting section of the edit graph menu

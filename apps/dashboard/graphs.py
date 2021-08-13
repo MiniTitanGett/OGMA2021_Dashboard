@@ -22,7 +22,8 @@ import pandas as pd
 import plotly.graph_objects as go
 
 # Internal Modules
-from apps.dashboard.data import get_label, data_filter, customize_menu_filter, linear_regression, polynomial_regression
+from apps.dashboard.data import get_label,  customize_menu_filter, linear_regression, polynomial_regression,\
+    data_manipulator
 
 
 # ***********************************************HELPER FUNCTIONS****************************************************
@@ -124,7 +125,9 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
             or hierarchy_type == 'Specific Item' and None not in [arg_value, hierarchy_path, hierarchy_type,
                                                                   hierarchy_graph_children, df_name, df_const]:
         # Specialty filtering
-        filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[2], df_const)
+        if df_name != "OPG011":
+            filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[2], df_const)
+
         hierarchy_col = get_hierarchy_col(hierarchy_type, hierarchy_level_dropdown, hierarchy_graph_children,
                                           hierarchy_path, df_name, df_const)
         # Create title
@@ -513,7 +516,9 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             or hierarchy_type == 'Specific Item' and None not in [arg_value, hierarchy_path, hierarchy_type,
                                                                   hierarchy_graph_children, df_name, df_const]:
         # Specialty filtering
-        filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[2], df_const)
+        if df_name != "OPG011":
+            filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[2], df_const)
+
         hierarchy_col = get_hierarchy_col(hierarchy_type, hierarchy_level_dropdown, hierarchy_graph_children,
                                           hierarchy_path, df_name, df_const)
 
@@ -723,7 +728,8 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             or hierarchy_type == 'Specific Item' and None not in [arg_value, hierarchy_path, hierarchy_type,
                                                                   hierarchy_graph_children, df_name, df_const]:
         # Specialty filtering
-        filtered_df = customize_menu_filter(dff, df_name, arg_value[0], arg_value[1], df_const)
+        if df_name != "OPG011":
+            filtered_df = customize_menu_filter(dff, df_name, arg_value[0], arg_value[1], df_const)
 
         # if hierarchy type is "Level Filter", or "Specific Item" while "Graph all in Dropdown" is selected
         if hierarchy_type == 'Level Filter' or (hierarchy_type == 'Specific Item' and
@@ -1076,6 +1082,7 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
                    hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options,
                    state_of_display, secondary_type, timeframe,
                    fiscal_toggle, start_year, end_year, start_secondary, end_secondary, df_const, xtitle, ytitle):
+
     # Creates a hierarchy trail from the display
     if type(state_of_display) == dict:
         state_of_display = [state_of_display]
@@ -1100,10 +1107,10 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
         filtered_df = pd.DataFrame(columns=df_const[df_name]['COLUMN_NAMES'])
     # else, filter normally
     else:
-        filtered_df = data_filter(list_of_names, secondary_type, end_secondary, end_year,
-                                  start_secondary, start_year, timeframe, fiscal_toggle, num_periods, period_type,
-                                  hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children,
-                                  df_name, df_const)
+        filtered_df = data_manipulator(list_of_names, hierarchy_toggle, hierarchy_level_dropdown,
+                                       hierarchy_graph_children, df_name, df_const, secondary_type, end_secondary,
+                                       end_year, start_secondary, start_year, timeframe, fiscal_toggle, num_periods,
+                                       period_type, graph_options, graph_type)
 
     # line and scatter graph creation
     if graph_type == 'Line' or graph_type == 'Scatter':

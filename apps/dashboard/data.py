@@ -6,7 +6,7 @@ contains arbitrary constants, data constants, and data manipulation functions
 """
 ######################################################################################################################
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 import numpy as np
 # External Packages
@@ -179,7 +179,7 @@ def dataset_to_df(df_name):
                 if parent not in list_of_depths[depth - 1]:
                     list_of_depths[depth - 1].append(parent)
                 # insert parent into table
-                df.loc[df["H{}".format(depth)] == node, "H{}".format(depth-1)] = parent
+                df.loc[df["H{}".format(depth)] == node, "H{}".format(depth - 1)] = parent
 
     df = create_categories(df, ['H0', 'H1', 'H2', 'H3', 'H4', 'H5'])
 
@@ -410,26 +410,64 @@ def generate_constants(df_name):
     return storage
 
 
+# ****************************************************DATE FUNCTIONS**************************************************
+
+# given a date returns the last day of the month
+def get_last_day_of_month(day):
+    next_month = day.replace(day=28) + timedelta(days=4)
+    return next_month - timedelta(days=next_month.day)
+
+
+# given a date determines the week number
+def week_number_of_month(date_value):
+    return date_value.isocalendar()[1] - date_value.replace(day=1).isocalendar()[1] + 1
+
+
+# given a date returns the start of a quarter
+def get_quarter_start(day):
+    return date(day.year, (day.month - 1) // 3 * 3 + 1, 1)
+
+
+# given a date returns the end of a quarter
+def get_last_day_of_quarter(day):
+    quarter_start = get_quarter_start(day)
+    return quarter_start + relativedelta(months=3, days=-1)
+
+
+# returns the last day of a given year
+def get_last_day_of_year(year):
+    return date(int(year), 12, 31)
+
+
 # **********************************************DATA MANIPULATION FUNCTIONS*******************************************
 
 
-def data_filter(hierarchy_path, secondary_type, end_secondary, end_year, start_secondary, start_year,
-                timeframe, fiscal_toggle, num_periods, period_type, hierarchy_toggle, hierarchy_level_dropdown,
-                hierarchy_graph_children, df_name, df_const):
-    # NOTE: This assumes hierarchy path is a list of all previously selected levels
+def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children, df_name,
+                     df_const, secondary_type, end_secondary, end_year, start_secondary, start_year, timeframe,
+                     fiscal_toggle, num_periods, period_type, arg_values=None, graph_type=None):
+    filtered_df = data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
+                                        hierarchy_graph_children, df_name, df_const)
 
-    """print("hierarchy_path: " + str(hierarchy_path))
-    print("hierarchy_graph_children: " + str(hierarchy_graph_children))
-    print("hierarchy_toggle: " + str(hierarchy_toggle))
-    print("hierarchy_level_dropdown: " + str(hierarchy_level_dropdown))
-    print("num_periods: " + str(num_periods))
-    print("period_type: " + str(period_type))
-    print("secondary_type: " + str(secondary_type))
-    print("start_secondary: " + str(start_secondary))
-    print("end_secondary: " + str(end_secondary))
-    print("start_year: " + str(start_year))
-    print("end_year: " + str(end_year))
-    print("timeframe: " + str(timeframe))"""
+    if df_name != 'OPG011':
+        time_df = data_time_filter(secondary_type, end_secondary, end_year, start_secondary, start_year, timeframe,
+                                   fiscal_toggle, num_periods, period_type, df_name, df_const, filtered_df)
+    else:
+        if graph_type == "Line" or graph_type == "Scatter" or graph_type == "Bar" or graph_type == "Box":
+            time_df = data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondary, end_year,
+                                                      start_secondary, start_year, timeframe, fiscal_toggle,
+                                                      num_periods, period_type, df_name, df_const, arg_values,
+                                                      graph_type, filtered_df)
+        else:
+            time_df = data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year, start_secondary,
+                                           start_year, timeframe, fiscal_toggle, num_periods, period_type, df_name,
+                                           df_const, filtered_df)
+
+    return time_df
+
+
+def data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children, df_name,
+                          df_const):
+    # NOTE: This assumes hierarchy path is a list of all previously selected levels
 
     if hierarchy_toggle == 'Level Filter' or (
             (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == ['graph_children'])):
@@ -468,6 +506,11 @@ def data_filter(hierarchy_path, secondary_type, end_secondary, end_year, start_s
                 len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]])
             filtered_df = filtered_df[bool_series]
 
+    return filtered_df
+
+
+def data_time_filter(secondary_type, end_secondary, end_year, start_secondary, start_year, timeframe, fiscal_toggle,
+                     num_periods, period_type, df_name, df_const, filtered_df):
     # account for date type (Gregorian vs Fiscal)
     if fiscal_toggle == 'Fiscal':
         year_prefix = 'Fiscal '
@@ -566,6 +609,476 @@ def data_filter(hierarchy_path, secondary_type, end_secondary, end_year, start_s
 
         # Filters out month and quarter values (whole year)
         time_df = time_df[time_df['Calendar Entry Type'] == '{}Year'.replace("{}", year_prefix)]
+
+    return time_df
+
+
+def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year, start_secondary, start_year,
+                         timeframe, fiscal_toggle, num_periods, period_type, df_name, df_const, filtered_df):
+    # account for date type (Gregorian vs Fiscal)
+    if fiscal_toggle == 'Fiscal':
+        year_prefix = 'Fiscal '
+    else:  # year_type is 'gregorian-dates'
+        year_prefix = ''
+
+    # account for special timeframe case 'all-time'
+    if timeframe == 'all-time':
+        secondary_type = 'Month'
+        if fiscal_toggle == 'Fiscal':
+            start_year = df_const[df_name]['FISCAL_MIN_YEAR']
+            end_year = df_const[df_name]['FISCAL_MONTH_MAX_YEAR']
+            start_secondary = df_const[df_name]['FISCAL_MONTH_FRINGE_MIN']
+            end_secondary = df_const[df_name]['FISCAL_MONTH_FRINGE_MAX'] + 1
+        else:  # year_type == 'Gregorian'
+            start_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
+            end_year = df_const[df_name]['GREGORIAN_MONTH_MAX_YEAR']
+            start_secondary = df_const[df_name]['GREGORIAN_MONTH_FRINGE_MIN']
+            end_secondary = df_const[df_name]['GREGORIAN_MONTH_FRINGE_MAX'] + 1
+
+    # account for special timeframe case 'to-current'
+    if timeframe == 'to-current':
+        num_periods = int(num_periods)
+        end_date = datetime.today()
+        if period_type == 'last-years':
+            if num_periods > int(end_date.year) - start_year:
+                num_periods = int(end_date.year) - start_year
+            start_date = end_date - relativedelta(years=num_periods)
+            current_filter = '{}Year'.replace("{}", year_prefix)
+        elif period_type == 'last-quarters':
+            if num_periods > (int(end_date.year) - start_year) * 4:
+                num_periods = (int(end_date.year) - start_year) * 4
+            start_date = end_date - relativedelta(months=3 * num_periods)
+            current_filter = 'Quarter'
+        elif period_type == 'last-months':
+            if num_periods > (int(end_date.year) - start_year) * 12:
+                num_periods = (int(end_date.year) - start_year) * 12
+            start_date = end_date - relativedelta(months=num_periods)
+            current_filter = 'Month'
+        else:  # period_type == 'last-weeks'
+            if num_periods > (int(end_date.year) - start_year) * 53:
+                num_periods = (int(end_date.year) - start_year) * 53
+            start_date = end_date - timedelta(weeks=num_periods)
+            current_filter = 'Week'
+
+        # Builds the data for the respective filter, either year, month or quarter
+        if df_name == "OPG011" and current_filter != 'Week':
+            if current_filter == 'Year':
+                division_column = '{}Year of Event'.format(year_prefix)
+            elif current_filter == 'Quarter':
+                division_column = '{}Quarter'.format(year_prefix)
+            else:
+                division_column = '{}Month of Event'.format(year_prefix)
+
+            measure_types = filtered_df['Measure Type'].unique().tolist()
+            variable_names = filtered_df['Variable Name'].unique().tolist()
+            row_list = []
+
+            # Builds data based on all measure types, variable names, and selected time frame
+            for x in range(len(measure_types)):
+                measure_type = measure_types[x]
+                reduced_df = filtered_df[filtered_df['Measure Type'] == measure_type]
+                for y in range(len(variable_names)):
+                    variable_name = variable_names[y]
+                    further_reduced_df = reduced_df[reduced_df['Variable Name'] == variable_name]
+                    for z in range(end_date.year - start_date.year + 1):
+                        year = start_date.year + z
+                        yearly_data = further_reduced_df[further_reduced_df['Year of Event'] == year]
+                        unique_secondary = yearly_data[division_column].dropna().unique().tolist()
+                        for w in range(len(unique_secondary)):
+                            secondary = unique_secondary[w]
+                            unique_data = yearly_data[yearly_data[division_column] == secondary]
+                            measure_value = unique_data['Measure Value'].sum()
+                            if current_filter == "Year":
+                                date_of_event = get_last_day_of_year(year)
+                                year_of_event = year
+                                quarter = ""
+                                month_of_event = ""
+                                week_of_event = ""
+                            elif current_filter == "Quarter":
+                                date_of_event = get_last_day_of_quarter(
+                                    date(year, int(unique_data['{}Month of Event'.format(year_prefix)].iloc[0]), 1))
+                                year_of_event = year
+                                quarter = secondary
+                                month_of_event = ""
+                                week_of_event = ""
+                            # secondary_type == "Month"
+                            else:
+                                date_of_event = get_last_day_of_month(date(year, int(secondary), 1))
+                                year_of_event = year
+                                quarter = unique_data['Quarter'].iloc[0]
+                                month_of_event = secondary
+                                week_of_event = ""
+                            row_list.append(
+                                [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
+                                 hierarchy_path[0] if len(hierarchy_path) >= 1 else '',
+                                 hierarchy_path[1] if len(hierarchy_path) >= 2 else '',
+                                 hierarchy_path[2] if len(hierarchy_path) >= 3 else '',
+                                 hierarchy_path[3] if len(hierarchy_path) >= 4 else '',
+                                 hierarchy_path[4] if len(hierarchy_path) >= 5 else '',
+                                 hierarchy_path[5] if len(hierarchy_path) >= 6 else '',
+                                 variable_name, unique_data['Variable Name Qualifier'].iloc[0],
+                                 unique_data['Variable Name Sub Qualifier'].iloc[0],
+                                 date_of_event, current_filter, year_of_event, quarter, month_of_event, week_of_event,
+                                 '', '', '', '', '', '', measure_value, measure_type, ''])
+
+            time_df = pd.DataFrame(row_list,
+                                   columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
+                                            'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
+                                            'Date of Event', 'Calendar Entry Type', 'Year of Event', 'Quarter',
+                                            'Month of Event', 'Week of Event', 'Fiscal Year of Event', 'Fiscal Quarter',
+                                            'Fiscal Month of Event', 'Fiscal Week of Event', 'Julian Day',
+                                            'Activity Event Id', 'Measure Value', 'Measure Type', 'Partial Period'])
+        # Creates a copy of the filtered data frame that just contains the weekly data
+        else:  # elif df_name == "OPG011" and current_filter == 'Week':
+            time_df = filtered_df.copy()
+
+        # Filter all dates inside range (inclusive)
+        time_df = time_df[time_df['Date of Event'] >= start_date.date()]
+        time_df = time_df[time_df['Date of Event'] <= end_date.date()]
+
+    # If not in year tab, filter using secondary selections
+    elif not secondary_type == 'Year':
+        if secondary_type == 'Quarter':
+            division_column = '{}Quarter'.format(year_prefix)
+        else:
+            division_column = '{}Month of Event'.format(year_prefix)
+
+        measure_types = filtered_df['Measure Type'].unique().tolist()
+        variable_names = filtered_df['Variable Name'].unique().tolist()
+        row_list = []
+
+        for x in range(len(measure_types)):
+            measure_type = measure_types[x]
+            reduced_df = filtered_df[filtered_df['Measure Type'] == measure_type]
+            for y in range(len(variable_names)):
+                variable_name = variable_names[y]
+                further_reduced_df = reduced_df[reduced_df['Variable Name'] == variable_name]
+                for z in range(end_year - start_year + 1):
+                    year = start_year + z
+                    yearly_data = further_reduced_df[further_reduced_df['Year of Event'] == year]
+                    unique_secondary = yearly_data[division_column].dropna().unique().tolist()
+                    for w in range(len(unique_secondary)):
+                        secondary = unique_secondary[w]
+                        unique_data = yearly_data[yearly_data[division_column] == secondary]
+                        measure_value = unique_data['Measure Value'].sum()
+                        row_list.append(
+                            [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
+                             hierarchy_path[0] if len(hierarchy_path) >= 1 else '',
+                             hierarchy_path[1] if len(hierarchy_path) >= 2 else '',
+                             hierarchy_path[2] if len(hierarchy_path) >= 3 else '',
+                             hierarchy_path[3] if len(hierarchy_path) >= 4 else '',
+                             hierarchy_path[4] if len(hierarchy_path) >= 5 else '',
+                             hierarchy_path[5] if len(hierarchy_path) >= 6 else '',
+                             variable_name, unique_data['Variable Name Qualifier'].iloc[0],
+                             unique_data['Variable Name Sub Qualifier'].iloc[0],
+                             get_last_day_of_month(date(year, int(secondary), 1)) if secondary_type == "Month" else
+                             get_last_day_of_quarter(
+                                 date(year, int(unique_data['{}Month of Event'.format(year_prefix)].iloc[0]), 1)),
+                             secondary_type, year,
+                             secondary if secondary_type == "Quarter" else unique_data['Quarter'].iloc[0],
+                             secondary if secondary_type == "Month" else "",
+                             '', '', '', '', '', '', '', measure_value,
+                             measure_type, ''])
+
+        time_df = pd.DataFrame(row_list,
+                               columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
+                                        'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
+                                        'Date of Event', 'Calendar Entry Type', 'Year of Event', 'Quarter',
+                                        'Month of Event', 'Week of Event', 'Fiscal Year of Event', 'Fiscal Quarter',
+                                        'Fiscal Month of Event', 'Fiscal Week of Event', 'Julian Day',
+                                        'Activity Event Id', 'Measure Value', 'Measure Type', 'Partial Period'])
+
+        if start_year == end_year:  # Don't have to deal with in between years
+            # Filter out all rows outside specified range
+            time_df = time_df[time_df[division_column] >= start_secondary]
+            time_df = time_df[time_df[division_column] < end_secondary]
+        else:  # Handles in-between years
+            # Filter starting year above threshold
+            range_df = time_df[time_df['{}Year of Event'.format(year_prefix)] == start_year]
+            range_df = range_df[range_df[division_column] >= start_secondary]
+
+            for i in range(end_year - start_year - 1):
+                # Include entirety of in-between years
+                range_df = range_df.append(
+                    time_df[time_df['{}Year of Event'.format(year_prefix)] == (start_year + i + 1)])
+
+            # Filter end year below threshold
+            time_df = time_df[time_df['{}Year of Event'.format(year_prefix)] == end_year]
+            time_df = time_df[time_df[division_column] < end_secondary]
+            range_df = range_df.append(time_df)
+
+            # Update working df
+            time_df = range_df.copy()
+    else:
+        measure_types = filtered_df['Measure Type'].unique().tolist()
+        variable_names = filtered_df['Variable Name'].unique().tolist()
+        row_list = []
+
+        for x in range(len(measure_types)):
+            measure_type = measure_types[x]
+            reduced_df = filtered_df[filtered_df['Measure Type'] == measure_type]
+            for y in range(len(variable_names)):
+                variable_name = variable_names[y]
+                further_reduced_df = reduced_df[reduced_df['Variable Name'] == variable_name]
+                unique_secondary = further_reduced_df['Year of Event'].dropna().unique().tolist()
+                for z in range(len(unique_secondary)):
+                    secondary = unique_secondary[z]
+                    unique_data = further_reduced_df[further_reduced_df['Year of Event'] == secondary]
+                    measure_value = unique_data['Measure Value'].sum()
+                    date_of_event = get_last_day_of_year(secondary)
+                    row_list.append(
+                        [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
+                         hierarchy_path[0] if len(hierarchy_path) >= 1 else '',
+                         hierarchy_path[1] if len(hierarchy_path) >= 2 else '',
+                         hierarchy_path[2] if len(hierarchy_path) >= 3 else '',
+                         hierarchy_path[3] if len(hierarchy_path) >= 4 else '',
+                         hierarchy_path[4] if len(hierarchy_path) >= 5 else '',
+                         hierarchy_path[5] if len(hierarchy_path) >= 6 else '',
+                         variable_name, unique_data['Variable Name Qualifier'].iloc[0],
+                         unique_data['Variable Name Sub Qualifier'].iloc[0],
+                         date_of_event, "Year", secondary, "", "", "",
+                         '', '', '', '', '', '', measure_value, measure_type, ''])
+
+        time_df = pd.DataFrame(row_list,
+                               columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
+                                        'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
+                                        'Date of Event', 'Calendar Entry Type', 'Year of Event', 'Quarter',
+                                        'Month of Event', 'Week of Event', 'Fiscal Year of Event', 'Fiscal Quarter',
+                                        'Fiscal Month of Event', 'Fiscal Week of Event', 'Julian Day',
+                                        'Activity Event Id', 'Measure Value', 'Measure Type', 'Partial Period'])
+
+    return time_df
+
+
+def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondary, end_year, start_secondary,
+                                    start_year, timeframe, fiscal_toggle, num_periods, period_type, df_name, df_const,
+                                    arg_values, graph_type, df):
+    if graph_type == "Box":
+        measure_type = arg_values[0]
+        variable_names = arg_values[1]
+    else:
+        measure_type = arg_values[1]
+        variable_names = arg_values[2]
+
+    filtered_df = df[df['Measure Type'] == measure_type]
+
+    # ensure variable_names is a list of variable values
+    if type(variable_names) is not list:
+        variable_names = [variable_names]
+
+    row_list = []
+
+    # account for date type (Gregorian vs Fiscal)
+    if fiscal_toggle == 'Fiscal':
+        year_prefix = 'Fiscal '
+    else:  # year_type is 'gregorian-dates'
+        year_prefix = ''
+
+    # account for special timeframe case 'all-time'
+    if timeframe == 'all-time':
+        secondary_type = 'Month'
+        if fiscal_toggle == 'Fiscal':
+            start_year = df_const[df_name]['FISCAL_MIN_YEAR']
+            end_year = df_const[df_name]['FISCAL_MONTH_MAX_YEAR']
+            start_secondary = df_const[df_name]['FISCAL_MONTH_FRINGE_MIN']
+            end_secondary = df_const[df_name]['FISCAL_MONTH_FRINGE_MAX'] + 1
+        else:  # year_type == 'Gregorian'
+            start_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
+            end_year = df_const[df_name]['GREGORIAN_MONTH_MAX_YEAR']
+            start_secondary = df_const[df_name]['GREGORIAN_MONTH_FRINGE_MIN']
+            end_secondary = df_const[df_name]['GREGORIAN_MONTH_FRINGE_MAX'] + 1
+
+    # account for special timeframe case 'to-current'
+    if timeframe == 'to-current':
+        num_periods = int(num_periods)
+        end_date = datetime.today()
+        if period_type == 'last-years':
+            if num_periods > int(end_date.year) - start_year:
+                num_periods = int(end_date.year) - start_year
+            start_date = end_date - relativedelta(years=num_periods)
+            current_filter = '{}Year'.replace("{}", year_prefix)
+        elif period_type == 'last-quarters':
+            if num_periods > (int(end_date.year) - start_year) * 4:
+                num_periods = (int(end_date.year) - start_year) * 4
+            start_date = end_date - relativedelta(months=3 * num_periods)
+            current_filter = 'Quarter'
+        elif period_type == 'last-months':
+            if num_periods > (int(end_date.year) - start_year) * 12:
+                num_periods = (int(end_date.year) - start_year) * 12
+            start_date = end_date - relativedelta(months=num_periods)
+            current_filter = 'Month'
+        else:  # period_type == 'last-weeks'
+            if num_periods > (int(end_date.year) - start_year) * 53:
+                num_periods = (int(end_date.year) - start_year) * 53
+            start_date = end_date - timedelta(weeks=num_periods)
+            current_filter = 'Week'
+
+        # Builds the data for the respective filter, either year, month or quarter
+        if df_name == "OPG011" and current_filter != 'Week':
+            if current_filter == 'Year':
+                division_column = '{}Year of Event'.format(year_prefix)
+            elif current_filter == 'Quarter':
+                division_column = '{}Quarter'.format(year_prefix)
+            else:
+                division_column = '{}Month of Event'.format(year_prefix)
+
+            # Builds data based on all measure types, variable names, and selected time frame
+            for y in range(len(variable_names)):
+                variable_name = variable_names[y]
+                further_reduced_df = filtered_df[filtered_df['Variable Name'] == variable_name]
+                for z in range(end_date.year - start_date.year + 1):
+                    year = start_date.year + z
+                    yearly_data = further_reduced_df[further_reduced_df['Year of Event'] == year]
+                    unique_secondary = yearly_data[division_column].dropna().unique().tolist()
+                    for w in range(len(unique_secondary)):
+                        secondary = unique_secondary[w]
+                        unique_data = yearly_data[yearly_data[division_column] == secondary]
+                        measure_value = unique_data['Measure Value'].sum()
+                        if current_filter == "Year":
+                            date_of_event = get_last_day_of_year(year)
+                            year_of_event = year
+                            quarter = ""
+                            month_of_event = ""
+                            week_of_event = ""
+                        elif current_filter == "Quarter":
+                            date_of_event = get_last_day_of_quarter(
+                                date(year, int(unique_data['{}Month of Event'.format(year_prefix)].iloc[0]), 1))
+                            year_of_event = year
+                            quarter = secondary
+                            month_of_event = ""
+                            week_of_event = ""
+                        # secondary_type == "Month"
+                        else:
+                            date_of_event = get_last_day_of_month(date(year, int(secondary), 1))
+                            year_of_event = year
+                            quarter = unique_data['Quarter'].iloc[0]
+                            month_of_event = secondary
+                            week_of_event = ""
+                        row_list.append(
+                            [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
+                             hierarchy_path[0] if len(hierarchy_path) >= 1 else '',
+                             hierarchy_path[1] if len(hierarchy_path) >= 2 else '',
+                             hierarchy_path[2] if len(hierarchy_path) >= 3 else '',
+                             hierarchy_path[3] if len(hierarchy_path) >= 4 else '',
+                             hierarchy_path[4] if len(hierarchy_path) >= 5 else '',
+                             hierarchy_path[5] if len(hierarchy_path) >= 6 else '',
+                             variable_name, unique_data['Variable Name Qualifier'].iloc[0],
+                             unique_data['Variable Name Sub Qualifier'].iloc[0],
+                             date_of_event, current_filter, year_of_event, quarter, month_of_event, week_of_event,
+                             '', '', '', '', '', '', measure_value, measure_type, ''])
+
+            time_df = pd.DataFrame(row_list,
+                                   columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
+                                            'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
+                                            'Date of Event', 'Calendar Entry Type', 'Year of Event', 'Quarter',
+                                            'Month of Event', 'Week of Event', 'Fiscal Year of Event', 'Fiscal Quarter',
+                                            'Fiscal Month of Event', 'Fiscal Week of Event', 'Julian Day',
+                                            'Activity Event Id', 'Measure Value', 'Measure Type', 'Partial Period'])
+        # Creates a copy of the filtered data frame that just contains the weekly data
+        else:  # elif df_name == "OPG011" and current_filter == 'Week':
+            time_df = filtered_df.copy()
+
+        # Filter all dates inside range (inclusive)
+        time_df = time_df[time_df['Date of Event'] >= start_date.date()]
+        time_df = time_df[time_df['Date of Event'] <= end_date.date()]
+
+    # If not in year tab, filter using secondary selections
+    elif not secondary_type == 'Year':
+        if secondary_type == 'Quarter':
+            division_column = '{}Quarter'.format(year_prefix)
+        else:
+            division_column = '{}Month of Event'.format(year_prefix)
+
+        for y in range(len(variable_names)):
+            variable_name = variable_names[y]
+            reduced_df = filtered_df[filtered_df['Variable Name'] == variable_name]
+            for z in range(end_year - start_year + 1):
+                year = start_year + z
+                yearly_data = reduced_df[reduced_df['Year of Event'] == year]
+                unique_secondary = yearly_data[division_column].dropna().unique().tolist()
+                for w in range(len(unique_secondary)):
+                    secondary = unique_secondary[w]
+                    unique_data = yearly_data[yearly_data[division_column] == secondary]
+                    measure_value = unique_data['Measure Value'].sum()
+                    row_list.append(
+                        [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
+                         hierarchy_path[0] if len(hierarchy_path) >= 1 else '',
+                         hierarchy_path[1] if len(hierarchy_path) >= 2 else '',
+                         hierarchy_path[2] if len(hierarchy_path) >= 3 else '',
+                         hierarchy_path[3] if len(hierarchy_path) >= 4 else '',
+                         hierarchy_path[4] if len(hierarchy_path) >= 5 else '',
+                         hierarchy_path[5] if len(hierarchy_path) >= 6 else '',
+                         variable_name, unique_data['Variable Name Qualifier'].iloc[0],
+                         unique_data['Variable Name Sub Qualifier'].iloc[0],
+                         get_last_day_of_month(
+                             date(year, int(secondary), 1)) if secondary_type == "Month" else get_last_day_of_quarter(
+                             date(year, int(unique_data['{}Month of Event'.format(year_prefix)].iloc[0]), 1)),
+                         secondary_type, year,
+                         secondary if secondary_type == "Quarter" else unique_data['Quarter'].iloc[0],
+                         secondary if secondary_type == "Month" else "",
+                         '', '', '', '', '', '', '', measure_value,
+                         measure_type, ''])
+
+        time_df = pd.DataFrame(row_list,
+                               columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
+                                        'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
+                                        'Date of Event', 'Calendar Entry Type', 'Year of Event', 'Quarter',
+                                        'Month of Event', 'Week of Event', 'Fiscal Year of Event', 'Fiscal Quarter',
+                                        'Fiscal Month of Event', 'Fiscal Week of Event', 'Julian Day',
+                                        'Activity Event Id', 'Measure Value', 'Measure Type', 'Partial Period'])
+
+        if start_year == end_year:  # Don't have to deal with in between years
+            # Filter out all rows outside specified range
+            time_df = time_df[time_df[division_column] >= start_secondary]
+            time_df = time_df[time_df[division_column] < end_secondary]
+        else:  # Handles in-between years
+            # Filter starting year above threshold
+            range_df = time_df[time_df['{}Year of Event'.format(year_prefix)] == start_year]
+            range_df = range_df[range_df[division_column] >= start_secondary]
+
+            for i in range(end_year - start_year - 1):
+                # Include entirety of in-between years
+                range_df = range_df.append(
+                    time_df[time_df['{}Year of Event'.format(year_prefix)] == (start_year + i + 1)])
+
+            # Filter end year below threshold
+            time_df = time_df[time_df['{}Year of Event'.format(year_prefix)] == end_year]
+            time_df = time_df[time_df[division_column] < end_secondary]
+            range_df = range_df.append(time_df)
+
+            # Update working df
+            time_df = range_df.copy()
+    else:
+        for y in range(len(variable_names)):
+            variable_name = variable_names[y]
+            further_reduced_df = filtered_df[filtered_df['Variable Name'] == variable_name]
+            unique_secondary = further_reduced_df['Year of Event'].dropna().unique().tolist()
+            for z in range(len(unique_secondary)):
+                secondary = unique_secondary[z]
+                unique_data = further_reduced_df[further_reduced_df['Year of Event'] == secondary]
+                measure_value = unique_data['Measure Value'].sum()
+                date_of_event = get_last_day_of_year(secondary)
+                row_list.append(
+                    [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
+                     hierarchy_path[0] if len(hierarchy_path) >= 1 else '',
+                     hierarchy_path[1] if len(hierarchy_path) >= 2 else '',
+                     hierarchy_path[2] if len(hierarchy_path) >= 3 else '',
+                     hierarchy_path[3] if len(hierarchy_path) >= 4 else '',
+                     hierarchy_path[4] if len(hierarchy_path) >= 5 else '',
+                     hierarchy_path[5] if len(hierarchy_path) >= 6 else '',
+                     variable_name, unique_data['Variable Name Qualifier'].iloc[0],
+                     unique_data['Variable Name Sub Qualifier'].iloc[0],
+                     date_of_event, "Year", secondary, "", "", "",
+                     '', '', '', '', '', '', measure_value, measure_type, ''])
+
+        time_df = pd.DataFrame(row_list,
+                               columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
+                                        'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
+                                        'Date of Event', 'Calendar Entry Type', 'Year of Event', 'Quarter',
+                                        'Month of Event', 'Week of Event', 'Fiscal Year of Event', 'Fiscal Quarter',
+                                        'Fiscal Month of Event', 'Fiscal Week of Event', 'Julian Day',
+                                        'Activity Event Id', 'Measure Value', 'Measure Type', 'Partial Period'])
+
     return time_df
 
 

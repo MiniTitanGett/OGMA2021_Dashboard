@@ -105,7 +105,8 @@ def _new_and_delete(_new_clicks, close_id, _dashboard_reset, tile_titles, tile_l
     for i in range(len(tile_titles)):
         input_tiles.append({'Tile Title': tile_titles[i],
                             'Link': tile_links[i],
-                            'Customize Content': tile_customize_menus[i]})
+                            'Customize Content': tile_customize_menus[i],
+                            'Rebuild Menu': False})
     # ------------------------------------------------------------------------------------------------------------------
     # if NEW callback chain has not been completed and NEW button enabled, prevent update
     if new_disabled:
@@ -629,13 +630,15 @@ app.clientside_callback(
     [Output({'type': 'div-graph-options', 'index': MATCH}, 'children'),
      Output({'type': 'update-graph-trigger', 'index': MATCH}, 'data-graph_menu_trigger'),
      Output({'type': 'update-graph-trigger', 'index': MATCH}, 'data-graph_menu_table_trigger'),
-     Output({'type': 'tile-customize-content', 'index': MATCH}, 'data-loaded')],
+     Output({'type': 'tile-customize-content', 'index': MATCH}, 'data-loaded'),
+     Output({'type': 'tile-rebuild-menu-flag', 'index': MATCH}, 'data')],
     [Input({'type': 'graph-menu-trigger', 'index': MATCH}, 'data-'),
      Input({'type': 'graph-type-dropdown', 'index': MATCH}, 'value'),
      Input({'type': 'tile-link', 'index': MATCH}, 'className'),
      Input({'type': 'graph_children_toggle', 'index': MATCH}, 'value'),
      Input({'type': 'hierarchy-toggle', 'index': MATCH}, 'value')],
-    [State({'type': 'tile-customize-content', 'index': MATCH}, 'data-loaded'),
+    [State({'type': 'tile-rebuild-menu-flag', 'index': MATCH}, 'data'),
+     State({'type': 'tile-customize-content', 'index': MATCH}, 'data-loaded'),
      State({'type': 'data-set', 'index': MATCH}, 'value'),
      State({'type': 'data-set', 'index': 4}, 'value'),
      State('df-constants-storage', 'data'),
@@ -644,8 +647,9 @@ app.clientside_callback(
      State({'type': 'hierarchy-toggle', 'index': 4}, 'value')],
     prevent_initial_call=True
 )
-def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, hierarchy_toggle, is_loaded, df_name,
-                       parent_df_name, df_const, df_confirm, parent_graph_all, parent_hierarchy_toggle):
+def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, hierarchy_toggle, rebuild_menu,
+                       is_loaded, df_name, parent_df_name, df_const, df_confirm, parent_graph_all,
+                       parent_hierarchy_toggle):
     """
     :param selected_graph_type: Selected graph type, ie. 'bar', 'line', etc.
     :return: Graph menu corresponding to selected graph type
@@ -654,6 +658,9 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
     # -------------------------------------------Variable Declarations--------------------------------------------------
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][-1]
     # ------------------------------------------------------------------------------------------------------------------
+
+    if not rebuild_menu:
+        return no_update, 1, no_update, no_update, True
 
     # prevents update if hierarchy toggle or graph all children is selected when the graph type is not line or
     # scatter
@@ -678,7 +685,7 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
     # if link state has changed from linked --> unlinked the data has not changed, prevent update
     if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink':
         if selected_graph_type is None:
-            return None, no_update, no_update, no_update
+            return None, no_update, no_update, no_update, no_update
         else:
             raise PreventUpdate
 
@@ -687,11 +694,11 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
             or ('type":"graph-type-dropdown"}.value' in changed_id and link_state == 'fa fa-link'
                 and selected_graph_type is None):
         if parent_df_name is None and df_name is None:
-            return None, 1, no_update, no_update
+            return None, 1, no_update, no_update, True
         if selected_graph_type not in GRAPH_OPTIONS[parent_df_name] or selected_graph_type is None:
-            return None, 1, no_update, no_update
+            return None, 1, no_update, no_update, True
         elif selected_graph_type in GRAPH_OPTIONS[parent_df_name]:
-            return no_update, 1, no_update, no_update
+            return no_update, 1, no_update, no_update, True
         else:
             raise PreventUpdate
 
@@ -703,11 +710,11 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
 
     # if graph menu trigger has value 'tile closed' then a tile was closed, don't update menu, still update table
     if 'graph-menu-trigger"}.data-' in changed_id and gm_trigger == 'tile closed':
-        return no_update, no_update, 1, no_update
+        return no_update, no_update, 1, no_update, True
 
     # if this has been loaded from the cancel of a graph menu edit then set to false and prevent update
     if 'graph-type-dropdown"}.value' in changed_id and is_loaded:
-        return no_update, no_update, no_update, False
+        return no_update, no_update, no_update, False, True
 
     tile = int(dash.callback_context.inputs_list[0]['id']['index'])
 
@@ -809,7 +816,7 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
     else:
         update_graph_trigger = no_update
 
-    return menu, update_graph_trigger, no_update, no_update
+    return menu, update_graph_trigger, no_update, no_update, True
 
 
 # ************************************************DATA SIDE-MENU******************************************************

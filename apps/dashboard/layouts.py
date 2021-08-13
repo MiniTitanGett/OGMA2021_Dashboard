@@ -852,7 +852,11 @@ def get_tile(tile, tile_keys=None, df_name=None):
                     className='customize-content')
             ], style={'flex-direction': 'column'},
                 id={'type': 'tile-body', 'index': tile},
-                className='flex-container fill-container')
+                className='flex-container fill-container'),
+            # used to prevent graph menu rebuilds on key built components
+            # (Rebuild menu if set to True, Do not rebuild menu if False)
+            dcc.Store(id={'type': 'tile-rebuild-menu-flag', 'index': tile},
+                      data=tile_keys['Rebuild Menu'] if tile_keys else True),
         ], className='tile-container',
             id={'type': 'tile', 'index': tile}),
         className='fill-container',

@@ -800,7 +800,10 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 # TODO: Need to add df name
                 customize_content = get_customize_content(tile=tile_index, graph_type=graph_type, graph_menu=graph_menu,
                                                           df_name=df_name)
-                tile_key = {'Tile Title': tile_title, 'Link': link_state, 'Customize Content': customize_content}
+                tile_key = {'Tile Title': tile_title,
+                            'Link': link_state,
+                            'Customize Content': customize_content,
+                            'Rebuild Menu': False}
                 tile_keys[tile_index] = tile_key
 
                 # if tile is unlinked, or linked while the parent does not exist, create data menu

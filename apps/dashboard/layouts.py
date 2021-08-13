@@ -204,18 +204,22 @@ def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Fi
 # ****************************************************TAB LAYOUT******************************************************
 
 # get div body
-def get_div_body(num_tiles=1, input_tiles=None, tile_keys=None):
+def get_div_body(num_tiles=1, tile_keys=None, layout=LAYOUTS[0]):
     cols = {'lg': 24}
     breakpoints = {'lg': 1200}
+    if num_tiles == 1 and tile_keys is None:
+        children = get_tile(0, df_name=None)
+    else:
+        children = get_tile_layout(num_tiles, tile_keys)
     return [
         # body div
         drgl.ResponsiveGridLayout(
-            get_tile(0, df_name=None),
+            children=children,
             useCSSTransforms=True,
             id='div-body',
             cols=cols,
             rowHeight=40,
-            layouts=LAYOUTS[0],
+            layouts=layout,
             breakpoints=breakpoints,
             draggableHandle='.dragbar')
     ]
@@ -861,7 +865,7 @@ def get_tile(tile, tile_keys=None, df_name=None):
             id={'type': 'tile', 'index': tile}),
         className='fill-container',
         style={'border': '1px solid {}'.format(CLR['lightgray'])},
-        id=str({'type': 'tile-wrapper', 'index': tile}))  # added to remove errors on responsive grid layout
+        id=str({"type": "tile-wrapper", "index": tile}))  # added to remove errors on responsive grid layout
 
 
 # arrange tiles on the page for 1-4 tiles

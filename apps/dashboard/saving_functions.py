@@ -61,7 +61,7 @@ def save_dashboard_to_db(dashboard_id, dashboard_title, is_adding):
     'json', @p_result_status output
     select @p_result_status as result_status
     """.format(session['sessionID'], 'Add' if is_adding else 'Edit', dashboard_id, dashboard_title,
-               json.dumps(session['saved_dashboards'][dashboard_id], sort_keys=True))
+               json.dumps(session['saved_dashboards'][dashboard_id], sort_keys=True).replace('\'', "\""))
 
     exec_storedproc(query)
 

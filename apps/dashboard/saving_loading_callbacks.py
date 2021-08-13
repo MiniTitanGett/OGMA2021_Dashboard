@@ -638,6 +638,9 @@ for y in range(4):
      State({'type': 'start-year-input', 'index': 2}, 'name'),
      State({'type': 'start-year-input', 'index': 3}, 'name'),
      State({'type': 'start-year-input', 'index': 4}, 'name'),
+     # dashboard layout
+     State('div-body', 'layouts'),
+     # df_const
      State('df-constants-storage', 'data')],
     prevent_initial_call=True
 )
@@ -664,7 +667,8 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                                       end_secondary_4,
                                       num_periods_0, num_periods_1, num_periods_2, num_periods_3, num_periods_4,
                                       period_type_0, period_type_1, period_type_2, period_type_3, period_type_4,
-                                      date_tab_0, date_tab_1, date_tab_2, date_tab_3, date_tab_4, df_const):
+                                      date_tab_0, date_tab_1, date_tab_2, date_tab_3, date_tab_4, layout,
+                                      df_const):
 
     # ---------------------------------------Variable Declarations------------------------------------------------------
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
@@ -833,7 +837,9 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
 
         # outputs
         dashboard_title_output = session['saved_dashboards'][selected_dashboard]['Dashboard Title']
-        tile_content_children = get_div_body(num_tiles=num_tiles, input_tiles=None, tile_keys=tile_keys)
+        tile_content_children = get_div_body(num_tiles=num_tiles,
+                                             tile_keys=tile_keys,
+                                             layout=session['saved_dashboards'][selected_dashboard]['Dashboard Layout'])
         df_const_wrapper = html.Div(
             html.Div(
                 html.Div(
@@ -936,7 +942,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 num_periods = [num_periods_0, num_periods_1, num_periods_2, num_periods_3, num_periods_4]
                 period_types = [period_type_0, period_type_1, period_type_2, period_type_3, period_type_4]
                 date_tabs = [date_tab_0, date_tab_1, date_tab_2, date_tab_3, date_tab_4]
-                dashboard_saves = {'Dashboard Title': dashboard_title}
+                dashboard_saves = {'Dashboard Title': dashboard_title, 'Dashboard Layout': layout}
                 arg_list_all = [args_list_0, args_list_1, args_list_2, args_list_3]
                 axes_titles_all = [xaxis_titles, yaxis_titles, x_leg_pos, y_leg_pos]
 
@@ -1061,7 +1067,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
             close_trigger = prompt_data[1]
 
     return options, update_graph_options_trigger, tile_title_returns[0], tile_title_returns[1], tile_title_returns[2], \
-        tile_title_returns[3], prompt_trigger, float_menu_trigger, popup_text, popup_is_open, dashboard_title_output, \
+        tile_title_returns[3], prompt_trigger, float_menu_trigger, popup_text, popup_is_open, dashboard_title_output,\
         tile_content_children, \
         dms[0]['Content'], dms[0]['Tab'], dms[0]['Start Year'], dms[0]['End Year'], dms[0]['Start Secondary'], \
         dms[0]['End Secondary'], \

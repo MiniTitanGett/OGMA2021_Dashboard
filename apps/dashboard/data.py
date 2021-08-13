@@ -252,7 +252,7 @@ def generate_constants(df_name):
     #     lambda x: pd.to_datetime(x, format='%Y%m%d', errors='ignore'))
 
     options = []
-    Variable_Option_Lists= []
+    Variable_Option_Lists = []
 
     unique_vars = df[VARIABLE_LEVEL].unique()
     cleaned_list = [x for x in unique_vars if str(x) != 'nan']

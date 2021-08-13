@@ -17,6 +17,7 @@ import dash_table
 import dash_html_components as html
 import dash
 import pandas as pd
+from parse import parse
 
 # import os
 import plotly.graph_objects as go
@@ -499,17 +500,28 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                                            df_name, df_const))
 
     # set title
-    if arg_value[0] == 'Time' and (xaxis_title == 'Time' or xaxis_title is None):
-        xaxis = '{} '.format(arg_value[0])
-    elif xaxis_title:
-        xaxis = xaxis_title
+    if xaxis_title:
+        result = parse('{} ({})', xaxis_title)
+        if result is None:
+            xaxis = xaxis_title
+        elif any(element in result[0] for element in df_const[df_name]['Variable_Option_Lists']) and \
+                result[1] in df_const[df_name]['MEASURE_TYPE_OPTIONS']:
+            xaxis = '{} ({})'.format(arg_value[0], arg_value[1])
+    elif arg_value[0] == 'Time' and (xaxis_title == 'Time' or xaxis_title is None):
+        xaxis = '{}'.format(arg_value[0])
     else:
         xaxis = '{} ({})'.format(arg_value[0], arg_value[1])
 
-    if arg_value[0] == 'Time' and (yaxis_title in df_const[df_name]['Variable_Options_Lists'] or yaxis_title is None):
-        yaxis = '{} '.format(arg_value[2])
+    if arg_value[0] == 'Time' and (any(element in arg_value[2] for element in
+                                         df_const[df_name]['Variable_Option_Lists']) or yaxis_title is None):
+        yaxis = '{}'.format(arg_value[2])
     elif yaxis_title:
-        yaxis = yaxis_title
+        result = parse('{} ({})', yaxis_title)
+        if result is None:
+            yaxis = yaxis_title
+        elif any(element in result[2] for element in df_const[df_name]['Variable_Option_Lists']) and \
+                result[1] in df_const[df_name]['MEASURE_TYPE_OPTIONS']:
+            yaxis = '{} ({})'.format(arg_value[2], arg_value[3])
     else:
         yaxis = '{} ({})'.format(arg_value[2], arg_value[3])
 

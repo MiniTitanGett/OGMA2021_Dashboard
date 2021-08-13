@@ -815,10 +815,9 @@ for x in range(4):
                 var hide_yaxis_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
                 var hide_size_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
                 }
-            return [hide_xaxis_measure, hide_yaxis_measure, hide_size_measure];
+            return [xaxis, yaxis, hide_xaxis_measure, hide_yaxis_measure, hide_size_measure];
         }
             """,
-
         [Output({'type': 'hide-xaxis-measure', 'index': x}, 'style'),
          Output({'type': 'hide-yaxis-measure', 'index': x}, 'style'),
          Output({'type': 'hide-size-measure', 'index': x}, 'style')],

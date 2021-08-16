@@ -673,7 +673,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
     df_tile = None
     # ------------------------------------------------------------------------------------------------------------------
 
-    if not rebuild_menu:
+    # if tab swapped or load triggered, don't reset menus
+    if not rebuild_menu or len(dash.callback_context.triggered) == 4:
         return no_update, 1, no_update, no_update, True
 
     # prevents update if hierarchy toggle or graph all children is selected when the graph type is not line or
@@ -998,9 +999,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
 
     # if 'data-menu-close' or 'select-dashboard-dropdown' requested, close all data menus
     # don't close if no data set has been chosen
-    elif ('data-menu-close' in changed_id or 'select-dashboard-dropdown' in changed_id) and \
-            (df_name_0 is not None or df_name_1 is not None or df_name_2 is not None or df_name_3 is not None or
-             df_name_4 is not None):
+    elif 'data-menu-close' in changed_id or 'select-dashboard-dropdown' in changed_id:
         pass
 
     # if 'tile-closed-trigger' requested

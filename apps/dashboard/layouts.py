@@ -20,7 +20,8 @@ import dash_responsive_grid_layout as drgl
 # Internal Modules
 from conn import exec_storedproc_results
 from apps.dashboard.data import GRAPH_OPTIONS, CLR, DATA_CONTENT_SHOW, DATA_CONTENT_HIDE, VIEW_CONTENT_SHOW, \
-    BAR_X_AXIS_OPTIONS, CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LAYOUT_CONTENT_HIDE, LAYOUTS
+    BAR_X_AXIS_OPTIONS, CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LAYOUT_CONTENT_HIDE, LAYOUTS, \
+    dataset_to_df, generate_constants
 from apps.dashboard.hierarchy_filter import get_hierarchy_layout
 from apps.dashboard.datepicker import get_date_picker
 from apps.dashboard.graphs import __update_graph
@@ -307,6 +308,10 @@ def get_layout_graph(report_name):
         state_of_display = '{{"props": {{"children": {}}}}}'.format(
             state_of_display)  # "{{'props': {{'children': {}}}}}".format(state_of_display)
 
+    # load data (added for external access)
+    session[j['Data Set']] = dataset_to_df(j['Data Set'])
+    df_const = {j['Data Set']: generate_constants(j['Data Set'])}
+
     graph = __update_graph(j['Data Set'],
                            j['Args List'],
                            j['Graph Type'],
@@ -325,11 +330,11 @@ def get_layout_graph(report_name):
                            j.get('End Year'),  # j['End Year'],
                            j.get('Start Secondary'),  # j['Start Secondary'],
                            j.get('End Secondary'),  # j['End Secondary']
-                           j.get('df_const'),
-                           None,  # xtitle
-                           None,  # ytitle
-                           None,  # xlegpos
-                           None)  # ylegpos
+                           df_const,
+                           j.get('Axes Title')[0],  # xtitle
+                           j.get('Axes Title')[1],  # ytitle
+                           j.get('Axes Title')[2],  # xlegpos
+                           j.get('Axes Title')[3])  # ylegpos
 
     if graph is None:
         raise PreventUpdate

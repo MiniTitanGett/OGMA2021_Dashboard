@@ -698,16 +698,14 @@ def get_layout_dashboard():
 
 # create customize content
 def get_customize_content(tile, graph_type, graph_menu, df_name):
+    graphs = []
+    options = []
     # check if keyword is in df_name
     if df_name is not None:
         if 'OPG010' in df_name:
             graphs = GRAPH_OPTIONS['OPG010']
         elif 'OPG001' in df_name:
             graphs = GRAPH_OPTIONS['OPG001']
-    else:
-        graphs = []
-
-    options = []
     graphs.sort()
     for i in graphs:
         options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
@@ -967,7 +965,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                                'top': '-15px',
                                'margin-right': '5px'})
                 ], style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}
-                if len(X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
+                   if len(X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
                 html.Div([
                     html.P(
                         "{}".format(X_AXIS_OPTIONS[0]),

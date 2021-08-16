@@ -282,15 +282,19 @@ for y in range(4):
         if trigger == 'save' or trigger == 'confirm-overwrite':
 
             intermediate_pointer = REPORT_POINTER_PREFIX + graph_title.replace(" ", "")
-            # regex.sub('[^A-Za-z0-9]+', '', graph_title)
 
             graph_titles = []
 
             for layout in session['saved_layouts']:
                 graph_titles.append(session['saved_layouts'][layout]['Title'])
 
+            # if user is trying to save an empty graph, warn them that they must have a graph to save
+            if not graph_display:
+                prompt_trigger = [['empty_graph', tile], {}, get_label('LBL_Empty_Graph'),
+                                  get_label('LBL_Empty_Graph_Prompt'), False]
+
             # if tile is untitled, prevent updates but return save message
-            if graph_title == '':
+            elif graph_title == '':
                 prompt_trigger = [['empty_title', tile], {}, get_label('LBL_Untitled_Graph'),
                                   get_label('LBL_Untitled_Graph_Prompt'), False]
 
@@ -298,7 +302,6 @@ for y in range(4):
             elif intermediate_pointer in session['saved_layouts'] \
                     and session['saved_layouts'][intermediate_pointer]['Title'] == graph_title \
                     and 'confirm-overwrite' != trigger:
-
                 prompt_trigger = [['overwrite', tile], {}, get_label('LBL_Overwrite_Graph'),
                                   get_label('LBL_Overwrite_Graph_Prompt'), False]
 

@@ -692,6 +692,10 @@ EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Continue_And_Modify_My
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Continue_And_Modify_My_Graphs_As_Necessary', @language = 'Fr', @ref_desc = 'Fr: Continue and modify my graphs as necessary'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Continue_And_Unlink_My_Graphs', @language = 'En', @ref_desc = 'Continue and unlink my graphs'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Continue_And_Unlink_My_Graphs', @language = 'Fr', @ref_desc = 'Fr: Continue and unlink my graphs'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Empty_Graph',@language = 'En', @ref_desc = 'Empty Graph'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Empty_Graph',@language = 'Fr', @ref_desc = 'Fr: Empty Graph'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Empty_Graph_Prompt',@language = 'En', @ref_desc = 'Your graph is empty. Please select a dataset to load and construct a graph before saving.'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Empty_Graph_Prompt',@language = 'Fr', @ref_desc = 'Fr: Your graph is empty. Please select a dataset to load and construct a graph before saving.'
 
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'En',@ref_desc = 'Hierarchy Selection''s Children'
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'Fr',@ref_desc = 'Enfants de la Sélection de Hiérarchie'

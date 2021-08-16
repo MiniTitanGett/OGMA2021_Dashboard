@@ -1218,8 +1218,8 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                                                         prev_selection=prev_selection[i],
                                                         df_const=df_const) if prompt_result == 'op-2' \
                                     else get_data_menu(i, df_names[i],
-                                                        prev_selection=prev_selection[i],
-                                                        df_const=df_const)
+                                                       prev_selection=prev_selection[i],
+                                                       df_const=df_const)
                                 refresh_button[i] = {'padding': '10px 0', 'width': '15px',
                                                      'height': '15px',
                                                      'position': 'relative',

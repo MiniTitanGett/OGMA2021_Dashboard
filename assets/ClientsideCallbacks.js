@@ -6,7 +6,7 @@ function resizeContentWrapper() {
     heightTotal = document.getElementById("page-content").offsetHeight;
     document.getElementById("tab-content-wrapper").style.maxHeight = String(heightTotal - heightMenu - heightTabs) + 'px';
   }
-  catch { /* Do Nothing */ }
+  catch (error){ /* Do Nothing */ }
 }
 
 window.onresize = resizeContentWrapper;
@@ -27,7 +27,7 @@ Array.prototype.equals = function (array) {
     if (this.length != array.length)
         return false;
 
-    for (var i = 0, l=this.length; i < l; i++) {
+    for (let i = 0, l = this.length; i < l; i++) {
         // Check if we have nested arrays
         if (this[i] instanceof Array && array[i] instanceof Array) {
             // recurse into the nested arrays
@@ -41,14 +41,15 @@ Array.prototype.equals = function (array) {
     }
     return true;
 }
+
 // Hide method from for-in loops
 Object.defineProperty(Array.prototype, "equals", {enumerable: false});
 
 // helper function used by clientside callbacks to compare objects
 function isEquivalent(a, b) {
     // Create arrays of property names
-    var aProps = Object.getOwnPropertyNames(a);
-    var bProps = Object.getOwnPropertyNames(b);
+    let aProps = Object.getOwnPropertyNames(a);
+    let bProps = Object.getOwnPropertyNames(b);
 
     // If number of properties is different,
     // objects are not equivalent
@@ -56,8 +57,8 @@ function isEquivalent(a, b) {
         return false;
     }
 
-    for (var i = 0; i < aProps.length; i++) {
-        var propName = aProps[i];
+    for (let i = 0; i < aProps.length; i++) {
+        let propName = aProps[i];
 
         // If values of same property are not equal,
         // objects are not equivalent
@@ -81,7 +82,7 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
         },
         graphLoadScreen0: function(trigger) {
             if (trigger == 'confirm-load'){
-                var newDiv = document.createElement('div');
+                let newDiv = document.createElement('div');
                 newDiv.className = '_graph-data-loading';
                 newDiv.id = 'graph-loading0';
                 document.getElementById('{"index":0,"type":"tile-view-content"}').appendChild(newDiv);
@@ -91,12 +92,12 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
         graphRemoveLoadScreen0: function(data, num_tiles) {
             try{
                 document.getElementById('graph-loading0').remove();
-            }catch{ /* Do Nothing */ }
+            }catch(error){ /* Do Nothing */ }
             return 0;
         },
         graphLoadScreen1: function(trigger) {
             if (trigger == 'confirm-load'){
-                var newDiv = document.createElement('div');
+                let newDiv = document.createElement('div');
                 newDiv.className = '_graph-data-loading';
                 newDiv.id = 'graph-loading1';
                 document.getElementById('{"index":1,"type":"tile-view-content"}').appendChild(newDiv);
@@ -106,12 +107,12 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
         graphRemoveLoadScreen1: function(data, num_tiles) {
             try{
                 document.getElementById('graph-loading1').remove();
-            }catch{ /* Do Nothing */ }
+            }catch(error){ /* Do Nothing */ }
             return 0;
         },
         graphLoadScreen2: function(trigger) {
             if (trigger == 'confirm-load'){
-                var newDiv = document.createElement('div');
+                let newDiv = document.createElement('div');
                 newDiv.className = '_graph-data-loading';
                 newDiv.id = 'graph-loading2';
                 document.getElementById('{"index":2,"type":"tile-view-content"}').appendChild(newDiv);
@@ -121,12 +122,12 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
         graphRemoveLoadScreen2: function(data, num_tiles) {
             try{
                 document.getElementById('graph-loading2').remove();
-            }catch{ /* Do Nothing */ }
+            }catch(error){ /* Do Nothing */ }
             return 0;
         },
         graphLoadScreen3: function(trigger) {
             if (trigger == 'confirm-load'){
-                var newDiv = document.createElement('div');
+                let newDiv = document.createElement('div');
                 newDiv.className = '_graph-data-loading';
                 newDiv.id = 'graph-loading3';
                 document.getElementById('{"index":3,"type":"tile-view-content"}').appendChild(newDiv);
@@ -136,7 +137,7 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
         graphRemoveLoadScreen3: function(data, num_tiles) {
             try{
                 document.getElementById('graph-loading3').remove();
-            }catch{ /* Do Nothing */ }
+            }catch(error){ /* Do Nothing */ }
             return 0;
         }
     }

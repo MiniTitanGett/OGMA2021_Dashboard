@@ -775,21 +775,21 @@ for x in range(4):
             const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
     
             if (degree_input == 'no-fit' || degree_input == 'linear-fit'){
-                var degree_input_wrapper = {'display': 'none'};
+                let degree_input_wrapper = {'display': 'none'};
                 if (degree_input == 'no-fit'){
-                    var confidence_interval_wrapper = {'display': 'none'};
+                    let confidence_interval_wrapper = {'display': 'none'};
                 }
                 else{
-                    var confidence_interval_wrapper = {'display': 'inline'};
+                    let confidence_interval_wrapper = {'display': 'inline'};
                 }
             }
             else if (degree_input == 'curve-fit'){
-                var degree_input_wrapper = {'display': 'inline'};
-                var confidence_interval_wrapper = {'display': 'inline'};
+                let degree_input_wrapper = {'display': 'inline'};
+                let confidence_interval_wrapper = {'display': 'inline'};
             }
             else{
-                var degree_input_wrapper = dash_clientside.no_update;
-                var confidence_interval_wrapper = dash_clientside.no_update;
+                let degree_input_wrapper = dash_clientside.no_update;
+                let confidence_interval_wrapper = dash_clientside.no_update;
             }
     
             return [degree_input_wrapper, confidence_interval_wrapper];
@@ -806,14 +806,14 @@ for x in range(4):
         """
         function _hide_animated_bubble_options(xaxis, graph_type){
             if (xaxis == 'Time' && graph_type == 'Bubble'){
-                var hide_xaxis_measure = {'display': 'none'};
-                var hide_yaxis_measure = {'display': 'none'};
-                var hide_size_measure = {'display': 'none'};
+                let hide_xaxis_measure = {'display': 'none'};
+                let hide_yaxis_measure = {'display': 'none'};
+                let hide_size_measure = {'display': 'none'};
                 }
             else{
-                var hide_xaxis_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
-                var hide_yaxis_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
-                var hide_size_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
+                let hide_xaxis_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
+                let hide_yaxis_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
+                let hide_size_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
                 }
             return [hide_xaxis_measure, hide_yaxis_measure, hide_size_measure];
         }

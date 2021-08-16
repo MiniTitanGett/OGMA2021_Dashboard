@@ -283,7 +283,7 @@ app.clientside_callback(
     """
     function _update_num_tiles(input1, input2, input3){
         const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
-        var result = dash_clientside.no_update;
+        let result = dash_clientside.no_update;
     
         if (triggered.includes('num-tiles-2')){
             result = input1;
@@ -397,24 +397,24 @@ app.clientside_callback(
              close_n_clicks, cancel_n_clicks, ok_n_clicks, float_menu_data) {
         // init variables
         const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
-        var float_menu_trigger = dash_clientside.no_update;
-        var result = dash_clientside.no_update;
-        var result_0 = dash_clientside.no_update;
-        var result_1 = dash_clientside.no_update;
+        let float_menu_trigger = dash_clientside.no_update;
+        let result = dash_clientside.no_update;
+        let result_0 = dash_clientside.no_update;
+        let result_1 = dash_clientside.no_update;
         
         // serve the menu by taking the tile and retrieving what was requested to put into body
         if (triggered.includes('float-menu-trigger')) {
-            var trigger_arr = [menu_trigger_0, menu_trigger_1, menu_trigger_2, menu_trigger_3, menu_trigger_4]
-            var tile = triggered.match(/\d+/)[0];
+            let trigger_arr = [menu_trigger_0, menu_trigger_1, menu_trigger_2, menu_trigger_3, menu_trigger_4];
+            let tile = triggered.match(/\d+/)[0];
             float_menu_trigger = trigger_arr[tile];
             if (float_menu_trigger[0][0] == 'customize') {
-                var menu = document.getElementById(`{"index":${tile},"type":"tile-customize-content"}`);
+                let menu = document.getElementById(`{"index":${tile},"type":"tile-customize-content"}`);
             }
             if (float_menu_trigger[0][0] == 'layouts') {
-                var menu = document.getElementById(`{"index":${tile},"type":"tile-layouts-content"}`);
+                let menu = document.getElementById(`{"index":${tile},"type":"tile-layouts-content"}`);
             }
             if (float_menu_trigger[0][0] == 'dashboard_layouts') {
-                var menu = document.getElementById('load-dashboard-menu');
+                let menu = document.getElementById('load-dashboard-menu');
             }
             document.getElementById("float-menu-body").appendChild(menu).style.display = ''; 
             
@@ -428,19 +428,19 @@ app.clientside_callback(
         // otherwise, input from menu needs to be handled to output to correct callback chain
         else {
             float_menu_trigger = [float_menu_data, {'display': 'none'}, dash_clientside.no_update, ''];
-            var tile = float_menu_data[1];
+            let tile = float_menu_data[1];
             if (float_menu_trigger[0][0] == 'customize') {
-                var menu = document.getElementById(`{"index":${tile},"type":"tile-customize-content"}`);
+                let menu = document.getElementById(`{"index":${tile},"type":"tile-customize-content"}`);
                 document.getElementById(`{"index":${tile},"type":"tile-customize-content-wrapper"}`).appendChild(
                     menu).style.display = 'none'; 
             }
             if (float_menu_trigger[0][0] == 'layouts') {
-                var menu = document.getElementById(`{"index":${tile},"type":"tile-layouts-content"}`);
+                let menu = document.getElementById(`{"index":${tile},"type":"tile-layouts-content"}`);
                 document.getElementById(`{"index":${tile},"type":"tile-body"}`).appendChild(
                     menu).style.display = 'none'; 
             }
             if (float_menu_trigger[0][0] == 'dashboard_layouts') {
-                var menu = document.getElementById('load-dashboard-menu');
+                let menu = document.getElementById('load-dashboard-menu');
                 document.getElementById('button-save-dashboard-wrapper').appendChild(menu).style.display = 'none';
             }
             
@@ -1360,7 +1360,7 @@ app.clientside_callback(
 app.clientside_callback(
     """
        function _data_set_confirmation_visuals(load_data_trigger, refresh_data_trigger){
-            var DATA_CONTENT_HIDE = {'display': 'none'};  
+            let DATA_CONTENT_HIDE = {'display': 'none'};  
             if (isEquivalent(load_data_trigger, DATA_CONTENT_HIDE) 
                 && !isEquivalent(refresh_data_trigger, DATA_CONTENT_HIDE)){
                 return {};
@@ -1380,7 +1380,7 @@ for x in range(4):
     app.clientside_callback(
         """
         function _highlight_tiles(_sidebar_styles, link_state, sidebar_style, parent_sidebar_style){
-            var DATA_CONTENT_SHOW = {
+            let DATA_CONTENT_SHOW = {
                 'max-width': '300px', 
                 'min-width': '300px',
                 'background-color':'#fffafa',
@@ -1391,10 +1391,10 @@ for x in range(4):
 
             if (isEquivalent(sidebar_style, DATA_CONTENT_SHOW) || 
                 (isEquivalent(parent_sidebar_style, DATA_CONTENT_SHOW) && link_state == 'fa fa-link')){
-                var tile_class = 'tile-highlight';
+                let tile_class = 'tile-highlight';
             }
             else{
-                var tile_class = 'tile-container';
+                let tile_class = 'tile-container';
             }
             return tile_class;
         }
@@ -1436,7 +1436,7 @@ app.clientside_callback(
     function datasetLoadScreen(n_click_load, n_click_reset, float_menu_result, prompt_result, float_menu_data,
                                selected_dashboard, prompt_data, prev_selected) {
         const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
-        var changed_index = null;
+        let changed_index = null;
         if (triggered.match(/\d+/)){
             changed_index = parseInt(triggered.match(/\d+/)[0]);
         }
@@ -1448,7 +1448,7 @@ app.clientside_callback(
              (typeof prompt_data != 'undefined' && prompt_data[0] == 'load_dataset' && prompt_result != 'op-1' &&
               prompt_result != 'close'))){
 
-            var newDiv = document.createElement('div');
+            let newDiv = document.createElement('div');
             newDiv.className = '_data-loading';
             newDiv.id = 'loading';
             document.body.appendChild(newDiv, document.getElementById('content'));
@@ -1472,7 +1472,7 @@ app.clientside_callback(
 app.clientside_callback(
     """
     function datasetRemoveLoadScreen(data, graph_displays, num_tiles) {
-        var triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
+        let triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
         if (triggered.includes("df-constants-storage.data")){
             try{
                 document.getElementById('loading').remove();
@@ -1480,7 +1480,7 @@ app.clientside_callback(
         }
         else {
             triggered = triggered[triggered.length - 1];
-            var tile = parseInt(triggered.match(/\d+/)[0]) + 1;
+            let tile = parseInt(triggered.match(/\d+/)[0]) + 1;
             if (tile == num_tiles){
                 try{
                     document.getElementById('loading').remove();
@@ -1507,19 +1507,19 @@ app.clientside_callback(
              prompt_data){
         // init variables
         const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
-        var prompt_trigger = dash_clientside.no_update;
-        var result = dash_clientside.no_update;
-        var result_0 = dash_clientside.no_update;
-        var result_1 = dash_clientside.no_update;
-        var result_2 = dash_clientside.no_update;
-        var duo_style = {};
-        var trip_style = {'display': 'none'};
+        let prompt_trigger = dash_clientside.no_update;
+        let result = dash_clientside.no_update;
+        let result_0 = dash_clientside.no_update;
+        let result_1 = dash_clientside.no_update;
+        let result_2 = dash_clientside.no_update;
+        let duo_style = {};
+        let trip_style = {'display': 'none'};
         
         // if input, serve the prompt
         if (triggered.includes('prompt-trigger')){
-            var trigger_arr = [prompt_trigger_0, prompt_trigger_1, prompt_trigger_2, prompt_trigger_3, prompt_trigger_4,
+            let trigger_arr = [prompt_trigger_0, prompt_trigger_1, prompt_trigger_2, prompt_trigger_3, prompt_trigger_4,
                                prompt_trigger_5];
-            var tile = triggered.match(/\d+/)[0];
+            let tile = triggered.match(/\d+/)[0];
             prompt_trigger = trigger_arr[tile];
             if (prompt_trigger[4]){
                 duo_style = {'display': 'none'};
@@ -1598,17 +1598,17 @@ app.clientside_callback(
     function _update_axes_titles(graph, hasTrigger){
         const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
 
-        var tile = triggered.match(/\d+/)[0];
-        var javascript = dash_clientside.no_update;
+        let tile = triggered.match(/\d+/)[0];
+        let javascript = dash_clientside.no_update;
         
         if (hasTrigger == null){
             javascript = `
-                var target = '{"index":${tile},"type":"graph_display"}';  
+                let target = '{"index":${tile},"type":"graph_display"}';  
                 $(document.getElementById(target)).on('plotly_relayout', (e) => {  
-                    var x_axis = dash_clientside.no_update;
-                    var y_axis = dash_clientside.no_update;
-                    var x_legend = dash_clientside.no_update;
-                    var y_legend = dash_clientside.no_update;
+                    let x_axis = dash_clientside.no_update;
+                    let y_axis = dash_clientside.no_update;
+                    let x_legend = dash_clientside.no_update;
+                    let y_legend = dash_clientside.no_update;
                     
                     // try setting the values if they exist
                     try { 
@@ -1630,7 +1630,7 @@ app.clientside_callback(
                                   'y_axis': y_axis,
                                   'x_legend': x_legend,
                                   'y_legend': y_legend}
-                    })
+                    });
                 });
             `
         }

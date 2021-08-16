@@ -406,15 +406,16 @@ app.clientside_callback(
         if (triggered.includes('float-menu-trigger')) {
             let trigger_arr = [menu_trigger_0, menu_trigger_1, menu_trigger_2, menu_trigger_3, menu_trigger_4];
             let tile = triggered.match(/\d+/)[0];
+            let menu = null;
             float_menu_trigger = trigger_arr[tile];
             if (float_menu_trigger[0][0] == 'customize') {
-                let menu = document.getElementById(`{"index":${tile},"type":"tile-customize-content"}`);
+                menu = document.getElementById(`{"index":${tile},"type":"tile-customize-content"}`);
             }
             if (float_menu_trigger[0][0] == 'layouts') {
-                let menu = document.getElementById(`{"index":${tile},"type":"tile-layouts-content"}`);
+                menu = document.getElementById(`{"index":${tile},"type":"tile-layouts-content"}`);
             }
             if (float_menu_trigger[0][0] == 'dashboard_layouts') {
-                let menu = document.getElementById('load-dashboard-menu');
+                menu = document.getElementById('load-dashboard-menu');
             }
             document.getElementById("float-menu-body").appendChild(menu).style.display = ''; 
             
@@ -429,18 +430,19 @@ app.clientside_callback(
         else {
             float_menu_trigger = [float_menu_data, {'display': 'none'}, dash_clientside.no_update, ''];
             let tile = float_menu_data[1];
+            let menu = null;
             if (float_menu_trigger[0][0] == 'customize') {
-                let menu = document.getElementById(`{"index":${tile},"type":"tile-customize-content"}`);
+                menu = document.getElementById(`{"index":${tile},"type":"tile-customize-content"}`);
                 document.getElementById(`{"index":${tile},"type":"tile-customize-content-wrapper"}`).appendChild(
                     menu).style.display = 'none'; 
             }
             if (float_menu_trigger[0][0] == 'layouts') {
-                let menu = document.getElementById(`{"index":${tile},"type":"tile-layouts-content"}`);
+                menu = document.getElementById(`{"index":${tile},"type":"tile-layouts-content"}`);
                 document.getElementById(`{"index":${tile},"type":"tile-body"}`).appendChild(
                     menu).style.display = 'none'; 
             }
             if (float_menu_trigger[0][0] == 'dashboard_layouts') {
-                let menu = document.getElementById('load-dashboard-menu');
+                menu = document.getElementById('load-dashboard-menu');
                 document.getElementById('button-save-dashboard-wrapper').appendChild(menu).style.display = 'none';
             }
             
@@ -1380,6 +1382,7 @@ for x in range(4):
     app.clientside_callback(
         """
         function _highlight_tiles(_sidebar_styles, link_state, sidebar_style, parent_sidebar_style){
+            let tile_class = dash_clientside.no_update;
             let DATA_CONTENT_SHOW = {
                 'max-width': '300px', 
                 'min-width': '300px',
@@ -1391,10 +1394,10 @@ for x in range(4):
 
             if (isEquivalent(sidebar_style, DATA_CONTENT_SHOW) || 
                 (isEquivalent(parent_sidebar_style, DATA_CONTENT_SHOW) && link_state == 'fa fa-link')){
-                let tile_class = 'tile-highlight';
+                tile_class = 'tile-highlight';
             }
             else{
-                let tile_class = 'tile-container';
+                tile_class = 'tile-container';
             }
             return tile_class;
         }

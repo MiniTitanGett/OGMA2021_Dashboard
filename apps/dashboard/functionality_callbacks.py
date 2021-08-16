@@ -773,23 +773,25 @@ for x in range(4):
         """
         function _update_data_fitting_options(degree_input){
             const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
-    
+            let degree_input_wrapper = dash_clientside.no_update;
+            let confidence_interval_wrapper = dash_clientside.no_update;
+            
             if (degree_input == 'no-fit' || degree_input == 'linear-fit'){
-                let degree_input_wrapper = {'display': 'none'};
+                degree_input_wrapper = {'display': 'none'};
                 if (degree_input == 'no-fit'){
-                    let confidence_interval_wrapper = {'display': 'none'};
+                    confidence_interval_wrapper = {'display': 'none'};
                 }
                 else{
-                    let confidence_interval_wrapper = {'display': 'inline'};
+                    confidence_interval_wrapper = {'display': 'inline'};
                 }
             }
             else if (degree_input == 'curve-fit'){
-                let degree_input_wrapper = {'display': 'inline'};
-                let confidence_interval_wrapper = {'display': 'inline'};
+                degree_input_wrapper = {'display': 'inline'};
+                confidence_interval_wrapper = {'display': 'inline'};
             }
             else{
-                let degree_input_wrapper = dash_clientside.no_update;
-                let confidence_interval_wrapper = dash_clientside.no_update;
+                degree_input_wrapper = dash_clientside.no_update;
+                confidence_interval_wrapper = dash_clientside.no_update;
             }
     
             return [degree_input_wrapper, confidence_interval_wrapper];
@@ -805,15 +807,18 @@ for x in range(4):
     app.clientside_callback(
         """
         function _hide_animated_bubble_options(xaxis, graph_type){
+            let hide_xaxis_measure = dash_clientside.no_update;
+            let hide_yaxis_measure = dash_clientside.no_update;
+            let hide_size_measure = dash_clientside.no_update;
             if (xaxis == 'Time' && graph_type == 'Bubble'){
-                let hide_xaxis_measure = {'display': 'none'};
-                let hide_yaxis_measure = {'display': 'none'};
-                let hide_size_measure = {'display': 'none'};
+                hide_xaxis_measure = {'display': 'none'};
+                hide_yaxis_measure = {'display': 'none'};
+                hide_size_measure = {'display': 'none'};
                 }
             else{
-                let hide_xaxis_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
-                let hide_yaxis_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
-                let hide_size_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
+                hide_xaxis_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
+                hide_yaxis_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
+                hide_size_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
                 }
             return [hide_xaxis_measure, hide_yaxis_measure, hide_size_measure];
         }

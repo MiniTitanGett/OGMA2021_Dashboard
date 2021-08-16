@@ -775,7 +775,8 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                         "Timeframe": "all-time",
                         "Title": "This Graph has been deleted"}
 
-                # pop graph_type/args_list/axes_title to compare the dashboard parent data menu to the saved tile menu
+                # pop graph_type/args_list/axes_title to compare the dashboard parent data menu to
+                # the saved tile data menu
                 graph_type = tile_data.pop('Graph Type')
                 args_list = tile_data.pop('Args List')
                 axes_title = tile_data.pop('Axes Title')
@@ -949,6 +950,9 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 # if any tiles are linked, save the parent data menu
                 if links.count('fa fa-link') > 0:
 
+                    if type(button_paths[4]) == dict:
+                        button_paths[4] = [button_paths[4]]
+
                     parent_nid_path = "root"
                     for button in button_paths[4]:
                         parent_nid_path += '^||^{}'.format(button['props']['children'])
@@ -1050,7 +1054,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 popup_is_open = True
 
         # if confirm delete, has been pressed
-        elif prompt_data[0] == 'delete-dashboard' and prompt_result == 'ok':
+        elif prompt_data[0] == 'delete_dashboard' and prompt_result == 'ok':
             intermediate_pointer = DASHBOARD_POINTER_PREFIX + dashboard_title.replace(" ", "")
             delete_dashboard(intermediate_pointer)
             update_graph_options_trigger = 'trigger'
@@ -1067,7 +1071,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
             close_trigger = prompt_data[1]
 
     return options, update_graph_options_trigger, tile_title_returns[0], tile_title_returns[1], tile_title_returns[2], \
-        tile_title_returns[3], prompt_trigger, float_menu_trigger, popup_text, popup_is_open, dashboard_title_output,\
+        tile_title_returns[3], prompt_trigger, float_menu_trigger, popup_text, popup_is_open, dashboard_title_output, \
         tile_content_children, \
         dms[0]['Content'], dms[0]['Tab'], dms[0]['Start Year'], dms[0]['End Year'], dms[0]['Start Secondary'], \
         dms[0]['End Secondary'], \

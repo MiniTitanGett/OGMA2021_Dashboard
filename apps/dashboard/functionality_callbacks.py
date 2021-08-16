@@ -122,7 +122,15 @@ for x in range(4):
         # -------------------------------------------Variable Declarations----------------------------------------------
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
         tile = dash.callback_context.inputs_list[0]['id']['index']
+        df_tile = None
         # --------------------------------------------------------------------------------------------------------------
+        # check if keyword in df_name
+        if df_name is not None:
+            df_tile = df_name
+            if 'OPG001' in df_name:
+                df_name = 'OPG001'
+            elif 'OPG010' in df_name:
+                df_name = 'OPG010'
 
         if '"type":"tile-view"}.className' in changed_id and df_name is None and parent_df_name is None:
             return None
@@ -147,8 +155,8 @@ for x in range(4):
                                            and graph_type in GRAPH_OPTIONS[df_name] and df_name != parent_df_name) or \
                 (df_name is None and df_confirm is not None and parent_df_name != df_confirm):
             if df_confirm is not None:
-                df_name = df_confirm
-            graph = __update_graph(df_name, arg_value, graph_type, tile_title, num_periods, period_type,
+                df_tile = df_confirm
+            graph = __update_graph(df_tile, arg_value, graph_type, tile_title, num_periods, period_type,
                                    hierarchy_toggle,
                                    hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options,
                                    state_of_display,
@@ -173,6 +181,8 @@ for x in range(4):
             period_type = parent_period_type
             df_name = parent_df_name
             hierarchy_options = parent_hierarchy_options
+        else:
+            df_name = df_tile
 
         # prevent update if invalid selections exist - should be handled by update_datepicker, but double check
         if not start_year or not end_year or not start_secondary or not end_secondary or \
@@ -788,5 +798,31 @@ for x in range(4):
         [Output({'type': 'degree-input-wrapper', 'index': x}, 'style'),
          Output({'type': 'confidence-interval-wrapper', 'index': x}, 'style')],
         [Input({'type': 'args-value: {}'.replace("{}", str(x)), 'index': 4}, 'value')],
+        prevent_initial_call=True
+    )
+
+for x in range(4):
+    app.clientside_callback(
+        """
+        function _hide_animated_bubble_options(xaxis, graph_type){
+            if (xaxis == 'Time' && graph_type == 'Bubble'){
+                var hide_xaxis_measure = {'display': 'none'};
+                var hide_yaxis_measure = {'display': 'none'};
+                var hide_size_measure = {'display': 'none'};
+                }
+            else{
+                var hide_xaxis_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
+                var hide_yaxis_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
+                var hide_size_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
+                }
+            return [hide_xaxis_measure, hide_yaxis_measure, hide_size_measure];
+        }
+            """,
+
+        [Output({'type': 'hide-xaxis-measure', 'index': x}, 'style'),
+         Output({'type': 'hide-yaxis-measure', 'index': x}, 'style'),
+         Output({'type': 'hide-size-measure', 'index': x}, 'style')],
+        Input({'type': 'args-value: {}'.replace("{}", str(x)), 'index': 0}, 'value'),
+        State({'type': 'graph-type-dropdown', 'index': x}, 'value'),
         prevent_initial_call=True
     )

@@ -698,10 +698,12 @@ def get_layout_dashboard():
 
 # create customize content
 def get_customize_content(tile, graph_type, graph_menu, df_name):
-    if df_name == 'OPG010':
-        graphs = GRAPH_OPTIONS['OPG010']
-    elif df_name == 'OPG001':
-        graphs = GRAPH_OPTIONS['OPG001']
+    # check if keyword is in df_name
+    if df_name is not None:
+        if 'OPG010' in df_name:
+            graphs = GRAPH_OPTIONS['OPG010']
+        elif 'OPG001' in df_name:
+            graphs = GRAPH_OPTIONS['OPG001']
     else:
         graphs = []
 
@@ -965,7 +967,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                                'top': '-15px',
                                'margin-right': '5px'})
                 ], style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}
-                   if len(X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
+                if len(X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
                 html.Div([
                     html.P(
                         "{}".format(X_AXIS_OPTIONS[0]),
@@ -1331,27 +1333,31 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
-                        options=[] if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
+                        options=[] if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'] +
+                                [{'label': 'Time', 'value': 'Time'}],
                         value=x,
                         clearable=False,
                         style={'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
-            html.Div([
-                html.Div([
-                    html.P(
-                        "{}:".format(get_label('LBL_X_Axis_Measure')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
-                           'margin-right': '5px'}),
-                html.Div([
-                    dcc.Dropdown(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
-                        options=[] if df_const is None else [{'label': i, 'value': i} for i in
-                                                             df_const[df_name]['MEASURE_TYPE_OPTIONS']],
-                        value=x_measure,
-                        clearable=False,
-                        style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+            html.Div(
+                id={'type': 'hide-xaxis-measure', 'index': tile},
+                children=[
+                    html.Div([
+                        html.P(
+                            "{}:".format(get_label('LBL_X_Axis_Measure')),
+                            style={'color': CLR['text1'], 'font-size': '13px'})],
+                        style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
+                               'margin-right': '5px'}),
+                    html.Div([
+                        dcc.Dropdown(
+                            id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
+                            options=[] if df_const is None else [{'label': i, 'value': i} for i in
+                                                                 df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                            value=x_measure,
+                            clearable=False,
+                            style={'font-size': '13px'})],
+                        style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})],
+                style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}),
             html.Div([
                 html.Div([
                     html.P(
@@ -1367,22 +1373,25 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                         clearable=False,
                         style={'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
-            html.Div([
-                html.Div([
-                    html.P(
-                        "{}:".format(get_label('LBL_Y_Axis_Measure')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
-                           'margin-right': '5px'}),
-                html.Div([
-                    dcc.Dropdown(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
-                        options=[] if df_const is None else [{'label': i, 'value': i} for i in
-                                                             df_const[df_name]['MEASURE_TYPE_OPTIONS']],
-                        value=y_measure,
-                        clearable=False,
-                        style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+            html.Div(
+                id={'type': 'hide-yaxis-measure', 'index': tile},
+                children=[
+                    html.Div([
+                        html.P(
+                            "{}:".format(get_label('LBL_Y_Axis_Measure')),
+                            style={'color': CLR['text1'], 'font-size': '13px'})],
+                        style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
+                               'margin-right': '5px'}),
+                    html.Div([
+                        dcc.Dropdown(
+                            id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
+                            options=[] if df_const is None else [{'label': i, 'value': i} for i in
+                                                                 df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                            value=y_measure,
+                            clearable=False,
+                            style={'font-size': '13px'})],
+                        style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})],
+                style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}),
             html.Div([
                 html.Div([
                     html.P(
@@ -1398,22 +1407,25 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                         clearable=False,
                         style={'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
-            html.Div([
-                html.Div([
-                    html.P(
-                        "{}:".format(get_label('LBL_Size_Measure')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
-                           'margin-right': '5px'}),
-                html.Div([
-                    dcc.Dropdown(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
-                        options=[] if df_const is None else [{'label': i, 'value': i} for i in
-                                                             df_const[df_name]['MEASURE_TYPE_OPTIONS']],
-                        value=size_measure,
-                        clearable=False,
-                        style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+            html.Div(
+                id={'type': 'hide-size-measure', 'index': tile},
+                children=[
+                    html.Div([
+                        html.P(
+                            "{}:".format(get_label('LBL_Size_Measure')),
+                            style={'color': CLR['text1'], 'font-size': '13px'})],
+                        style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
+                               'margin-right': '5px'}),
+                    html.Div([
+                        dcc.Dropdown(
+                            id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
+                            options=[] if df_const is None else [{'label': i, 'value': i} for i in
+                                                                 df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                            value=size_measure,
+                            clearable=False,
+                            style={'font-size': '13px'})],
+                        style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})],
+                style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}),
             dcc.Checklist(
                 id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 6},
                 options=[{'label': get_label('LBL_Show_Grid_Lines'),
@@ -1591,10 +1603,14 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
 
 
 # table menu layout
-def get_table_graph_menu(tile, number_of_columns):
+def get_table_graph_menu(tile, number_of_columns, xaxis, yaxis, xpos, ypos):
     """
     :param number_of_columns: The number of columns to display
     :param tile: Index of the tile the table instructions corresponds to.
+    :param xaxis: the title of the xaxis
+    :param yaxis: the title of the yaxis
+    :param xpos: the x position of the legend
+    :param ypos: the y position of the legend
     :return: Text instructions for how user can interact with table.
     """
     # (args-value: {})[0] = tile index
@@ -1662,16 +1678,47 @@ def get_table_graph_menu(tile, number_of_columns):
                     - Pour afficher les colonnes cachées, activez-les dans le menu 'BASCULER LES COLONNES'
                     ''')],
                 style={'margin-left': '15px'}),
+            html.Div([
+                dcc.Input(
+                    id={'type': 'xaxis-title', 'index': tile},
+                    type="text",
+                    value=xaxis if xaxis else None,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'yaxis-title', 'index': tile},
+                    type="text",
+                    value=yaxis if yaxis else None,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'x-pos-legend', 'index': tile},
+                    type="text",
+                    value=xpos if xpos else None,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'y-pos-legend', 'index': tile},
+                    type="text",
+                    value=ypos if ypos else None,
+                    style={'display': 'None'},
+                    debounce=True)],
+                style={'display': 'None'}),
         ], style={'font-size': '13px'})]
 
 
 # sankey menu layout
-def get_sankey_menu(tile, graphed_options, df_name, df_const):
+def get_sankey_menu(tile, graphed_options, df_name, df_const, xaxis, yaxis, xpos, ypos):
     """
     :param tile: Index of the tile the line graph menu corresponds to.
     :param graphed_options: the variable name
     :param df_name: Name of the data set being used.
     :param df_const: Dataframe constants
+    :param df_const: Dataframe constants
+    :param xaxis: the title of the xaxis
+    :param yaxis: the title of the yaxis
+    :param xpos: the x position of the legend
+    :param ypos: the y position of the legend
     :return: Menu with options to modify a sankey graph.
     """
     # (args-value: {})[0] = graphed variables
@@ -1709,5 +1756,32 @@ def get_sankey_menu(tile, graphed_options, df_name, df_const):
                         multi=False,
                         clearable=False,
                         style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})])
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})]),
+            html.Div([
+                dcc.Input(
+                    id={'type': 'xaxis-title', 'index': tile},
+                    type="text",
+                    value=xaxis if xaxis else None,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'yaxis-title', 'index': tile},
+                    type="text",
+                    value=yaxis if yaxis else None,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'x-pos-legend', 'index': tile},
+                    type="text",
+                    value=xpos if xpos else None,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'y-pos-legend', 'index': tile},
+                    type="text",
+                    value=ypos if ypos else None,
+                    style={'display': 'None'},
+                    debounce=True)],
+                style={'display': 'None'})
+
         ], style={'margin-left': '15px'})]

@@ -94,8 +94,8 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             }catch{ /* Do Nothing */ }
             return 0;
         },
-        graphLoadScreen1: function(n_click_view, view_content_className) {
-            if (view_content_className != 'tile-nav tile-nav--view tile-nav--selected'){
+        graphLoadScreen1: function(trigger) {
+            if (trigger == 'confirm-load'){
                 var newDiv = document.createElement('div');
                 newDiv.className = '_graph-data-loading';
                 newDiv.id = 'graph-loading1';
@@ -109,8 +109,8 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             }catch{ /* Do Nothing */ }
             return 0;
         },
-        graphLoadScreen2: function(n_click_view, view_content_className) {
-            if (view_content_className != 'tile-nav tile-nav--view tile-nav--selected'){
+        graphLoadScreen2: function(trigger) {
+            if (trigger == 'confirm-load'){
                 var newDiv = document.createElement('div');
                 newDiv.className = '_graph-data-loading';
                 newDiv.id = 'graph-loading2';
@@ -124,8 +124,8 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             }catch{ /* Do Nothing */ }
             return 0;
         },
-        graphLoadScreen3: function(n_click_view, view_content_className) {
-            if (view_content_className != 'tile-nav tile-nav--view tile-nav--selected'){
+        graphLoadScreen3: function(trigger) {
+            if (trigger == 'confirm-load'){
                 var newDiv = document.createElement('div');
                 newDiv.className = '_graph-data-loading';
                 newDiv.id = 'graph-loading3';

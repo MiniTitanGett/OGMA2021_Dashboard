@@ -127,6 +127,8 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
         # Specialty filtering
         if df_name != "OPG011":
             filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[2], df_const)
+        else:
+            filtered_df = dff.copy()
 
         hierarchy_col = get_hierarchy_col(hierarchy_type, hierarchy_level_dropdown, hierarchy_graph_children,
                                           hierarchy_path, df_name, df_const)
@@ -518,6 +520,8 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         # Specialty filtering
         if df_name != "OPG011":
             filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[2], df_const)
+        else:
+            filtered_df = dff.copy()
 
         hierarchy_col = get_hierarchy_col(hierarchy_type, hierarchy_level_dropdown, hierarchy_graph_children,
                                           hierarchy_path, df_name, df_const)
@@ -730,6 +734,8 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         # Specialty filtering
         if df_name != "OPG011":
             filtered_df = customize_menu_filter(dff, df_name, arg_value[0], arg_value[1], df_const)
+        else:
+            filtered_df = dff.copy()
 
         # if hierarchy type is "Level Filter", or "Specific Item" while "Graph all in Dropdown" is selected
         if hierarchy_type == 'Level Filter' or (hierarchy_type == 'Specific Item' and

@@ -445,22 +445,29 @@ def get_last_day_of_year(year):
 def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children, df_name,
                      df_const, secondary_type, end_secondary, end_year, start_secondary, start_year, timeframe,
                      fiscal_toggle, num_periods, period_type, arg_values=None, graph_type=None):
-    filtered_df = data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
-                                        hierarchy_graph_children, df_name, df_const)
 
     if df_name != 'OPG011':
+        filtered_df = data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
+                                            hierarchy_graph_children, df_name, df_const)
         time_df = data_time_filter(secondary_type, end_secondary, end_year, start_secondary, start_year, timeframe,
                                    fiscal_toggle, num_periods, period_type, df_name, df_const, filtered_df)
     else:
+        df = session[df_name].copy()
         if graph_type == "Line" or graph_type == "Scatter" or graph_type == "Bar" or graph_type == "Box":
             time_df = data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondary, end_year,
                                                       start_secondary, start_year, timeframe, fiscal_toggle,
                                                       num_periods, period_type, df_name, df_const, arg_values,
-                                                      graph_type, filtered_df)
+                                                      graph_type, df)
+
+            time_df = data_hierarchy_aggregator(time_df, hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
+                                                hierarchy_graph_children, df_name, df_const)
         else:
             time_df = data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year, start_secondary,
                                            start_year, timeframe, fiscal_toggle, num_periods, period_type, df_name,
-                                           df_const, filtered_df)
+                                           df_const, df)
+
+            time_df = data_hierarchy_aggregator(time_df, hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
+                                                hierarchy_graph_children, df_name, df_const)
 
     return time_df
 
@@ -497,6 +504,47 @@ def data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_drop
             filtered_df.dropna(subset=[df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)]], inplace=True)
     else:
         filtered_df = session[df_name]
+        # Filters out all rows that don't include path member at specific level
+        for i in range(len(hierarchy_path)):
+            filtered_df = filtered_df[filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i]]
+        # Filters out all rows that are more specific than given path
+        for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - len(hierarchy_path)):
+            bool_series = pd.isnull(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][
+                len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]])
+            filtered_df = filtered_df[bool_series]
+
+    return filtered_df
+
+
+def data_hierarchy_aggregator(filtered_df, hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
+                              hierarchy_graph_children, df_name, df_const):
+    # NOTE: This assumes hierarchy path is a list of all previously selected levels
+
+    if hierarchy_toggle == 'Level Filter' or (
+            (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == ['graph_children'])):
+        if hierarchy_toggle == 'Level Filter':
+            # If anything is in the drop down
+            if hierarchy_level_dropdown:
+                # Filter based on hierarchy level
+                filtered_df.dropna(subset=[hierarchy_level_dropdown], inplace=True)
+                for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - int(hierarchy_level_dropdown[1])):
+                    bool_series = pd.isnull(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][
+                        len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]])
+                    filtered_df = filtered_df[bool_series]
+            else:
+                # Returns empty data frame with column names
+                filtered_df = filtered_df[0:0]
+        else:
+            # Filters out all rows that are less specific than given path length
+            for i in range(len(hierarchy_path)):
+                filtered_df = filtered_df[filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i]]
+            # Filters out all rows that are more specific than given path length plus one to preserve the child column
+            for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - (len(hierarchy_path) + 1)):
+                bool_series = pd.isnull(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][
+                    len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]])
+                filtered_df = filtered_df[bool_series]
+            filtered_df.dropna(subset=[df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)]], inplace=True)
+    else:
         # Filters out all rows that don't include path member at specific level
         for i in range(len(hierarchy_path)):
             filtered_df = filtered_df[filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i]]

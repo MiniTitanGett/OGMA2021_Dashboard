@@ -2,7 +2,7 @@
 """
 layouts.py
 
-stores all layouts excluding hierarchy filter layout
+Stores all layouts excluding hierarchy filter layout
 """
 ######################################################################################################################
 

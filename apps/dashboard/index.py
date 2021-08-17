@@ -2,7 +2,7 @@
 """
 index.py
 
-combines the layout and callbacks to run the program
+Combines the layout and callbacks to run the program.
 """
 ######################################################################################################################
 

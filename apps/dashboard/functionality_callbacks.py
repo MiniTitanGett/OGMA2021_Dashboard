@@ -2,7 +2,7 @@
 """
 functionality_callbacks.py
 
-stores all callbacks for the functionality of the app
+Stores all callbacks for the functionality of the app.
 """
 ######################################################################################################################
 
@@ -16,7 +16,7 @@ import dash_core_components as dcc
 from re import search
 from flask import session
 
-# Internal Packages
+# Internal Modules
 from apps.dashboard.graphs import __update_graph
 from apps.dashboard.hierarchy_filter import generate_history_button, generate_dropdown
 from apps.dashboard.app import app
@@ -124,6 +124,7 @@ for x in range(4):
         tile = dash.callback_context.inputs_list[0]['id']['index']
         df_tile = None
         # --------------------------------------------------------------------------------------------------------------
+
         # check if keyword in df_name
         if df_name is not None:
             df_tile = df_name
@@ -156,6 +157,7 @@ for x in range(4):
                 (df_name is None and df_confirm is not None and parent_df_name != df_confirm):
             if df_confirm is not None:
                 df_tile = df_confirm
+
             graph = __update_graph(df_tile, arg_value, graph_type, tile_title, num_periods, period_type,
                                    hierarchy_toggle,
                                    hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options,
@@ -235,15 +237,13 @@ for x in range(5):
     def _print_choice_to_display_and_modify_dropdown(dropdown_val, _n_clicks_r, _n_clicks_tt,
                                                      n_clicks_click_history, state_of_display,
                                                      df_name):
-
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
-
         # if page loaded - prevent update
         if changed_id == '.':
             raise PreventUpdate
 
-        # create a comma delimited string for hierarchy (node id) navigation
         def get_nid_path(sod=None, dropdown_value=None):
+            """Create a comma delimited string for hierarchy (node id) navigation."""
             if sod is None:
                 sod = []
             path = "root"
@@ -276,12 +276,10 @@ for x in range(5):
             display_button = state_of_display
             nid_path = get_nid_path(sod=state_of_display)
             dropdown = generate_dropdown(changed_index, df_name, nid_path)
-
         elif 'hierarchy_to_top' in changed_id or 'data-set' in changed_id:
             display_button = []
             nid_path = get_nid_path()
             dropdown = generate_dropdown(changed_index, df_name, nid_path)
-
         elif 'hierarchy_specific_dropdown' in changed_id:
             # If dropdown has been remade, do not modify the history
             if dropdown_val is None:
@@ -297,13 +295,10 @@ for x in range(5):
                     (generate_history_button(dropdown_val, len(state_of_display), changed_index))]
                 nid_path = get_nid_path(sod=state_of_display, dropdown_value=dropdown_val)
                 dropdown = generate_dropdown(changed_index, df_name, nid_path)
-
         # If update triggered due to creation of a button do not update anything
         elif all(i == 0 for i in n_clicks_click_history):
             raise PreventUpdate
-
-        # If the history has been selected find the value of the button pressed and get it to reset the history and
-        # dropdown to that point
+        # If history has been selected find value of the button pressed and reset the history and dropdown to that point
         else:
             index = [i != 0 for i in n_clicks_click_history].index(True)
             history = state_of_display[:index + 1]
@@ -399,7 +394,6 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                 dcc.Input(id={'type': 'end-secondary-input', 'index': tile},
                           value=1)
             ], style={'width': '0', 'height': '0', 'overflow': 'hidden'})]
-
     # 'Select Range' was selected
     else:
         # tabs are unselected and enabled unless otherwise specified
@@ -438,7 +432,6 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                     id={'type': 'end-secondary-input', 'index': tile},
                     value=1,
                     style={'display': 'none'})])
-
         # if a tab was requested other than 'year', generate the default appearance of the selected tab
         elif 'n_clicks' in changed_id:
             conditions = ['date-picker-quarter-button' in changed_id, 'date-picker-month-button' in changed_id]
@@ -477,7 +470,6 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                                                maximum=fringe_max)
             left_column = [year_input_min, secondary_input_min]
             right_column = [year_input_max, secondary_input_max]
-
         # if an input within a tab changed to a valid value or fiscal year toggle changed, apply the change
         else:
             # if an invalid input exists, do not update
@@ -599,6 +591,7 @@ operators = [[' ge ', '>='],
 
 
 def split_filter_part(filter_part):
+    """Returns column name, operator and filter_value or None given a filter part."""
     for operator_type in operators:
         for operator in operator_type:
             if operator in filter_part:
@@ -736,7 +729,7 @@ for x in range(4):
         # Reformat date column
         dff['Date of Event'] = dff['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
 
-        # Filter based on datatable filters
+        # Filter based on data table filters
         filtering_expressions = filter_query.split(' && ')
         for filter_part in filtering_expressions:
             col_name, operator, filter_value = split_filter_part(filter_part)

@@ -692,6 +692,12 @@ EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Continue_And_Modify_My
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Continue_And_Modify_My_Graphs_As_Necessary', @language = 'Fr', @ref_desc = 'Fr: Continue and modify my graphs as necessary'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Continue_And_Unlink_My_Graphs', @language = 'En', @ref_desc = 'Continue and unlink my graphs'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Continue_And_Unlink_My_Graphs', @language = 'Fr', @ref_desc = 'Fr: Continue and unlink my graphs'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Continue_And_Unlink_My_Graphs', @language = 'En', @ref_desc = 'Continue and unlink my graphs'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Continue_And_Unlink_My_Graphs', @language = 'Fr', @ref_desc = 'Fr: Continue and unlink my graphs'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Axes_Graph_Labels_Modified', @language = 'En', @ref_desc = 'Your Axes Labels May Not Reflect The Graph'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Axes_Graph_Labels_Modified', @language = 'Fr', @ref_desc = 'Fr: Your Axes Labels May Not Reflect The Graph'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Axes_Graphs_Labels_Modified', @language = 'En', @ref_desc = 'Your Axes Labels May Not Reflect The Graphs'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Axes_Graphs_Labels_Modified', @language = 'Fr', @ref_desc = 'Fr: Your Axes Labels May Not Reflect The Graphs'
 
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'En',@ref_desc = 'Hierarchy Selection''s Children'
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'Fr',@ref_desc = 'Enfants de la Sélection de Hiérarchie'

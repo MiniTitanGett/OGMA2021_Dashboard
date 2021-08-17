@@ -577,7 +577,35 @@ def get_layout_dashboard():
             id={'type': 'minor-popup', 'index': 4},
             is_open=False,
             color='dark',
-            style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px', 'z-index': '500'},
+            style={'position': 'absolute', 'right': '50', 'top': '80%', 'margin-right': '-100px', 'z-index': '500'},
+            duration=4000),
+        dbc.Alert(
+            'Your Axes Label May Not Reflect The Graphs',
+            id={'type': 'axes-popup', 'index': 0},
+            is_open=False,
+            color='dark',
+            style={'position': 'absolute', 'right': '47%', 'top': '80%', 'margin-right': '-100px', 'z-index': '1070'},
+            duration=4000),
+        dbc.Alert(
+            'Your Axes Label May Not Reflect The Graphs',
+            id={'type': 'axes-popup', 'index': 1},
+            is_open=False,
+            color='dark',
+            style={'position': 'absolute', 'right': '47%', 'top': '80%', 'margin-right': '-100px', 'z-index': '1070'},
+            duration=4000),
+        dbc.Alert(
+            'Your Axes Label May Not Reflect The Graphs',
+            id={'type': 'axes-popup', 'index': 2},
+            is_open=False,
+            color='dark',
+            style={'position': 'absolute', 'right': '47%', 'top': '80%', 'margin-right': '-100px', 'z-index': '1070'},
+            duration=4000),
+        dbc.Alert(
+            'Your Axes Labels May Not Reflect The Graphs',
+            id={'type': 'axes-popup', 'index': 3},
+            is_open=False,
+            color='dark',
+            style={'position': 'absolute', 'right': '47%', 'top': '80%', 'margin-right': '-100px', 'z-index': '1070'},
             duration=4000),
         # dashboard-reset-confirmation is used by the prompts to reset the viewport
         dcc.Store(id='dashboard-reset-confirmation'),
@@ -686,7 +714,6 @@ def get_layout_dashboard():
 
 # create customize content
 def get_customize_content(tile, graph_type, graph_menu, df_name):
-
     graphs = []
     # check if keyword is in df_name
     if df_name is not None:
@@ -990,7 +1017,7 @@ def get_tile_layout(num_tiles, input_tiles, tile_keys=None, parent_df=None):
 
 # line graph menu layout
 def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridline, legend, df_const, data_fitting, ci,
-                                data_fit, degree, xaxis, yaxis, xpos, ypos):
+                                data_fit, degree, xaxis, yaxis, xpos, ypos, xmodified, ymodified):
     """
     :param data_fitting: boolean to determine whether to show data fitting options
     :param ci: show confidence interval or not
@@ -1179,38 +1206,19 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                     options=[{'label': get_label('LBL_Hide_Legend'), 'value': 'legend'}],
                     value=legend if legend else [],
                     style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
-                html.Div([
-                    dcc.Input(
-                        id={'type': 'xaxis-title', 'index': tile},
-                        type="text",
-                        value=xaxis if xaxis else None,
-                        style={'display': 'None'},
-                        debounce=True),
-                    dcc.Input(
-                        id={'type': 'yaxis-title', 'index': tile},
-                        type="text",
-                        value=yaxis if yaxis else None,
-                        style={'display': 'None'},
-                        debounce=True),
-                    dcc.Input(
-                        id={'type': 'x-pos-legend', 'index': tile},
-                        type="text",
-                        value=xpos if xpos else None,
-                        style={'display': 'None'},
-                        debounce=True),
-                    dcc.Input(
-                        id={'type': 'y-pos-legend', 'index': tile},
-                        type="text",
-                        value=ypos if ypos else None,
-                        style={'display': 'None'},
-                        debounce=True)],
-                    style={'display': 'None'})
+                html.Div(
+                    html.Div(
+                        children=get_default_graph_options(xaxis=xaxis, yaxis=yaxis, xpos=xpos, ypos=ypos,
+                                                           xmodified=xmodified, ymodified=ymodified, tile=tile),
+                        style=CUSTOMIZE_CONTENT_HIDE,
+                        id={'type': 'default-graph-options', 'index': tile}),
+                    id={'type': 'default-graph-options-wrapper', 'index': tile})
             ], style={'margin-left': '15px'})]), ]
 
 
 # bar graph menu layout
 def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline, legend, df_name, df_const, xaxis,
-                       yaxis, xpos, ypos):
+                       yaxis, xpos, ypos, xmodified, ymodified):
     """
     :param tile: Index of the tile the bar graph menu corresponds to.
     :param x: the x-axis value
@@ -1334,39 +1342,19 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
                           'value': 'legend'}],
                 value=legend if legend else [],
                 style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
-            html.Div([
-                dcc.Input(
-                    id={'type': 'xaxis-title', 'index': tile},
-                    type="text",
-                    value=xaxis if xaxis else None,
-                    style={'display': 'None'},
-                    debounce=True),
-                dcc.Input(
-                    id={'type': 'yaxis-title', 'index': tile},
-                    type="text",
-                    value=yaxis if yaxis else None,
-                    style={'display': 'None'},
-                    debounce=True),
-                dcc.Input(
-                    id={'type': 'x-pos-legend', 'index': tile},
-                    type="text",
-                    value=xpos if xpos else None,
-                    style={'display': 'None'},
-                    debounce=True),
-                dcc.Input(
-                    id={'type': 'y-pos-legend', 'index': tile},
-                    type="text",
-                    value=ypos if ypos else None,
-                    style={'display': 'None'},
-                    debounce=True)],
-                style={'display': 'None'})
-
+            html.Div(
+                html.Div(
+                    children=get_default_graph_options(xaxis=xaxis, yaxis=yaxis, xpos=xpos, ypos=ypos,
+                                                       xmodified=xmodified, ymodified=ymodified, tile=tile),
+                    style=CUSTOMIZE_CONTENT_HIDE,
+                    id={'type': 'default-graph-options', 'index': tile}),
+                id={'type': 'default-graph-options-wrapper', 'index': tile})
         ], style={'margin-left': '15px'})]
 
 
 # bubble graph menu layout
 def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, gridline, legend, df_name, df_const,
-                          xaxis, yaxis, xpos, ypos):
+                          xaxis, yaxis, xpos, ypos, xmodified, ymodified):
     """
     :param tile: Index of the tile the bar graph menu corresponds to.
     :param x: the x-axis value
@@ -1527,38 +1515,19 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                           'value': 'legend'}],
                 value=legend if legend else [],
                 style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
-            html.Div([
-                dcc.Input(
-                    id={'type': 'xaxis-title', 'index': tile},
-                    type="text",
-                    value=xaxis if xaxis else None,
-                    style={'display': 'None'},
-                    debounce=True),
-                dcc.Input(
-                    id={'type': 'yaxis-title', 'index': tile},
-                    type="text",
-                    value=yaxis if yaxis else None,
-                    style={'display': 'None'},
-                    debounce=True),
-                dcc.Input(
-                    id={'type': 'x-pos-legend', 'index': tile},
-                    type="text",
-                    value=xpos if xpos else None,
-                    style={'display': 'None'},
-                    debounce=True),
-                dcc.Input(
-                    id={'type': 'y-pos-legend', 'index': tile},
-                    type="text",
-                    value=ypos if ypos else None,
-                    style={'display': 'None'},
-                    debounce=True)],
-                style={'display': 'None'})
+            html.Div(
+                html.Div(
+                    children=get_default_graph_options(xaxis=xaxis, yaxis=yaxis, xpos=xpos, ypos=ypos,
+                                                       xmodified=xmodified, ymodified=ymodified, tile=tile),
+                    style=CUSTOMIZE_CONTENT_HIDE,
+                    id={'type': 'default-graph-options', 'index': tile}),
+                id={'type': 'default-graph-options-wrapper', 'index': tile})
         ], style={'margin-left': '15px'})]
 
 
 # box plot menu layout
 def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, df_name, show_data_points, gridline,
-                      legend, df_const, xaxis, yaxis, xpos, ypos):
+                      legend, df_const, xaxis, yaxis, xpos, ypos, xmodified, ymodified):
     """
         :param tile: Index of the tile the bar graph menu corresponds to.
         :param axis_measure: the measure for the axis
@@ -1662,37 +1631,18 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                           'value': 'legend'}],
                 value=legend if legend else [],
                 style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
-            html.Div([
-                dcc.Input(
-                    id={'type': 'xaxis-title', 'index': tile},
-                    type="text",
-                    value=xaxis if xaxis else None,
-                    style={'display': 'None'},
-                    debounce=True),
-                dcc.Input(
-                    id={'type': 'yaxis-title', 'index': tile},
-                    type="text",
-                    value=yaxis if yaxis else None,
-                    style={'display': 'None'},
-                    debounce=True),
-                dcc.Input(
-                    id={'type': 'x-pos-legend', 'index': tile},
-                    type="text",
-                    value=xpos if xpos else None,
-                    style={'display': 'None'},
-                    debounce=True),
-                dcc.Input(
-                    id={'type': 'y-pos-legend', 'index': tile},
-                    type="text",
-                    value=ypos if ypos else None,
-                    style={'display': 'None'},
-                    debounce=True)],
-                style={'display': 'None'})
+            html.Div(
+                html.Div(
+                    children=get_default_graph_options(xaxis=xaxis, yaxis=yaxis, xpos=xpos, ypos=ypos,
+                                                       xmodified=xmodified, ymodified=ymodified, tile=tile),
+                    style=CUSTOMIZE_CONTENT_HIDE,
+                    id={'type': 'default-graph-options', 'index': tile}),
+                id={'type': 'default-graph-options-wrapper', 'index': tile})
         ], style={'margin-left': '15px'})]
 
 
 # table menu layout
-def get_table_graph_menu(tile, number_of_columns, xaxis, yaxis, xpos, ypos):
+def get_table_graph_menu(tile, number_of_columns, xaxis, yaxis, xpos, ypos, xmodified, ymodified):
     """
     :param number_of_columns: The number of columns to display
     :param tile: Index of the tile the table instructions corresponds to.
@@ -1767,37 +1717,18 @@ def get_table_graph_menu(tile, number_of_columns, xaxis, yaxis, xpos, ypos):
                     - Pour afficher les colonnes cachées, activez-les dans le menu 'BASCULER LES COLONNES'
                     ''')],
                 style={'margin-left': '15px'}),
-            html.Div([
-                dcc.Input(
-                    id={'type': 'xaxis-title', 'index': tile},
-                    type="text",
-                    value=xaxis if xaxis else None,
-                    style={'display': 'None'},
-                    debounce=True),
-                dcc.Input(
-                    id={'type': 'yaxis-title', 'index': tile},
-                    type="text",
-                    value=yaxis if yaxis else None,
-                    style={'display': 'None'},
-                    debounce=True),
-                dcc.Input(
-                    id={'type': 'x-pos-legend', 'index': tile},
-                    type="text",
-                    value=xpos if xpos else None,
-                    style={'display': 'None'},
-                    debounce=True),
-                dcc.Input(
-                    id={'type': 'y-pos-legend', 'index': tile},
-                    type="text",
-                    value=ypos if ypos else None,
-                    style={'display': 'None'},
-                    debounce=True)],
-                style={'display': 'None'}),
+            html.Div(
+                html.Div(
+                    children=get_default_graph_options(xaxis=xaxis, yaxis=yaxis, xpos=xpos, ypos=ypos,
+                                                       xmodified=xmodified, ymodified=ymodified, tile=tile),
+                    style=CUSTOMIZE_CONTENT_HIDE,
+                    id={'type': 'default-graph-options', 'index': tile}),
+                id={'type': 'default-graph-options-wrapper', 'index': tile})
         ], style={'font-size': '13px'})]
 
 
 # sankey menu layout
-def get_sankey_menu(tile, graphed_options, df_name, df_const, xaxis, yaxis, xpos, ypos):
+def get_sankey_menu(tile, graphed_options, df_name, df_const, xaxis, yaxis, xpos, ypos, xmodified, ymodified):
     """
     :param tile: Index of the tile the line graph menu corresponds to.
     :param graphed_options: the variable name
@@ -1846,31 +1777,51 @@ def get_sankey_menu(tile, graphed_options, df_name, df_const, xaxis, yaxis, xpos
                         clearable=False,
                         style={'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})]),
-            html.Div([
-                dcc.Input(
-                    id={'type': 'xaxis-title', 'index': tile},
-                    type="text",
-                    value=xaxis if xaxis else None,
-                    style={'display': 'None'},
-                    debounce=True),
-                dcc.Input(
-                    id={'type': 'yaxis-title', 'index': tile},
-                    type="text",
-                    value=yaxis if yaxis else None,
-                    style={'display': 'None'},
-                    debounce=True),
-                dcc.Input(
-                    id={'type': 'x-pos-legend', 'index': tile},
-                    type="text",
-                    value=xpos if xpos else None,
-                    style={'display': 'None'},
-                    debounce=True),
-                dcc.Input(
-                    id={'type': 'y-pos-legend', 'index': tile},
-                    type="text",
-                    value=ypos if ypos else None,
-                    style={'display': 'None'},
-                    debounce=True)],
-                style={'display': 'None'})
+            html.Div(
+                html.Div(
+                    children=get_default_graph_options(xaxis=xaxis, yaxis=yaxis, xpos=xpos, ypos=ypos,
+                                                       xmodified=xmodified, ymodified=ymodified, tile=tile),
+                    style=CUSTOMIZE_CONTENT_HIDE,
+                    id={'type': 'default-graph-options', 'index': tile}),
+                id={'type': 'default-graph-options-wrapper', 'index': tile})
 
         ], style={'margin-left': '15px'})]
+
+
+# create graph options
+def get_default_graph_options(xaxis, yaxis, xpos, ypos, xmodified, ymodified, tile):
+    return [
+        html.Div([
+            dcc.Input(
+                id={'type': 'xaxis-title', 'index': tile},
+                type="text",
+                value=xaxis if xaxis else None,
+                style={'display': 'None'},
+                debounce=True),
+            dcc.Input(
+                id={'type': 'yaxis-title', 'index': tile},
+                type="text",
+                value=yaxis if yaxis else None,
+                style={'display': 'None'},
+                debounce=True),
+            dcc.Input(
+                id={'type': 'x-pos-legend', 'index': tile},
+                type="text",
+                value=xpos if xpos else None,
+                style={'display': 'None'},
+                debounce=True),
+            dcc.Input(
+                id={'type': 'y-pos-legend', 'index': tile},
+                type="text",
+                value=ypos if ypos else None,
+                style={'display': 'None'},
+                debounce=True),
+            # xmodified flags for when x axis label has been modified
+            dcc.Store(id={'type': 'x-modified', 'index': tile},
+                      data=xmodified if xmodified else None),
+            # ymodified flags for when y axis label has been modified
+            dcc.Store(id={'type': 'y-modified', 'index': tile},
+                      data=ymodified if ymodified else None),
+        ],
+            style={'display': 'None'})
+    ]

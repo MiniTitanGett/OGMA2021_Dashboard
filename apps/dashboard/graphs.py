@@ -354,6 +354,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
     # args_value[7] = legend toggle
 
     language = session["language"]
+    xaxis = None
+    yaxis = None
 
     # Check whether we have enough information to attempt getting data for a graph
     if hierarchy_type == 'Level Filter' and None not in [arg_value, hierarchy_level_dropdown, hierarchy_type,
@@ -519,7 +521,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
         result = parse('{} ({})', yaxis_title)
         if result is None:
             yaxis = yaxis_title
-        elif any(element in result[2] for element in df_const[df_name]['Variable_Option_Lists']) and \
+        elif any(element in result[0] for element in df_const[df_name]['Variable_Option_Lists']) and \
                 result[1] in df_const[df_name]['MEASURE_TYPE_OPTIONS']:
             yaxis = '{} ({})'.format(arg_value[2], arg_value[3])
     else:

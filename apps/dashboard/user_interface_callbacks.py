@@ -746,6 +746,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
                                            yaxis=None,
                                            xpos=None,
                                            ypos=None,
+                                           xmodified=None,
+                                           ymodified=None,
                                            df_name=df_name,
                                            df_const=df_const,
                                            data_fitting=data_fitting,
@@ -765,6 +767,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
                                   yaxis=None,
                                   xpos=None,
                                   ypos=None,
+                                  xmodified=None,
+                                  ymodified=None,
                                   df_name=df_name,
                                   df_const=df_const)
 
@@ -788,6 +792,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
                                      yaxis=None,
                                      xpos=None,
                                      ypos=None,
+                                     xmodified=None,
+                                     ymodified=None,
                                      df_name=df_name,
                                      df_const=df_const)
 
@@ -796,7 +802,9 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
                                     xaxis=None,
                                     yaxis=None,
                                     xpos=None,
-                                    ypos=None)
+                                    ypos=None,
+                                    xmodified=None,
+                                    ymodified=None)
 
     elif selected_graph_type == 'Box_Plot':
         menu = get_box_plot_menu(tile=tile,
@@ -813,6 +821,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
                                  yaxis=None,
                                  xpos=None,
                                  ypos=None,
+                                 xmodified=None,
+                                 ymodified=None,
                                  df_const=df_const)
 
     elif selected_graph_type == 'Sankey':
@@ -824,7 +834,9 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
                                xaxis=None,
                                yaxis=None,
                                xpos=None,
-                               ypos=None)
+                               ypos=None,
+                               xmodified=None,
+                               ymodified=None)
 
     else:
         raise PreventUpdate
@@ -1209,8 +1221,8 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                                                         prev_selection=prev_selection[i],
                                                         df_const=df_const) if prompt_result == 'op-2' \
                                     else get_data_menu(i, df_names[i],
-                                                        prev_selection=prev_selection[i],
-                                                        df_const=df_const)
+                                                       prev_selection=prev_selection[i],
+                                                       df_const=df_const)
                                 refresh_button[i] = {'padding': '10px 0', 'width': '15px',
                                                      'height': '15px',
                                                      'position': 'relative',
@@ -1589,6 +1601,8 @@ app.clientside_callback(
                     var y_axis = dash_clientside.no_update;
                     var x_legend = dash_clientside.no_update;
                     var y_legend = dash_clientside.no_update;
+                    var x_modified = false;
+                    var y_modified = false;
                     
                     // try setting the values if they exist
                     try { 
@@ -1609,8 +1623,10 @@ app.clientside_callback(
                         'event': {'x_axis': x_axis, 
                                   'y_axis': y_axis,
                                   'x_legend': x_legend,
-                                  'y_legend': y_legend}
-                    })
+                                  'y_legend': y_legend,
+                                  'x_modified': x_modified,
+                                  'y_modified': y_modified}
+                    });
                 });
             `
         }
@@ -1629,14 +1645,141 @@ app.clientside_callback(
 # axis_titles
 app.clientside_callback(
     """
-    function _update_axes_titles(event){
-        return [event.x_axis, event.y_axis, event.x_legend, event.y_legend];
+    function _update_axes_titles(event, dfConst, graphType, dfName, dfNameParent, linkState,argValue){
+        if(linkState == 'fa fa-link'){
+                dfName=dfNameParent;
+            }
+        if(event.x_axis != undefined){
+            switch(graphType){
+                case 'Line':
+                case 'Scatter':
+                    if(event.x_axis != 'Date of Event'){
+                        event.x_modified = true;
+                        break;
+                    }
+                    else{
+                        event.x_modified = false;
+                    }
+                case 'Bar':
+                    event.x_modified = true;
+                    break;
+                case 'Bubble':
+                    string= event.x_axis.split(" (")
+                    if(string.length==1){
+                        if(argValue[0]=='Time' && event.x_axis == 'Time'){
+                            event.x_modified = false;
+                            break;
+                        }
+                        else{ 
+                            event.x_modified = true;
+                            break;
+                        }
+                    }
+                    else{
+                        string[1]=string[1].replace(')','')
+                        let num=dfConst[dfName]['Variable_Option_Lists'].length
+                        for(let i=0;i<num;i++){
+                            if(dfConst[dfName]['Variable_Option_Lists'][i].includes(string[0])){
+                                if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(string[1])){
+                                    event.x_modified = false;
+                                    break;
+                                }
+                            }
+                            event.x_modified = true;
+                        }
+                        break;
+                    }
+                case 'Box_Plot':
+                    if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(event.x_axis)){
+                        event.x_modified = false;
+                        break;
+                    }
+                    else{
+                        event.x_modified = true;
+                        break;
+                    }
+                default:
+                    event.x_modified = false;
+                    break;
+            }
+        }
+        if(event.y_axis != undefined){
+            switch(graphType){
+                case 'Line':
+                case 'Scatter':
+                    if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(event.y_axis)){
+                    event.y_modified = false;
+                    break;
+                    }
+                    else{
+                        event.y_modified = true;
+                        break;
+                    }
+                case 'Bar':
+                    if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(event.y_axis)){
+                    event.y_modified = false;
+                    break;
+                    }
+                    else{
+                       event.y_modified = true;
+                       break;
+                    }
+                case 'Bubble':
+                    string= event.y_axis.split(" (")
+                    if(string.length==1){
+                        if(argValue[0]=='Time'){
+                            let num=dfConst[dfName]['Variable_Option_Lists'].length
+                            for(let i=0;i<num;i++){
+                                if(dfConst[dfName]['Variable_Option_Lists'][i].includes(string[0])){
+                                    event.y_modified = false;
+                                    break;
+                                }
+                                event.y_modified = true;
+                            }
+                            break;
+                        }
+                        else{ 
+                            event.y_modified = true;
+                            break;
+                        }
+                    }
+                    else{
+                        string[1]=string[1].replace(')','')
+                        let num=dfConst[dfName]['Variable_Option_Lists'].length
+                        for(let i=0;i<num;i++){
+                            if(dfConst[dfName]['Variable_Option_Lists'][i].includes(string[0])){
+                                if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(string[1])){
+                                    event.y_modified = false;
+                                    break;
+                                }
+                            }
+                        event.y_modified = true;
+                        }
+                        break;
+                    }
+                case 'Box_Plot':
+                    event.y_modified = true;
+                    break;
+                default:
+                    event.y_modified = false;
+                    break;
+            }
+        }
+        return [event.x_axis, event.y_axis, event.x_legend, event.y_legend, event.x_modified, event.y_modified];
     }
     """,
     [Output({"type": "xaxis-title", "index": MATCH}, 'value'),
      Output({"type": "yaxis-title", "index": MATCH}, 'value'),
      Output({'type': 'x-pos-legend', 'index': MATCH}, 'value'),
-     Output({'type': 'y-pos-legend', 'index': MATCH}, 'value')],
+     Output({'type': 'y-pos-legend', 'index': MATCH}, 'value'),
+     Output({'type': 'x-modified', 'index': MATCH}, 'data'),
+     Output({'type': 'y-modified', 'index': MATCH}, 'data')],
     Input({'type': 'javascript', 'index': MATCH}, 'event'),
+    [State('df-constants-storage', 'data'),
+     State({'type': 'graph-type-dropdown', 'index': MATCH}, 'value'),
+     State({'type': 'data-set', 'index': MATCH}, 'value'),
+     State({'type': 'data-set', 'index': 4}, 'value'),
+     State({'type': 'tile-link', 'index': MATCH}, 'className'),
+     State({'type': 'args-value: {}'.replace("{}", str(0)), 'index': ALL}, 'value')],
     prevent_initial_call=True
 )

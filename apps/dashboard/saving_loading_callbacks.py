@@ -188,6 +188,8 @@ for y in range(4):
          State({'type': 'graph-type-dropdown', 'index': y}, 'value'),
          State({'type': 'args-value: {}'.replace("{}", str(y)), 'index': ALL}, 'value'),
          State({'type': 'graph_display', 'index': y}, 'children'),
+         State({'type': 'x-modified', 'index': y}, 'data'),
+         State({'type': 'y-modified', 'index': y}, 'data'),
 
          # Data set states
          State({'type': 'data-set', 'index': y}, 'value'),
@@ -225,8 +227,8 @@ for y in range(4):
          State('df-constants-storage', 'data')],
         prevent_initial_call=True
     )
-    def _manage_tile_saves(trigger, graph_title, link_state, graph_type, args_list, graph_display, df_name,
-                           parent_df_name, parent_year_start, parent_year_end, parent_hierarchy_toggle,
+    def _manage_tile_saves(trigger, graph_title, link_state, graph_type, args_list, graph_display, xmodified, ymodified,
+                           df_name, parent_df_name, parent_year_start, parent_year_end, parent_hierarchy_toggle,
                            parent_hierarchy_level_dropdown, parent_state_of_display, parent_graph_children_toggle,
                            parent_fiscal_toggle, parent_input_method, parent_secondary_start, parent_secondary_end,
                            parent_x_time_period, parent_period_type, parent_tab, year_start, year_end, hierarchy_toggle,
@@ -277,6 +279,7 @@ for y in range(4):
         df_const_output = no_update
         link_output = no_update
         axes_title = [None, None, None, None]
+        axes_modified = [xmodified, ymodified]
 
         # if save requested or the overwrite was confirmed, check for exceptions and save
         if trigger == 'save' or trigger == 'confirm-overwrite':
@@ -317,14 +320,16 @@ for y in range(4):
                             axes_title[0] = graph_display['props']['figure']['layout']['xaxis']['title']['text']
                         if 'title' in graph_display['props']['figure']['layout']['yaxis']:
                             axes_title[1] = graph_display['props']['figure']['layout']['yaxis']['title']['text']
-                    if 'x' in graph_display['props']['figure']['layout']['legend']:
-                        axes_title[2] = graph_display['props']['figure']['layout']['legend']['x']
-                    if 'y' in graph_display['props']['figure']['layout']['legend']:
-                        axes_title[3] = graph_display['props']['figure']['layout']['legend']['y']
+                    if 'legend' in graph_display['props']['figure']['layout']:
+                        if 'x' in graph_display['props']['figure']['layout']['legend']:
+                            axes_title[2] = graph_display['props']['figure']['layout']['legend']['x']
+                        if 'y' in graph_display['props']['figure']['layout']['legend']:
+                            axes_title[3] = graph_display['props']['figure']['layout']['legend']['y']
 
                 elements_to_save = {'Graph Type': graph_type,
                                     'Args List': args_list,
                                     'Axes Title': axes_title,
+                                    'Axes Modified': axes_modified,
                                     'Fiscal Toggle': fiscal_toggle,
                                     'Timeframe': input_method,
                                     'Num Periods': x_time_period,
@@ -392,9 +397,10 @@ for y in range(4):
             graph_type = session['saved_layouts'][selected_layout]['Graph Type']
             args_list = session['saved_layouts'][selected_layout]['Args List']
             axes_title = session['saved_layouts'][selected_layout]['Axes Title']
+            axes_modified = session['saved_layouts'][selected_layout]['Axes Modified']
 
             graph_menu = load_graph_menu(graph_type=graph_type, tile=tile, df_name=df_name, args_list=args_list,
-                                         axes_title=axes_title, df_const=df_const)
+                                         axes_title=axes_title, axes_modified=axes_modified, df_const=df_const)
 
             customize_content = get_customize_content(tile=tile, graph_type=graph_type, graph_menu=graph_menu,
                                                       df_name=df_name)
@@ -554,6 +560,8 @@ for y in range(4):
      State({'type': 'yaxis-title', 'index': ALL}, 'value'),
      State({'type': 'x-pos-legend', 'index': ALL}, 'value'),
      State({'type': 'y-pos-legend', 'index': ALL}, 'value'),
+     State({'type': 'x-modified', 'index': ALL}, 'data'),
+     State({'type': 'y-modified', 'index': ALL}, 'data'),
      # data sets
      State({'type': 'data-set', 'index': 0}, 'value'),
      State({'type': 'data-set', 'index': 1}, 'value'),
@@ -645,7 +653,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                                       _reset_clicks, _close_clicks, prompt_data, float_menu_data, selected_dashboard,
                                       dashboard_title, tile_titles, links, graph_types,
                                       args_list_0, args_list_1, args_list_2, args_list_3,
-                                      xaxis_titles, yaxis_titles, x_leg_pos, y_leg_pos,
+                                      xaxis_titles, yaxis_titles, x_leg_pos, y_leg_pos, xmodified, ymodified,
                                       df_name_0, df_name_1, df_name_2, df_name_3, df_name4,
                                       start_year_0, start_year_1, start_year_2, start_year_3, start_year_4,
                                       end_year_0, end_year_1, end_year_2, end_year_3, end_year_4,
@@ -759,6 +767,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                     tile_data = {
                         "Args List": ["", "", ""],
                         "Axes Title": ["", ""],
+                        "Axes Modified": ["", ""],
                         "Data Set": "OPG001",  # "Data Set": "OPG001_2016-17_Week_v3.csv",
                         "Fiscal Toggle": "Gregorian",
                         "Graph All Toggle": [],
@@ -776,6 +785,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 graph_type = tile_data.pop('Graph Type')
                 args_list = tile_data.pop('Args List')
                 axes_title = tile_data.pop('Axes Title')
+                axes_modified = tile_data.pop('Axes Modified')
                 df_name = tile_data['Data Set']
 
                 # check if data is loaded
@@ -796,7 +806,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
 
                 # create tile keys
                 graph_menu = load_graph_menu(graph_type=graph_type, tile=tile_index, df_name=df_name,
-                                             args_list=args_list, axes_title=axes_title,
+                                             args_list=args_list, axes_title=axes_title, axes_modified=axes_modified,
                                              df_const=df_const)
                 # TODO: Need to add df name
                 customize_content = get_customize_content(tile=tile_index, graph_type=graph_type, graph_menu=graph_menu,
@@ -937,6 +947,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 dashboard_saves = {'Dashboard Title': dashboard_title}
                 arg_list_all = [args_list_0, args_list_1, args_list_2, args_list_3]
                 axes_titles_all = [xaxis_titles, yaxis_titles, x_leg_pos, y_leg_pos]
+                axes_modified_all = [xmodified, ymodified]
 
                 # if any tiles are linked, save the parent data menu
                 if links.count('fa fa-link') > 0:
@@ -983,7 +994,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                     # set up axes titles and args
                     args_list = arg_list_all[i]
                     axes_title = [x[i] for x in axes_titles_all if len(x) >= (i+1)]
-
+                    axes_modified = [x[i] for x in axes_modified_all if len(x) >= (i + 1)]
                     if type(button_paths[i]) == dict:
                         button_paths[i] = [button_paths[i]]
 
@@ -1027,7 +1038,8 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
 
                     # save tile to file
                     save_layout_state(tile_pointer, {'Graph Type': graph_types[i], 'Args List': args_list,
-                                                     'Axes Title': axes_title, **tile_data, 'Title': tile_titles[i]})
+                                                     'Axes Title': axes_title, 'Axes Modified': axes_modified,
+                                                     **tile_data, 'Title': tile_titles[i]})
                     # save_layout_to_file(session['saved_layouts'])
                     save_layout_to_db(tile_pointer, tile_titles[i], tile_titles[i] not in used_titles)
 

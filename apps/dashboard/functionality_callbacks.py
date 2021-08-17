@@ -15,6 +15,7 @@ import dash_html_components as html
 import dash_core_components as dcc
 from re import search
 from flask import session
+from dash import no_update
 
 # Internal Packages
 from apps.dashboard.graphs import __update_graph
@@ -36,16 +37,14 @@ from apps.dashboard.datepicker import get_date_box, update_date_columns, get_sec
 #       - operators
 #       - split_filter_part()
 #       - _update_table()
-# ********************************************Arbitrary Constants*****************************************************
-
-plotly_graph = {'Line': 'line', 'Bar': 'bar', 'Scatter': 'scatter', 'Bubble': 'bubble',
-                'Box_Plot': 'box', 'Table': 'table', 'Sankey': 'sankey'}
 # ***************************************************GRAPH************************************************************
 
 # update graph
 for x in range(4):
     @app.callback(
-        Output({'type': 'graph_display', 'index': x}, 'children'),
+        [Output({'type': 'graph_display', 'index': x}, 'children'),
+         Output({'type': 'axes-popup', 'index': x}, 'children'),
+         Output({'type': 'axes-popup', 'index': x}, 'is_open')],
         # Graph menu update graph trigger
         [Input({'type': 'update-graph-trigger', 'index': x}, 'data-graph_menu_trigger'),
          # Customize menu inputs
@@ -105,7 +104,12 @@ for x in range(4):
          State({'type': 'yaxis-title', 'index': x}, 'value'),
          # Legend Position
          State({'type': 'x-pos-legend', 'index': x}, 'value'),
-         State({'type': 'y-pos-legend', 'index': x}, 'value')],
+         State({'type': 'y-pos-legend', 'index': x}, 'value'),
+         # Axes Modified
+         State({'type': 'x-modified', 'index': x}, 'data'),
+         State({'type': 'y-modified', 'index': x}, 'data'),
+         State('num-tiles', 'data-num-tiles'),
+         ],
         prevent_initial_call=True
     )
     def _update_graph(_df_trigger, arg_value, graph_type, tile_title, _datepicker_trigger,
@@ -117,12 +121,14 @@ for x in range(4):
                       parent_secondary_type, parent_timeframe, parent_fiscal_toggle, parent_start_year, parent_end_year,
                       parent_start_secondary, parent_end_secondary, graph_display, df_name, parent_df_name,
                       link_state, hierarchy_options, parent_hierarchy_options, df_const, df_confirm, xaxis, yaxis,
-                      xlegend, ylegend):
+                      xlegend, ylegend, xmodified, ymodified, num_tiles):
 
         # -------------------------------------------Variable Declarations----------------------------------------------
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
         tile = dash.callback_context.inputs_list[0]['id']['index']
         df_tile = None
+        popup_text = no_update
+        popup_is_open = no_update
         # --------------------------------------------------------------------------------------------------------------
         # check if keyword in df_name
         if df_name is not None:
@@ -150,19 +156,28 @@ for x in range(4):
         if link_state == 'fa fa-unlink' and '"type":"tile-link"}.className' in changed_id:
             raise PreventUpdate
 
+        if (xmodified or ymodified) and 'args-value' in changed_id:
+            if num_tiles < 2:
+                popup_text = get_label('LBL_Axes_Graph_Labels_Modified')
+            else:
+                popup_text = get_label('LBL_Axes_Graphs_Labels_Modified')
+            popup_is_open = True
+
         # if linked and graph-type is in both data sets update graph
         if link_state == 'fa fa-link' and (df_name is not None
                                            and graph_type in GRAPH_OPTIONS[df_name] and df_name != parent_df_name) or \
                 (df_name is None and df_confirm is not None and parent_df_name != df_confirm):
             if df_confirm is not None:
                 df_tile = df_confirm
-            graph = __update_graph(df_tile, arg_value, graph_type, tile_title, num_periods, period_type,
-                                   hierarchy_toggle,
-                                   hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options,
-                                   state_of_display,
-                                   secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
-                                   end_secondary, df_const, xaxis, yaxis, xlegend, ylegend)
-            return graph
+            graph = __update_graph(df_tile, arg_value, graph_type, tile_title, num_periods,
+                                                           period_type, hierarchy_toggle,
+                                                           hierarchy_level_dropdown, hierarchy_graph_children,
+                                                           hierarchy_options,
+                                                           state_of_display,
+                                                           secondary_type, timeframe, fiscal_toggle, start_year,
+                                                           end_year, start_secondary,
+                                                           end_secondary, df_const, xaxis, yaxis, xlegend, ylegend)
+            return graph, popup_text, popup_is_open
 
         # account for tile being linked or not
         if link_state == 'fa fa-link':
@@ -206,15 +221,18 @@ for x in range(4):
             if arg_value[4] != 'no-fit' and (hierarchy_toggle != 'Specific Item' or hierarchy_graph_children != []):
                 arg_value[4] = 'no-fit'
 
-        graph = __update_graph(df_name, arg_value, graph_type, tile_title, num_periods, period_type, hierarchy_toggle,
-                               hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options, state_of_display,
-                               secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
-                               end_secondary, df_const, xaxis, yaxis, xlegend, ylegend)
+        graph = __update_graph(df_name, arg_value, graph_type, tile_title, num_periods,
+                                                       period_type, hierarchy_toggle,
+                                                       hierarchy_level_dropdown, hierarchy_graph_children,
+                                                       hierarchy_options, state_of_display,
+                                                       secondary_type, timeframe, fiscal_toggle, start_year, end_year,
+                                                       start_secondary,
+                                                       end_secondary, df_const, xaxis, yaxis, xlegend, ylegend)
 
         if graph is None:
             raise PreventUpdate
 
-        return graph
+        return graph, popup_text, popup_is_open
 
 # *******************************************************HIERARCHY***************************************************
 
@@ -365,7 +383,6 @@ app.clientside_callback(
 def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quarter_button_clicks,
                         _month_button_clicks, _week_button_clicks, start_year_selection, end_year_selection,
                         start_secondary_selection, end_secondary_selection, update_trigger, tab, df_name, df_const):
-
     # ----------------------------------------------Variable Declarations-----------------------------------------------
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     tile = dash.callback_context.inputs_list[0]['id']['index']
@@ -443,8 +460,8 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
         elif 'n_clicks' in changed_id:
             conditions = ['date-picker-quarter-button' in changed_id, 'date-picker-month-button' in changed_id]
             quarter_classname, quarter_disabled, month_classname, month_disabled, week_classname, week_disabled, \
-                fringe_min, fringe_max, default_max, max_year, \
-                new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
+            fringe_min, fringe_max, default_max, max_year, \
+            new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
             # set min_year according to user selected fiscal/gregorian time type
             if fiscal_toggle == 'Gregorian':
                 min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
@@ -500,8 +517,8 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                 selected_secondary_max = end_secondary_selection
                 conditions = [tab == 'Quarter', tab == 'Month']
                 quarter_classname, quarter_disabled, month_classname, month_disabled, week_classname, week_disabled, \
-                    fringe_min, fringe_max, default_max, max_year, \
-                    new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
+                fringe_min, fringe_max, default_max, max_year, \
+                new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
             # set min_year according to user selected time type (gregorian/fiscal)
             if fiscal_toggle == 'Gregorian':
                 min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
@@ -764,7 +781,7 @@ for x in range(4):
                 inplace=False)
 
         return dff.iloc[page_current * page_size: (page_current + 1) * page_size].to_dict('records'), \
-            math.ceil(dff.iloc[:, 0].size / page_size)
+               math.ceil(dff.iloc[:, 0].size / page_size)
 
 # *************************************************DATA-FITTING******************************************************
 # update the data fitting section of the edit graph menu
@@ -815,7 +832,7 @@ for x in range(4):
                 var hide_yaxis_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
                 var hide_size_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
                 }
-            return [xaxis, yaxis, hide_xaxis_measure, hide_yaxis_measure, hide_size_measure];
+            return [hide_xaxis_measure, hide_yaxis_measure, hide_size_measure];
         }
             """,
         [Output({'type': 'hide-xaxis-measure', 'index': x}, 'style'),

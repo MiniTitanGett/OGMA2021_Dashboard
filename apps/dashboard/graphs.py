@@ -21,6 +21,7 @@ import plotly.graph_objects as go
 # Internal Modules
 from apps.dashboard.data import get_label, data_filter, customize_menu_filter, linear_regression, polynomial_regression
 
+
 # ***********************************************HELPER FUNCTIONS****************************************************
 
 
@@ -99,6 +100,7 @@ def get_hierarchy_col(hierarchy_type, hierarchy_level_dropdown, hierarchy_graph_
         hierarchy_col = df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path) - 1]
 
     return hierarchy_col
+
 
 # ************************************************GRAPH FUNCTIONS**************************************************
 
@@ -356,6 +358,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
     # ------------------------------------------------------------------------------------------------------------------
 
     language = session["language"]
+    xaxis = None
+    yaxis = None
 
     # Check whether we have enough information to attempt getting data for a graph
     if hierarchy_type == 'Level Filter' and None not in [arg_value, hierarchy_level_dropdown, hierarchy_type,
@@ -514,7 +518,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
         xaxis = '{} ({})'.format(arg_value[0], arg_value[1])
 
     if arg_value[0] == 'Time' and (any(element in arg_value[2] for element in
-                                         df_const[df_name]['Variable_Option_Lists']) or yaxis_title is None):
+                                       df_const[df_name]['Variable_Option_Lists']) or yaxis_title is None):
         yaxis = '{}'.format(arg_value[2])
     elif yaxis_title:
         result = parse('{} ({})', yaxis_title)

@@ -139,14 +139,14 @@ for x in range(4):
                 df_name = 'OPG010'
 
         if '"type":"tile-view"}.className' in changed_id and df_name is None and parent_df_name is None:
-            return None
+            return None, popup_text, popup_is_open
 
         # if new/delete while the graph already exists, prevent update
         if changed_id == '.' and graph_display:
             raise PreventUpdate
 
         if len(arg_value) == 0:
-            return None
+            return None, popup_text, popup_is_open
 
         # if unlinked and parent changes, prevent update
         if (link_state == 'fa fa-unlink' and '"index":4' in changed_id) and 'args-value' not in changed_id:

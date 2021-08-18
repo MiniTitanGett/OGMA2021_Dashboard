@@ -577,7 +577,7 @@ def get_layout_dashboard():
             id={'type': 'minor-popup', 'index': 4},
             is_open=False,
             color='dark',
-            style={'position': 'absolute', 'right': '50', 'top': '80%', 'margin-right': '-100px', 'z-index': '500'},
+            style={'position': 'absolute', 'right': '50%', 'top': '80%', 'margin-right': '-100px', 'z-index': '500'},
             duration=4000),
         dbc.Alert(
             'Your Axes Label May Not Reflect The Graphs',
@@ -766,7 +766,7 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
             style=DATA_CONTENT_HIDE if df_name is None else
             {'margin-left': '15px'}),
         html.Div(
-            children=graph_menu,
+            children=graph_menu if df_name else empty_graph_menu(tile),
             id={'type': 'div-graph-options', 'index': tile})]
 
 
@@ -840,7 +840,8 @@ def get_tile(tile, tile_keys=None, df_name=None):
             html.Div(
                 html.Div(
                     tile_keys['Customize Content'] if tile_keys
-                    else get_customize_content(tile=tile, graph_type=None, graph_menu=None, df_name=df_name),
+                    else get_customize_content(tile=tile, graph_type=None, graph_menu=None,
+                                               df_name=df_name),
                     style=CUSTOMIZE_CONTENT_HIDE,
                     id={'type': 'tile-customize-content', 'index': tile},
                     className='customize-content'),
@@ -1036,6 +1037,8 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
     :param yaxis: the title of the yaxis
     :param xpos: the x position of the legend
     :param ypos: the y position of the legend
+    :param xmodified: the x title of the xaxis has been modified
+    :param ymodified: the y of the yaxis title has been modified
     :return: Menu with options to modify a line graph.
     """
     # arg_value[0] = xaxis selector
@@ -1234,6 +1237,8 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
     :param yaxis: the title of the yaxis
     :param xpos: the x position of the legend
     :param ypos: the y position of the legend
+    :param xmodified: the x title of the xaxis has been modified
+    :param ymodified: the y of the yaxis title has been modified
     :return: Menu with options to modify a bar graph.
     """
     # args_value[0] = x-axis
@@ -1371,6 +1376,8 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
     :param yaxis: the title of the yaxis
     :param xpos: the x position of the legend
     :param ypos: the y position of the legend
+    :param xmodified: the x title of the xaxis has been modified
+    :param ymodified: the y of the yaxis title has been modified
     :return: Menu with options to modify a bubble graph.
     """
     # args_value[0] = x-axis
@@ -1542,6 +1549,8 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
         :param yaxis: the title of the yaxis
         :param xpos: the x position of the legend
         :param ypos: the y position of the legend
+        :param xmodified: the x title of the xaxis has been modified
+        :param ymodified: the y of the yaxis title has been modified
         :return: Menu with options to modify a bar graph.
         """
     # args_value[0] = graphed variables
@@ -1650,6 +1659,8 @@ def get_table_graph_menu(tile, number_of_columns, xaxis, yaxis, xpos, ypos, xmod
     :param yaxis: the title of the yaxis
     :param xpos: the x position of the legend
     :param ypos: the y position of the legend
+    :param xmodified: the x title of the xaxis has been modified
+    :param ymodified: the y of the yaxis title has been modified
     :return: Text instructions for how user can interact with table.
     """
     # (args-value: {})[0] = tile index
@@ -1739,6 +1750,8 @@ def get_sankey_menu(tile, graphed_options, df_name, df_const, xaxis, yaxis, xpos
     :param yaxis: the title of the yaxis
     :param xpos: the x position of the legend
     :param ypos: the y position of the legend
+    :param xmodified: the x title of the xaxis has been modified
+    :param ymodified: the y of the yaxis title has been modified
     :return: Menu with options to modify a sankey graph.
     """
     # (args-value: {})[0] = graphed variables
@@ -1825,3 +1838,41 @@ def get_default_graph_options(xaxis, yaxis, xpos, ypos, xmodified, ymodified, ti
         ],
             style={'display': 'None'})
     ]
+
+
+# empty graph menu
+def empty_graph_menu(tile):
+    return [
+    html.Div([
+        dcc.Input(
+            id={'type': 'xaxis-title', 'index': tile},
+            type="text",
+            value=None,
+            style={'display': 'None'},
+            debounce=True),
+        dcc.Input(
+            id={'type': 'yaxis-title', 'index': tile},
+            type="text",
+            value=None,
+            style={'display': 'None'},
+            debounce=True),
+        dcc.Input(
+            id={'type': 'x-pos-legend', 'index': tile},
+            type="text",
+            value=None,
+            style={'display': 'None'},
+            debounce=True),
+        dcc.Input(
+            id={'type': 'y-pos-legend', 'index': tile},
+            type="text",
+            value=None,
+            style={'display': 'None'},
+            debounce=True),
+        # xmodified flags for when x axis label has been modified
+        dcc.Store(id={'type': 'x-modified', 'index': tile},
+                  data=None),
+        # ymodified flags for when y axis label has been modified
+        dcc.Store(id={'type': 'y-modified', 'index': tile},
+                  data=None),
+    ],
+        style={'display': 'None'})]

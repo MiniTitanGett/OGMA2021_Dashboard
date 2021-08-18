@@ -2,25 +2,22 @@
 """
 hierarchy.py
 
-contains helper functions for, and layout of, the hierarchy filter
+Contains helper functions for, and layout of, the hierarchy filter.
 """
 ######################################################################################################################
 
 # External Packages
-# import time
-
 import dash_core_components as dcc
 import dash_html_components as html
-# import pandas as pd
 
 # Internal Modules
 from apps.dashboard.data import get_label, session, CLR
 
-
 # ***********************************************HELPER FUNCTIONS****************************************************
 
-# helper function to generate hierarchy dropdown
+
 def generate_dropdown(tile, df_name, nid_path):
+    """Helper function to generate and return hierarchy drop-down."""
     if df_name:
         # using a subset of our dataframe, turn it into a multiindex df, and access unique values for option
         df = session[df_name][['H0', 'H1', 'H2', 'H3', 'H4', 'H5']]
@@ -48,8 +45,8 @@ def generate_dropdown(tile, df_name, nid_path):
             placeholder='{}...'.format(get_label('LBL_Select')))
 
 
-# helper function to generate a hierarchy button for hierarchy path
 def generate_history_button(name, index, tile):
+    """helper function to generate and return a hierarchy button for the hierarchy path."""
     return html.Button(
         name,
         id={'type': 'button: {}'.replace("{}", str(tile)), 'index': index},
@@ -58,11 +55,11 @@ def generate_history_button(name, index, tile):
                'cursor': 'pointer', 'text-align': 'center', 'text-decoration': 'underline', 'display': 'inline-block',
                'margin-left': str(index * 30) + 'px'})
 
-
 # ***********************************************LAYOUT***************************************************************
 
-# get hierarchy layout
+
 def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle, nid_path, df_const):
+    """Gets and returns the hierarchy layout."""
     if df_name is not None and df_const is not None:
         hierarchy_nid_list = nid_path.split("^||^")
         hierarchy_button_path = []

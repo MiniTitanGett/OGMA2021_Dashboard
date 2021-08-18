@@ -2,7 +2,7 @@
 """
 app.py
 
-initializes the app's: server, metadata and external stylesheets
+Initializes the app's: server, metadata and external stylesheets.
 """
 ######################################################################################################################
 

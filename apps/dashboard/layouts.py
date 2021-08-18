@@ -2,7 +2,7 @@
 """
 layouts.py
 
-stores all layouts excluding hierarchy filter layout
+Stores all layouts excluding hierarchy filter layout.
 """
 ######################################################################################################################
 
@@ -10,30 +10,27 @@ stores all layouts excluding hierarchy filter layout
 import inspect
 import dash_core_components as dcc
 import dash_html_components as html
+import visdcc as visdcc
 from dash.exceptions import PreventUpdate
 from flask import session
 import json
 import dash_bootstrap_components as dbc
+import dash_responsive_grid_layout as drgl
 
 # Internal Modules
 from conn import exec_storedproc_results
 from apps.dashboard.data import GRAPH_OPTIONS, CLR, DATA_CONTENT_SHOW, DATA_CONTENT_HIDE, VIEW_CONTENT_SHOW, \
-    BAR_X_AXIS_OPTIONS, CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LAYOUT_CONTENT_HIDE
+    BAR_X_AXIS_OPTIONS, CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LAYOUT_CONTENT_HIDE, LAYOUTS, \
+    dataset_to_df, generate_constants
 from apps.dashboard.hierarchy_filter import get_hierarchy_layout
 from apps.dashboard.datepicker import get_date_picker
 from apps.dashboard.graphs import __update_graph
 
-
 # ********************************************HELPER FUNCTION(S)******************************************************
 
-# change index numbers of all id's within tile or data side-menu
-def change_index(doc, index):
-    """
-    :param doc: An array of an unknown combination of nested lists/dictionaries.
-    :param index: New index integer to replace the old index integer.
-    :return: Pointer to the modified document.
-    """
 
+def change_index(doc, index):
+    """Change index numbers of all id's within tile or data side-menu."""
     def _change_index(document, new_index):
         if isinstance(document, list):
             for list_items in document:
@@ -57,6 +54,7 @@ def change_index(doc, index):
     return _change_index(document=doc, new_index=index)
 
 
+# TODO: No usages
 def recursive_to_plotly_json(document):
     document = document.to_plotly_json()
     inspect.getmembers(html, inspect.isclass)
@@ -87,19 +85,11 @@ def recursive_to_plotly_json(document):
 
     return _recursive_to_plotly_json(inner_document=document)
 
-
 # ************************************************DATA SIDE MENU******************************************************
 
 
-# get Data set picker for data menu
 def get_data_set_picker(tile, df_name, confirm_parent, prev_selection=None):
-    """
-    :param tile: Index of the created data side-menu.
-    :param df_name: Dataframe name.
-    :param prev_selection: takes in last selected dataframe
-    :param confirm_parent: the loaded dataset
-    :return: Drop down of the possible data sets.
-    """
+    """Returns data set picker for data menu."""
     return [
         html.Div(
             children=[
@@ -163,11 +153,10 @@ def get_data_set_picker(tile, df_name, confirm_parent, prev_selection=None):
     ]
 
 
-# get DATA side-menu
 def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Filter', level_value='H0',
                   nid_path="root", graph_all_toggle=None, fiscal_toggle='Gregorian', input_method='all-time',
                   num_periods='5', period_type='last-years', prev_selection=None, confirm_parent=None, df_const=None):
-
+    """Returns the data side-menu."""
     content = [
         html.A(
             className='boxclose',
@@ -192,29 +181,38 @@ def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Fi
             id={'type': 'data-menu-dashboard-loading', 'index': tile},
             style={'width': '260px', 'height': '100%', 'margin-left': '20px', 'margin-right': '20px',
                    'padding': '0'})
-
     elif mode == 'tile-loading':
         return content
-
     elif mode == 'dashboard-loading':
         return dashboard_loading_wrapper
 
-
 # ****************************************************TAB LAYOUT******************************************************
 
-# get div body
-def get_div_body(num_tiles=1, input_tiles=None, tile_keys=None):
+
+def get_div_body(num_tiles=1, tile_keys=None, layout=LAYOUTS[0]):
+    """Returns the div body."""
+    cols = {'lg': 24}
+    breakpoints = {'lg': 1200}
+    if num_tiles == 1 and tile_keys is None:
+        children = get_tile(0, df_name=None)
+    else:
+        children = get_tile_layout(num_tiles, tile_keys)
     return [
         # body div
-        html.Div(
-            get_tile_layout(num_tiles, input_tiles, tile_keys),
+        drgl.ResponsiveGridLayout(
+            children=children,
+            useCSSTransforms=True,
             id='div-body',
-            style={'overflow-x': 'hidden', 'overflow-y': 'hidden'},
-            className='graph-container')]
+            cols=cols,
+            rowHeight=40,
+            layouts=layout,
+            breakpoints=breakpoints,
+            draggableHandle='.dragbar')
+    ]
 
 
-# default tab layout
 def get_default_tab_content():
+    """Returns the default tab layout."""
     return [
         # stores number of tiles for the tab
         html.Div(
@@ -236,14 +234,16 @@ def get_default_tab_content():
 
 # *************************************************DASHBOARD LAYOUT***************************************************
 
-# Page layout for UI
+
 # https://community.plotly.com/t/dash-on-multi-page-site-app-route-flask-to-dash/4582/11
 def get_layout():
+    """Page layout for UI."""
     return html.Div([dcc.Location(id='url', refresh=False),
                      html.Div(id='page-content')])
 
 
 def get_layout_graph(report_name):
+    """Returns the graph loaded from database."""
     query = """\
     declare @p_report_layout varchar(max)
     declare @p_result_status varchar(255)
@@ -295,6 +295,10 @@ def get_layout_graph(report_name):
         state_of_display = '{{"props": {{"children": {}}}}}'.format(
             state_of_display)  # "{{'props': {{'children': {}}}}}".format(state_of_display)
 
+    # load data (added for external access)
+    session[j['Data Set']] = dataset_to_df(j['Data Set'])
+    df_const = {j['Data Set']: generate_constants(j['Data Set'])}
+
     graph = __update_graph(j['Data Set'],
                            j['Args List'],
                            j['Graph Type'],
@@ -313,9 +317,11 @@ def get_layout_graph(report_name):
                            j.get('End Year'),  # j['End Year'],
                            j.get('Start Secondary'),  # j['Start Secondary'],
                            j.get('End Secondary'),  # j['End Secondary']
-                           j.get('df_const'),
-                           None,  # xtitle
-                           None)  # ytitle
+                           df_const,
+                           j.get('Axes Title')[0],  # xtitle
+                           j.get('Axes Title')[1],  # ytitle
+                           j.get('Axes Title')[2],  # xlegpos
+                           j.get('Axes Title')[3])  # ylegpos
 
     if graph is None:
         raise PreventUpdate
@@ -323,8 +329,8 @@ def get_layout_graph(report_name):
     return graph
 
 
-# get the input box for the dashboard title
 def get_dashboard_title_input(title=''):
+    """Returns the input box for the dashboard title."""
     return dcc.Input(
         id='dashboard-title',
         placeholder=get_label('LBL_Enter_Dashboard_Title'),
@@ -333,11 +339,8 @@ def get_dashboard_title_input(title=''):
         debounce=True)
 
 
-# defines entire dashboard layout
 def get_layout_dashboard():
-    """
-    :return: Layout of app's UI.
-    """
+    """Returns layout of app's UI."""
     return html.Div([
         # flex
         html.Div([
@@ -579,6 +582,11 @@ def get_layout_dashboard():
             duration=4000),
         # dashboard-reset-confirmation is used by the prompts to reset the viewport
         dcc.Store(id='dashboard-reset-confirmation'),
+        # javascript visdcc object for running the javascript required to handle plotly_relayout events
+        visdcc.Run_js(id={'type': 'javascript', 'index': 0}),
+        visdcc.Run_js(id={'type': 'javascript', 'index': 1}),
+        visdcc.Run_js(id={'type': 'javascript', 'index': 2}),
+        visdcc.Run_js(id={'type': 'javascript', 'index': 3}),
         # select-range-trigger is used by the load callbacks to load the select range datepicker section
         dcc.Store(id={'type': 'select-range-trigger', 'index': 0}),
         dcc.Store(id={'type': 'select-range-trigger', 'index': 1}),
@@ -674,19 +682,20 @@ def get_layout_dashboard():
             id='df-constants-storage-dashboard-wrapper')
     ], style={'background-color': CLR['lightpink']})
 
-
 # ****************************************************TILE LAYOUT****************************************************
 
-# create customize content
-def get_customize_content(tile, graph_type, graph_menu, df_name):
-    if df_name == 'OPG010':
-        graphs = GRAPH_OPTIONS['OPG010']
-    elif df_name == 'OPG001':
-        graphs = GRAPH_OPTIONS['OPG001']
-    else:
-        graphs = []
 
+def get_customize_content(tile, graph_type, graph_menu, df_name):
+    """Returns the customize content."""
+    graphs = []
     options = []
+    # check if keyword is in df_name
+    if df_name is not None:
+        if 'OPG010' in df_name:
+            graphs = GRAPH_OPTIONS['OPG010']
+        elif 'OPG001' in df_name:
+            graphs = GRAPH_OPTIONS['OPG001']
+    graphs.sort()
     for i in graphs:
         options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
 
@@ -733,253 +742,151 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
             id={'type': 'div-graph-options', 'index': tile})]
 
 
-# create default tile
 def get_tile(tile, tile_keys=None, df_name=None):
     """
     :param tile: Index of the created tile.
     :param tile_keys: Holds information regarding tile values
     :param df_name: Name of the data set being used.
-    :return: New tile with index values matching the specified tile index.
+    :return: New default tile with index values matching the specified tile index.
     """
-    return [html.Div([
-        # flex container
+    return html.Div(
         html.Div([
-            html.Header([
-                dcc.Input(
-                    id={'type': 'tile-title', 'index': tile},
-                    placeholder=get_label('LBL_Enter_Graph_Title'),
-                    value=tile_keys['Tile Title'] if tile_keys else '',
-                    className='tile-title',
-                    debounce=True),
-                html.Button(
-                    [get_label('LBL_Graph')],
-                    id={'type': 'tile-view', 'index': tile},
-                    className='tile-nav tile-nav--view tile-nav--selected'),
-                dcc.Store(
-                    id={'type': 'tile-view-store', 'index': tile}),
-                html.Button(
-                    [get_label('LBL_Edit')],
-                    id={'type': 'tile-customize', 'index': tile},
-                    className='tile-nav tile-nav--customize'),
-                html.Button(
-                    [get_label('LBL_Save')],
-                    id={'type': 'save-button', 'index': tile},
-                    n_clicks=0,
-                    className='tile-nav tile-nav--save'),
-                html.Button(
-                    [get_label('LBL_Load')],
-                    id={'type': 'tile-layouts', 'index': tile},
-                    className='tile-nav tile-nav--layout'),
-                html.Button(
-                    [get_label('LBL_Delete')],
-                    id={'type': 'delete-button', 'index': tile},
-                    className='tile-nav tile-nav--delete'),
-                html.Button(
-                    [get_label('LBL_Data')],
-                    id={'type': 'tile-data', 'index': tile},
-                    className='tile-nav tile-nav--data'),
+            # flex container
+            html.Div([
+                html.Div([
+                    dcc.Input(
+                        id={'type': 'tile-title', 'index': tile},
+                        placeholder=get_label('LBL_Enter_Graph_Title'),
+                        value=tile_keys['Tile Title'] if tile_keys else '',
+                        className='tile-title',
+                        debounce=True),
+                    html.Header([
+                        html.Button(
+                            [get_label('LBL_Graph')],
+                            id={'type': 'tile-view', 'index': tile},
+                            className='tile-nav tile-nav--view tile-nav--selected'),
+                        dcc.Store(
+                            id={'type': 'tile-view-store', 'index': tile}),
+                        html.Button(
+                            [get_label('LBL_Edit')],
+                            id={'type': 'tile-customize', 'index': tile},
+                            className='tile-nav tile-nav--customize'),
+                        html.Button(
+                            [get_label('LBL_Save')],
+                            id={'type': 'save-button', 'index': tile},
+                            n_clicks=0,
+                            className='tile-nav tile-nav--save'),
+                        html.Button(
+                            [get_label('LBL_Load')],
+                            id={'type': 'tile-layouts', 'index': tile},
+                            className='tile-nav tile-nav--layout'),
+                        html.Button(
+                            [get_label('LBL_Delete')],
+                            id={'type': 'delete-button', 'index': tile},
+                            className='tile-nav tile-nav--delete'),
+                        html.Button(
+                            [get_label('LBL_Data')],
+                            id={'type': 'tile-data', 'index': tile},
+                            className='tile-nav tile-nav--data')],
+                        className='dragbar',
+                        id={'type': 'tile-menu-header', 'index': tile},
+                        style={'margin-right': '25px', 'flex-grow': '1'}),
+                ], style={'display': 'flex'}),
                 html.Div(
                     html.I(
                         className=tile_keys['Link'] if tile_keys else 'fa fa-link',
                         id={'type': 'tile-link', 'index': tile},
                         style={'position': 'relative'}),
-                    id={'type': 'tile-link-wrapper', 'index': tile})],
-                id={'type': 'tile-menu-header', 'index': tile},
-                style={'margin-right': '25px'}),
-            html.A(
-                className='boxclose',
-                id={'type': 'tile-close', 'index': tile},
-                style={'position': 'absolute', 'right': '0', 'top': '0'}),
-            html.Div(
-                style=VIEW_CONTENT_SHOW,
-                id={'type': 'tile-view-content', 'index': tile},
-                className='fill-container',
-                children=[
-                    html.Div(
-                        children=[],
-                        id={'type': 'graph_display', 'index': tile},
-                        className='fill-container')]),
-            html.Div(
+                    className='dragbar',
+                    id={'type': 'tile-link-wrapper', 'index': tile}),
+                html.A(
+                    className='boxclose',
+                    id={'type': 'tile-close', 'index': tile},
+                    style={'position': 'absolute', 'right': '0', 'top': '0'}),
                 html.Div(
-                    tile_keys['Customize Content'] if tile_keys
-                    else get_customize_content(tile=tile, graph_type=None, graph_menu=None, df_name=df_name),
-                    style=CUSTOMIZE_CONTENT_HIDE,
-                    id={'type': 'tile-customize-content', 'index': tile},
-                    className='customize-content'),
-                id={'type': 'tile-customize-content-wrapper', 'index': tile},
-                className='customize-content'),
-            html.Div([
-                html.P(get_label('LBL_Load_A_Saved_Graph'),
-                       style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
-                html.Div(
-                    id={'type': 'select-layout-dropdown-div', 'index': tile},
+                    style=VIEW_CONTENT_SHOW,
+                    id={'type': 'tile-view-content', 'index': tile},
+                    className='fill-container',
                     children=[
-                        dcc.Dropdown(id={'type': 'select-layout-dropdown', 'index': tile},
-                                     options=[{'label': session['saved_layouts'][key]['Title'], 'value': key} for key in
-                                              session['saved_layouts']],
-                                     style={'width': '400px', 'font-size': '13px'},
-                                     clearable=False,
-                                     value='',
-                                     placeholder='{}...'.format(get_label('LBL_Select')))
-                    ], style={'width': '400px'}),
-                html.P(get_label('LBL_Load_Graph_Prompt'),
-                       id={'type': 'tile-layouts-warning', 'index': tile},
-                       style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
-            ], style=LAYOUT_CONTENT_HIDE,
-                id={'type': 'tile-layouts-content', 'index': tile},
-                className='customize-content')
-        ], style={'flex-direction': 'column'},
-            id={'type': 'tile-body', 'index': tile},
-            className='flex-container fill-container')
-    ], className='tile-container',
-        id={'type': 'tile', 'index': tile},
-        style={'z-index': '{}'.replace("{}", str(tile))})]
+                        html.Div(
+                            children=[],
+                            id={'type': 'graph_display', 'index': tile},
+                            className='fill-container')]),
+                html.Div(
+                    html.Div(
+                        tile_keys['Customize Content'] if tile_keys
+                        else get_customize_content(tile=tile, graph_type=None, graph_menu=None, df_name=df_name),
+                        style=CUSTOMIZE_CONTENT_HIDE,
+                        id={'type': 'tile-customize-content', 'index': tile},
+                        className='customize-content'),
+                    id={'type': 'tile-customize-content-wrapper', 'index': tile},
+                    className='customize-content'),
+                html.Div([
+                    html.P(get_label('LBL_Load_A_Saved_Graph'),
+                           style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
+                    html.Div(
+                        id={'type': 'select-layout-dropdown-div', 'index': tile},
+                        children=[
+                            dcc.Dropdown(id={'type': 'select-layout-dropdown', 'index': tile},
+                                         options=[{'label': session['saved_layouts'][key]['Title'], 'value': key} for
+                                                  key in
+                                                  session['saved_layouts']],
+                                         style={'width': '400px', 'font-size': '13px'},
+                                         clearable=False,
+                                         value='',
+                                         placeholder='{}...'.format(get_label('LBL_Select')))
+                        ], style={'width': '400px'}),
+                    html.P(get_label('LBL_Load_Graph_Prompt'),
+                           id={'type': 'tile-layouts-warning', 'index': tile},
+                           style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
+                ], style=LAYOUT_CONTENT_HIDE,
+                    id={'type': 'tile-layouts-content', 'index': tile},
+                    className='customize-content')
+            ], style={'flex-direction': 'column'},
+                id={'type': 'tile-body', 'index': tile},
+                className='flex-container fill-container'),
+            # used to prevent graph menu rebuilds on key built components
+            # (Rebuild menu if set to True, Do not rebuild menu if False)
+            dcc.Store(id={'type': 'tile-rebuild-menu-flag', 'index': tile},
+                      data=tile_keys['Rebuild Menu'] if tile_keys else True),
+        ], className='tile-container',
+            id={'type': 'tile', 'index': tile}),
+        className='fill-container',
+        style={'border': '1px solid {}'.format(CLR['lightgray'])},
+        id="tile-wrapper: " + str(tile))  # added to remove errors on responsive grid layout
 
 
 # arrange tiles on the page for 1-4 tiles
-def get_tile_layout(num_tiles, input_tiles, tile_keys=None, parent_df=None):
+def get_tile_layout(num_tiles, tile_keys=None, parent_df=None):
     """
     :param num_tiles: Desired number of tiles to display.
-    :param input_tiles: List of children of existing tiles.
-    :param tile_keys:
+    :param tile_keys: key info for building a tile
     :param parent_df: Name of the parent data set being used
     :raise IndexError: If num_tiles < 0 or num_tiles > 4
     :return: Layout of specified number of tiles.
     """
-    tile = [None, None, None, None]
+    tile = []
     # for each case, prioritize reusing existing input_tiles, otherwise create default tiles where needed
     if num_tiles == 0:
         children = []
-    elif num_tiles == 1:
-        if input_tiles:
-            tile[0] = [
-                html.Div(
-                    children=input_tiles[0],
-                    className='tile-container',
-                    id={'type': 'tile', 'index': 0}, style={'z-index': '0'})]
-        elif tile_keys:
-            tile[0] = get_tile(0, tile_keys[0], df_name=parent_df)
-        else:
-            tile[0] = get_tile(0, df_name=parent_df)
-        children = [
-            html.Div([
-                html.Div(
-                    children=tile[0],
-                    style={'grid-row': '1', 'grid-column': '1', '-ms-grid-row': '1', '-ms-grid-column': '1'})],
-                className='grid-container fill-container',
-                style={'grid-template-rows': '100%', 'grid-template-columns': '100%',
-                       '-ms-grid-rows': '100%', '-ms-grid-columns': '100%'})]
-    elif num_tiles == 2:
-        if input_tiles:
-            for i in range(len(input_tiles)):
-                tile[i] = [
-                    html.Div(
-                        children=input_tiles[i],
-                        className='tile-container',
-                        id={'type': 'tile', 'index': i},
-                        style={'z-index': '{}'.replace("{}", str(i))})]
-            for i in range(len(input_tiles), num_tiles):
-                tile[i] = get_tile(i, df_name=parent_df)
-        elif tile_keys:
+    elif 5 > num_tiles:
+        if tile_keys:
             for i in range(num_tiles):
-                tile[i] = get_tile(i, tile_keys[i], df_name=parent_df)
+                tile.append(get_tile(i, tile_keys[i], df_name=parent_df))
         else:
             for i in range(num_tiles):
-                tile[i] = get_tile(i, df_name=parent_df)
-        children = [
-            html.Div([
-                html.Div(
-                    children=tile[0],
-                    style={'grid-row': '1', 'grid-column': '1', '-ms-grid-row': '1', '-ms-grid-column': '1'}),
-                html.Div(
-                    children=tile[1],
-                    style={'border-left': '1px solid {}'.format(CLR['lightergray']),
-                           'grid-row': '1', 'grid-column': '2', '-ms-grid-row': '1', '-ms-grid-column': '2'})
-            ], className='grid-container fill-container',
-                style={'grid-template-rows': '100%', 'grid-template-columns': '50% 50%',
-                       '-ms-grid-rows': '100%', '-ms-grid-columns': '50% 50%'})]
-    elif num_tiles == 3:
-        if input_tiles:
-            for i in range(len(input_tiles)):
-                tile[i] = [
-                    html.Div(
-                        children=input_tiles[i],
-                        className='tile-container',
-                        id={'type': 'tile', 'index': i},
-                        style={'z-index': '{}'.replace("{}", str(i))})]
-            for i in range(len(input_tiles), num_tiles):
-                tile[i] = get_tile(i, df_name=parent_df)
-        elif tile_keys:
-            for i in range(num_tiles):
-                tile[i] = get_tile(i, tile_keys[i], df_name=parent_df)
-        else:
-            for i in range(num_tiles):
-                tile[i] = get_tile(i, df_name=parent_df)
-        children = [
-            html.Div([
-                html.Div(
-                    children=tile[0],
-                    style={'grid-row': '1', 'grid-column': '1', '-ms-grid-row': '1', '-ms-grid-column': '1'}),
-                html.Div(
-                    children=tile[1],
-                    style={'border-left': '1px solid {}'.format(CLR['lightergray']),
-                           'grid-row': '1', 'grid-column': '2', '-ms-grid-row': '1', '-ms-grid-column': '2'}),
-                html.Div(
-                    children=tile[2],
-                    style={'border-top': '1px solid {}'.format(CLR['lightergray']), 'grid-row': '2',
-                           'grid-column-start': '1', 'grid-column-end': '-1', '-ms-grid-row': '2',
-                           '-ms-grid-column': '1', '-ms-grid-column-span': '2'})
-            ], className='grid-container fill-container',
-                style={'grid-template-rows': '50% 50%', 'grid-template-columns': '50% 50%',
-                       '-ms-grid-rows': '50% 50%', '-ms-grid-columns': '50% 50%'})]
-    elif num_tiles == 4:
-        if input_tiles:
-            for i in range(len(input_tiles)):
-                tile[i] = [
-                    html.Div(
-                        children=input_tiles[i],
-                        className='tile-container',
-                        id={'type': 'tile', 'index': i},
-                        style={'z-index': '{}'.replace("{}", str(i))})]
-            for i in range(len(input_tiles), num_tiles):
-                tile[i] = get_tile(i, df_name=parent_df)
-        elif tile_keys:
-            for i in range(num_tiles):
-                tile[i] = get_tile(i, tile_keys[i], df_name=parent_df)
-        else:
-            for i in range(num_tiles):
-                tile[i] = get_tile(i, df_name=parent_df)
-        children = [
-            html.Div([
-                html.Div(
-                    children=tile[0],
-                    style={'grid-row': '1', 'grid-column': '1', '-ms-grid-row': '1', '-ms-grid-column': '1'}),
-                html.Div(
-                    children=tile[1],
-                    style={'border-left': '1px solid {}'.format(CLR['lightergray']),
-                           'grid-row': '1', 'grid-column': '2', '-ms-grid-row': '1', '-ms-grid-column': '2'}),
-                html.Div(
-                    children=tile[2],
-                    style={'border-top': '1px solid {}'.format(CLR['lightergray']),
-                           'grid-row': '2', 'grid-column': '1', '-ms-grid-row': '2', '-ms-grid-column': '1'}),
-                html.Div(
-                    children=tile[3],
-                    style={'border-top': '1px solid {}'.format(CLR['lightergray']),
-                           'border-left': '1px solid {}'.format(CLR['lightergray']),
-                           'grid-row': '2', 'grid-column': '2', '-ms-grid-row': '2', '-ms-grid-column': '2'})
-            ], className='grid-container fill-container',
-                style={'grid-template-rows': '50% 50%', 'grid-template-columns': '50% 50%',
-                       '-ms-grid-rows': '50% 50%', '-ms-grid-columns': '50% 50%'})]
+                tile.append(get_tile(i, df_name=parent_df))
+        children = tile
+
     else:
         raise IndexError("The number of displayed tiles cannot exceed 4, " + str(num_tiles) + " tiles were requested")
     return children
 
-
 # ***************************************************GRAPH MENUS*****************************************************
 
-# line graph menu layout
+
 def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridline, legend, df_const, data_fitting, ci,
-                                data_fit, degree, xaxis, yaxis):
+                                data_fit, degree, xaxis, yaxis, xpos, ypos):
     """
     :param data_fitting: boolean to determine whether to show data fitting options
     :param ci: show confidence interval or not
@@ -996,6 +903,8 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
     :param degree: degree value
     :param xaxis: the title of the xaxis
     :param yaxis: the title of the yaxis
+    :param xpos: the x position of the legend
+    :param ypos: the y position of the legend
     :return: Menu with options to modify a line graph.
     """
     # arg_value[0] = xaxis selector
@@ -1168,37 +1077,50 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                     style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
                 html.Div([
                     dcc.Input(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 9},
+                        id={'type': 'xaxis-title', 'index': tile},
                         type="text",
-                        value=xaxis,
+                        value=xaxis if xaxis else None,
                         style={'display': 'None'},
                         debounce=True),
                     dcc.Input(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 10},
+                        id={'type': 'yaxis-title', 'index': tile},
                         type="text",
-                        value=yaxis,
+                        value=yaxis if yaxis else None,
+                        style={'display': 'None'},
+                        debounce=True),
+                    dcc.Input(
+                        id={'type': 'x-pos-legend', 'index': tile},
+                        type="text",
+                        value=xpos if xpos else None,
+                        style={'display': 'None'},
+                        debounce=True),
+                    dcc.Input(
+                        id={'type': 'y-pos-legend', 'index': tile},
+                        type="text",
+                        value=ypos if ypos else None,
                         style={'display': 'None'},
                         debounce=True)],
                     style={'display': 'None'})
             ], style={'margin-left': '15px'})]), ]
 
 
-# bar graph menu layout
 def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline, legend, df_name, df_const, xaxis,
-                       yaxis):
+                       yaxis, xpos, ypos):
     """
-    :param measure_type: the measure type value
-    :param y: the y-axis value
+    :param tile: Index of the tile the bar graph menu corresponds to.
     :param x: the x-axis value
+    :param y: the y-axis value
+    :param measure_type: the measure type value
     :param orientation: the orientation value
     :param animate: the animate graph value
     :param gridline: Show gridline or not
     :param legend: Show legend or not
-    :param tile: Index of the tile the bar graph menu corresponds to.
     :param df_name: Name of the data set being used.
     :param df_const: Dataframe constants
     :param xaxis: the title of the xaxis
     :param yaxis: the title of the yaxis
+    :param xpos: the x position of the legend
+    :param ypos: the y position of the legend
     :return: Menu with options to modify a bar graph.
     """
     # args_value[0] = x-axis
@@ -1309,15 +1231,27 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
                 style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
             html.Div([
                 dcc.Input(
-                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 7},
+                    id={'type': 'xaxis-title', 'index': tile},
                     type="text",
-                    value=xaxis,
+                    value=xaxis if xaxis else None,
                     style={'display': 'None'},
                     debounce=True),
                 dcc.Input(
-                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 8},
+                    id={'type': 'yaxis-title', 'index': tile},
                     type="text",
-                    value=yaxis,
+                    value=yaxis if yaxis else None,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'x-pos-legend', 'index': tile},
+                    type="text",
+                    value=xpos if xpos else None,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'y-pos-legend', 'index': tile},
+                    type="text",
+                    value=ypos if ypos else None,
                     style={'display': 'None'},
                     debounce=True)],
                 style={'display': 'None'})
@@ -1325,9 +1259,26 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
         ], style={'margin-left': '15px'})]
 
 
-# bubble graph menu layout
 def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, gridline, legend, df_name, df_const,
-                          xaxis, yaxis):
+                          xaxis, yaxis, xpos, ypos):
+    """
+    :param tile: Index of the tile the bar graph menu corresponds to.
+    :param x: the x-axis value
+    :param x_measure: the x-axis measure
+    :param y: the y-axis value
+    :param y_measure: the y-axis measure
+    :param size: the size value
+    :param size_measure: the size measure
+    :param gridline: Show gridline or not
+    :param legend: Show legend or not
+    :param df_name: Name of the data set being used.
+    :param df_const: Dataframe constants
+    :param xaxis: the title of the xaxis
+    :param yaxis: the title of the yaxis
+    :param xpos: the x position of the legend
+    :param ypos: the y position of the legend
+    :return: Menu with options to modify a bubble graph.
+    """
     # args_value[0] = x-axis
     # args_value[1] = x-axis measure
     # args_value[2] = y-axis
@@ -1365,27 +1316,31 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
-                        options=[] if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
+                        options=[] if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'] +
+                                [{'label': 'Time', 'value': 'Time'}],
                         value=x,
                         clearable=False,
                         style={'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
-            html.Div([
-                html.Div([
-                    html.P(
-                        "{}:".format(get_label('LBL_X_Axis_Measure')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
-                           'margin-right': '5px'}),
-                html.Div([
-                    dcc.Dropdown(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
-                        options=[] if df_const is None else [{'label': i, 'value': i} for i in
-                                                             df_const[df_name]['MEASURE_TYPE_OPTIONS']],
-                        value=x_measure,
-                        clearable=False,
-                        style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+            html.Div(
+                id={'type': 'hide-xaxis-measure', 'index': tile},
+                children=[
+                    html.Div([
+                        html.P(
+                            "{}:".format(get_label('LBL_X_Axis_Measure')),
+                            style={'color': CLR['text1'], 'font-size': '13px'})],
+                        style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
+                               'margin-right': '5px'}),
+                    html.Div([
+                        dcc.Dropdown(
+                            id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
+                            options=[] if df_const is None else [{'label': i, 'value': i} for i in
+                                                                 df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                            value=x_measure,
+                            clearable=False,
+                            style={'font-size': '13px'})],
+                        style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})],
+                style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}),
             html.Div([
                 html.Div([
                     html.P(
@@ -1401,22 +1356,25 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                         clearable=False,
                         style={'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
-            html.Div([
-                html.Div([
-                    html.P(
-                        "{}:".format(get_label('LBL_Y_Axis_Measure')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
-                           'margin-right': '5px'}),
-                html.Div([
-                    dcc.Dropdown(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
-                        options=[] if df_const is None else [{'label': i, 'value': i} for i in
-                                                             df_const[df_name]['MEASURE_TYPE_OPTIONS']],
-                        value=y_measure,
-                        clearable=False,
-                        style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+            html.Div(
+                id={'type': 'hide-yaxis-measure', 'index': tile},
+                children=[
+                    html.Div([
+                        html.P(
+                            "{}:".format(get_label('LBL_Y_Axis_Measure')),
+                            style={'color': CLR['text1'], 'font-size': '13px'})],
+                        style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
+                               'margin-right': '5px'}),
+                    html.Div([
+                        dcc.Dropdown(
+                            id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
+                            options=[] if df_const is None else [{'label': i, 'value': i} for i in
+                                                                 df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                            value=y_measure,
+                            clearable=False,
+                            style={'font-size': '13px'})],
+                        style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})],
+                style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}),
             html.Div([
                 html.Div([
                     html.P(
@@ -1432,22 +1390,25 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                         clearable=False,
                         style={'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
-            html.Div([
-                html.Div([
-                    html.P(
-                        "{}:".format(get_label('LBL_Size_Measure')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
-                           'margin-right': '5px'}),
-                html.Div([
-                    dcc.Dropdown(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
-                        options=[] if df_const is None else [{'label': i, 'value': i} for i in
-                                                             df_const[df_name]['MEASURE_TYPE_OPTIONS']],
-                        value=size_measure,
-                        clearable=False,
-                        style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+            html.Div(
+                id={'type': 'hide-size-measure', 'index': tile},
+                children=[
+                    html.Div([
+                        html.P(
+                            "{}:".format(get_label('LBL_Size_Measure')),
+                            style={'color': CLR['text1'], 'font-size': '13px'})],
+                        style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
+                               'margin-right': '5px'}),
+                    html.Div([
+                        dcc.Dropdown(
+                            id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
+                            options=[] if df_const is None else [{'label': i, 'value': i} for i in
+                                                                 df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                            value=size_measure,
+                            clearable=False,
+                            style={'font-size': '13px'})],
+                        style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})],
+                style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}),
             dcc.Checklist(
                 id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 6},
                 options=[{'label': get_label('LBL_Show_Grid_Lines'),
@@ -1462,24 +1423,51 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                 style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
             html.Div([
                 dcc.Input(
-                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 8},
+                    id={'type': 'xaxis-title', 'index': tile},
                     type="text",
-                    value=xaxis,
+                    value=xaxis if xaxis else None,
                     style={'display': 'None'},
                     debounce=True),
                 dcc.Input(
-                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 9},
+                    id={'type': 'yaxis-title', 'index': tile},
                     type="text",
-                    value=yaxis,
+                    value=yaxis if yaxis else None,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'x-pos-legend', 'index': tile},
+                    type="text",
+                    value=xpos if xpos else None,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'y-pos-legend', 'index': tile},
+                    type="text",
+                    value=ypos if ypos else None,
                     style={'display': 'None'},
                     debounce=True)],
                 style={'display': 'None'})
         ], style={'margin-left': '15px'})]
 
 
-# box plot menu layout
 def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, df_name, show_data_points, gridline,
-                      legend, df_const, xaxis, yaxis):
+                      legend, df_const, xaxis, yaxis, xpos, ypos):
+    """
+        :param tile: Index of the tile the bar graph menu corresponds to.
+        :param axis_measure: the measure for the axis
+        :param graphed_variables: the variables to be graphed
+        :param graph_orientation: the orientation value
+        :param df_name: Name of the data set being used.
+        :param show_data_points: the animate graph value
+        :param gridline: Show gridline or not
+        :param legend: Show legend or not
+        :param df_const: Dataframe constants
+        :param xaxis: the title of the xaxis
+        :param yaxis: the title of the yaxis
+        :param xpos: the x position of the legend
+        :param ypos: the y position of the legend
+        :return: Menu with options to modify a bar graph.
+        """
     # args_value[0] = graphed variables
     # args_value[1] = measure type
     # args_value[2] = points toggle
@@ -1569,26 +1557,41 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                 style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
             html.Div([
                 dcc.Input(
-                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 6},
+                    id={'type': 'xaxis-title', 'index': tile},
                     type="text",
-                    value=xaxis,
+                    value=xaxis if xaxis else None,
                     style={'display': 'None'},
                     debounce=True),
                 dcc.Input(
-                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 7},
+                    id={'type': 'yaxis-title', 'index': tile},
                     type="text",
-                    value=yaxis,
+                    value=yaxis if yaxis else None,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'x-pos-legend', 'index': tile},
+                    type="text",
+                    value=xpos if xpos else None,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'y-pos-legend', 'index': tile},
+                    type="text",
+                    value=ypos if ypos else None,
                     style={'display': 'None'},
                     debounce=True)],
                 style={'display': 'None'})
         ], style={'margin-left': '15px'})]
 
 
-# table menu layout
-def get_table_graph_menu(tile, number_of_columns):
+def get_table_graph_menu(tile, number_of_columns, xaxis, yaxis, xpos, ypos):
     """
     :param number_of_columns: The number of columns to display
     :param tile: Index of the tile the table instructions corresponds to.
+    :param xaxis: the title of the xaxis
+    :param yaxis: the title of the yaxis
+    :param xpos: the x position of the legend
+    :param ypos: the y position of the legend
     :return: Text instructions for how user can interact with table.
     """
     # (args-value: {})[0] = tile index
@@ -1656,16 +1659,46 @@ def get_table_graph_menu(tile, number_of_columns):
                     - Pour afficher les colonnes cachées, activez-les dans le menu 'BASCULER LES COLONNES'
                     ''')],
                 style={'margin-left': '15px'}),
+            html.Div([
+                dcc.Input(
+                    id={'type': 'xaxis-title', 'index': tile},
+                    type="text",
+                    value=xaxis if xaxis else None,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'yaxis-title', 'index': tile},
+                    type="text",
+                    value=yaxis if yaxis else None,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'x-pos-legend', 'index': tile},
+                    type="text",
+                    value=xpos if xpos else None,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'y-pos-legend', 'index': tile},
+                    type="text",
+                    value=ypos if ypos else None,
+                    style={'display': 'None'},
+                    debounce=True)],
+                style={'display': 'None'}),
         ], style={'font-size': '13px'})]
 
 
-# sankey menu layout
-def get_sankey_menu(tile, graphed_options, df_name, df_const):
+def get_sankey_menu(tile, graphed_options, df_name, df_const, xaxis, yaxis, xpos, ypos):
     """
     :param tile: Index of the tile the line graph menu corresponds to.
     :param graphed_options: the variable name
     :param df_name: Name of the data set being used.
     :param df_const: Dataframe constants
+    :param df_const: Dataframe constants
+    :param xaxis: the title of the xaxis
+    :param yaxis: the title of the yaxis
+    :param xpos: the x position of the legend
+    :param ypos: the y position of the legend
     :return: Menu with options to modify a sankey graph.
     """
     # (args-value: {})[0] = graphed variables
@@ -1703,5 +1736,32 @@ def get_sankey_menu(tile, graphed_options, df_name, df_const):
                         multi=False,
                         clearable=False,
                         style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})])
+                    style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})]),
+            html.Div([
+                dcc.Input(
+                    id={'type': 'xaxis-title', 'index': tile},
+                    type="text",
+                    value=xaxis if xaxis else None,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'yaxis-title', 'index': tile},
+                    type="text",
+                    value=yaxis if yaxis else None,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'x-pos-legend', 'index': tile},
+                    type="text",
+                    value=xpos if xpos else None,
+                    style={'display': 'None'},
+                    debounce=True),
+                dcc.Input(
+                    id={'type': 'y-pos-legend', 'index': tile},
+                    type="text",
+                    value=ypos if ypos else None,
+                    style={'display': 'None'},
+                    debounce=True)],
+                style={'display': 'None'})
+
         ], style={'margin-left': '15px'})]

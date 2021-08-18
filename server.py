@@ -105,7 +105,7 @@ def load_saved_dashboards_from_db():
     results = exec_storedproc_results(query)
 
     for i, row in results.iterrows():
-        session['saved_dashboards'][row["ref_value"]] = json.loads(row["clob_text"])
+        session['saved_dashboards'][row["ref_value"]] = json.loads(row["clob_text"].replace(')', ""))
 
 
 def get_hierarchy_parent(child_org, child_level):

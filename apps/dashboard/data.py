@@ -290,16 +290,18 @@ def generate_constants(df_name):
         #     lambda x: pd.to_datetime(x, format='%Y%m%d', errors='ignore'))
 
         options = []
-
+        variable_option_lists = []
         unique_vars = df[VARIABLE_LEVEL].unique()
         cleaned_list = [x for x in unique_vars if str(x) != 'nan']
         cleaned_list.sort()
 
         for unique_var in cleaned_list:
+            variable_option_lists.append(unique_var)
             options.append(
                 {'label': "  " * unique_var.count("|") + str(unique_var).replace('|', ', '), 'value': unique_var})
 
         VARIABLE_OPTIONS = options
+        VARIABLE_OPTION_LISTS = variable_option_lists
         MIN_DATE_UNF = min_date_unf.strftime('%m/%d/%Y')
         MAX_DATE_UNF = max_date_unf.strftime('%m/%d/%Y')
     else:
@@ -398,6 +400,7 @@ def generate_constants(df_name):
                 {'label': "  " * unique_var.count("|") + str(unique_var).replace('|', ', '), 'value': unique_var})
 
         VARIABLE_OPTIONS = options
+        VARIABLE_OPTION_LISTS = variable_option_lists
     storage = {
         'HIERARCHY_LEVELS': HIERARCHY_LEVELS,
         'VARIABLE_LEVEL': VARIABLE_LEVEL,
@@ -430,7 +433,7 @@ def generate_constants(df_name):
         'MIN_DATE_UNF': MIN_DATE_UNF,
         'MAX_DATE_UNF': MAX_DATE_UNF,
         'VARIABLE_OPTIONS': VARIABLE_OPTIONS,
-        'Variable_Option_Lists': variable_option_lists
+        'VARIABLE_OPTION_LISTS': VARIABLE_OPTION_LISTS
     }
     return storage
 
@@ -524,8 +527,8 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
                                                start_year, timeframe, fiscal_toggle, num_periods, period_type, df_name,
                                                df_const, df)
         # TODO: Write hierarchy aggregator when date_time_aggregator is complete
-        # filtered_df = data_hierarchy_aggregator(filtered_df, hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
-        #                                         hierarchy_graph_children, df_name, df_const)
+        # filtered_df = data_hierarchy_aggregator(filtered_df, hierarchy_path, hierarchy_toggle,
+        #                                         hierarchy_level_dropdown,hierarchy_graph_children, df_name, df_const)
 
     return filtered_df
 
@@ -709,7 +712,6 @@ def data_time_filter(secondary_type, end_secondary, end_year, start_secondary, s
         time_df = time_df[time_df['{}Year of Event'.format(year_prefix)] <= end_year - 1]
         # Filters out month and quarter values (whole year)
         time_df = time_df[time_df['Calendar Entry Type'] == '{}Year'.replace("{}", year_prefix)]
-
 
     return time_df
 
@@ -1345,9 +1347,7 @@ def polynomial_regression(df, x, y, degree, ci):
 
 
 def confidence_intervals(model):
-    """
-    Calculates standard deviation and confidence interval for prediction and returns the upper and lower confidence
-    interval.
-    """
+    # calculates standard deviation and confidence interval for prediction
     _, lower, upper = wls_prediction_std(model)
+    # returns the upper and lower confidence interval
     return lower, upper

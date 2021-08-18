@@ -843,7 +843,7 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                              hierarchy_path[5] if len(hierarchy_path) >= 6 else '',
                              variable_name, unique_data['Variable Name Qualifier'].iloc[0],
                              unique_data['Variable Name Sub Qualifier'].iloc[0],
-                             get_last_day_of_month(unique_dates[w]) if secondary_type == "Month" else
+                             get_last_day_of_month(date(year, int(secondary), 1)) if secondary_type == "Month" else
                              get_last_day_of_quarter(unique_dates[w]),
                              secondary_type, year,
                              secondary if secondary_type == "Quarter" else get_quarter(unique_dates[w]),

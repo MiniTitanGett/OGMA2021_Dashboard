@@ -596,7 +596,7 @@ app.clientside_callback(
         if (hierarchy_toggle == 'Specific Item' && graph_all.equals([])){
             for (let i = 0; i < style.length; i++){
                 if (isEquivalent(style[i], {'display': 'inline-block', 'width': '80%', 'max-width': '125px'})){
-                    style[i] = no_update;
+                    style[i] = dash_clientside.no_update;
                 } else {
                     if (link_state[i] == "fa fa-link" && (
                             selected_graph_type[i] == "Line" || selected_graph_type[i] == "Scatter")){
@@ -609,7 +609,7 @@ app.clientside_callback(
                 }
             }
         }
-        else if (hierarchy_toggle == 'Level Filter' && !graph_all.equals([])){
+        else if (hierarchy_toggle == 'Level Filter' || (hierarchy_toggle == 'Specific Item' && !graph_all.equals([]))){
             for (let i = 0; i < style.length; i++){
                 if (isEquivalent(style[i], {'display': 'inline-block', 'width': '80%', 'max-width': '125px'})){
                     style[i] = dash_clientside.no_update;

@@ -2,29 +2,26 @@
 """
 saving_functions.py
 
-stores all functions used for saving graph meta data and dashboard meta data
+Stores all functions used for saving graph meta data and dashboard meta data.
 """
 ######################################################################################################################
 
 # External Packages
-# import os
 import json
-# import pyodbc
-# import logging
-# import pymssql
 from flask import session
 from dash.exceptions import PreventUpdate
 
-# Internal Packages
-# import config
+# Internal Modules
 from conn import exec_storedproc
 from apps.dashboard.layouts import get_line_scatter_graph_menu, get_bar_graph_menu, get_table_graph_menu, \
     get_box_plot_menu, get_sankey_menu, get_bubble_graph_menu
 
+# **********************************************SAVING FUNCTIONS********************************************************
 
-# maps the name of the graph to the attributes you want to store
+
 def save_layout_state(name, attributes):
     """
+    Maps the name of the graph to the attributes you want to store.
     :param attributes: meta data that defines the unique layout to be saved
     :param name: the title of the layout (graph title)
     """
@@ -32,9 +29,9 @@ def save_layout_state(name, attributes):
         session['saved_layouts'][name] = attributes
 
 
-# maps the name of the dashboard to the dashboard attributes you want to store
 def save_dashboard_state(name, attributes):
     """
+    Maps the name of the dashboard to the dashboard attributes you want to store.
     :param attributes: list of all of the attributes that defines the unique layout to be saved
     :param name: the title of the layout (graph title)
     """
@@ -43,6 +40,7 @@ def save_dashboard_state(name, attributes):
 
 
 def save_layout_to_db(graph_id, graph_title, is_adding):
+    """Saves a specific graph layout to the database."""
     query = """\
     declare @p_result_status varchar(255)
     exec dbo.opp_addgeteditdeletefind_extdashboardreports {}, \'{}\', \'{}\', \'{}\', 'Dash', \'{}\', 
@@ -55,6 +53,7 @@ def save_layout_to_db(graph_id, graph_title, is_adding):
 
 
 def save_dashboard_to_db(dashboard_id, dashboard_title, is_adding):
+    """Saves a specific dashboard configuration to the database."""
     query = """\
     declare @p_result_status varchar(255)
     exec dbo.opp_addgeteditdeletefind_extdashboards {}, \'{}\', \'{}\', \'{}\', 'Dash', \'{}\', 'application/json',
@@ -67,6 +66,7 @@ def save_dashboard_to_db(dashboard_id, dashboard_title, is_adding):
 
 
 def delete_layout(graph_id):
+    """Deletes a specific graph layout from the database."""
     query = """\
     declare @p_result_status varchar(255)
     exec dbo.opp_addgeteditdeletefind_extdashboardreports {}, 'Delete', \'{}\', null, null, null, null, null,
@@ -80,6 +80,7 @@ def delete_layout(graph_id):
 
 
 def delete_dashboard(dashboard_id):
+    """Deletes a specific dashboard configuration from the database."""
     query = """\
     declare @p_result_status varchar(255)
     exec dbo.opp_addgeteditdeletefind_extdashboards {}, \'{}\', \'{}\', null, null, null, null, null,
@@ -93,6 +94,7 @@ def delete_dashboard(dashboard_id):
 
 
 def load_graph_menu(graph_type, tile, df_name, args_list, axes_title, df_const):
+    """Retuns the graph menu dependent on the graph type."""
     if graph_type == 'Line' or graph_type == 'Scatter':
         graph_menu = get_line_scatter_graph_menu(tile=tile, x=args_list[0], y=args_list[2], measure_type=args_list[1],
                                                  mode=args_list[3], data_fit=args_list[4], degree=args_list[5],

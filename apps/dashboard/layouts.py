@@ -2,7 +2,7 @@
 """
 layouts.py
 
-Stores all layouts excluding hierarchy filter layout
+Stores all layouts excluding hierarchy filter layout.
 """
 ######################################################################################################################
 
@@ -26,17 +26,11 @@ from apps.dashboard.hierarchy_filter import get_hierarchy_layout
 from apps.dashboard.datepicker import get_date_picker
 from apps.dashboard.graphs import __update_graph
 
-
 # ********************************************HELPER FUNCTION(S)******************************************************
 
-# change index numbers of all id's within tile or data side-menu
-def change_index(doc, index):
-    """
-    :param doc: An array of an unknown combination of nested lists/dictionaries.
-    :param index: New index integer to replace the old index integer.
-    :return: Pointer to the modified document.
-    """
 
+def change_index(doc, index):
+    """Change index numbers of all id's within tile or data side-menu."""
     def _change_index(document, new_index):
         if isinstance(document, list):
             for list_items in document:
@@ -60,6 +54,7 @@ def change_index(doc, index):
     return _change_index(document=doc, new_index=index)
 
 
+# TODO: No usages
 def recursive_to_plotly_json(document):
     document = document.to_plotly_json()
     inspect.getmembers(html, inspect.isclass)
@@ -90,19 +85,11 @@ def recursive_to_plotly_json(document):
 
     return _recursive_to_plotly_json(inner_document=document)
 
-
 # ************************************************DATA SIDE MENU******************************************************
 
 
-# get Data set picker for data menu
 def get_data_set_picker(tile, df_name, confirm_parent, prev_selection=None):
-    """
-    :param tile: Index of the created data side-menu.
-    :param df_name: Dataframe name.
-    :param prev_selection: takes in last selected dataframe
-    :param confirm_parent: the loaded dataset
-    :return: Drop down of the possible data sets.
-    """
+    """Returns data set picker for data menu."""
     return [
         html.Div(
             children=[
@@ -166,10 +153,10 @@ def get_data_set_picker(tile, df_name, confirm_parent, prev_selection=None):
     ]
 
 
-# get DATA side-menu
 def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Filter', level_value='H1',
                   nid_path="root", graph_all_toggle=None, fiscal_toggle='Gregorian', input_method='all-time',
                   num_periods='5', period_type='last-years', prev_selection=None, confirm_parent=None, df_const=None):
+    """Returns the data side-menu."""
     content = [
         html.A(
             className='boxclose',
@@ -194,18 +181,16 @@ def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Fi
             id={'type': 'data-menu-dashboard-loading', 'index': tile},
             style={'width': '260px', 'height': '100%', 'margin-left': '20px', 'margin-right': '20px',
                    'padding': '0'})
-
     elif mode == 'tile-loading':
         return content
-
     elif mode == 'dashboard-loading':
         return dashboard_loading_wrapper
 
-
 # ****************************************************TAB LAYOUT******************************************************
 
-# get div body
+
 def get_div_body(num_tiles=1, tile_keys=None, layout=LAYOUTS[0]):
+    """Returns the div body."""
     cols = {'lg': 24}
     breakpoints = {'lg': 1200}
     if num_tiles == 1 and tile_keys is None:
@@ -226,8 +211,8 @@ def get_div_body(num_tiles=1, tile_keys=None, layout=LAYOUTS[0]):
     ]
 
 
-# default tab layout
 def get_default_tab_content():
+    """Returns the default tab layout."""
     return [
         # stores number of tiles for the tab
         html.Div(
@@ -249,14 +234,16 @@ def get_default_tab_content():
 
 # *************************************************DASHBOARD LAYOUT***************************************************
 
-# Page layout for UI
+
 # https://community.plotly.com/t/dash-on-multi-page-site-app-route-flask-to-dash/4582/11
 def get_layout():
+    """Page layout for UI."""
     return html.Div([dcc.Location(id='url', refresh=False),
                      html.Div(id='page-content')])
 
 
 def get_layout_graph(report_name):
+    """Returns the graph loaded from database."""
     query = """\
     declare @p_report_layout varchar(max)
     declare @p_result_status varchar(255)
@@ -342,8 +329,8 @@ def get_layout_graph(report_name):
     return graph
 
 
-# get the input box for the dashboard title
 def get_dashboard_title_input(title=''):
+    """Returns the input box for the dashboard title."""
     return dcc.Input(
         id='dashboard-title',
         placeholder=get_label('LBL_Enter_Dashboard_Title'),
@@ -352,11 +339,8 @@ def get_dashboard_title_input(title=''):
         debounce=True)
 
 
-# defines entire dashboard layout
 def get_layout_dashboard():
-    """
-    :return: Layout of app's UI.
-    """
+    """Returns layout of app's UI."""
     return html.Div([
         # flex
         html.Div([
@@ -698,11 +682,11 @@ def get_layout_dashboard():
             id='df-constants-storage-dashboard-wrapper')
     ], style={'background-color': CLR['lightpink']})
 
-
 # ****************************************************TILE LAYOUT****************************************************
 
-# create customize content
+
 def get_customize_content(tile, graph_type, graph_menu, df_name):
+    """Returns the customize content."""
     graphs = []
     options = []
     # check if keyword is in df_name
@@ -758,13 +742,12 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
             id={'type': 'div-graph-options', 'index': tile})]
 
 
-# create default tile
 def get_tile(tile, tile_keys=None, df_name=None):
     """
     :param tile: Index of the created tile.
     :param tile_keys: Holds information regarding tile values
     :param df_name: Name of the data set being used.
-    :return: New tile with index values matching the specified tile index.
+    :return: New default tile with index values matching the specified tile index.
     """
     return html.Div(
         html.Div([
@@ -899,10 +882,9 @@ def get_tile_layout(num_tiles, tile_keys=None, parent_df=None):
         raise IndexError("The number of displayed tiles cannot exceed 4, " + str(num_tiles) + " tiles were requested")
     return children
 
-
 # ***************************************************GRAPH MENUS*****************************************************
 
-# line graph menu layout
+
 def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridline, legend, df_const, data_fitting, ci,
                                 data_fit, degree, xaxis, yaxis, xpos, ypos):
     """
@@ -1122,7 +1104,6 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
             ], style={'margin-left': '15px'})]), ]
 
 
-# bar graph menu layout
 def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline, legend, df_name, df_const, xaxis,
                        yaxis, xpos, ypos):
     """
@@ -1278,7 +1259,6 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
         ], style={'margin-left': '15px'})]
 
 
-# bubble graph menu layout
 def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, gridline, legend, df_name, df_const,
                           xaxis, yaxis, xpos, ypos):
     """
@@ -1470,7 +1450,6 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
         ], style={'margin-left': '15px'})]
 
 
-# box plot menu layout
 def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, df_name, show_data_points, gridline,
                       legend, df_const, xaxis, yaxis, xpos, ypos):
     """
@@ -1605,7 +1584,6 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
         ], style={'margin-left': '15px'})]
 
 
-# table menu layout
 def get_table_graph_menu(tile, number_of_columns, xaxis, yaxis, xpos, ypos):
     """
     :param number_of_columns: The number of columns to display
@@ -1710,7 +1688,6 @@ def get_table_graph_menu(tile, number_of_columns, xaxis, yaxis, xpos, ypos):
         ], style={'font-size': '13px'})]
 
 
-# sankey menu layout
 def get_sankey_menu(tile, graphed_options, df_name, df_const, xaxis, yaxis, xpos, ypos):
     """
     :param tile: Index of the tile the line graph menu corresponds to.

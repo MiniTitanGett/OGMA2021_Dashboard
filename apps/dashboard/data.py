@@ -765,7 +765,7 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                             elif current_filter == 'Quarter':
                                 unique_secondary = get_quarter(unique_dates[w])
                                 unique_data = yearly_data[get_quarter(yearly_data["Date of Event"]) == unique_secondary]
-                                date_of_event = get_last_day_of_quarter(unique_dates[w])
+                                date_of_event = get_last_day_of_quarter(date(year, int(get_month(unique_dates[w])), 1))
                                 year_of_event = year
                                 quarter = unique_secondary
                                 month_of_event = ""
@@ -844,7 +844,7 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                              variable_name, unique_data['Variable Name Qualifier'].iloc[0],
                              unique_data['Variable Name Sub Qualifier'].iloc[0],
                              get_last_day_of_month(date(year, int(secondary), 1)) if secondary_type == "Month" else
-                             get_last_day_of_quarter(unique_dates[w]),
+                             get_last_day_of_quarter(date(year, int(get_month(unique_dates[w])), 1)),
                              secondary_type, year,
                              secondary if secondary_type == "Quarter" else get_quarter(unique_dates[w]),
                              secondary if secondary_type == "Month" else "",

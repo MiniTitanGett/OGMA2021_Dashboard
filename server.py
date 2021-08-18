@@ -108,14 +108,29 @@ def load_saved_dashboards_from_db():
         session['saved_dashboards'][row["ref_value"]] = json.loads(row["clob_text"])
 
 
-def get_org_parent(child_org, child_level):
+def get_hierarchy_parent(child_org, child_level):
     """
     requests the parent of the child_org from the database and returns the parent
     """
     query = """\
         declare @p_parent_org varchar(64)
         declare @p_result_status varchar(255)
-        exec dbo.OPP_Get_Org_Parent {}, \"{}\", \"{}\", {},
+        exec dbo.OPP_Get_Hierarchy_Parent {}, \"{}\", \"{}\", {},
+        @p_parent_org output, @p_result_status output
+        select @p_parent_org as parent_org, @p_result_status as result_status
+        """.format(session["sessionID"], session["language"], child_org, child_level)
+
+    return exec_storedproc(query)[0]
+
+
+def get_variable_parent(child_org, child_level):
+    """
+    requests the parent of the child_org from the database and returns the parent
+    """
+    query = """\
+        declare @p_parent_org varchar(64)
+        declare @p_result_status varchar(255)
+        exec dbo.OPP_Get_Variable_Parent {}, \"{}\", \"{}\", {},
         @p_parent_org output, @p_result_status output
         select @p_parent_org as parent_org, @p_result_status as result_status
         """.format(session["sessionID"], session["language"], child_org, child_level)

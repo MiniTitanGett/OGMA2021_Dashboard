@@ -21,9 +21,10 @@ from sklearn.preprocessing import PolynomialFeatures
 
 # import config
 from conn import get_ref, exec_storedproc_results
+from server import get_hierarchy_parent, get_variable_parent
 
 # ***********************************************ARBITRARY CONSTANTS*************************************************
-from server import get_org_parent
+
 
 GRAPH_OPTIONS = {
     'OPG001': ['Line', 'Bar', 'Scatter', 'Bubble', 'Box_Plot', 'Table'],
@@ -106,18 +107,33 @@ def dataset_to_df(df_name):
             "Hierarchy One -2",
             "Hierarchy One -3",
             "Hierarchy One -4",
-            "Hierarchy One Leaf"]] = np.NaN
+            "Hierarchy One Leaf",
+            "Variable Name",
+            "Variable Name Qualifier",
+            "Variable Name Sub Qualifier"]] = np.NaN
 
         # TODO: REPLACE VAR HIERARCHY ITERATION HERE
-        # add all variable names without qualifiers to col
-        col = pd.Series(df['Variable Name'][df['Variable Name Qualifier'].isna()])
-        # combine variable hierarchy columns into col for rows with qualifiers
-        col = col.append(
-            pd.Series(
-                df['Variable Name'][df['Variable Name Qualifier'].notna()]
-                + " "
-                + df['Variable Name Qualifier'][df['Variable Name Qualifier'].notna()]))
-        df['Variable Name'] = col
+        list_of_depths = [[], [], []]
+        var_levels = ["Variable Name", "Variable Name Qualifier", "Variable Name Sub Qualifier"]
+        dff = df[["Variable Value", "Variable Level"]].drop_duplicates()
+        # init the depth lists
+        for x in dff["Variable Value"]:
+            depth = int(dff.loc[dff["Variable Value"] == x]["Variable Level"].iloc[0])
+            list_of_depths[depth].append(x)
+            df.loc[df["Variable Value"] == x, var_levels[depth]] = x
+
+        # begin reverse breadth first traversal, filling hierarchy along the way
+        depth = 3
+        for nodes_at_depth in reversed(list_of_depths):
+            depth = depth - 1
+            for node in nodes_at_depth:
+                parent = get_variable_parent(node, depth)
+                if parent not in list_of_depths[depth - 1]:
+                    list_of_depths[depth - 1].append(parent)
+                # insert parent into table
+                df.loc[df[var_levels[depth]] == node, var_levels[depth - 1]] = parent
+
+        df = create_categories(df, ['H0', 'H1', 'H2', 'H3', 'H4', 'H5'])
 
     else:
         df[['Year of Event',
@@ -141,15 +157,15 @@ def dataset_to_df(df_name):
                                     'Julian Day',
                                     'Activity Event Id',
                                     'Measure Value']].apply(pd.to_numeric)
-        # add all variable names without qualifiers to col
-        col = pd.Series(df['Variable Name'][df['Variable Name Qualifier'].isna()])
-        # combine variable hierarchy columns into col for rows with qualifiers
-        col = col.append(
-            pd.Series(
-                df['Variable Name'][df['Variable Name Qualifier'].notna()]
-                + " "
-                + df['Variable Name Qualifier'][df['Variable Name Qualifier'].notna()]))
-        df['Variable Name'] = col
+    # add all variable names without qualifiers to col
+    col = pd.Series(df['Variable Name'][df['Variable Name Qualifier'].isna()])
+    # combine variable hierarchy columns into col for rows with qualifiers
+    col = col.append(
+        pd.Series(
+            df['Variable Name'][df['Variable Name Qualifier'].notna()]
+            + " "
+            + df['Variable Name Qualifier'][df['Variable Name Qualifier'].notna()]))
+    df['Variable Name'] = col
 
     # Can be redone to exclude hierarchy one name and to include more levels
     df = df.rename(columns={'Hierarchy One Top': 'H0',
@@ -178,7 +194,7 @@ def dataset_to_df(df_name):
         for nodes_at_depth in reversed(list_of_depths):
             depth = depth - 1
             for node in nodes_at_depth:
-                parent = get_org_parent(node, depth)
+                parent = get_hierarchy_parent(node, depth)
                 if parent not in list_of_depths[depth - 1]:
                     list_of_depths[depth - 1].append(parent)
                 # insert parent into table

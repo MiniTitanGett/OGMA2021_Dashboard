@@ -439,6 +439,13 @@ def get_last_day_of_year(year):
     return date(int(year), 12, 31)
 
 
+def get_month(day):
+    return day.astype('datetime64[M]').astype(int) % 12 + 1
+
+
+def get_quarter(day):
+    return (get_month(day) - 1) // 3 + 1
+
 # **********************************************DATA MANIPULATION FUNCTIONS*******************************************
 
 
@@ -710,13 +717,6 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
 
         # Builds the data for the respective filter, either year, month or quarter
         if df_name == "OPG011" and current_filter != 'Week':
-            if current_filter == 'Year':
-                division_column = '{}Year of Event'.format(year_prefix)
-            elif current_filter == 'Quarter':
-                division_column = '{}Quarter'.format(year_prefix)
-            else:
-                division_column = '{}Month of Event'.format(year_prefix)
-
             measure_types = filtered_df['Measure Type'].unique().tolist()
             variable_names = filtered_df['Variable Name'].unique().tolist()
             row_list = []
@@ -730,32 +730,36 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                     further_reduced_df = reduced_df[reduced_df['Variable Name'] == variable_name]
                     for z in range(end_date.year - start_date.year + 1):
                         year = start_date.year + z
-                        yearly_data = further_reduced_df[further_reduced_df['Year of Event'] == year]
-                        unique_secondary = yearly_data[division_column].dropna().unique().tolist()
-                        for w in range(len(unique_secondary)):
-                            secondary = unique_secondary[w]
-                            unique_data = yearly_data[yearly_data[division_column] == secondary]
-                            measure_value = unique_data['Measure Value'].sum()
-                            if current_filter == "Year":
+                        yearly_data = further_reduced_df[further_reduced_df["Date of Event"].dt.year == year]
+                        # TODO: needs to filter on unique secondary types not unique dates
+                        unique_dates = yearly_data["Date of Event"].unique()
+                        for w in range(len(unique_dates)):
+                            if current_filter == 'Year':
+                                unique_secondary = unique_dates[w].year
+                                unique_data = yearly_data[yearly_data["Date of Event"].year == unique_secondary]
                                 date_of_event = get_last_day_of_year(year)
                                 year_of_event = year
                                 quarter = ""
                                 month_of_event = ""
                                 week_of_event = ""
-                            elif current_filter == "Quarter":
-                                date_of_event = get_last_day_of_quarter(
-                                    date(year, int(unique_data['{}Month of Event'.format(year_prefix)].iloc[0]), 1))
+                            elif current_filter == 'Quarter':
+                                unique_secondary = get_quarter(unique_dates[w])
+                                unique_data = yearly_data[get_quarter(yearly_data["Date of Event"]) == unique_secondary]
+                                date_of_event = get_last_day_of_quarter(unique_dates[w])
                                 year_of_event = year
-                                quarter = secondary
+                                quarter = unique_secondary
                                 month_of_event = ""
                                 week_of_event = ""
-                            # secondary_type == "Month"
                             else:
-                                date_of_event = get_last_day_of_month(date(year, int(secondary), 1))
+                                unique_secondary = get_month(unique_dates[w])
+                                unique_data = yearly_data[yearly_data["Date of Event"].dt.month == unique_secondary]
+                                date_of_event = get_last_day_of_month(date(year, int(unique_secondary), 1))
                                 year_of_event = year
-                                quarter = unique_data['Quarter'].iloc[0]
-                                month_of_event = secondary
+                                quarter = get_quarter(unique_dates[w])
+                                month_of_event = unique_secondary
                                 week_of_event = ""
+
+                            measure_value = unique_data['Measure Value'].sum()
                             row_list.append(
                                 [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
                                  hierarchy_path[0] if len(hierarchy_path) >= 1 else '',
@@ -786,11 +790,6 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
 
     # If not in year tab, filter using secondary selections
     elif not secondary_type == 'Year':
-        if secondary_type == 'Quarter':
-            division_column = '{}Quarter'.format(year_prefix)
-        else:
-            division_column = '{}Month of Event'.format(year_prefix)
-
         measure_types = filtered_df['Measure Type'].unique().tolist()
         variable_names = filtered_df['Variable Name'].unique().tolist()
         row_list = []
@@ -803,11 +802,16 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                 further_reduced_df = reduced_df[reduced_df['Variable Name'] == variable_name]
                 for z in range(end_year - start_year + 1):
                     year = start_year + z
-                    yearly_data = further_reduced_df[further_reduced_df['Year of Event'] == year]
-                    unique_secondary = yearly_data[division_column].dropna().unique().tolist()
-                    for w in range(len(unique_secondary)):
-                        secondary = unique_secondary[w]
-                        unique_data = yearly_data[yearly_data[division_column] == secondary]
+                    yearly_data = further_reduced_df[further_reduced_df["Date of Event"].dt.year == year]
+                    # TODO: needs to filter on unique secondary types not unique dates
+                    unique_dates = yearly_data["Date of Event"].unique()
+                    for w in range(len(unique_dates)):
+                        if secondary_type == 'Quarter':
+                            secondary = get_quarter(unique_dates[w])
+                            unique_data = yearly_data[get_quarter(yearly_data["Date of Event"]) == secondary]
+                        else:
+                            secondary = get_month(unique_dates[w])
+                            unique_data = yearly_data[yearly_data["Date of Event"].dt.month == secondary]
                         measure_value = unique_data['Measure Value'].sum()
                         row_list.append(
                             [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
@@ -819,11 +823,10 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                              hierarchy_path[5] if len(hierarchy_path) >= 6 else '',
                              variable_name, unique_data['Variable Name Qualifier'].iloc[0],
                              unique_data['Variable Name Sub Qualifier'].iloc[0],
-                             get_last_day_of_month(date(year, int(secondary), 1)) if secondary_type == "Month" else
-                             get_last_day_of_quarter(
-                                 date(year, int(unique_data['{}Month of Event'.format(year_prefix)].iloc[0]), 1)),
+                             get_last_day_of_month(unique_dates[w]) if secondary_type == "Month" else
+                             get_last_day_of_quarter(unique_dates[w]),
                              secondary_type, year,
-                             secondary if secondary_type == "Quarter" else unique_data['Quarter'].iloc[0],
+                             secondary if secondary_type == "Quarter" else get_quarter(unique_dates[w]),
                              secondary if secondary_type == "Month" else "",
                              '', '', '', '', '', '', '', measure_value,
                              measure_type, ''])
@@ -835,6 +838,11 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                                         'Month of Event', 'Week of Event', 'Fiscal Year of Event', 'Fiscal Quarter',
                                         'Fiscal Month of Event', 'Fiscal Week of Event', 'Julian Day',
                                         'Activity Event Id', 'Measure Value', 'Measure Type', 'Partial Period'])
+
+        if secondary_type == 'Quarter':
+            division_column = '{}Quarter'.format(year_prefix)
+        else:
+            division_column = '{}Month of Event'.format(year_prefix)
 
         if start_year == end_year:  # Don't have to deal with in between years
             # Filter out all rows outside specified range
@@ -868,10 +876,10 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
             for y in range(len(variable_names)):
                 variable_name = variable_names[y]
                 further_reduced_df = reduced_df[reduced_df['Variable Name'] == variable_name]
-                unique_secondary = further_reduced_df['Year of Event'].dropna().unique().tolist()
+                unique_secondary = further_reduced_df['Date of Event'].dt.year.unique().tolist()
                 for z in range(len(unique_secondary)):
                     secondary = unique_secondary[z]
-                    unique_data = further_reduced_df[further_reduced_df['Year of Event'] == secondary]
+                    unique_data = further_reduced_df[further_reduced_df['Date of Event'].dt.year == secondary]
                     measure_value = unique_data['Measure Value'].sum()
                     date_of_event = get_last_day_of_year(secondary)
                     row_list.append(
@@ -963,12 +971,6 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
 
         # Builds the data for the respective filter, either year, month or quarter
         if df_name == "OPG011" and current_filter != 'Week':
-            if current_filter == 'Year':
-                division_column = '{}Year of Event'.format(year_prefix)
-            elif current_filter == 'Quarter':
-                division_column = '{}Quarter'.format(year_prefix)
-            else:
-                division_column = '{}Month of Event'.format(year_prefix)
 
             # Builds data based on all measure types, variable names, and selected time frame
             for y in range(len(variable_names)):
@@ -976,32 +978,36 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                 further_reduced_df = filtered_df[filtered_df['Variable Name'] == variable_name]
                 for z in range(end_date.year - start_date.year + 1):
                     year = start_date.year + z
-                    yearly_data = further_reduced_df[further_reduced_df['Year of Event'] == year]
-                    unique_secondary = yearly_data[division_column].dropna().unique().tolist()
-                    for w in range(len(unique_secondary)):
-                        secondary = unique_secondary[w]
-                        unique_data = yearly_data[yearly_data[division_column] == secondary]
-                        measure_value = unique_data['Measure Value'].sum()
-                        if current_filter == "Year":
+                    yearly_data = further_reduced_df[further_reduced_df["Date of Event"].dt.year == year]
+                    # TODO: needs to filter on unique secondary types not unique dates
+                    unique_dates = yearly_data["Date of Event"].unique()
+                    for w in range(len(unique_dates)):
+                        if current_filter == 'Year':
+                            unique_secondary = unique_dates[w].year
+                            unique_data = yearly_data[yearly_data["Date of Event"].year == unique_secondary]
                             date_of_event = get_last_day_of_year(year)
                             year_of_event = year
                             quarter = ""
                             month_of_event = ""
                             week_of_event = ""
-                        elif current_filter == "Quarter":
-                            date_of_event = get_last_day_of_quarter(
-                                date(year, int(unique_data['{}Month of Event'.format(year_prefix)].iloc[0]), 1))
+                        elif current_filter == 'Quarter':
+                            unique_secondary = get_quarter(unique_dates[w])
+                            unique_data = yearly_data[get_quarter(yearly_data["Date of Event"]) == unique_secondary]
+                            date_of_event = get_last_day_of_quarter(unique_dates[w])
                             year_of_event = year
-                            quarter = secondary
+                            quarter = unique_secondary
                             month_of_event = ""
                             week_of_event = ""
-                        # secondary_type == "Month"
                         else:
-                            date_of_event = get_last_day_of_month(date(year, int(secondary), 1))
+                            unique_secondary = get_month(unique_dates[w])
+                            unique_data = yearly_data[yearly_data["Date of Event"].dt.month == unique_secondary]
+                            date_of_event = get_last_day_of_month(date(year, int(unique_secondary), 1))
                             year_of_event = year
-                            quarter = unique_data['Quarter'].iloc[0]
-                            month_of_event = secondary
+                            quarter = get_quarter(unique_dates[w])
+                            month_of_event = unique_secondary
                             week_of_event = ""
+
+                        measure_value = unique_data['Measure Value'].sum()
                         row_list.append(
                             [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
                              hierarchy_path[0] if len(hierarchy_path) >= 1 else '',
@@ -1014,7 +1020,6 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                              unique_data['Variable Name Sub Qualifier'].iloc[0],
                              date_of_event, current_filter, year_of_event, quarter, month_of_event, week_of_event,
                              '', '', '', '', '', '', measure_value, measure_type, ''])
-
             time_df = pd.DataFrame(row_list,
                                    columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
                                             'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
@@ -1032,21 +1037,21 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
 
     # If not in year tab, filter using secondary selections
     elif not secondary_type == 'Year':
-        if secondary_type == 'Quarter':
-            division_column = '{}Quarter'.format(year_prefix)
-        else:
-            division_column = '{}Month of Event'.format(year_prefix)
-
         for y in range(len(variable_names)):
             variable_name = variable_names[y]
             reduced_df = filtered_df[filtered_df['Variable Name'] == variable_name]
             for z in range(end_year - start_year + 1):
                 year = start_year + z
-                yearly_data = reduced_df[reduced_df['Year of Event'] == year]
-                unique_secondary = yearly_data[division_column].dropna().unique().tolist()
-                for w in range(len(unique_secondary)):
-                    secondary = unique_secondary[w]
-                    unique_data = yearly_data[yearly_data[division_column] == secondary]
+                yearly_data = reduced_df[reduced_df["Date of Event"].dt.year == year]
+                # TODO: this filtering can create duplicate data and it needs to be fixed (same with above)
+                unique_dates = yearly_data["Date of Event"].unique()
+                for w in range(len(unique_dates)):
+                    if secondary_type == 'Quarter':
+                        secondary = get_quarter(unique_dates[w])
+                        unique_data = yearly_data[get_quarter(yearly_data["Date of Event"]) == secondary]
+                    else:
+                        secondary = get_month(unique_dates[w])
+                        unique_data = yearly_data[yearly_data["Date of Event"].dt.month == secondary]
                     measure_value = unique_data['Measure Value'].sum()
                     row_list.append(
                         [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
@@ -1058,11 +1063,10 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                          hierarchy_path[5] if len(hierarchy_path) >= 6 else '',
                          variable_name, unique_data['Variable Name Qualifier'].iloc[0],
                          unique_data['Variable Name Sub Qualifier'].iloc[0],
-                         get_last_day_of_month(
-                             date(year, int(secondary), 1)) if secondary_type == "Month" else get_last_day_of_quarter(
-                             date(year, int(unique_data['{}Month of Event'.format(year_prefix)].iloc[0]), 1)),
+                         get_last_day_of_month(unique_dates[w]) if secondary_type == "Month" else
+                         get_last_day_of_quarter(unique_dates[w]),
                          secondary_type, year,
-                         secondary if secondary_type == "Quarter" else unique_data['Quarter'].iloc[0],
+                         secondary if secondary_type == "Quarter" else get_quarter(unique_dates[w]),
                          secondary if secondary_type == "Month" else "",
                          '', '', '', '', '', '', '', measure_value,
                          measure_type, ''])
@@ -1074,6 +1078,11 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                                         'Month of Event', 'Week of Event', 'Fiscal Year of Event', 'Fiscal Quarter',
                                         'Fiscal Month of Event', 'Fiscal Week of Event', 'Julian Day',
                                         'Activity Event Id', 'Measure Value', 'Measure Type', 'Partial Period'])
+
+        if secondary_type == 'Quarter':
+            division_column = '{}Quarter'.format(year_prefix)
+        else:
+            division_column = '{}Month of Event'.format(year_prefix)
 
         if start_year == end_year:  # Don't have to deal with in between years
             # Filter out all rows outside specified range
@@ -1100,10 +1109,10 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
         for y in range(len(variable_names)):
             variable_name = variable_names[y]
             further_reduced_df = filtered_df[filtered_df['Variable Name'] == variable_name]
-            unique_secondary = further_reduced_df['Year of Event'].dropna().unique().tolist()
+            unique_secondary = further_reduced_df['Date of Event'].dt.year.unique().tolist()
             for z in range(len(unique_secondary)):
                 secondary = unique_secondary[z]
-                unique_data = further_reduced_df[further_reduced_df['Year of Event'] == secondary]
+                unique_data = further_reduced_df[further_reduced_df['Date of Event'].dt.year == secondary]
                 measure_value = unique_data['Measure Value'].sum()
                 date_of_event = get_last_day_of_year(secondary)
                 row_list.append(

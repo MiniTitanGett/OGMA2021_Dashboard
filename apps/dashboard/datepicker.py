@@ -2,7 +2,7 @@
 """
 datepicker.py
 
-stores the layout and helper functions for datepicker
+Stores the layout and helper functions for date picker.
 """
 ######################################################################################################################
 
@@ -14,12 +14,13 @@ import dash_html_components as html
 # Internal Modules
 from apps.dashboard.data import CLR, get_label
 
-
 # ********************************************DATE-PICKER LAYOUT**************************************************
 
-# date picker layout
+
 def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, period_type, df_const):
+    """Returns the date picker layout."""
     language = session["language"]
+
     if df_name:
         children = [
             html.H6(
@@ -247,13 +248,14 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                 **{'data-boolean': {}},
                 style={'display': 'none'})
         ]
-    return children
 
+    return children
 
 # ********************************************DATE-PICKER FUNCTIONS**************************************************
 
-# get datepicker input box
+
 def get_date_box(index, value, minimum, maximum, name=None):
+    """Returns date picker input box"""
     return dcc.Input(id=index,
                      type='number',
                      value=value,
@@ -264,12 +266,15 @@ def get_date_box(index, value, minimum, maximum, name=None):
                      style={'width': '100%'})
 
 
-# define variables necessary for having secondary input boxes
 def get_secondary_data(conditions, fiscal_toggle, df_name, df_const):
+    """
+    Returns the defined variables necessary for having secondary input boxes.
+    """
     # all tabs are enabled initially but the button for the tab the user is inside is disabled later
     quarter_disabled = month_disabled = week_disabled = False
     # all tabs are initially unselected
     quarter_class_name = month_class_name = week_class_name = 'date-picker-nav'
+
     # if inside quarter tab
     if conditions[0]:
         new_tab = 'Quarter'
@@ -327,13 +332,14 @@ def get_secondary_data(conditions, fiscal_toggle, df_name, df_const):
             fringe_max = 1
         else:
             fringe_max += 1
+
     return quarter_class_name, quarter_disabled, month_class_name, month_disabled, week_class_name, week_disabled, \
         fringe_min, fringe_max, default_max, max_year, new_tab
 
 
-# create left and right columns for tabs with secondary time options (beneath years)
 def update_date_columns(changed_id, selected_min_year, min_year, fringe_min, selected_max_year, max_year, fringe_max,
                         default_max, tab, selected_secondary_min, selected_secondary_max, tile):
+    """Creates left and right columns for tabs with secondary time options (beneath years)."""
     # if max/min year changed, reset corresponding max/min (period) selection to max/min
     if 'start-year-input' in changed_id:
         if selected_min_year == min_year:
@@ -351,6 +357,7 @@ def update_date_columns(changed_id, selected_min_year, min_year, fringe_min, sel
         selected_max_year = max_year
         selected_secondary_min = fringe_min
         selected_secondary_max = fringe_max
+
     # if min and max years are the same
     if selected_min_year == selected_max_year:
         modifier_min = 0
@@ -391,6 +398,7 @@ def update_date_columns(changed_id, selected_min_year, min_year, fringe_min, sel
         else:
             max_min = 1
             max_max = default_max
+
     # if min (period) is (default_max), don't allow max year to be same year
     if selected_secondary_min == default_max:
         year_modifier_max = 1
@@ -401,6 +409,7 @@ def update_date_columns(changed_id, selected_min_year, min_year, fringe_min, sel
         year_modifier_min = 0
     else:
         year_modifier_min = 1
+
     # min year changed - change min year and reset min (period)
     if 'start-year-input' in changed_id:
         min_value = min_min
@@ -422,6 +431,7 @@ def update_date_columns(changed_id, selected_min_year, min_year, fringe_min, sel
         max_value = selected_secondary_max
         max_min += modifier_max
         max_max += 1
+
     year_input_min = get_date_box(index={'type': 'start-year-input', 'index': tile},
                                   value=selected_min_year,
                                   minimum=min_year,

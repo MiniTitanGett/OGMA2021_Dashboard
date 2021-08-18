@@ -2,7 +2,7 @@
 """
 saving_loading_callbacks.py
 
-stores all callbacks for managing saves/loading tiles/dashboards
+Stores all callbacks for managing saves/loading tiles/dashboards.
 """
 ######################################################################################################################
 
@@ -16,22 +16,19 @@ from dash import no_update
 import dash_html_components as html
 from flask import session
 
-# Internal Packages
+# Internal Modules
 from apps.dashboard.layouts import get_data_menu, get_customize_content, get_div_body
 from apps.dashboard.app import app
 from apps.dashboard.data import get_label, dataset_to_df, generate_constants
 from apps.dashboard.saving_functions import delete_layout, save_layout_state, save_layout_to_db, \
     save_dashboard_state, save_dashboard_to_db, delete_dashboard, load_graph_menu
 
-
 # **********************************************GLOBAL VARIABLES*****************************************************
 
 REPORT_POINTER_PREFIX = 'Report_Ext_'
 DASHBOARD_POINTER_PREFIX = 'Dashboard_Ext_'
 
-
 # ************************************SHARED TILE LOADING/DASHBOARD SAVING*******************************************
-
 
 # load the tile title
 app.clientside_callback(
@@ -56,7 +53,7 @@ app.clientside_callback(
 # ***********************************************SHARED SAVING*******************************************************
 
 
-# update the dropdown options of available tile layouts
+# Update the dropdown options of available tile layouts.
 @app.callback(
     Output({'type': 'select-layout-dropdown', 'index': ALL}, 'options'),
     [Input({'type': 'set-dropdown-options-trigger', 'index': ALL}, 'data-tile_saving'),
@@ -74,11 +71,10 @@ def _update_tile_loading_dropdown_options(_tile_saving_trigger, _dashboard_savin
     return [[{'label': session['saved_layouts'][key]['Title'], 'value': key} for key in
              session['saved_layouts']]] * len(links)
 
-
 # *************************************************TILE SAVING********************************************************
 
-# manage tile saves trigger
-# formatted in two chained callbacks to mix ALL and y values
+
+# Manage tile saves trigger. Formatted in two chained callbacks to mix ALL and y values.
 @app.callback(
     Output('tile-save-trigger-wrapper', 'children'),
     [Input({'type': 'save-button', 'index': ALL}, 'n_clicks'),
@@ -156,11 +152,10 @@ def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, _link_clicks,
         # even though we can use a direct output method for linking the two callbacks, this is more efficient on page
         # load due to how the dash renderer loads callbacks
         children.append(dcc.Store(id={'type': 'tile-save-trigger', 'index': changed_index}, data=mode))
-
     return children
 
 
-# Tile saving/save deleting/tile loading - serves prompt
+# Tile saving/save deleting/tile loading - serves prompt.
 for y in range(4):
     @app.callback(
         # LAYOUT components
@@ -190,7 +185,6 @@ for y in range(4):
          State({'type': 'graph_display', 'index': y}, 'children'),
          State({'type': 'x-modified', 'index': y}, 'data'),
          State({'type': 'y-modified', 'index': y}, 'data'),
-
          # Data set states
          State({'type': 'data-set', 'index': y}, 'value'),
          State({'type': 'data-set', 'index': 4}, 'value'),
@@ -260,7 +254,6 @@ for y in range(4):
             nid_path += '^||^{}'.format(button['props']['children'])
 
         tile = int(dash.callback_context.inputs_list[0]['id']['index'])
-
         # Outputs
         update_options_trigger = no_update
         # [[mode/prompt_trigger, tile], prompt_style/show_hide, prompt_title, prompt_body, isTrip]
@@ -283,28 +276,26 @@ for y in range(4):
 
         # if save requested or the overwrite was confirmed, check for exceptions and save
         if trigger == 'save' or trigger == 'confirm-overwrite':
-
             intermediate_pointer = REPORT_POINTER_PREFIX + graph_title.replace(" ", "")
-            # regex.sub('[^A-Za-z0-9]+', '', graph_title)
-
             graph_titles = []
 
             for layout in session['saved_layouts']:
                 graph_titles.append(session['saved_layouts'][layout]['Title'])
 
+            # if user is trying to save an empty graph, warn them that they must have a graph to save
+            if not graph_display:
+                prompt_trigger = [['empty_graph', tile], {}, get_label('LBL_Empty_Graph'),
+                                  get_label('LBL_Empty_Graph_Prompt'), False]
             # if tile is untitled, prevent updates but return save message
-            if graph_title == '':
+            elif graph_title == '':
                 prompt_trigger = [['empty_title', tile], {}, get_label('LBL_Untitled_Graph'),
                                   get_label('LBL_Untitled_Graph_Prompt'), False]
-
             # if conflicting tiles and overwrite not requested, prompt overwrite
             elif intermediate_pointer in session['saved_layouts'] \
                     and session['saved_layouts'][intermediate_pointer]['Title'] == graph_title \
                     and 'confirm-overwrite' != trigger:
-
                 prompt_trigger = [['overwrite', tile], {}, get_label('LBL_Overwrite_Graph'),
                                   get_label('LBL_Overwrite_Graph_Prompt'), False]
-
             # else, title is valid to be saved
             else:
                 while True:
@@ -340,6 +331,7 @@ for y in range(4):
                                     'Graph All Toggle': graph_children_toggle,
                                     'NID Path': nid_path,
                                     'Title': graph_title}
+
                 # if input method is 'select-range', add the states of the select range inputs
                 if input_method == 'select-range':
                     elements_to_save['Date Tab'] = tab
@@ -354,14 +346,11 @@ for y in range(4):
                 # save_layout_to_file(session['saved_layouts'])
                 # saves the graph layout to the database
                 save_layout_to_db(layout_pointer, graph_title, 'save' == trigger)
-
                 popup_text = get_label('LBL_Your_Graph_Has_Been_Saved').format(graph_title)
                 popup_is_open = True
                 update_options_trigger = 'trigger'
-
         # if delete button was pressed, prompt delete
         elif trigger == 'delete':
-
             intermediate_pointer = REPORT_POINTER_PREFIX + graph_title.replace(" ", "")
             graph_titles = []
             for layout in session['saved_layouts']:
@@ -372,7 +361,6 @@ for y in range(4):
                     and session['saved_layouts'][intermediate_pointer]['Title'] == graph_title:
                 prompt_trigger = [['delete', tile], {}, get_label('LBL_Delete_Graph'),
                                   get_label('LBL_Delete_Graph_Prompt').format(graph_title), False]
-
         # If confirm delete button has been pressed
         elif trigger == 'confirm-delete':
             intermediate_pointer = REPORT_POINTER_PREFIX + graph_title.replace(" ", "")
@@ -380,7 +368,6 @@ for y in range(4):
             update_options_trigger = 'trigger'
             popup_text = get_label('LBL_Your_Graph_Has_Been_Deleted').format(graph_title)
             popup_is_open = True
-
         # if confirm-load then we load what was selected from menu
         elif trigger == 'confirm-load':
             df_name = session['saved_layouts'][selected_layout]['Data Set']
@@ -393,20 +380,16 @@ for y in range(4):
                 df_const[df_name] = generate_constants(df_name)
 
             #  --------- create customize menu ---------
-
             graph_type = session['saved_layouts'][selected_layout]['Graph Type']
             args_list = session['saved_layouts'][selected_layout]['Args List']
             axes_title = session['saved_layouts'][selected_layout]['Axes Title']
             axes_modified = session['saved_layouts'][selected_layout]['Axes Modified']
-
             graph_menu = load_graph_menu(graph_type=graph_type, tile=tile, df_name=df_name, args_list=args_list,
                                          axes_title=axes_title, axes_modified=axes_modified, df_const=df_const)
-
             customize_content = get_customize_content(tile=tile, graph_type=graph_type, graph_menu=graph_menu,
                                                       df_name=df_name)
 
             #  --------- create data side menu ---------
-
             # set hierarchy toggle value (level vs specific)
             hierarchy_toggle = session['saved_layouts'][selected_layout]['Hierarchy Toggle']
             # set level value selection
@@ -450,14 +433,13 @@ for y in range(4):
                     df_const,
                     id={'type': 'df-constants-storage-tile-wrapper', 'index': x}
                 )
-            session['tile_edited'][tile] = 'Load'
 
+            session['tile_edited'][tile] = 'Load'
             unlink = html.I(
                 className='fa fa-unlink',
                 id={'type': 'tile-link', 'index': tile},
                 style={'position': 'relative'})
             tile_title_trigger = session['saved_layouts'][selected_layout]['Title']
-
         # if we have linking inputs
         elif trigger == 'fa fa-unlink':
             link_output = 'fa fa-unlink'
@@ -474,10 +456,10 @@ for y in range(4):
             customize_content, data_content, tab_output, start_year, end_year, start_secondary, \
             end_secondary, unlink, df_const_output, link_output
 
-
 # **********************************************DASHBOARD MENU*******************************************************
 
-# dashboard saving/save deleting/loading - triggers prompt and menu
+
+# Dashboard saving/save deleting/loading - triggers prompt and menu.
 @app.callback(
     [Output('select-dashboard-dropdown', 'options'),
      Output({'type': 'set-dropdown-options-trigger', 'index': 0}, 'data-dashboard_saving'),
@@ -646,6 +628,9 @@ for y in range(4):
      State({'type': 'start-year-input', 'index': 2}, 'name'),
      State({'type': 'start-year-input', 'index': 3}, 'name'),
      State({'type': 'start-year-input', 'index': 4}, 'name'),
+     # dashboard layout
+     State('div-body', 'layouts'),
+     # df_const
      State('df-constants-storage', 'data')],
     prevent_initial_call=True
 )
@@ -672,7 +657,8 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                                       end_secondary_4,
                                       num_periods_0, num_periods_1, num_periods_2, num_periods_3, num_periods_4,
                                       period_type_0, period_type_1, period_type_2, period_type_3, period_type_4,
-                                      date_tab_0, date_tab_1, date_tab_2, date_tab_3, date_tab_4, df_const):
+                                      date_tab_0, date_tab_1, date_tab_2, date_tab_3, date_tab_4, layout,
+                                      df_const):
 
     # ---------------------------------------Variable Declarations------------------------------------------------------
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
@@ -721,11 +707,9 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 and session['saved_dashboards'][intermediate_pointer]['Dashboard Title'] == dashboard_title:
             prompt_trigger = [['delete_dashboard', 4], {}, get_label('LBL_Delete_Dashboard'),
                               get_label('LBL_Delete_Dashboard_Prompt').format(dashboard_title), False]
-
     elif 'dashboard-reset' in changed_id:
         prompt_trigger = [['reset', 4], {}, get_label('LBL_Reset_Dashboard'), get_label('LBL_Reset_Dashboard_Prompt'),
                           False]
-
     # if load button was pressed, send load menu
     elif 'load-dashboard' in changed_id:
         float_menu_trigger = [['dashboard_layouts', 4], {}, get_label('LBL_Load_Dashboard'),
@@ -811,7 +795,10 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 # TODO: Need to add df name
                 customize_content = get_customize_content(tile=tile_index, graph_type=graph_type, graph_menu=graph_menu,
                                                           df_name=df_name)
-                tile_key = {'Tile Title': tile_title, 'Link': link_state, 'Customize Content': customize_content}
+                tile_key = {'Tile Title': tile_title,
+                            'Link': link_state,
+                            'Customize Content': customize_content,
+                            'Rebuild Menu': False}
                 tile_keys[tile_index] = tile_key
 
                 # if tile is unlinked, or linked while the parent does not exist, create data menu
@@ -841,7 +828,9 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
 
         # outputs
         dashboard_title_output = session['saved_dashboards'][selected_dashboard]['Dashboard Title']
-        tile_content_children = get_div_body(num_tiles=num_tiles, input_tiles=None, tile_keys=tile_keys)
+        tile_content_children = get_div_body(num_tiles=num_tiles,
+                                             tile_keys=tile_keys,
+                                             layout=session['saved_dashboards'][selected_dashboard]['Dashboard Layout'])
         df_const_wrapper = html.Div(
             html.Div(
                 html.Div(
@@ -855,15 +844,11 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 id={'type': 'df-constants-storage-tile-wrapper', 'index': 2}),
             id={'type': 'df-constants-storage-tile-wrapper', 'index': 3}),
         session['tile_edited'][4] = num_tiles  # set for load warning
-
     elif prompt_data is not None or 'save-dashboard' in changed_id:
-
         # if save requested or the overwrite was confirmed, check for exceptions and save
         if 'save-dashboard' in changed_id or (prompt_data[0] == 'overwrite_dashboard' and prompt_result == 'ok'):
-
             dashboard_pointer = DASHBOARD_POINTER_PREFIX + dashboard_title.replace(" ", "")
             # regex.sub('[^A-Za-z0-9]+', '', dashboard_title)
-
             used_dashboard_titles = []
 
             for dashboard_layout in session['saved_dashboards']:
@@ -884,17 +869,14 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 prompt_trigger = [['empty_title', 4], {}, get_label('LBL_Untitled_Dashboard'),
                                   get_label('LBL_Untitled_Dashboard_Prompt'), False]
                 # get_label('LBL_Dashboards_Require_A_Title_To_Be_Saved')
-
             # check if the dashboard is empty
             elif len(links) == 0:
                 prompt_trigger = [['empty_dashboard', 4], {}, get_label('LBL_Empty_Dashboard'),
                                   get_label('LBL_Empty_Dashboard_Prompt'), False]
                 # get_label('LBL_Dashboard_Must_Not_Be_Empty')
-
             # if conflicting tiles or dashboard and overwrite not requested, prompt overwrite
             elif ((dashboard_title in used_dashboard_titles or any(x in used_titles for x in tile_titles))
                   and 'prompt-result' not in changed_id):
-
                 # dashboard-overwrite index 0 = confirm overwrite
                 # dashboard-overwrite index 1 = cancel overwrite
                 # if conflicting graph titles
@@ -917,16 +899,13 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                         prompt_trigger = [['overwrite_dashboard', 4], {}, get_label('LBL_Overwrite_Dashboard'),
                                           get_label('LBL_Overwrite_Dashboard_C_Graph_Prompt').format(
                                               conflicting_graphs_list), False]
-
                 # else, just conflicting dashboard title
                 else:
                     prompt_trigger = [['overwrite_dashboard', 4], {}, get_label('LBL_Overwrite_Dashboard'),
                                       get_label('LBL_Overwrite_Dashboard_C_Title_Prompt').format(dashboard_title),
                                       False]
-
             # else, save/overwrite the dashboard and contained tiles
             else:
-
                 df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name4]
                 start_years = [start_year_0, start_year_1, start_year_2, start_year_3, start_year_4]
                 end_years = [end_year_0, end_year_1, end_year_2, end_year_3, end_year_4]
@@ -944,14 +923,13 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 num_periods = [num_periods_0, num_periods_1, num_periods_2, num_periods_3, num_periods_4]
                 period_types = [period_type_0, period_type_1, period_type_2, period_type_3, period_type_4]
                 date_tabs = [date_tab_0, date_tab_1, date_tab_2, date_tab_3, date_tab_4]
-                dashboard_saves = {'Dashboard Title': dashboard_title}
+                dashboard_saves = {'Dashboard Title': dashboard_title, 'Dashboard Layout': layout}
                 arg_list_all = [args_list_0, args_list_1, args_list_2, args_list_3]
                 axes_titles_all = [xaxis_titles, yaxis_titles, x_leg_pos, y_leg_pos]
                 axes_modified_all = [xmodified, ymodified]
 
                 # if any tiles are linked, save the parent data menu
                 if links.count('fa fa-link') > 0:
-
                     if type(button_paths[4]) == dict:
                         button_paths[4] = [button_paths[4]]
 
@@ -985,7 +963,6 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
 
                     tile_pointer = REPORT_POINTER_PREFIX + tile_titles[i].replace(" ", "")
                     # regex.sub('[^A-Za-z0-9]+', '', tile_titles[i])
-
                     used_titles = []
 
                     for key in session['saved_layouts']:
@@ -1008,9 +985,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                         # 'Tile Title': tile_titles[i],
                         'Link': links[i]
                     }
-
                     # ---------- save tile ----------
-
                     # if tile is unlinked, save data menu
                     if links[i] == 'fa fa-unlink':
                         tile_data = {
@@ -1032,7 +1007,6 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                             tile_data['End Year'] = end_years[i]
                             tile_data['Start Secondary'] = start_secondaries[i]
                             tile_data['End Secondary'] = end_secondaries[i]
-
                     else:
                         tile_data = dashboard_saves['Parent Data']
 
@@ -1048,7 +1022,6 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 save_dashboard_state(dashboard_pointer, dashboard_saves)
                 # save_dashboard_to_file(session['saved_dashboards'])
                 save_dashboard_to_db(dashboard_pointer, dashboard_title, dashboard_title not in used_dashboard_titles)
-
                 update_graph_options_trigger = 'trigger'
                 tile_title_returns = auto_named_titles
                 options = [{'label': session['saved_dashboards'][key]['Dashboard Title'], 'value': key} for key in
@@ -1091,7 +1064,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
 
 # *********************************************SHARED LOADING********************************************************
 
-# load select range inputs, prompting the date picker callback to instantiate the layout of the datepicker for us
+# Load select range inputs, prompting the date picker callback to instantiate the layout of the date-picker for us.
 @app.callback(
     [Output({'type': 'start-year-input', 'index': MATCH}, 'name'),
      Output({'type': 'start-year-input', 'index': MATCH}, 'value'),
@@ -1113,6 +1086,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
 def _load_select_range_inputs(tile_tab, dashboard_tab, tile_start_year, tile_end_year, tile_start_secondary,
                               tile_end_secondary, dashboard_start_year, dashboard_end_year, dashboard_start_secondary,
                               dashboard_end_secondary):
+
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':
@@ -1125,7 +1099,6 @@ def _load_select_range_inputs(tile_tab, dashboard_tab, tile_start_year, tile_end
         end_year = tile_end_year
         start_secondary = tile_start_secondary
         end_secondary = tile_end_secondary
-
     # else, loading type is dashboard
     else:
         date_tab = dashboard_tab
@@ -1137,7 +1110,7 @@ def _load_select_range_inputs(tile_tab, dashboard_tab, tile_start_year, tile_end
     return date_tab, start_year, end_year, start_secondary, end_secondary
 
 
-# resets selected dashboard dropdown value to ''
+# Resets selected dashboard dropdown value to ''.
 app.clientside_callback(
     """
     function(_trigger){

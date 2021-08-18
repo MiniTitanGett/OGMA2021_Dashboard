@@ -2,7 +2,7 @@
 """
 functionality_callbacks.py
 
-stores all callbacks for the functionality of the app
+Stores all callbacks for the functionality of the app.
 """
 ######################################################################################################################
 
@@ -17,7 +17,7 @@ from re import search
 from flask import session
 from dash import no_update
 
-# Internal Packages
+# Internal Modules
 from apps.dashboard.graphs import __update_graph
 from apps.dashboard.hierarchy_filter import generate_history_button, generate_dropdown
 from apps.dashboard.app import app
@@ -108,8 +108,7 @@ for x in range(4):
          # Axes Modified
          State({'type': 'x-modified', 'index': x}, 'data'),
          State({'type': 'y-modified', 'index': x}, 'data'),
-         State('num-tiles', 'data-num-tiles'),
-         ],
+         State('num-tiles', 'data-num-tiles')],
         prevent_initial_call=True
     )
     def _update_graph(_df_trigger, arg_value, graph_type, tile_title, _datepicker_trigger,
@@ -130,6 +129,7 @@ for x in range(4):
         popup_text = no_update
         popup_is_open = no_update
         # --------------------------------------------------------------------------------------------------------------
+
         # check if keyword in df_name
         if df_name is not None:
             df_tile = df_name
@@ -221,13 +221,10 @@ for x in range(4):
             if arg_value[4] != 'no-fit' and (hierarchy_toggle != 'Specific Item' or hierarchy_graph_children != []):
                 arg_value[4] = 'no-fit'
 
-        graph = __update_graph(df_name, arg_value, graph_type, tile_title, num_periods,
-                                                       period_type, hierarchy_toggle,
-                                                       hierarchy_level_dropdown, hierarchy_graph_children,
-                                                       hierarchy_options, state_of_display,
-                                                       secondary_type, timeframe, fiscal_toggle, start_year, end_year,
-                                                       start_secondary,
-                                                       end_secondary, df_const, xaxis, yaxis, xlegend, ylegend)
+        graph = __update_graph(df_name, arg_value, graph_type, tile_title, num_periods, period_type, hierarchy_toggle,
+                               hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options, state_of_display,
+                               secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
+                               end_secondary, df_const, xaxis, yaxis, xlegend, ylegend)
 
         if graph is None:
             raise PreventUpdate
@@ -253,15 +250,13 @@ for x in range(5):
     def _print_choice_to_display_and_modify_dropdown(dropdown_val, _n_clicks_r, _n_clicks_tt,
                                                      n_clicks_click_history, state_of_display,
                                                      df_name):
-
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
-
         # if page loaded - prevent update
         if changed_id == '.':
             raise PreventUpdate
 
-        # create a comma delimited string for hierarchy (node id) navigation
         def get_nid_path(sod=None, dropdown_value=None):
+            """Create a comma delimited string for hierarchy (node id) navigation."""
             if sod is None:
                 sod = []
             path = "root"
@@ -294,12 +289,10 @@ for x in range(5):
             display_button = state_of_display
             nid_path = get_nid_path(sod=state_of_display)
             dropdown = generate_dropdown(changed_index, df_name, nid_path)
-
         elif 'hierarchy_to_top' in changed_id or 'data-set' in changed_id:
             display_button = []
             nid_path = get_nid_path()
             dropdown = generate_dropdown(changed_index, df_name, nid_path)
-
         elif 'hierarchy_specific_dropdown' in changed_id:
             # If dropdown has been remade, do not modify the history
             if dropdown_val is None:
@@ -315,13 +308,10 @@ for x in range(5):
                     (generate_history_button(dropdown_val, len(state_of_display), changed_index))]
                 nid_path = get_nid_path(sod=state_of_display, dropdown_value=dropdown_val)
                 dropdown = generate_dropdown(changed_index, df_name, nid_path)
-
         # If update triggered due to creation of a button do not update anything
         elif all(i == 0 for i in n_clicks_click_history):
             raise PreventUpdate
-
-        # If the history has been selected find the value of the button pressed and get it to reset the history and
-        # dropdown to that point
+        # If history has been selected find value of the button pressed and reset the history and dropdown to that point
         else:
             index = [i != 0 for i in n_clicks_click_history].index(True)
             history = state_of_display[:index + 1]
@@ -383,6 +373,7 @@ app.clientside_callback(
 def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quarter_button_clicks,
                         _month_button_clicks, _week_button_clicks, start_year_selection, end_year_selection,
                         start_secondary_selection, end_secondary_selection, update_trigger, tab, df_name, df_const):
+
     # ----------------------------------------------Variable Declarations-----------------------------------------------
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     tile = dash.callback_context.inputs_list[0]['id']['index']
@@ -416,7 +407,6 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                 dcc.Input(id={'type': 'end-secondary-input', 'index': tile},
                           value=1)
             ], style={'width': '0', 'height': '0', 'overflow': 'hidden'})]
-
     # 'Select Range' was selected
     else:
         # tabs are unselected and enabled unless otherwise specified
@@ -455,13 +445,12 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                     id={'type': 'end-secondary-input', 'index': tile},
                     value=1,
                     style={'display': 'none'})])
-
         # if a tab was requested other than 'year', generate the default appearance of the selected tab
         elif 'n_clicks' in changed_id:
             conditions = ['date-picker-quarter-button' in changed_id, 'date-picker-month-button' in changed_id]
             quarter_classname, quarter_disabled, month_classname, month_disabled, week_classname, week_disabled, \
-            fringe_min, fringe_max, default_max, max_year, \
-            new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
+                fringe_min, fringe_max, default_max, max_year, \
+                new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
             # set min_year according to user selected fiscal/gregorian time type
             if fiscal_toggle == 'Gregorian':
                 min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
@@ -494,7 +483,6 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                                                maximum=fringe_max)
             left_column = [year_input_min, secondary_input_min]
             right_column = [year_input_max, secondary_input_max]
-
         # if an input within a tab changed to a valid value or fiscal year toggle changed, apply the change
         else:
             # if an invalid input exists, do not update
@@ -517,8 +505,8 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                 selected_secondary_max = end_secondary_selection
                 conditions = [tab == 'Quarter', tab == 'Month']
                 quarter_classname, quarter_disabled, month_classname, month_disabled, week_classname, week_disabled, \
-                fringe_min, fringe_max, default_max, max_year, \
-                new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
+                    fringe_min, fringe_max, default_max, max_year, \
+                    new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
             # set min_year according to user selected time type (gregorian/fiscal)
             if fiscal_toggle == 'Gregorian':
                 min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
@@ -616,6 +604,7 @@ operators = [[' ge ', '>='],
 
 
 def split_filter_part(filter_part):
+    """Returns column name, operator and filter_value or None given a filter part."""
     for operator_type in operators:
         for operator in operator_type:
             if operator in filter_part:
@@ -753,7 +742,7 @@ for x in range(4):
         # Reformat date column
         dff['Date of Event'] = dff['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
 
-        # Filter based on datatable filters
+        # Filter based on data table filters
         filtering_expressions = filter_query.split(' && ')
         for filter_part in filtering_expressions:
             col_name, operator, filter_value = split_filter_part(filter_part)
@@ -790,23 +779,25 @@ for x in range(4):
         """
         function _update_data_fitting_options(degree_input){
             const triggered = String(dash_clientside.callback_context.triggered.map(t => t.prop_id));
-    
+            let degree_input_wrapper = dash_clientside.no_update;
+            let confidence_interval_wrapper = dash_clientside.no_update;
+            
             if (degree_input == 'no-fit' || degree_input == 'linear-fit'){
-                var degree_input_wrapper = {'display': 'none'};
+                degree_input_wrapper = {'display': 'none'};
                 if (degree_input == 'no-fit'){
-                    var confidence_interval_wrapper = {'display': 'none'};
+                    confidence_interval_wrapper = {'display': 'none'};
                 }
                 else{
-                    var confidence_interval_wrapper = {'display': 'inline'};
+                    confidence_interval_wrapper = {'display': 'inline'};
                 }
             }
             else if (degree_input == 'curve-fit'){
-                var degree_input_wrapper = {'display': 'inline'};
-                var confidence_interval_wrapper = {'display': 'inline'};
+                degree_input_wrapper = {'display': 'inline'};
+                confidence_interval_wrapper = {'display': 'inline'};
             }
             else{
-                var degree_input_wrapper = dash_clientside.no_update;
-                var confidence_interval_wrapper = dash_clientside.no_update;
+                degree_input_wrapper = dash_clientside.no_update;
+                confidence_interval_wrapper = dash_clientside.no_update;
             }
     
             return [degree_input_wrapper, confidence_interval_wrapper];
@@ -822,19 +813,23 @@ for x in range(4):
     app.clientside_callback(
         """
         function _hide_animated_bubble_options(xaxis, graph_type){
+            let hide_xaxis_measure = dash_clientside.no_update;
+            let hide_yaxis_measure = dash_clientside.no_update;
+            let hide_size_measure = dash_clientside.no_update;
             if (xaxis == 'Time' && graph_type == 'Bubble'){
-                var hide_xaxis_measure = {'display': 'none'};
-                var hide_yaxis_measure = {'display': 'none'};
-                var hide_size_measure = {'display': 'none'};
+                hide_xaxis_measure = {'display': 'none'};
+                hide_yaxis_measure = {'display': 'none'};
+                hide_size_measure = {'display': 'none'};
                 }
             else{
-                var hide_xaxis_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
-                var hide_yaxis_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
-                var hide_size_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
+                hide_xaxis_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
+                hide_yaxis_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
+                hide_size_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
                 }
             return [hide_xaxis_measure, hide_yaxis_measure, hide_size_measure];
         }
             """,
+
         [Output({'type': 'hide-xaxis-measure', 'index': x}, 'style'),
          Output({'type': 'hide-yaxis-measure', 'index': x}, 'style'),
          Output({'type': 'hide-size-measure', 'index': x}, 'style')],

@@ -2,16 +2,14 @@
 """
 data.py
 
-contains arbitrary constants, data constants, and data manipulation functions
+Contains arbitrary constants, data constants, and data manipulation functions.
 """
 ######################################################################################################################
 
-from datetime import datetime, timedelta
-
-import numpy as np
 # External Packages
+from datetime import datetime, timedelta
+import numpy as np
 import pandas as pd
-# import pyodbc
 import logging
 from dateutil.relativedelta import relativedelta
 from flask import session
@@ -19,9 +17,8 @@ import statsmodels.api as sm
 from statsmodels.sandbox.regression.predstd import wls_prediction_std
 from sklearn.preprocessing import PolynomialFeatures
 
-# import config
+# Internal Modules
 from conn import get_ref, exec_storedproc_results
-
 
 # ***********************************************ARBITRARY CONSTANTS*************************************************
 
@@ -49,6 +46,20 @@ CLR = {'text1': 'black',
        'sidebar-final': '#fffafa',
        'sidebar-initial': '#9B6072'}
 
+LAYOUTS = [{'lg': [{'i': "tile-wrapper: 0", 'x': 0, 'y': 0, 'w': 24, 'h': 18}]},
+           {'lg': [
+               {'i': "tile-wrapper: 0", 'x': 0, 'y': 0, 'w': 12, 'h': 18},
+               {'i': "tile-wrapper: 1", 'x': 12, 'y': 0, 'w': 12, 'h': 18}]},
+           {'lg': [
+               {'i': "tile-wrapper: 0", 'x': 0, 'y': 0, 'w': 12, 'h': 9},
+               {'i': "tile-wrapper: 1", 'x': 12, 'y': 0, 'w': 12, 'h': 9},
+               {'i': "tile-wrapper: 2", 'x': 0, 'y': 9, 'w': 24, 'h': 9}]},
+           {'lg': [
+               {'i': "tile-wrapper: 0", 'x': 0, 'y': 0, 'w': 12, 'h': 9},
+               {'i': "tile-wrapper: 1", 'x': 12, 'y': 0, 'w': 12, 'h': 9},
+               {'i': "tile-wrapper: 2", 'x': 0, 'y': 9, 'w': 12, 'h': 9},
+               {'i': "tile-wrapper: 3", 'x': 12, 'y': 9, 'w': 12, 'h': 9}]}]
+
 # ******************************************STYLE RETURNS FOR CALLBACKS***********************************************
 
 VIEW_CONTENT_SHOW = {'min-height': '0', 'overflow': 'hidden'}
@@ -68,9 +79,10 @@ DATA_CONTENT_HIDE = {'display': 'none'}
 
 # ********************************************DATASET*****************************************************************
 
-def dataset_to_df(df_name):
-    logging.debug("loading dataset {}...".format(df_name))
 
+def dataset_to_df(df_name):
+    """Queries for the dataset and returns a formatted pandas data frame."""
+    logging.debug("loading dataset {}...".format(df_name))
     # conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
     # sql_query = pd.read_sql_query(
     #     '''
@@ -82,7 +94,6 @@ def dataset_to_df(df_name):
     exec dbo.OPP_Get_DataSet {}, \'{}\', \'{}\', @p_result_status output
     select @p_result_status as result_status
     """.format(session["sessionID"], session["language"], df_name)
-
     df = exec_storedproc_results(query)
     df[['Year of Event',
         'Quarter',
@@ -136,13 +147,10 @@ def dataset_to_df(df_name):
                             'Hierarchy One -4': 'H5',
                             'Hierarchy One Leaf': 'H6'})
 
-    # Shrinks Data Size
     df = create_categories(df, ['H1', 'H2', 'H3', 'H4', 'H5', 'H6'])
-
     # replaces all strings that are just spaces with NaN
     df.replace(to_replace=r'^\s*$', value=np.NaN, regex=True, inplace=True)
     df.replace(to_replace='', value=np.NaN, inplace=True)
-
     logging.debug("dataset {} loaded.".format(df_name))
 
     # If we are dealing with links in the future we must format them as follows and edit the table drawer
@@ -150,20 +158,16 @@ def dataset_to_df(df_name):
     return df
 
 
-# generates the constants required to be stored for the given dataset
 def generate_constants(df_name):
+    """Generates the constants required to be stored for the given dataset."""
     HIERARCHY_LEVELS = ['H{}'.format(i + 1) for i in range(6)]
-
     df = session[df_name]
 
-    # list of variable column names
-    VARIABLE_LEVEL = 'Variable Name'
+    VARIABLE_LEVEL = 'Variable Name'  # list of variable column names
 
-    # list of column names
-    COLUMN_NAMES = df.columns.values
+    COLUMN_NAMES = df.columns.values  # list of column names
 
-    # list of measure type options
-    MEASURE_TYPE_OPTIONS = df['Measure Type'].dropna().unique().tolist()
+    MEASURE_TYPE_OPTIONS = df['Measure Type'].dropna().unique().tolist()  # list of measure type options
     MEASURE_TYPE_OPTIONS.sort()
 
     # New date picker values
@@ -246,11 +250,9 @@ def generate_constants(df_name):
 
     # replaces all Y in Partial Period with True & False
     df['Partial Period'] = df['Partial Period'].transform(lambda x: x == 'Y')
-
     # Sets the Date of Event in the df to be in the correct format for Plotly
     # df['Date of Event'] = df['Date of Event'].transform(
     #     lambda x: pd.to_datetime(x, format='%Y%m%d', errors='ignore'))
-
     options = []
     Variable_Option_Lists = []
 
@@ -264,7 +266,6 @@ def generate_constants(df_name):
             {'label': "  " * unique_var.count("|") + str(unique_var).replace('|', ', '), 'value': unique_var})
 
     VARIABLE_OPTIONS = options
-
     storage = {
         'HIERARCHY_LEVELS': HIERARCHY_LEVELS,
         'VARIABLE_LEVEL': VARIABLE_LEVEL,
@@ -405,9 +406,7 @@ def data_filter(hierarchy_path, secondary_type, end_secondary, end_year, start_s
         # Data frame filtered to be in inputted year range
         time_df = filtered_df[filtered_df['{}Year of Event'.format(year_prefix)] >= int(start_year)]
         time_df = time_df[time_df['{}Year of Event'.format(year_prefix)] <= end_year]
-
-        # Filters out unused calender values
-        time_df = time_df[time_df['Calendar Entry Type'] == secondary_type]
+        time_df = time_df[time_df['Calendar Entry Type'] == secondary_type]  # Filters out unused calender values
 
         if secondary_type == 'Quarter':
             division_column = '{}Quarter'.format(year_prefix)
@@ -418,7 +417,6 @@ def data_filter(hierarchy_path, secondary_type, end_secondary, end_year, start_s
             # Filter out all rows outside specified range
             time_df = time_df[time_df[division_column] >= start_secondary]
             time_df = time_df[time_df[division_column] < end_secondary]
-
         else:  # Handles in-between years
             # Filter starting year above threshold
             range_df = time_df[time_df['{}Year of Event'.format(year_prefix)] == start_year]
@@ -433,30 +431,27 @@ def data_filter(hierarchy_path, secondary_type, end_secondary, end_year, start_s
             time_df = time_df[time_df['{}Year of Event'.format(year_prefix)] == end_year]
             time_df = time_df[time_df[division_column] < end_secondary]
             range_df = range_df.append(time_df)
-
             # Update working df
             time_df = range_df.copy()
-
     else:
         # Data frame filtered to be in inputted year range
         time_df = filtered_df.copy()
         time_df = time_df[time_df['{}Year of Event'.format(year_prefix)] >= start_year]
         time_df = time_df[time_df['{}Year of Event'.format(year_prefix)] <= end_year - 1]
-
         # Filters out month and quarter values (whole year)
         time_df = time_df[time_df['Calendar Entry Type'] == '{}Year'.replace("{}", year_prefix)]
+
     return time_df
 
 
-# Filters data based on customize menu inputs
 def customize_menu_filter(dff, df_name, measure_type, variable_names, df_const):
+    """Filters data frame based on the customize menu inputs and returns the filtered data frame."""
     if measure_type == 'Link':
         filtered_df = dff[dff['Measure Fcn'] == 'Link']
     else:
         filtered_df = dff[dff['Measure Type'] == measure_type]
 
     if variable_names is not None:
-
         # ensure variable_names is a list of variable values
         if type(variable_names) is not list:
             variable_names = [variable_names]
@@ -470,20 +465,22 @@ def customize_menu_filter(dff, df_name, measure_type, variable_names, df_const):
                 filtered_df[filtered_df[df_const[df_name]['VARIABLE_LEVEL']] == variable_name])
 
         filtered_df = aggregate_df
-
     return filtered_df
 
 
-# This uses pandas categories to shrink the data
 def create_categories(dff, hierarchy_columns):
+    """Uses pandas categories to shrink the data and returns the reduced data frame."""
     to_category = ['Calendar Entry Type', 'Measure Type', 'OPG Data Set', 'Hierarchy One Name', 'Variable Name',
                    'Variable Name Qualifier', 'Variable Name Sub Qualifier', 'Partial Period']
     to_category = hierarchy_columns + to_category
+
     for i in to_category:
         dff[i] = pd.Categorical(dff[i])
+
     return dff
 
 
+# TODO: No usages
 def get_table_columns(dff):
     df = dff.drop(
         # ['OPG 001 Time Series Measures', 'Calendar Entry Type', 'Year of Event',
@@ -495,6 +492,7 @@ def get_table_columns(dff):
 # *********************************************LANGUAGE DATA***********************************************************
 
 def get_label(label, table=None):
+    """Given a label returns the appropriate ref_desc from OP_Ref."""
     if label is None:
         return None
 
@@ -569,14 +567,15 @@ def get_label(label, table=None):
 # ********************************************DATA FITTING OPERATIONS**************************************************
 
 def linear_regression(df, x, y, ci):
+    """
+    Creates statistical model from ordinary lease squares method and uses the model return the prediction of a
+    linear best fit.
+    """
     df_best_fit = pd.DataFrame()
-
     df_best_fit['timestamp'] = pd.to_datetime(df[x])
     df_best_fit['serialtime'] = [(d - datetime(1970, 1, 1)).days for d in df_best_fit['timestamp']]
-
     x_axis = sm.add_constant(df_best_fit['serialtime'])
-    # creates statistical model from ordinary lease squares method
-    model = sm.OLS(df[y], x_axis).fit()
+    model = sm.OLS(df[y], x_axis).fit()  # creates statistical model from ordinary lease squares method
     df_best_fit['Best Fit'] = model.fittedvalues
 
     if ci:
@@ -586,17 +585,17 @@ def linear_regression(df, x, y, ci):
 
 
 def polynomial_regression(df, x, y, degree, ci):
+    """
+    Creates statistical model from ordinary lease squares method and uses the model return the prediction of a
+    polynomial best fit.
+    """
     df_best_fit = pd.DataFrame()
-
     df_best_fit['timestamp'] = pd.to_datetime(df[x])
     df_best_fit['serialtime'] = [(d - datetime(1970, 1, 1)).days for d in df_best_fit['timestamp']]
-
     polynomial_features = PolynomialFeatures(degree=degree)
     xp = polynomial_features.fit_transform(df_best_fit['serialtime'].to_numpy().reshape(-1, 1))
-    # creates statistical model from ordinary lease squares method
-    model = sm.OLS(df[y], xp).fit()
-    # creates best fit with generated polynomial
-    df_best_fit["Best Fit"] = model.predict(xp)
+    model = sm.OLS(df[y], xp).fit()  # creates statistical model from ordinary lease squares method
+    df_best_fit["Best Fit"] = model.predict(xp)  # creates best fit with generated polynomial
 
     if ci:
         df_best_fit["Lower Interval"], df_best_fit["Upper Interval"] = confidence_intervals(model)
@@ -605,7 +604,9 @@ def polynomial_regression(df, x, y, degree, ci):
 
 
 def confidence_intervals(model):
-    # calculates standard deviation and confidence interval for prediction
+    """
+    Calculates standard deviation and confidence interval for prediction and returns the upper and lower confidence
+    interval.
+    """
     _, lower, upper = wls_prediction_std(model)
-    # returns the upper and lower confidence interval
     return lower, upper

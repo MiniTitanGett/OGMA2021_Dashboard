@@ -108,7 +108,16 @@ def dataset_to_df(df_name):
             "Hierarchy One -4",
             "Hierarchy One Leaf"]] = np.NaN
 
-        # TODO: SETUP VAR HIERARCHY ITERATION HERE
+        # TODO: REPLACE VAR HIERARCHY ITERATION HERE
+        # add all variable names without qualifiers to col
+        col = pd.Series(df['Variable Name'][df['Variable Name Qualifier'].isna()])
+        # combine variable hierarchy columns into col for rows with qualifiers
+        col = col.append(
+            pd.Series(
+                df['Variable Name'][df['Variable Name Qualifier'].notna()]
+                + " "
+                + df['Variable Name Qualifier'][df['Variable Name Qualifier'].notna()]))
+        df['Variable Name'] = col
 
     else:
         df[['Year of Event',
@@ -493,8 +502,8 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
                                                start_year, timeframe, fiscal_toggle, num_periods, period_type, df_name,
                                                df_const, df)
         # TODO: Write hierarchy aggregator when date_time_aggregator is complete
-        filtered_df = data_hierarchy_aggregator(filtered_df, hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
-                                                hierarchy_graph_children, df_name, df_const)
+        # filtered_df = data_hierarchy_aggregator(filtered_df, hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
+        #                                         hierarchy_graph_children, df_name, df_const)
 
     return filtered_df
 

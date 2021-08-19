@@ -110,6 +110,16 @@ def dataset_to_df(df_name):
 
         session[df_name + "_NodeData"] = node_df
 
+        # add all variable names without qualifiers to col
+        col = pd.Series(df['Variable Name'][df['Variable Name Qualifier'].isna()])
+        # combine variable hierarchy columns into col for rows with qualifiers
+        col = col.append(
+            pd.Series(
+                df['Variable Name'][df['Variable Name Qualifier'].notna()]
+                + " "
+                + df['Variable Name Qualifier'][df['Variable Name Qualifier'].notna()]))
+        df[['Variable Value']] = col
+
     if df_name == 'OPG011':
         df[["OPG Data Set",
             "Hierarchy One Name",
@@ -316,7 +326,6 @@ def generate_constants(df_name):
         MIN_DATE_UNF = min_date_unf.strftime('%m/%d/%Y')
         MAX_DATE_UNF = max_date_unf.strftime('%m/%d/%Y')
     else:
-        VARIABLE_LEVEL = 'Variable Name'  # list of variable column names
         # New date picker values
         GREGORIAN_MIN_YEAR = int(df['Year of Event'].min())
         GREGORIAN_YEAR_MAX = int(df['Year of Event'][df['Calendar Entry Type'] == 'Year'].max())

@@ -50,6 +50,7 @@ app.clientside_callback(
     prevent_initial_call=True
 )
 
+
 # ***********************************************SHARED SAVING*******************************************************
 
 
@@ -71,6 +72,7 @@ def _update_tile_loading_dropdown_options(_tile_saving_trigger, _dashboard_savin
     return [[{'label': session['saved_layouts'][key]['Title'], 'value': key} for key in
              session['saved_layouts']]] * len(links)
 
+
 # *************************************************TILE SAVING********************************************************
 
 
@@ -91,7 +93,6 @@ def _update_tile_loading_dropdown_options(_tile_saving_trigger, _dashboard_savin
 )
 def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, _link_clicks, link_trigger, float_menu_result,
                                        prompt_result, prompt_data, float_menu_data, load_state, link_state):
-
     # -------------------------------------------Variable Declaration---------------------------------------------------
     changed_ids = [p['prop_id'] for p in dash.callback_context.triggered]
     children = []
@@ -159,7 +160,7 @@ def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, _link_clicks,
 for y in range(4):
     @app.callback(
         # LAYOUT components
-        [Output({'type': 'prompt-trigger', 'index': y}, 'data-'),
+        [Output({'type': 'prompt-trigger-wrapper', 'index': y}, 'children'),
          Output({'type': 'set-dropdown-options-trigger', 'index': y}, 'data-tile_saving'),
          Output({'type': 'minor-popup', 'index': y}, 'children'),
          Output({'type': 'minor-popup', 'index': y}, 'is_open'),
@@ -281,18 +282,21 @@ for y in range(4):
 
             # if user is trying to save an empty graph, warn them that they must have a graph to save
             if not graph_display:
-                prompt_trigger = [['empty_graph', tile], {}, get_label('LBL_Empty_Graph'),
-                                  get_label('LBL_Empty_Graph_Prompt'), False]
+                prompt_trigger = dcc.Store(id={'type': 'prompt-trigger', 'index': tile},
+                                           data=[['empty_graph', tile], {}, get_label('LBL_Empty_Graph'),
+                                                 get_label('LBL_Empty_Graph_Prompt'), False])
             # if tile is untitled, prevent updates but return save message
             elif graph_title == '':
-                prompt_trigger = [['empty_title', tile], {}, get_label('LBL_Untitled_Graph'),
-                                  get_label('LBL_Untitled_Graph_Prompt'), False]
+                prompt_trigger = dcc.Store(id={'type': 'prompt-trigger', 'index': tile},
+                                           data=[['empty_title', tile], {}, get_label('LBL_Untitled_Graph'),
+                                                 get_label('LBL_Untitled_Graph_Prompt'), False])
             # if conflicting tiles and overwrite not requested, prompt overwrite
             elif intermediate_pointer in session['saved_layouts'] \
                     and session['saved_layouts'][intermediate_pointer]['Title'] == graph_title \
                     and 'confirm-overwrite' != trigger:
-                prompt_trigger = [['overwrite', tile], {}, get_label('LBL_Overwrite_Graph'),
-                                  get_label('LBL_Overwrite_Graph_Prompt'), False]
+                prompt_trigger = dcc.Store(id={'type': 'prompt-trigger', 'index': tile},
+                                           data=[['overwrite', tile], {}, get_label('LBL_Overwrite_Graph'),
+                                                 get_label('LBL_Overwrite_Graph_Prompt'), False])
             # else, title is valid to be saved
             else:
                 while True:
@@ -354,8 +358,9 @@ for y in range(4):
             # if tile exists in session, send delete prompt
             if intermediate_pointer in session['saved_layouts'] \
                     and session['saved_layouts'][intermediate_pointer]['Title'] == graph_title:
-                prompt_trigger = [['delete', tile], {}, get_label('LBL_Delete_Graph'),
-                                  get_label('LBL_Delete_Graph_Prompt').format(graph_title), False]
+                prompt_trigger = dcc.Store(id={'type': 'prompt-trigger', 'index': tile},
+                                           data=[['delete', tile], {}, get_label('LBL_Delete_Graph'),
+                                                 get_label('LBL_Delete_Graph_Prompt').format(graph_title), False])
         # If confirm delete button has been pressed
         elif trigger == 'confirm-delete':
             intermediate_pointer = REPORT_POINTER_PREFIX + graph_title.replace(" ", "")
@@ -439,8 +444,9 @@ for y in range(4):
             link_output = 'fa fa-unlink'
         elif trigger == 'fa fa-link':
             if df_name != parent_df_name:
-                prompt_trigger = [['link', tile], {}, get_label('LBL_Link_Graph'),
-                                  get_label('LBL_Link_Graph_Prompt'), False]
+                prompt_trigger = dcc.Store(id={'type': 'prompt-trigger', 'index': tile},
+                                           data=[['link', tile], {}, get_label('LBL_Link_Graph'),
+                                                 get_label('LBL_Link_Graph_Prompt'), False])
             else:
                 link_output = 'fa fa-link'
         elif trigger == 'confirm-link':
@@ -449,6 +455,7 @@ for y in range(4):
         return prompt_trigger, update_options_trigger, popup_text, popup_is_open, tile_title_trigger, \
             customize_content, data_content, tab_output, start_year, end_year, start_secondary, \
             end_secondary, unlink, df_const_output, link_output
+
 
 # **********************************************DASHBOARD MENU*******************************************************
 
@@ -462,8 +469,8 @@ for y in range(4):
      Output({'type': 'set-tile-title-trigger', 'index': 2}, 'data-dashboard_load_title'),
      Output({'type': 'set-tile-title-trigger', 'index': 3}, 'data-dashboard_load_title'),
      # menu and prompt outputs
-     Output({'type': 'prompt-trigger', 'index': 4}, 'data-'),
-     Output({'type': 'float-menu-trigger', 'index': 4}, 'data-'),
+     Output({'type': 'prompt-trigger-wrapper', 'index': 4}, 'children'),
+     Output({'type': 'float-menu-trigger-wrapper', 'index': 4}, 'children'),
      Output({'type': 'minor-popup', 'index': 4}, 'children'),
      Output({'type': 'minor-popup', 'index': 4}, 'is_open'),
      # outputs for dashboard loading
@@ -651,7 +658,6 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                                       period_type_0, period_type_1, period_type_2, period_type_3, period_type_4,
                                       date_tab_0, date_tab_1, date_tab_2, date_tab_3, date_tab_4, layout,
                                       df_const):
-
     # ---------------------------------------Variable Declarations------------------------------------------------------
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     # Outputs
@@ -697,21 +703,27 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
         # if tile exists in session, send delete prompt
         if intermediate_pointer in session['saved_dashboards'] \
                 and session['saved_dashboards'][intermediate_pointer]['Dashboard Title'] == dashboard_title:
-            prompt_trigger = [['delete_dashboard', 4], {}, get_label('LBL_Delete_Dashboard'),
-                              get_label('LBL_Delete_Dashboard_Prompt').format(dashboard_title), False]
+            prompt_trigger = dcc.Store(id={'type': 'prompt-trigger', 'index': 4},
+                                       data=[['delete_dashboard', 4], {}, get_label('LBL_Delete_Dashboard'),
+                                             get_label('LBL_Delete_Dashboard_Prompt').format(dashboard_title), False])
     elif 'dashboard-reset' in changed_id:
-        prompt_trigger = [['reset', 4], {}, get_label('LBL_Reset_Dashboard'), get_label('LBL_Reset_Dashboard_Prompt'),
-                          False]
+        prompt_trigger = dcc.Store(id={'type': 'prompt-trigger', 'index': 4},
+                                   data=[['reset', 4], {}, get_label('LBL_Reset_Dashboard'),
+                                         get_label('LBL_Reset_Dashboard_Prompt'),
+                                         False])
     # if load button was pressed, send load menu
     elif 'load-dashboard' in changed_id:
-        float_menu_trigger = [['dashboard_layouts', 4], {}, get_label('LBL_Load_Dashboard'),
-                              session['tile_edited'][4]]
+        float_menu_trigger = dcc.Store(id={'type': 'float-menu-trigger', 'index': 4},
+                                       data=[['dashboard_layouts', 4], {}, get_label('LBL_Load_Dashboard'),
+                                             session['tile_edited'][4]])
     elif 'tile-close' in changed_id:
         if [p['value'] for p in dash.callback_context.triggered][0] is None:
             pass
         elif session['tile_edited'][int(search(r'\d+', changed_id).group())]:
-            prompt_trigger = [['close', int(search(r'\d+', changed_id).group())], {}, get_label('LBL_Close_Graph'),
-                              get_label('LBL_Close_Graph_Prompt'), False]
+            prompt_trigger = dcc.Store(id={'type': 'prompt-trigger', 'index': 4},
+                                       data=[['close', int(search(r'\d+', changed_id).group())], {},
+                                             get_label('LBL_Close_Graph'),
+                                             get_label('LBL_Close_Graph_Prompt'), False])
         else:
             close_trigger = int(search(r'\d+', changed_id).group())
     # if confirm load, load dashboard
@@ -856,13 +868,15 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
 
             # check if the dashboard title is blank
             if dashboard_title == '':
-                prompt_trigger = [['empty_title', 4], {}, get_label('LBL_Untitled_Dashboard'),
-                                  get_label('LBL_Untitled_Dashboard_Prompt'), False]
+                prompt_trigger = dcc.Store(id={'type': 'prompt-trigger', 'index': 4},
+                                           data=[['empty_title', 4], {}, get_label('LBL_Untitled_Dashboard'),
+                                                 get_label('LBL_Untitled_Dashboard_Prompt'), False])
                 # get_label('LBL_Dashboards_Require_A_Title_To_Be_Saved')
             # check if the dashboard is empty
             elif len(links) == 0:
-                prompt_trigger = [['empty_dashboard', 4], {}, get_label('LBL_Empty_Dashboard'),
-                                  get_label('LBL_Empty_Dashboard_Prompt'), False]
+                prompt_trigger = dcc.Store(id={'type': 'prompt-trigger', 'index': 4},
+                                           data=[['empty_dashboard', 4], {}, get_label('LBL_Empty_Dashboard'),
+                                                 get_label('LBL_Empty_Dashboard_Prompt'), False])
                 # get_label('LBL_Dashboard_Must_Not_Be_Empty')
             # if conflicting tiles or dashboard and overwrite not requested, prompt overwrite
             elif ((dashboard_title in used_dashboard_titles or any(x in used_titles for x in tile_titles))
@@ -880,20 +894,27 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                             conflicting_graphs += ', '
                     # if conflicting graph titles and dashboard title
                     if dashboard_title in used_dashboard_titles:  # was session['saved_dashboards']
-                        prompt_trigger = [['overwrite_dashboard', 4], {},
-                                          get_label('LBL_Overwrite_Dashboard'),
-                                          get_label('LBL_Overwrite_Dashboard_C_Title_Graph_Prompt').format(
-                                              dashboard_title, conflicting_graphs_list), False]
+                        prompt_trigger = dcc.Store(id={'type': 'prompt-trigger', 'index': 4},
+                                                   data=[['overwrite_dashboard', 4], {},
+                                                         get_label('LBL_Overwrite_Dashboard'),
+                                                         get_label(
+                                                             'LBL_Overwrite_Dashboard_C_Title_Graph_Prompt').format(
+                                                             dashboard_title, conflicting_graphs_list), False])
                     # else, just conflicting graph titles
                     else:
-                        prompt_trigger = [['overwrite_dashboard', 4], {}, get_label('LBL_Overwrite_Dashboard'),
-                                          get_label('LBL_Overwrite_Dashboard_C_Graph_Prompt').format(
-                                              conflicting_graphs_list), False]
+                        prompt_trigger = dcc.Store(id={'type': 'prompt-trigger', 'index': 4},
+                                                   data=[['overwrite_dashboard', 4], {},
+                                                         get_label('LBL_Overwrite_Dashboard'),
+                                                         get_label('LBL_Overwrite_Dashboard_C_Graph_Prompt').format(
+                                                             conflicting_graphs_list), False])
                 # else, just conflicting dashboard title
                 else:
-                    prompt_trigger = [['overwrite_dashboard', 4], {}, get_label('LBL_Overwrite_Dashboard'),
-                                      get_label('LBL_Overwrite_Dashboard_C_Title_Prompt').format(dashboard_title),
-                                      False]
+                    prompt_trigger = dcc.Store(id={'type': 'prompt-trigger', 'index': 4},
+                                               data=[['overwrite_dashboard', 4], {},
+                                                     get_label('LBL_Overwrite_Dashboard'),
+                                                     get_label('LBL_Overwrite_Dashboard_C_Title_Prompt').format(
+                                                         dashboard_title),
+                                                     False])
             # else, save/overwrite the dashboard and contained tiles
             else:
                 df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name4]
@@ -959,7 +980,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
 
                     # set up axes titles and args
                     args_list = arg_list_all[i]
-                    axes_title = [x[i] for x in axes_titles_all if len(x) >= (i+1)]
+                    axes_title = [x[i] for x in axes_titles_all if len(x) >= (i + 1)]
 
                     if type(button_paths[i]) == dict:
                         button_paths[i] = [button_paths[i]]
@@ -1074,7 +1095,6 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
 def _load_select_range_inputs(tile_tab, dashboard_tab, tile_start_year, tile_end_year, tile_start_secondary,
                               tile_end_secondary, dashboard_start_year, dashboard_end_year, dashboard_start_secondary,
                               dashboard_end_secondary):
-
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
     if changed_id == '.':

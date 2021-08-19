@@ -176,10 +176,10 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
             if hierarchy_type == 'Level Filter' or (hierarchy_type == 'Specific Item' and
                                                     hierarchy_graph_children == ['graph_children']):
                 color = hierarchy_col
-                line_group = 'Variable Name'
+                line_group = df_const[df_name]['VARIABLE_LEVEL']
                 legend_title_text = get_label('LBL_' + hierarchy_col, df_name)
             else:
-                color = 'Variable Name'
+                color = df_const[df_name]['VARIABLE_LEVEL']
                 line_group = None
                 legend_title_text = get_label('LBL_Variable_Names')
 
@@ -195,7 +195,7 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                 y='Measure Value',
                 color=color,
                 line_group=line_group,
-                custom_data=[hierarchy_col, 'Variable Name'])
+                custom_data=[hierarchy_col, df_const[df_name]['VARIABLE_LEVEL']])
             fig.update_layout(legend_title_text=legend_title_text)
 
             # check what arg_value[3]: mode is selected and sets the corresponding trace
@@ -372,25 +372,25 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
 
         if arg_value[0] == 'Time':
             filtered_df = dff.copy().query(
-                "`Variable Name` == @arg_value[0] or "
-                "`Variable Name` == @arg_value[2] or "
-                "`Variable Name` == @arg_value[4]")
-            filtered_df[['Date of Event', 'Variable Name', 'Partial Period', color]] = \
+                "`{0}` == @arg_value[0] or "
+                "`{0}` == @arg_value[2] or "
+                "`{0}` == @arg_value[4]").format(df_const[df_name]['VARIABLE_LEVEL'])
+            filtered_df[['Date of Event', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]] = \
                 filtered_df[
-                    ['Date of Event', 'Variable Name', 'Partial Period', color]].astype(str)
+                    ['Date of Event', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]].astype(str)
             filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color],
-                                                  columns=['Variable Name'],
+                                                  columns=[df_const[df_name]['VARIABLE_LEVEL']],
                                                   values='Measure Value').reset_index()
         else:
             # Specialty filtering
             filtered_df = dff.copy().query(
-                "(`Variable Name` == @arg_value[0] and `Measure Type` == @arg_value[1]) or "
-                "(`Variable Name` == @arg_value[2] and `Measure Type` == @arg_value[3]) or "
-                "(`Variable Name` == @arg_value[4] and `Measure Type` == @arg_value[5])")
-            filtered_df[['Date of Event', 'Measure Type', 'Variable Name', 'Partial Period', color]] = filtered_df[
-                ['Date of Event', 'Measure Type', 'Variable Name', 'Partial Period', color]].astype(str)
+                "(`{0}` == @arg_value[0] and `Measure Type` == @arg_value[1]) or "
+                "(`{0}` == @arg_value[2] and `Measure Type` == @arg_value[3]) or "
+                "(`{0}` == @arg_value[4] and `Measure Type` == @arg_value[5])").format(df_const[df_name]['VARIABLE_LEVEL'])
+            filtered_df[['Date of Event', 'Measure Type', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]] = filtered_df[
+                ['Date of Event', 'Measure Type', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]].astype(str)
             filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color],
-                                                  columns=['Variable Name', 'Measure Type'],
+                                                  columns=[df_const[df_name]['VARIABLE_LEVEL'], 'Measure Type'],
                                                   values='Measure Value').reset_index()
 
         filtered_df = filtered_df.dropna()
@@ -651,23 +651,23 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                                                 hierarchy_graph_children == ['graph_children']):
             # Axis and color logic
             if not group_by_item:
-                x = 'Variable Name'
+                x = df_const[df_name]['VARIABLE_LEVEL']
                 if hierarchy_type == 'Level Filter':
                     color = hierarchy_level_dropdown
                 else:
                     color = df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)]
             elif hierarchy_type == 'Level Filter':
                 x = hierarchy_level_dropdown
-                color = 'Variable Name'
+                color = df_const[df_name]['VARIABLE_LEVEL']
             else:
                 x = df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)]
-                color = 'Variable Name'
+                color = df_const[df_name]['VARIABLE_LEVEL']
 
             legend_title_text = get_label('LBL_' + color.replace(' ', '_'), df_name)
         # hierarchy type is specific item while "Graph all in Dropdown" is unselected
         else:
-            color = 'Variable Name' if group_by_item else 'Partial Period'
-            x = 'Date of Event' if group_by_item and not arg_value[4] else 'Variable Name'
+            color = df_const[df_name]['VARIABLE_LEVEL'] if group_by_item else 'Partial Period'
+            x = 'Date of Event' if group_by_item and not arg_value[4] else df_const[df_name]['VARIABLE_LEVEL']
             legend_title_text = get_label('LBL_Variable_Name', df_name) if group_by_item else get_label(
                 'LBL_Partial_Period', df_name)
             # if group_by_item and not arg_value[4]:
@@ -708,7 +708,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                 color=color,
                 barmode='group',
                 animation_frame='Date of Event' if arg_value[4] else None,
-                custom_data=[hierarchy_col, 'Variable Name', 'Date of Event'])
+                custom_data=[hierarchy_col, df_const[df_name]['VARIABLE_LEVEL'], 'Date of Event'])
             fig.update_layout(legend_title_text=legend_title_text)
             # set up hover label
             hovertemplate = get_label('LBL_Gen_Hover_Data', df_name)
@@ -863,12 +863,12 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                     y = hierarchy_level_dropdown
                 else:
                     y = df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)]
-                filtered_df.sort_values(by=['Variable Name', y, x], inplace=True)
+                filtered_df.sort_values(by=[df_const[df_name]['VARIABLE_LEVEL'], y, x], inplace=True)
             # hierarchy type is specific item while "Graph all in Dropdown" is unselected
             else:
                 x = 'Measure Value'
                 y = None
-                filtered_df.sort_values(by=['Variable Name', 'Measure Value'])
+                filtered_df.sort_values(by=[df_const[df_name]['VARIABLE_LEVEL'], 'Measure Value'])
 
             # filter the dataframe down to the partial period selected
             filtered_df['Date of Event'] = filtered_df['Date of Event'].transform(
@@ -883,7 +883,7 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                 # check arg_value[2]: orientation assign to corresponding x and y axis
                 x=x if arg_value[2] == 'Horizontal' else y,
                 y=y if arg_value[2] == 'Horizontal' else x,
-                color='Variable Name',
+                color=df_const[df_name]['VARIABLE_LEVEL'],
                 points='all' if arg_value[3] else False)
 
             fig.update_layout(legend_title_text=get_label('LBL_Variable_Names'))

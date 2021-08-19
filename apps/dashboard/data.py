@@ -171,15 +171,15 @@ def dataset_to_df(df_name):
                                     'Julian Day',
                                     'Activity Event Id',
                                     'Measure Value']].apply(pd.to_numeric)
-    # add all variable names without qualifiers to col
-    col = pd.Series(df['Variable Name'][df['Variable Name Qualifier'].isna()])
-    # combine variable hierarchy columns into col for rows with qualifiers
-    col = col.append(
-        pd.Series(
-            df['Variable Name'][df['Variable Name Qualifier'].notna()]
-            + " "
-            + df['Variable Name Qualifier'][df['Variable Name Qualifier'].notna()]))
-    df[['Variable Value']] = col
+        # add all variable names without qualifiers to col
+        col = pd.Series(df['Variable Name'][df['Variable Name Qualifier'].isna()])
+        # combine variable hierarchy columns into col for rows with qualifiers
+        col = col.append(
+            pd.Series(
+                df['Variable Name'][df['Variable Name Qualifier'].notna()]
+                + " "
+                + df['Variable Name Qualifier'][df['Variable Name Qualifier'].notna()]))
+        df[['Variable Value']] = col
 
     # Can be redone to exclude hierarchy one name and to include more levels
     df = df.rename(columns={'Hierarchy One Top': 'H0',

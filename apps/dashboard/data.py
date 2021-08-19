@@ -248,6 +248,8 @@ def generate_constants(df_name):
     MEASURE_TYPE_OPTIONS.sort()
 
     if df_name == 'OPG011':
+        # TODO: Remove when variable value is created in OPG011 time_df
+        VARIABLE_LEVEL = 'Variable Name'
         try:
             min_date_unf = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(),
                                                     'Date of Event'], '%Y/%m/%d')

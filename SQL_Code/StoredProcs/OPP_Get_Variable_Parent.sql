@@ -2,7 +2,7 @@ if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[OPP_Get_Va
 drop procedure [dbo].[OPP_Get_Variable_Parent]
 go
 
--- Copyright © OGMA Consulting Corp.
+-- Copyright ï¿½ OGMA Consulting Corp.
 -- $Id$
 Create Procedure dbo.OPP_Get_Variable_Parent
 
@@ -21,10 +21,10 @@ begin
 
   set @p_parent = null
 
-  if (@pr_child_level = 3)
+  if (@pr_child_level = 2)
     set @p_parent = (select top 1 [Variable Name Qualifier] from dbo.OPG001 with (nolock) where [Variable Name Sub Qualifier] = @pr_child)
 
-  else if (@pr_child_level = 2)
+  else if (@pr_child_level = 1)
     set @p_parent = (select top 1 [Variable Name] from dbo.OPG001 with (nolock) where [Variable Name Qualifier] = @pr_child)
   
   set @p_result_status = 'OK'

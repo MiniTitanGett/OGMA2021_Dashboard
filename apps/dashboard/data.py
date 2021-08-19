@@ -144,7 +144,10 @@ def dataset_to_df(df_name):
                 # insert parent into table
                 df.loc[df[var_levels[depth]] == node, var_levels[depth - 1]] = parent
 
-        df = create_categories(df, ['H0', 'H1', 'H2', 'H3', 'H4', 'H5'])
+        # combine variable hierarchy columns into col for rows with qualifiers
+        col = df[['Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier']].astype(
+            str).agg(' '.join, axis=1)
+        df[["Variable Value"]] = col
 
     else:
         df[['Year of Event',
@@ -176,7 +179,7 @@ def dataset_to_df(df_name):
             df['Variable Name'][df['Variable Name Qualifier'].notna()]
             + " "
             + df['Variable Name Qualifier'][df['Variable Name Qualifier'].notna()]))
-    df['Variable Name'] = col
+    df[['Variable Value']] = col
 
     # Can be redone to exclude hierarchy one name and to include more levels
     df = df.rename(columns={'Hierarchy One Top': 'H0',
@@ -211,7 +214,9 @@ def dataset_to_df(df_name):
                 # insert parent into table
                 df.loc[df["H{}".format(depth)] == node, "H{}".format(depth - 1)] = parent
 
-    df = create_categories(df, ['H0', 'H1', 'H2', 'H3', 'H4', 'H5'])
+    else:
+        df = create_categories(df, ['Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier', 'H0',
+                                    'H1', 'H2', 'H3', 'H4', 'H5'])
 
     logging.debug("dataset {} loaded.".format(df_name))
 
@@ -225,7 +230,7 @@ def generate_constants(df_name):
     HIERARCHY_LEVELS = ['H{}'.format(i) for i in range(6)]
     df = session[df_name]
 
-    VARIABLE_LEVEL = 'Variable Name'  # list of variable column names
+    VARIABLE_LEVEL = 'Variable Value'  # list of variable column names
 
     COLUMN_NAMES = df.columns.values  # list of column names
 
@@ -291,8 +296,14 @@ def generate_constants(df_name):
 
         options = []
         variable_option_lists = []
-        unique_vars = df[VARIABLE_LEVEL].unique()
-        cleaned_list = [x for x in unique_vars if str(x) != 'nan']
+        # appends all versions of the hierarchy to the unique vars list (ex) a child is b child is c -> [a, a b, a b c]
+        unique_vars = df['Variable Name'].unique().astype(str).tolist() + \
+            df[['Variable Name', 'Variable Name Qualifier']].fillna(
+                '').astype(str).agg(' '.join, axis=1).unique().tolist() + \
+            df[['Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier']].fillna(
+                '').astype(str).agg(' '.join, axis=1).unique().tolist()
+        # drops nans and duplicates from the list
+        cleaned_list = list(dict.fromkeys([x.strip() for x in unique_vars if str(x) != 'nan']))
         cleaned_list.sort()
 
         for unique_var in cleaned_list:
@@ -305,6 +316,7 @@ def generate_constants(df_name):
         MIN_DATE_UNF = min_date_unf.strftime('%m/%d/%Y')
         MAX_DATE_UNF = max_date_unf.strftime('%m/%d/%Y')
     else:
+        VARIABLE_LEVEL = 'Variable Name'  # list of variable column names
         # New date picker values
         GREGORIAN_MIN_YEAR = int(df['Year of Event'].min())
         GREGORIAN_YEAR_MAX = int(df['Year of Event'][df['Calendar Entry Type'] == 'Year'].max())
@@ -474,13 +486,13 @@ def get_month(day):
 def get_quarter(day):
     return (get_month(day) - 1) // 3 + 1
 
+
 # **********************************************DATA MANIPULATION FUNCTIONS*******************************************
 
 
 def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children, df_name,
                      df_const, secondary_type, end_secondary, end_year, start_secondary, start_year, timeframe,
                      fiscal_toggle, num_periods, period_type, arg_values=None, graph_type=None):
-
     if df_name != 'OPG011':
         filtered_df = data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
                                             hierarchy_graph_children, df_name, df_const)
@@ -546,7 +558,7 @@ def data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_drop
             if hierarchy_level_dropdown:
                 # Filter based on hierarchy level
                 filtered_df.dropna(subset=[hierarchy_level_dropdown], inplace=True)
-                for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - int(hierarchy_level_dropdown[1])):
+                for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - (int(hierarchy_level_dropdown[1])+1)):
                     bool_series = pd.isnull(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][
                         len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]])
                     filtered_df = filtered_df[bool_series]
@@ -1211,13 +1223,11 @@ def customize_menu_filter(dff, df_name, measure_type, variable_names, df_const):
     return filtered_df
 
 
-def create_categories(dff, hierarchy_columns):
+def create_categories(dff, hierarchy_columns=None):
     """Uses pandas categories to shrink the data and returns the reduced data frame."""
-    to_category = ['Calendar Entry Type', 'Measure Type', 'OPG Data Set', 'Hierarchy One Name', 'Variable Name',
-                   'Variable Name Qualifier', 'Variable Name Sub Qualifier', 'Partial Period']
-    to_category = hierarchy_columns + to_category
-
-    for i in to_category:
+    if hierarchy_columns is None:
+        hierarchy_columns = []
+    for i in hierarchy_columns:
         dff[i] = pd.Categorical(dff[i])
 
     return dff

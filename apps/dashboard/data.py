@@ -225,8 +225,8 @@ def dataset_to_df(df_name):
                 df.loc[df["H{}".format(depth)] == node, "H{}".format(depth - 1)] = parent
 
     else:
-        df = create_categories(df, ['Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier', 'H0',
-                                    'H1', 'H2', 'H3', 'H4', 'H5'])
+        df = create_categories(df, ['Variable Value', 'Variable Name', 'Variable Name Qualifier',
+                                    'Variable Name Sub Qualifier', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5'])
 
     logging.debug("dataset {} loaded.".format(df_name))
 

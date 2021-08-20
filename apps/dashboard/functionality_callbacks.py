@@ -690,7 +690,7 @@ for x in range(4):
                       parent_hierarchy_toggle, parent_hierarchy_level_dropdown, parent_state_of_display,
                       parent_hierarchy_graph_children, parent_hierarchy_options, parent_df_name, df_const, df_confirm):
 
-        if link_state == 'fa fa-link':
+        if link_state == 'fa fa-link' and df_name is None:
             secondary_type = parent_secondary_type
             timeframe = parent_timeframe
             fiscal_toggle = parent_fiscal_toggle

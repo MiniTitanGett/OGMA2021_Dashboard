@@ -10,7 +10,7 @@ Stores all callbacks for the user interface.
 import copy
 from re import search
 from urllib.parse import parse_qsl
-
+import dash_core_components as dcc
 import dash
 import dash_html_components as html
 from dash import no_update
@@ -25,6 +25,7 @@ from apps.dashboard.data import DATA_CONTENT_HIDE, DATA_CONTENT_SHOW, get_label,
 from apps.dashboard.layouts import get_line_scatter_graph_menu, get_bar_graph_menu, get_table_graph_menu, \
     get_tile_layout, change_index, get_box_plot_menu, get_default_tab_content, get_layout_dashboard, get_layout_graph, \
     get_data_menu, get_sankey_menu, get_dashboard_title_input, get_bubble_graph_menu
+
 
 # *************************************************MAIN LAYOUT********************************************************
 
@@ -143,7 +144,7 @@ def _new_and_delete(_new_clicks, close_id, _dashboard_reset, tile_titles, tile_l
     # disable the NEW button
     new_button = html.Button(
         className='parent-nav', n_clicks=0, children=get_label('LBL_Add_Tile'), id='button-new', disabled=True)
-    return deleted_tile, children, LAYOUTS[num_tiles-1], new_button, num_tiles
+    return deleted_tile, children, LAYOUTS[num_tiles - 1], new_button, num_tiles
 
 
 # unlock NEW button after end of callback chain
@@ -329,7 +330,7 @@ def _update_tab_title(title, active_tab, list_of_children):
 # Serve the float menu to the user.
 for x in range(4):
     @app.callback(
-        [Output({'type': 'float-menu-trigger', 'index': x}, 'data-'),
+        [Output({'type': 'float-menu-trigger-wrapper', 'index': x}, 'children'),
          Output({'type': 'tile-customize', 'index': x}, 'className'),
          Output({'type': 'tile-layouts', 'index': x}, 'className'),
          Output({'type': 'tile-customize-content-wrapper', 'index': x}, 'children')],
@@ -366,12 +367,15 @@ for x in range(4):
         if 'tile-customize' in changed_id:
             # [[mode/prompt_trigger, tile, stored_menu_for_cancel], menu_style/show_hide, menu_title,
             # show_hide_load_warning, isTrip]
-            float_menu_trigger = [['customize', tile, customize_menu], {}, get_label('LBL_Edit_Graph'),
-                                  session['tile_edited'][tile]]
+            float_menu_trigger = dcc.Store(id={'type': 'float-menu-trigger', 'index': tile},
+                                           data=[['customize', tile, customize_menu], {}, get_label('LBL_Edit_Graph'),
+                                                 session['tile_edited'][tile]])
             customize_className = 'tile-nav tile-nav--customize tile-nav--selected'
             layouts_className = 'tile-nav tile-nav--layout'
         elif 'tile-layouts' in changed_id:
-            float_menu_trigger = [['layouts', tile], {}, get_label('LBL_Load_Graph'), session['tile_edited'][tile]]
+            float_menu_trigger = dcc.Store(id={'type': 'float-menu-trigger', 'index': tile},
+                                           data=[['layouts', tile], {}, get_label('LBL_Load_Graph'),
+                                                 session['tile_edited'][tile]])
             customize_className = 'tile-nav tile-nav--customize'
             layouts_className = 'tile-nav tile-nav--layout tile-nav--selected'
         elif float_menu_result == 'ok':
@@ -467,17 +471,18 @@ app.clientside_callback(
      Output({'type': 'float-menu-result', 'index': 0}, 'children'),  # _manage_tile_save_load_trigger() callback
      Output({'type': 'float-menu-result', 'index': 1}, 'children'),  # _manage_dashboard_saves_and_reset() callback
      Output({'type': 'float-menu-result', 'index': 2}, 'children')],  # _serve_float_menu_and_take_result() callback
-    [Input({'type': 'float-menu-trigger', 'index': 0}, 'data-'),
-     Input({'type': 'float-menu-trigger', 'index': 1}, 'data-'),
-     Input({'type': 'float-menu-trigger', 'index': 2}, 'data-'),
-     Input({'type': 'float-menu-trigger', 'index': 3}, 'data-'),
-     Input({'type': 'float-menu-trigger', 'index': 4}, 'data-'),
+    [Input({'type': 'float-menu-trigger', 'index': 0}, 'data'),
+     Input({'type': 'float-menu-trigger', 'index': 1}, 'data'),
+     Input({'type': 'float-menu-trigger', 'index': 2}, 'data'),
+     Input({'type': 'float-menu-trigger', 'index': 3}, 'data'),
+     Input({'type': 'float-menu-trigger', 'index': 4}, 'data'),
      Input('float-menu-close', 'n_clicks'),
      Input('float-menu-cancel', 'n_clicks'),
      Input('float-menu-ok', 'n_clicks')],
     [State('float-menu-title', 'data-')],
     prevent_initial_call=True
 )
+
 
 # ************************************************CUSTOMIZE TAB*******************************************************
 
@@ -857,6 +862,7 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
 
     return menu, update_graph_trigger, no_update, no_update, True
 
+
 # ************************************************DATA SIDE-MENU******************************************************
 
 
@@ -901,7 +907,7 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
      Output({'type': 'set-graph-options-trigger', 'index': 1}, 'options-'),
      Output({'type': 'set-graph-options-trigger', 'index': 2}, 'options-'),
      Output({'type': 'set-graph-options-trigger', 'index': 3}, 'options-'),
-     Output({'type': 'prompt-trigger', 'index': 5}, 'data-'),
+     Output({'type': 'prompt-trigger-wrapper', 'index': 5}, 'children'),
      Output({'type': 'data-set-parent', 'index': 4}, 'value'),
      Output({'type': 'update-date-picker-trigger', 'index': 0}, 'data-boolean'),
      Output({'type': 'update-date-picker-trigger', 'index': 1}, 'data-boolean'),
@@ -1084,16 +1090,20 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                     options_triggers[changed_index] = df_name
             # send out a prompt
             elif changed_index == 4:  # prompt with trip prompt
-                prompt_trigger = [['loaded_dataset_swap', changed_index], {}, get_label('LBL_Load_Dataset'),
-                                  get_label('LBL_Load_Dataset_Prompt'), True]
+                prompt_trigger = dcc.Store(
+                    id={'type': 'prompt-trigger', 'index': 5},
+                    data=[['loaded_dataset_swap', changed_index], {}, get_label('LBL_Load_Dataset'),
+                          get_label('LBL_Load_Dataset_Prompt'), True])
                 for i in range(len(links_style)):
                     if links_style[i] == 'fa fa-link':
                         confirm_button[i] = DATA_CONTENT_HIDE
                         refresh_button[i] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
                                              'position': 'relative', 'vertical-align': 'top'}
             else:  # prompt with only two options
-                prompt_trigger = [['loaded_dataset_swap', changed_index], {}, get_label('LBL_Load_Dataset'),
-                                  get_label('LBL_Load_Dataset_Duo_Prompt'), False]
+                prompt_trigger = dcc.Store(
+                    id={'type': 'prompt-trigger', 'index': 5},
+                    data=[['loaded_dataset_swap', changed_index], {}, get_label('LBL_Load_Dataset'),
+                          get_label('LBL_Load_Dataset_Duo_Prompt'), False])
         else:
             # trigger update for all tiles that are linked to the active data menu
             if changed_index == 4:
@@ -1116,11 +1126,15 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
         if '"type":"confirm-load-data"}.n_clicks' in changed_id \
                 and (prev_selection[changed_index] is not None):
             if changed_index == 4:  # prompt with trip prompt
-                prompt_trigger = [['load_dataset', changed_index], {}, get_label('LBL_Load_Dataset'),
-                                  get_label('LBL_Load_Dataset_Prompt'), True]
+                prompt_trigger = dcc.Store(
+                    id={'type': 'prompt-trigger', 'index': 5},
+                    data=[['load_dataset', changed_index], {}, get_label('LBL_Load_Dataset'),
+                          get_label('LBL_Load_Dataset_Prompt'), True])
             else:  # prompt with only two options
-                prompt_trigger = [['load_dataset', changed_index], {}, get_label('LBL_Load_Dataset'),
-                                  get_label('LBL_Load_Dataset_Duo_Prompt'), False]
+                prompt_trigger = dcc.Store(
+                    id={'type': 'prompt-trigger', 'index': 5},
+                    data=[['load_dataset', changed_index], {}, get_label('LBL_Load_Dataset'),
+                          get_label('LBL_Load_Dataset_Duo_Prompt'), False])
         # The first instance that the datasets are loaded in
         else:
             df_name = df_names[changed_index]
@@ -1368,7 +1382,6 @@ app.clientside_callback(
     Input({'type': 'data-tile', 'index': ALL}, 'style'),
 )
 
-
 # http://adripofjavascript.com/blog/drips/object-equality-in-javascript.html#:~:text=Here%20is%20a%20very%20basic,are%20not%20equivalent%20if%20(aProps.
 app.clientside_callback(
     """
@@ -1588,12 +1601,12 @@ app.clientside_callback(
      Output({'type': 'prompt-result', 'index': 2}, 'children'),  # _manage_data_sidemenus() callback
      Output('prompt-button-wrapper-duo', 'style'),
      Output('prompt-button-wrapper-trip', 'style')],
-    [Input({'type': 'prompt-trigger', 'index': 0}, 'data-'),  # tile 0
-     Input({'type': 'prompt-trigger', 'index': 1}, 'data-'),  # tile 1
-     Input({'type': 'prompt-trigger', 'index': 2}, 'data-'),  # tile 2
-     Input({'type': 'prompt-trigger', 'index': 3}, 'data-'),  # tile 3
-     Input({'type': 'prompt-trigger', 'index': 4}, 'data-'),  # dashboard
-     Input({'type': 'prompt-trigger', 'index': 5}, 'data-'),  # sidemenus
+    [Input({'type': 'prompt-trigger', 'index': 0}, 'data'),  # tile 0
+     Input({'type': 'prompt-trigger', 'index': 1}, 'data'),  # tile 1
+     Input({'type': 'prompt-trigger', 'index': 2}, 'data'),  # tile 2
+     Input({'type': 'prompt-trigger', 'index': 3}, 'data'),  # tile 3
+     Input({'type': 'prompt-trigger', 'index': 4}, 'data'),  # dashboard
+     Input({'type': 'prompt-trigger', 'index': 5}, 'data'),  # sidemenus
      Input('prompt-close', 'n_clicks'),
      Input('prompt-cancel', 'n_clicks'),
      Input('prompt-ok', 'n_clicks'),

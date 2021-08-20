@@ -170,13 +170,11 @@ for x in range(4):
             if df_confirm is not None:
                 df_tile = df_confirm
             graph = __update_graph(df_tile, arg_value, graph_type, tile_title, num_periods,
-                                                           period_type, hierarchy_toggle,
-                                                           hierarchy_level_dropdown, hierarchy_graph_children,
-                                                           hierarchy_options,
-                                                           state_of_display,
-                                                           secondary_type, timeframe, fiscal_toggle, start_year,
-                                                           end_year, start_secondary,
-                                                           end_secondary, df_const, xaxis, yaxis, xlegend, ylegend)
+                                   period_type, hierarchy_toggle,
+                                   hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options,
+                                   state_of_display,
+                                   secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
+                                   end_secondary, df_const, xaxis, yaxis, xlegend, ylegend)
             return graph, popup_text, popup_is_open
 
         # account for tile being linked or not
@@ -373,7 +371,6 @@ app.clientside_callback(
 def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quarter_button_clicks,
                         _month_button_clicks, _week_button_clicks, start_year_selection, end_year_selection,
                         start_secondary_selection, end_secondary_selection, update_trigger, tab, df_name, df_const):
-
     # ----------------------------------------------Variable Declarations-----------------------------------------------
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     tile = dash.callback_context.inputs_list[0]['id']['index']
@@ -628,149 +625,148 @@ def split_filter_part(filter_part):
     return [None] * 3
 
 
-for x in range(4):
-    @app.callback(
-        [Output({'type': 'datatable', 'index': x}, 'data'),
-         Output({'type': 'datatable', 'index': x}, 'page_count')],
-        [Input({'type': 'datatable', 'index': x}, "page_current"),
-         Input({'type': 'datatable', 'index': x}, "page_size"),
-         Input({'type': 'datatable', 'index': x}, 'sort_by'),
-         Input({'type': 'datatable', 'index': x}, 'filter_query'),
-         # update graph trigger
-         Input({'type': 'update-graph-trigger', 'index': x}, 'data-graph_menu_trigger'),
-         # update table trigger
-         Input({'type': 'update-graph-trigger', 'index': x}, 'data-graph_menu_table_trigger')],
-        # Link state
-        [State({'type': 'tile-link', 'index': x}, 'className'),
-         # Data set state
-         State({'type': 'data-set', 'index': x}, 'value'),
-         # Date picker state
-         State({'type': 'start-year-input', 'index': x}, 'name'),
-         State({'type': 'radio-timeframe', 'index': x}, 'value'),
-         State({'type': 'fiscal-year-toggle', 'index': x}, 'value'),
-         State({'type': 'start-year-input', 'index': x}, 'value'),
-         State({'type': 'end-year-input', 'index': x}, 'value'),
-         State({'type': 'start-secondary-input', 'index': x}, 'value'),
-         State({'type': 'end-secondary-input', 'index': x}, 'value'),
-         State({'type': 'num-periods', 'index': x}, 'value'),
-         State({'type': 'period-type', 'index': x}, 'value'),
-         # Hierarchy states for tile
-         State({'type': 'hierarchy-toggle', 'index': x}, 'value'),
-         State({'type': 'hierarchy_level_dropdown', 'index': x}, 'value'),
-         State({'type': 'hierarchy_display_button', 'index': x}, 'children'),
-         State({'type': 'graph_children_toggle', 'index': x}, 'value'),
-         State({'type': 'hierarchy_specific_dropdown', 'index': x}, 'options'),
-         # Date picker states for parent data menu
-         State({'type': 'start-year-input', 'index': 4}, 'name'),
-         State({'type': 'radio-timeframe', 'index': 4}, 'value'),
-         State({'type': 'fiscal-year-toggle', 'index': 4}, 'value'),
-         State({'type': 'start-year-input', 'index': 4}, 'value'),
-         State({'type': 'end-year-input', 'index': 4}, 'value'),
-         State({'type': 'start-secondary-input', 'index': 4}, 'value'),
-         State({'type': 'end-secondary-input', 'index': 4}, 'value'),
-         State({'type': 'num-periods', 'index': 4}, 'value'),
-         State({'type': 'period-type', 'index': 4}, 'value'),
-         # Hierarchy States for parent data menu
-         State({'type': 'hierarchy-toggle', 'index': 4}, 'value'),
-         State({'type': 'hierarchy_level_dropdown', 'index': 4}, 'value'),
-         State({'type': 'hierarchy_display_button', 'index': 4}, 'children'),
-         State({'type': 'graph_children_toggle', 'index': 4}, 'value'),
-         State({'type': 'hierarchy_specific_dropdown', 'index': 4}, 'options'),
-         # Parent Data set
-         State({'type': 'data-set', 'index': 4}, 'value'),
-         State('df-constants-storage', 'data'),
-         State({'type': 'data-set-parent', 'index': 4}, 'value')]
-    )
-    def _update_table(page_current, page_size, sort_by, filter_query, _graph_trigger, _table_trigger, link_state,
-                      df_name, secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
-                      end_secondary, num_periods, period_type, hierarchy_toggle, hierarchy_level_dropdown,
-                      state_of_display, hierarchy_graph_children, hierarchy_options, parent_secondary_type,
-                      parent_timeframe, parent_fiscal_toggle, parent_start_year, parent_end_year,
-                      parent_start_secondary, parent_end_secondary, parent_num_periods, parent_period_type,
-                      parent_hierarchy_toggle, parent_hierarchy_level_dropdown, parent_state_of_display,
-                      parent_hierarchy_graph_children, parent_hierarchy_options, parent_df_name, df_const, df_confirm):
-
-        if link_state == 'fa fa-link' and df_name is None:
-            secondary_type = parent_secondary_type
-            timeframe = parent_timeframe
-            fiscal_toggle = parent_fiscal_toggle
-            start_year = parent_start_year
-            end_year = parent_end_year
-            start_secondary = parent_start_secondary
-            end_secondary = parent_end_secondary
-            hierarchy_toggle = parent_hierarchy_toggle
-            hierarchy_level_dropdown = parent_hierarchy_level_dropdown
-            state_of_display = parent_state_of_display
-            hierarchy_graph_children = parent_hierarchy_graph_children
-            num_periods = parent_num_periods
-            period_type = parent_period_type
-            hierarchy_options = parent_hierarchy_options
-            if df_confirm is not None:
-                df_name = df_confirm
-            else:
-                df_name = parent_df_name
-
-        # prevent update if invalid selections exist - should be handled by update_datepicker, but double check
-        if not start_year or not end_year or not start_secondary or not end_secondary:
-            raise PreventUpdate
-
-        # Creates a hierarchy trail from the display
-        if type(state_of_display) == dict:
-            state_of_display = [state_of_display]
-        list_of_names = []
-        if len(state_of_display) > 0:
-            for obj in state_of_display:
-                list_of_names.append(obj['props']['children'])
-
-        if hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == ['graph_children']:
-            # If at a leaf node then display it's parents data
-            nid_path = "root"
-            for i in list_of_names:
-                nid_path += ('^||^{}'.format(i))
-            if not hierarchy_options:
-                list_of_names.pop()
-
-        # If "Last ___ ____" is active and the num_periods is invalid (None), return an empty graph
-        if timeframe == 'to-current' and not num_periods:
-            return [], 0
-        # else, filter normally
+@app.callback(
+    [Output({'type': 'datatable', 'index': MATCH}, 'data'),
+     Output({'type': 'datatable', 'index': MATCH}, 'page_count')],
+    [Input({'type': 'datatable', 'index': MATCH}, "page_current"),
+     Input({'type': 'datatable', 'index': MATCH}, "page_size"),
+     Input({'type': 'datatable', 'index': MATCH}, 'sort_by'),
+     Input({'type': 'datatable', 'index': MATCH}, 'filter_query'),
+     # update graph trigger
+     Input({'type': 'update-graph-trigger', 'index': MATCH}, 'data-graph_menu_trigger'),
+     # update table trigger
+     Input({'type': 'update-graph-trigger', 'index': MATCH}, 'data-graph_menu_table_trigger')],
+    # Link state
+    [State({'type': 'tile-link', 'index': MATCH}, 'className'),
+     # Data set state
+     State({'type': 'data-set', 'index': MATCH}, 'value'),
+     # Date picker state
+     State({'type': 'start-year-input', 'index': MATCH}, 'name'),
+     State({'type': 'radio-timeframe', 'index': MATCH}, 'value'),
+     State({'type': 'fiscal-year-toggle', 'index': MATCH}, 'value'),
+     State({'type': 'start-year-input', 'index': MATCH}, 'value'),
+     State({'type': 'end-year-input', 'index': MATCH}, 'value'),
+     State({'type': 'start-secondary-input', 'index': MATCH}, 'value'),
+     State({'type': 'end-secondary-input', 'index': MATCH}, 'value'),
+     State({'type': 'num-periods', 'index': MATCH}, 'value'),
+     State({'type': 'period-type', 'index': MATCH}, 'value'),
+     # Hierarchy states for tile
+     State({'type': 'hierarchy-toggle', 'index': MATCH}, 'value'),
+     State({'type': 'hierarchy_level_dropdown', 'index': MATCH}, 'value'),
+     State({'type': 'hierarchy_display_button', 'index': MATCH}, 'children'),
+     State({'type': 'graph_children_toggle', 'index': MATCH}, 'value'),
+     State({'type': 'hierarchy_specific_dropdown', 'index': MATCH}, 'options'),
+     # Date picker states for parent data menu
+     State({'type': 'start-year-input', 'index': 4}, 'name'),
+     State({'type': 'radio-timeframe', 'index': 4}, 'value'),
+     State({'type': 'fiscal-year-toggle', 'index': 4}, 'value'),
+     State({'type': 'start-year-input', 'index': 4}, 'value'),
+     State({'type': 'end-year-input', 'index': 4}, 'value'),
+     State({'type': 'start-secondary-input', 'index': 4}, 'value'),
+     State({'type': 'end-secondary-input', 'index': 4}, 'value'),
+     State({'type': 'num-periods', 'index': 4}, 'value'),
+     State({'type': 'period-type', 'index': 4}, 'value'),
+     # Hierarchy States for parent data menu
+     State({'type': 'hierarchy-toggle', 'index': 4}, 'value'),
+     State({'type': 'hierarchy_level_dropdown', 'index': 4}, 'value'),
+     State({'type': 'hierarchy_display_button', 'index': 4}, 'children'),
+     State({'type': 'graph_children_toggle', 'index': 4}, 'value'),
+     State({'type': 'hierarchy_specific_dropdown', 'index': 4}, 'options'),
+     # Parent Data set
+     State({'type': 'data-set', 'index': 4}, 'value'),
+     State('df-constants-storage', 'data'),
+     State({'type': 'data-set-parent', 'index': 4}, 'value')]
+)
+def _update_table(page_current, page_size, sort_by, filter_query, _graph_trigger, _table_trigger, link_state,
+                  df_name, secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
+                  end_secondary, num_periods, period_type, hierarchy_toggle, hierarchy_level_dropdown,
+                  state_of_display, hierarchy_graph_children, hierarchy_options, parent_secondary_type,
+                  parent_timeframe, parent_fiscal_toggle, parent_start_year, parent_end_year,
+                  parent_start_secondary, parent_end_secondary, parent_num_periods, parent_period_type,
+                  parent_hierarchy_toggle, parent_hierarchy_level_dropdown, parent_state_of_display,
+                  parent_hierarchy_graph_children, parent_hierarchy_options, parent_df_name, df_const, df_confirm):
+    if link_state == 'fa fa-link':
+        secondary_type = parent_secondary_type
+        timeframe = parent_timeframe
+        fiscal_toggle = parent_fiscal_toggle
+        start_year = parent_start_year
+        end_year = parent_end_year
+        start_secondary = parent_start_secondary
+        end_secondary = parent_end_secondary
+        hierarchy_toggle = parent_hierarchy_toggle
+        hierarchy_level_dropdown = parent_hierarchy_level_dropdown
+        state_of_display = parent_state_of_display
+        hierarchy_graph_children = parent_hierarchy_graph_children
+        num_periods = parent_num_periods
+        period_type = parent_period_type
+        hierarchy_options = parent_hierarchy_options
+        if df_confirm is not None:
+            df_name = df_confirm
         else:
-            dff = data_filter(list_of_names, secondary_type, end_secondary, end_year, start_secondary, start_year,
-                              timeframe, fiscal_toggle, num_periods, period_type, hierarchy_toggle,
-                              hierarchy_level_dropdown, hierarchy_graph_children, df_name, df_const)
+            df_name = parent_df_name
 
-        # Reformat date column
-        dff['Date of Event'] = dff['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
+    # prevent update if invalid selections exist - should be handled by update_datepicker, but double check
+    if not start_year or not end_year or not start_secondary or not end_secondary:
+        raise PreventUpdate
 
-        # Filter based on data table filters
-        filtering_expressions = filter_query.split(' && ')
-        for filter_part in filtering_expressions:
-            col_name, operator, filter_value = split_filter_part(filter_part)
-            if operator in ('eq', 'ne', 'lt', 'le', 'gt', 'ge'):
-                # these operators match pandas series operator method names
-                dff = dff.loc[getattr(dff[col_name], operator)(filter_value)]
-            elif operator == 'contains':
-                if type(filter_value) is not str:
-                    continue
-                dff = dff.loc[dff[col_name].astype(str).str.lower().str.contains(filter_value.lower())]
-            elif operator == 'datestartswith':
-                if type(filter_value) is not str:
-                    continue
-                # this is a simplification of the front-end filtering logic,
-                # only works with complete fields in standard format
-                dff = dff.loc[dff[col_name].astype(str).str.lower().str.startswith(filter_value.lower())]
+    # Creates a hierarchy trail from the display
+    if type(state_of_display) == dict:
+        state_of_display = [state_of_display]
+    list_of_names = []
+    if len(state_of_display) > 0:
+        for obj in state_of_display:
+            list_of_names.append(obj['props']['children'])
 
-        if len(sort_by):
-            dff = dff.sort_values(
-                [col['column_id'] for col in sort_by],
-                ascending=[
-                    col['direction'] == 'asc'
-                    for col in sort_by
-                ],
-                inplace=False)
+    if hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == ['graph_children']:
+        # If at a leaf node then display it's parents data
+        nid_path = "root"
+        for i in list_of_names:
+            nid_path += ('^||^{}'.format(i))
+        if not hierarchy_options:
+            list_of_names.pop()
 
-        return dff.iloc[page_current * page_size: (page_current + 1) * page_size].to_dict('records'), \
-               math.ceil(dff.iloc[:, 0].size / page_size)
+    # If "Last ___ ____" is active and the num_periods is invalid (None), return an empty graph
+    if timeframe == 'to-current' and not num_periods:
+        return [], 0
+    # else, filter normally
+    else:
+        dff = data_filter(list_of_names, secondary_type, end_secondary, end_year, start_secondary, start_year,
+                          timeframe, fiscal_toggle, num_periods, period_type, hierarchy_toggle,
+                          hierarchy_level_dropdown, hierarchy_graph_children, df_name, df_const)
+
+    # Reformat date column
+    dff['Date of Event'] = dff['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
+
+    # Filter based on data table filters
+    filtering_expressions = filter_query.split(' && ')
+    for filter_part in filtering_expressions:
+        col_name, operator, filter_value = split_filter_part(filter_part)
+        if operator in ('eq', 'ne', 'lt', 'le', 'gt', 'ge'):
+            # these operators match pandas series operator method names
+            dff = dff.loc[getattr(dff[col_name], operator)(filter_value)]
+        elif operator == 'contains':
+            if type(filter_value) is not str:
+                continue
+            dff = dff.loc[dff[col_name].astype(str).str.lower().str.contains(filter_value.lower())]
+        elif operator == 'datestartswith':
+            if type(filter_value) is not str:
+                continue
+            # this is a simplification of the front-end filtering logic,
+            # only works with complete fields in standard format
+            dff = dff.loc[dff[col_name].astype(str).str.lower().str.startswith(filter_value.lower())]
+
+    if len(sort_by):
+        dff = dff.sort_values(
+            [col['column_id'] for col in sort_by],
+            ascending=[
+                col['direction'] == 'asc'
+                for col in sort_by
+            ],
+            inplace=False)
+
+    return dff.iloc[page_current * page_size: (page_current + 1) * page_size].to_dict('records'), \
+           math.ceil(dff.iloc[:, 0].size / page_size)
+
 
 # *************************************************DATA-FITTING******************************************************
 # update the data fitting section of the edit graph menu

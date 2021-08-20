@@ -26,11 +26,13 @@ from apps.dashboard.hierarchy_filter import get_hierarchy_layout
 from apps.dashboard.datepicker import get_date_picker
 from apps.dashboard.graphs import __update_graph
 
+
 # ********************************************HELPER FUNCTION(S)******************************************************
 
 
 def change_index(doc, index):
     """Change index numbers of all id's within tile or data side-menu."""
+
     def _change_index(document, new_index):
         if isinstance(document, list):
             for list_items in document:
@@ -84,6 +86,7 @@ def recursive_to_plotly_json(document):
         return inner_document
 
     return _recursive_to_plotly_json(inner_document=document)
+
 
 # ************************************************DATA SIDE MENU******************************************************
 
@@ -185,6 +188,7 @@ def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Fi
         return content
     elif mode == 'dashboard-loading':
         return dashboard_loading_wrapper
+
 
 # ****************************************************TAB LAYOUT******************************************************
 
@@ -494,12 +498,24 @@ def get_layout_dashboard():
             id='prompt-obscure',
             className='prompt-obscure'
         ),
-        dcc.Store(id={'type': 'prompt-trigger', 'index': 0}),  # tile 0
-        dcc.Store(id={'type': 'prompt-trigger', 'index': 1}),  # tile 1
-        dcc.Store(id={'type': 'prompt-trigger', 'index': 2}),  # tile 2
-        dcc.Store(id={'type': 'prompt-trigger', 'index': 3}),  # tile 3
-        dcc.Store(id={'type': 'prompt-trigger', 'index': 4}),  # dashboard
-        dcc.Store(id={'type': 'prompt-trigger', 'index': 5}),  # sidemenus
+        html.Div(
+            dcc.Store(id={'type': 'prompt-trigger', 'index': 0}),  # tile 0
+            id={'type': 'prompt-trigger-wrapper', 'index': 0}),
+        html.Div(
+            dcc.Store(id={'type': 'prompt-trigger', 'index': 1}),  # tile 1
+            id={'type': 'prompt-trigger-wrapper', 'index': 1}),
+        html.Div(
+            dcc.Store(id={'type': 'prompt-trigger', 'index': 2}),  # tile 2
+            id={'type': 'prompt-trigger-wrapper', 'index': 2}),
+        html.Div(
+            dcc.Store(id={'type': 'prompt-trigger', 'index': 3}),  # tile 3
+            id={'type': 'prompt-trigger-wrapper', 'index': 3}),
+        html.Div(
+            dcc.Store(id={'type': 'prompt-trigger', 'index': 4}),  # dashboard
+            id={'type': 'prompt-trigger-wrapper', 'index': 4}),
+        html.Div(
+            dcc.Store(id={'type': 'prompt-trigger', 'index': 5}),  # sidemenus
+            id={'type': 'prompt-trigger-wrapper', 'index': 5}),
         # separated result stores for specific callback chains
         dcc.Store(id={'type': 'prompt-result', 'index': 0}),  # _manage_tile_save_load_trigger() callback
         dcc.Store(id={'type': 'prompt-result', 'index': 1}),  # _manage_dashboard_saves_and_reset() callback
@@ -535,11 +551,21 @@ def get_layout_dashboard():
             style=DATA_CONTENT_HIDE,
             id='float-menu-obscure',
             className='prompt-obscure'),
-        dcc.Store(id={'type': 'float-menu-trigger', 'index': 0}),  # tile 0
-        dcc.Store(id={'type': 'float-menu-trigger', 'index': 1}),  # tile 1
-        dcc.Store(id={'type': 'float-menu-trigger', 'index': 2}),  # tile 2
-        dcc.Store(id={'type': 'float-menu-trigger', 'index': 3}),  # tile 3
-        dcc.Store(id={'type': 'float-menu-trigger', 'index': 4}),  # linked tiles
+        html.Div(
+            dcc.Store(id={'type': 'float-menu-trigger', 'index': 0}),  # tile 0
+            id={'type': 'float-menu-trigger-wrapper', 'index': 0}),
+        html.Div(
+            dcc.Store(id={'type': 'float-menu-trigger', 'index': 1}),  # tile 1
+            id={'type': 'float-menu-trigger-wrapper', 'index': 1}),
+        html.Div(
+            dcc.Store(id={'type': 'float-menu-trigger', 'index': 2}),  # tile 2
+            id={'type': 'float-menu-trigger-wrapper', 'index': 2}),
+        html.Div(
+            dcc.Store(id={'type': 'float-menu-trigger', 'index': 3}),  # tile 3
+            id={'type': 'float-menu-trigger-wrapper', 'index': 3}),
+        html.Div(
+            dcc.Store(id={'type': 'float-menu-trigger', 'index': 4}),  # linked tiles
+            id={'type': 'float-menu-trigger-wrapper', 'index': 4}),
         # separated result stores for specific callback chains
         dcc.Store(id={'type': 'float-menu-result', 'index': 0}),  # _manage_tile_save_load_trigger() callback
         dcc.Store(id={'type': 'float-menu-result', 'index': 1}),  # _manage_dashboard_saves_and_reset() callback
@@ -909,6 +935,7 @@ def get_tile_layout(num_tiles, tile_keys=None, parent_df=None):
     else:
         raise IndexError("The number of displayed tiles cannot exceed 4, " + str(num_tiles) + " tiles were requested")
     return children
+
 
 # ***************************************************GRAPH MENUS*****************************************************
 

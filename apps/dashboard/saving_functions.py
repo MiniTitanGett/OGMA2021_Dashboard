@@ -113,7 +113,7 @@ def load_graph_menu(graph_type, tile, df_name, args_list, graph_options, df_cons
         graph_menu = get_table_graph_menu(tile=tile, number_of_columns=args_list[1], xaxis=graph_options[0],
                                           yaxis=graph_options[1], xpos=graph_options[2], ypos=graph_options[3],
                                           xmodified=graph_options[4], ymodified=graph_options[5],
-                                          gridline=graph_options[6], legend=graph_options[7],)
+                                          )
     elif graph_type == 'Box_Plot':
         graph_menu = get_box_plot_menu(tile=tile, axis_measure=args_list[0], graphed_variables=args_list[1],
                                        graph_orientation=args_list[2], show_data_points=args_list[3],
@@ -125,7 +125,7 @@ def load_graph_menu(graph_type, tile, df_name, args_list, graph_options, df_cons
         graph_menu = get_sankey_menu(tile=tile, graphed_options=args_list[0], df_name=df_name, df_const=df_const,
                                      xaxis=graph_options[0], yaxis=graph_options[1], xpos=graph_options[2],
                                      ypos=graph_options[3], xmodified=graph_options[4], ymodified=graph_options[5],
-                                     gridline=graph_options[6], legend=graph_options[7],)
+                                     )
     elif graph_type == 'Bubble':
         graph_menu = get_bubble_graph_menu(tile=tile, x=args_list[0], x_measure=args_list[1], y=args_list[2],
                                            y_measure=args_list[3], size=args_list[4], size_measure=args_list[5],

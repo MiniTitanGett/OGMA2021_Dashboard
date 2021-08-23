@@ -137,7 +137,7 @@ def _new_and_delete(_new_clicks, close_id, _dashboard_reset, tile_titles, tile_l
     # if RESET dashboard requested, set dashboard to default appearance
     elif 'dashboard-reset' in changed_id:
         num_tiles = 1
-        children = get_tile_layout(num_tiles, [], parent_df=parent_df)
+        children = get_tile_layout(num_tiles, [], parent_df=None)
     # else, a tab change was made, prevent update
     else:
         raise PreventUpdate
@@ -1685,7 +1685,7 @@ app.clientside_callback(
         if(linkState == 'fa fa-link'){
                 dfName=dfNameParent;
             }
-        if(event.x_axis != undefined){
+        if(event.x_axis != ""){
             switch(graphType){
                 case 'Line':
                 case 'Scatter':
@@ -1695,10 +1695,27 @@ app.clientside_callback(
                     }
                     else{
                         event.x_modified = false;
+                        break;
                     }
                 case 'Bar':
-                    event.x_modified = true;
-                    break;
+                    if (argValue[3] == 'Horizontal'){
+                        if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(event.x_axis)){
+                            event.x_modified = false;
+                            break;
+                        }
+                        else{
+                            event.x_modified = true;
+                            break;
+                        }
+                    }
+                    else if (event.x_axis == ""){
+                        event.x_modified = false;
+                        break;
+                    }
+                    else{
+                        event.x_modified = true;
+                        break;
+                    }
                 case 'Bubble':
                     string= event.x_axis.split(" (")
                     if(string.length==1){
@@ -1726,7 +1743,17 @@ app.clientside_callback(
                         break;
                     }
                 case 'Box_Plot':
-                    if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(event.x_axis)){
+                    if(argValue[2]=='Vertical'){
+                        if (event.x_axis == ""){
+                            event.x_modified = false;
+                            break;
+                        }
+                        else{
+                            event.x_modified = true;
+                            break;
+                        }  
+                    }
+                    else if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(event.x_axis)){
                         event.x_modified = false;
                         break;
                     }
@@ -1739,7 +1766,7 @@ app.clientside_callback(
                     break;
             }
         }
-        if(event.y_axis != undefined){
+        if(event.y_axis != ""){
             switch(graphType){
                 case 'Line':
                 case 'Scatter':
@@ -1752,9 +1779,19 @@ app.clientside_callback(
                         break;
                     }
                 case 'Bar':
-                    if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(event.y_axis)){
-                    event.y_modified = false;
-                    break;
+                    if (argValue[3] == 'Horizontal'){
+                        if (event.y_axis == ""){
+                            event.y_modified = false;
+                            break;
+                        }
+                        else{
+                            event.y_modified = true;
+                            break;
+                        }  
+                    }
+                    else if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(event.y_axis)){
+                        event.y_modified = false;
+                        break;
                     }
                     else{
                        event.y_modified = true;
@@ -1794,8 +1831,24 @@ app.clientside_callback(
                         break;
                     }
                 case 'Box_Plot':
-                    event.y_modified = true;
-                    break;
+                    if(argValue[2]=='Vertical'){
+                        if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(event.y_axis)){
+                            event.y_modified = false;
+                            break;
+                        }
+                        else{
+                            event.y_modified = true;
+                            break;
+                        }
+                    }
+                    else if (event.y_axis == ""){
+                        event.y_modified = false;
+                        break;
+                    }
+                    else{
+                        event.y_modified = true;
+                        break;
+                    }  
                 default:
                     event.y_modified = false;
                     break;

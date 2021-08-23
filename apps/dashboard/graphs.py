@@ -734,16 +734,35 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             title=get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, arg_value[2],
                                            df_name, df_const))
 
+    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     # set title
-    if xaxis_title:
-        xaxis = xaxis_title
+    if arg_value[3] == 'Horizontal':
+        if xaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title == '' and xaxis_title is not \
+                None:
+            yaxis = xaxis_title
+        else:
+            yaxis = arg_value[1]
+        if yaxis_title:
+            xaxis = yaxis_title
+        else:
+            xaxis = ''
     else:
-        xaxis = None
-
-    if yaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and yaxis_title is not None:
-        yaxis = yaxis_title
-    else:
-        yaxis = arg_value[1]
+        # when switching back to vertical the label will change with the arg value
+        if xaxis_title in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title is not None:
+            yaxis = arg_value[1]
+        # default axis label
+        elif xaxis_title:
+            xaxis = xaxis_title
+        else:
+            xaxis = ''
+        # when switching back to vertical
+        if yaxis_title == '':
+            xaxis = yaxis_title
+        # default axis label
+        elif yaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and yaxis_title is not None:
+            yaxis = yaxis_title
+        else:
+            yaxis = arg_value[1]
 
     # set legend position
     if xlegend and ylegend:
@@ -893,15 +912,30 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             title=get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, arg_value[2],
                                            df_name, df_const))
 
+
     # set title
-    if xaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title is not None:
-        xaxis = xaxis_title
+    if arg_value[2] == 'Vertical':
+        if xaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title is not None:
+            xaxis = xaxis_title
+        else:
+            xaxis = arg_value[0]
+        if yaxis_title:
+            yaxis = yaxis_title
+        else:
+            yaxis = ''
     else:
-        xaxis = arg_value[0]
-    if yaxis_title:
-        yaxis = yaxis_title
-    else:
-        yaxis = None
+        if xaxis_title in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title is not None:
+            xaxis = arg_value[0]
+        elif xaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title is not None:
+            xaxis = xaxis_title
+        else:
+            xaxis = arg_value[0]
+        if yaxis_title == '':
+            yaxis = yaxis_title
+        elif yaxis_title:
+            yaxis = yaxis_title
+        else:
+            yaxis = ''
 
     # set legend position
     if xlegend and ylegend:
@@ -1215,12 +1249,12 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
     elif graph_type == 'Bubble':
         return get_bubble_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
                                  list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
-                                 df_const, xtitle, ytitle, xlegend, ylegend,gridline, legend)
+                                 df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend)
     # bar graph creation
     elif graph_type == 'Bar':
         return get_bar_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
                               list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
-                              df_const, xtitle, ytitle, xlegend, ylegend,gridline, legend)
+                              df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend)
     # box plot creation
     elif graph_type == 'Box_Plot':
         return get_box_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,

@@ -311,9 +311,10 @@ for y in range(4):
                         layout_pointer = intermediate_pointer
                         break
                 if 'figure' in graph_display['props']:
-                    if 'yaxis' in graph_display['props']['figure']['layout']:
+                    if 'xaxis' in graph_display['props']['figure']['layout']:
                         if 'title' in graph_display['props']['figure']['layout']['xaxis']:
                             graph_options[0] = graph_display['props']['figure']['layout']['xaxis']['title']['text']
+                    if 'yaxis' in graph_display['props']['figure']['layout']:
                         if 'title' in graph_display['props']['figure']['layout']['yaxis']:
                             graph_options[1] = graph_display['props']['figure']['layout']['yaxis']['title']['text']
                     if 'legend' in graph_display['props']['figure']['layout']:
@@ -321,6 +322,18 @@ for y in range(4):
                             graph_options[2] = graph_display['props']['figure']['layout']['legend']['x']
                         if 'y' in graph_display['props']['figure']['layout']['legend']:
                             graph_options[3] = graph_display['props']['figure']['layout']['legend']['y']
+
+                if graph_type == 'Bar':
+                    if args_list[3] == 'Horizontal':
+                        temp_variable = graph_options[1]
+                        graph_options[1] = graph_options[0]
+                        graph_options[0] = temp_variable
+
+                if graph_type == 'Box_Plot':
+                    if args_list[2] == 'Vertical':
+                        temp_variable = graph_options[1]
+                        graph_options[1] = graph_options[0]
+                        graph_options[0] = temp_variable
 
                 elements_to_save = {'Graph Type': graph_type,
                                     'Args List': args_list,

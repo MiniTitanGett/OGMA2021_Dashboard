@@ -1061,6 +1061,9 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
 
     cond_style.append({'if': {'row_index': 'odd'}, 'backgroundColor': 'rgb(248, 248, 248)'})
 
+    cond_style.append(
+        {'if': {'column_id': 'Link'}, 'cursor': 'pointer', 'color': 'blue', 'text-decoration': 'underline'})
+
     # check arg_value[1]: num of pages is a whole integer if not assign 10
     if arg_value[1] is None or type(arg_value[1]) is not int:
         arg_value[1] = 10

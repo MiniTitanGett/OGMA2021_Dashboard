@@ -180,13 +180,6 @@ blockquote {
 
 /* Links
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
-a {
-  color: white;
-  text-decoration: none;
-  cursor: pointer;}
-a:hover {
-  background-color: #E6BFCC;
-  color: #3B0012; }
 
 
 /* Buttons

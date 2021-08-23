@@ -29,6 +29,5 @@ xlrd==1.2.0
 pymssql~=2.2.1
 regex~=2021.4.4
 flask_session==0.3.2
-scikit-learn~=0.24.2
-visdcc~=0.0.40
+visdcc~=0.0.4
 parse~=1.19.0

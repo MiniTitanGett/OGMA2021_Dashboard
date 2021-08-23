@@ -577,6 +577,8 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
     # ---------------------------------------Variable Declarations------------------------------------------------------
     language = session["language"]
     filtered_df = None
+    xaxis = None
+    yaxis = None
     # ------------------------------------------------------------------------------------------------------------------
 
     # Check whether we have enough information to attempt getting data for a graph
@@ -734,7 +736,6 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             title=get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, arg_value[2],
                                            df_name, df_const))
 
-    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     # set title
     if arg_value[3] == 'Horizontal':
         if xaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title == '' and xaxis_title is not \
@@ -742,6 +743,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             yaxis = xaxis_title
         else:
             yaxis = arg_value[1]
+
         if yaxis_title:
             xaxis = yaxis_title
         else:
@@ -755,6 +757,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             xaxis = xaxis_title
         else:
             xaxis = ''
+
         # when switching back to vertical
         if yaxis_title == '':
             xaxis = yaxis_title
@@ -912,24 +915,27 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             title=get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, arg_value[2],
                                            df_name, df_const))
 
-
     # set title
     if arg_value[2] == 'Vertical':
         if xaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title is not None:
             xaxis = xaxis_title
         else:
             xaxis = arg_value[0]
+
         if yaxis_title:
             yaxis = yaxis_title
         else:
             yaxis = ''
     else:
+        # when switching back to vertical the label will change with the arg value
         if xaxis_title in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title is not None:
             xaxis = arg_value[0]
         elif xaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title is not None:
             xaxis = xaxis_title
         else:
             xaxis = arg_value[0]
+
+        # when switching back to vertical the label will change with the arg value
         if yaxis_title == '':
             yaxis = yaxis_title
         elif yaxis_title:

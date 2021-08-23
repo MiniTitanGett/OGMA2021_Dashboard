@@ -186,6 +186,8 @@ for y in range(4):
          State({'type': 'graph_display', 'index': y}, 'children'),
          State({'type': 'x-modified', 'index': y}, 'data'),
          State({'type': 'y-modified', 'index': y}, 'data'),
+         State({'type': 'gridline', 'index': y}, 'value'),
+         State({'type': 'legend', 'index': y}, 'value'),
          # Data set states
          State({'type': 'data-set', 'index': y}, 'value'),
          State({'type': 'data-set', 'index': 4}, 'value'),
@@ -223,13 +225,13 @@ for y in range(4):
         prevent_initial_call=True
     )
     def _manage_tile_saves(trigger, graph_title, link_state, graph_type, args_list, graph_display, xmodified, ymodified,
-                           df_name, parent_df_name, parent_year_start, parent_year_end, parent_hierarchy_toggle,
-                           parent_hierarchy_level_dropdown, parent_state_of_display, parent_graph_children_toggle,
-                           parent_fiscal_toggle, parent_input_method, parent_secondary_start, parent_secondary_end,
-                           parent_x_time_period, parent_period_type, parent_tab, year_start, year_end, hierarchy_toggle,
-                           hierarchy_level_dropdown, state_of_display, graph_children_toggle, fiscal_toggle,
-                           input_method, secondary_start, secondary_end, x_time_period, period_type, tab,
-                           selected_layout, df_const):
+                           gridline, legend, df_name, parent_df_name, parent_year_start, parent_year_end,
+                           parent_hierarchy_toggle, parent_hierarchy_level_dropdown, parent_state_of_display,
+                           parent_graph_children_toggle, parent_fiscal_toggle, parent_input_method,
+                           parent_secondary_start, parent_secondary_end, parent_x_time_period, parent_period_type,
+                           parent_tab, year_start, year_end, hierarchy_toggle, hierarchy_level_dropdown,
+                           state_of_display, graph_children_toggle, fiscal_toggle, input_method, secondary_start,
+                           secondary_end, x_time_period, period_type, tab, selected_layout, df_const):
 
         if link_state == 'fa fa-link':
             fiscal_toggle = parent_fiscal_toggle
@@ -270,10 +272,9 @@ for y in range(4):
         start_secondary = no_update
         end_secondary = no_update
         unlink = no_update
-        df_const_output = no_update
         link_output = no_update
-        axes_title = [None, None, None, None]
-        axes_modified = [xmodified, ymodified]
+        df_const_output = no_update
+        graph_options = [None, None, None, None, xmodified, ymodified, gridline, legend]
 
         # if save requested or the overwrite was confirmed, check for exceptions and save
         if trigger == 'save' or trigger == 'confirm-overwrite':
@@ -312,19 +313,18 @@ for y in range(4):
                 if 'figure' in graph_display['props']:
                     if 'yaxis' in graph_display['props']['figure']['layout']:
                         if 'title' in graph_display['props']['figure']['layout']['xaxis']:
-                            axes_title[0] = graph_display['props']['figure']['layout']['xaxis']['title']['text']
+                            graph_options[0] = graph_display['props']['figure']['layout']['xaxis']['title']['text']
                         if 'title' in graph_display['props']['figure']['layout']['yaxis']:
-                            axes_title[1] = graph_display['props']['figure']['layout']['yaxis']['title']['text']
+                            graph_options[1] = graph_display['props']['figure']['layout']['yaxis']['title']['text']
                     if 'legend' in graph_display['props']['figure']['layout']:
                         if 'x' in graph_display['props']['figure']['layout']['legend']:
-                            axes_title[2] = graph_display['props']['figure']['layout']['legend']['x']
+                            graph_options[2] = graph_display['props']['figure']['layout']['legend']['x']
                         if 'y' in graph_display['props']['figure']['layout']['legend']:
-                            axes_title[3] = graph_display['props']['figure']['layout']['legend']['y']
+                            graph_options[3] = graph_display['props']['figure']['layout']['legend']['y']
 
                 elements_to_save = {'Graph Type': graph_type,
                                     'Args List': args_list,
-                                    'Axes Title': axes_title,
-                                    'Axes Modified': axes_modified,
+                                    'Graph Options': graph_options,
                                     'Fiscal Toggle': fiscal_toggle,
                                     'Timeframe': input_method,
                                     'Num Periods': x_time_period,
@@ -387,10 +387,9 @@ for y in range(4):
             #  --------- create customize menu ---------
             graph_type = session['saved_layouts'][selected_layout]['Graph Type']
             args_list = session['saved_layouts'][selected_layout]['Args List']
-            axes_title = session['saved_layouts'][selected_layout]['Axes Title']
-            axes_modified = session['saved_layouts'][selected_layout]['Axes Modified']
+            graph_options = session['saved_layouts'][selected_layout]['Graph Options']
             graph_menu = load_graph_menu(graph_type=graph_type, tile=tile, df_name=df_name, args_list=args_list,
-                                         axes_title=axes_title, axes_modified=axes_modified, df_const=df_const)
+                                         graph_options=graph_options, df_const=df_const)
             customize_content = get_customize_content(tile=tile, graph_type=graph_type, graph_menu=graph_menu,
                                                       df_name=df_name)
 
@@ -551,6 +550,8 @@ for y in range(4):
      State({'type': 'y-pos-legend', 'index': ALL}, 'value'),
      State({'type': 'x-modified', 'index': ALL}, 'data'),
      State({'type': 'y-modified', 'index': ALL}, 'data'),
+     State({'type': 'gridline', 'index': ALL}, 'value'),
+     State({'type': 'legend', 'index': ALL}, 'value'),
      # data sets
      State({'type': 'data-set', 'index': 0}, 'value'),
      State({'type': 'data-set', 'index': 1}, 'value'),
@@ -645,8 +646,8 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                                       _reset_clicks, _close_clicks, prompt_data, float_menu_data, selected_dashboard,
                                       dashboard_title, tile_titles, links, graph_types,
                                       args_list_0, args_list_1, args_list_2, args_list_3,
-                                      xaxis_titles, yaxis_titles, x_leg_pos, y_leg_pos, xmodified, ymodified,
-                                      df_name_0, df_name_1, df_name_2, df_name_3, df_name4,
+                                      xaxis_titles, yaxis_titles, x_leg_pos, y_leg_pos, xmodified, ymodified, gridline,
+                                      legend, df_name_0, df_name_1, df_name_2, df_name_3, df_name4,
                                       start_year_0, start_year_1, start_year_2, start_year_3, start_year_4,
                                       end_year_0, end_year_1, end_year_2, end_year_3, end_year_4,
                                       hierarchy_toggle_0, hierarchy_toggle_1, hierarchy_toggle_2, hierarchy_toggle_3,
@@ -762,8 +763,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                     tile_title = "This Graph has been deleted"
                     tile_data = {
                         "Args List": ["", "", ""],
-                        "Axes Title": ["", ""],
-                        "Axes Modified": ["", ""],
+                        "Graph Options": ["", "", "", "", "", ""],
                         "Data Set": "OPG001",  # "Data Set": "OPG001_2016-17_Week_v3.csv",
                         "Fiscal Toggle": "Gregorian",
                         "Graph All Toggle": [],
@@ -776,12 +776,11 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                         "Timeframe": "all-time",
                         "Title": "This Graph has been deleted"}
 
-                # pop graph_type/args_list/axes_title to compare the dashboard parent data menu to
+                # pop graph_type/args_list/graph_options to compare the dashboard parent data menu to
                 # the saved tile data menu
                 graph_type = tile_data.pop('Graph Type')
                 args_list = tile_data.pop('Args List')
-                axes_title = tile_data.pop('Axes Title')
-                axes_modified = tile_data.pop('Axes Modified')
+                graph_options = tile_data.pop('Graph Options')
                 df_name = tile_data['Data Set']
 
                 # check if data is loaded
@@ -802,7 +801,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
 
                 # create tile keys
                 graph_menu = load_graph_menu(graph_type=graph_type, tile=tile_index, df_name=df_name,
-                                             args_list=args_list, axes_title=axes_title, axes_modified=axes_modified,
+                                             args_list=args_list, graph_options=graph_options,
                                              df_const=df_const)
                 # TODO: Need to add df name
                 customize_content = get_customize_content(tile=tile_index, graph_type=graph_type, graph_menu=graph_menu,
@@ -946,8 +945,8 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 date_tabs = [date_tab_0, date_tab_1, date_tab_2, date_tab_3, date_tab_4]
                 dashboard_saves = {'Dashboard Title': dashboard_title, 'Dashboard Layout': layout}
                 arg_list_all = [args_list_0, args_list_1, args_list_2, args_list_3]
-                axes_titles_all = [xaxis_titles, yaxis_titles, x_leg_pos, y_leg_pos]
-                axes_modified_all = [xmodified, ymodified]
+                graph_options_all = [xaxis_titles, yaxis_titles, x_leg_pos, y_leg_pos, xmodified, ymodified, gridline,
+                                     legend]
 
                 # if any tiles are linked, save the parent data menu
                 if links.count('fa fa-link') > 0:
@@ -989,10 +988,9 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                     for key in session['saved_layouts']:
                         used_titles.append(session['saved_layouts'][key]["Title"])
 
-                    # set up axes titles and args
+                    # set up Graph Options and args
                     args_list = arg_list_all[i]
-                    axes_title = [x[i] for x in axes_titles_all if len(x) >= (i + 1)]
-                    axes_modified = [x[i] for x in axes_modified_all if len(x) >= (i + 1)]
+                    graph_options = [x[i] for x in graph_options_all if len(x) >= (i + 1)]
 
                     if type(button_paths[i]) == dict:
                         button_paths[i] = [button_paths[i]]
@@ -1034,8 +1032,8 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
 
                     # save tile to file
                     save_layout_state(tile_pointer, {'Graph Type': graph_types[i], 'Args List': args_list,
-                                                     'Axes Title': axes_title, 'Axes Modified': axes_modified,
-                                                     **tile_data, 'Title': tile_titles[i]})
+                                                     'Graph Options': graph_options, **tile_data,
+                                                     'Title': tile_titles[i]})
                     # save_layout_to_file(session['saved_layouts'])
                     save_layout_to_db(tile_pointer, tile_titles[i], tile_titles[i] not in used_titles)
 

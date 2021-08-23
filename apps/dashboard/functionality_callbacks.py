@@ -49,6 +49,8 @@ for x in range(4):
         [Input({'type': 'update-graph-trigger', 'index': x}, 'data-graph_menu_trigger'),
          # Customize menu inputs
          Input({'type': 'args-value: {}'.replace("{}", str(x)), 'index': ALL}, 'value'),
+         Input({'type': 'gridline', 'index': x}, 'value'),
+         Input({'type': 'legend', 'index': x}, 'value'),
          Input({'type': 'graph-type-dropdown', 'index': x}, 'value'),
          # View menu inputs
          Input({'type': 'tile-title', 'index': x}, 'value'),
@@ -111,7 +113,7 @@ for x in range(4):
          State('num-tiles', 'data-num-tiles')],
         prevent_initial_call=True
     )
-    def _update_graph(_df_trigger, arg_value, graph_type, tile_title, _datepicker_trigger,
+    def _update_graph(_df_trigger, arg_value, gridline, legend, graph_type, tile_title, _datepicker_trigger,
                       num_periods, period_type, _parent_datepicker_trigger, parent_num_periods,
                       parent_period_type, hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children,
                       state_of_display, parent_state_of_display, parent_hierarchy_toggle,
@@ -174,7 +176,7 @@ for x in range(4):
                                    hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options,
                                    state_of_display,
                                    secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
-                                   end_secondary, df_const, xaxis, yaxis, xlegend, ylegend)
+                                   end_secondary, df_const, xaxis, yaxis, xlegend, ylegend, gridline, legend)
             return graph, popup_text, popup_is_open
 
         # account for tile being linked or not
@@ -222,7 +224,7 @@ for x in range(4):
         graph = __update_graph(df_name, arg_value, graph_type, tile_title, num_periods, period_type, hierarchy_toggle,
                                hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options, state_of_display,
                                secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
-                               end_secondary, df_const, xaxis, yaxis, xlegend, ylegend)
+                               end_secondary, df_const, xaxis, yaxis, xlegend, ylegend, gridline, legend)
 
         if graph is None:
             raise PreventUpdate

@@ -203,6 +203,8 @@ EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Julian_Day',          
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Activity_Event_Id',       @language = 'Fr', @ref_desc = 'Fr: Document Control #'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Measure_Value',           @language = 'Fr', @ref_desc = 'Mesurer la Valeur'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Measure_Type',            @language = 'Fr', @ref_desc = 'Type de Mesure'
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Partial_Period',          @language = 'En', @ref_desc = 'Partial Period?'
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Partial_Period',          @language = 'Fr', @ref_desc = 'Période Partielle?'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Hierarchy_One_Name',      @language = 'En', @ref_desc = 'Hierarchy One Name'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Hierarchy_One_Name',      @language = 'Fr', @ref_desc = 'Hiérarchie un Nom'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Gen_Hover_Data',          @language = 'En', @ref_desc = '<b>%{customdata[0]}</b><br><b>%{customdata[1]}</b><br><b>%AXIS-TITLE-A%</b>: %AXIS-A%<br><b>%AXIS-TITLE-B%</b>: %AXIS-B%<extra></extra>'

@@ -328,6 +328,14 @@ EXEC InsertOPRef @ref_table = 'OPG001C', @ref_value = 'LBL_Gen_Hover_Data',     
 EXEC InsertOPRef @ref_table = 'OPG001C', @ref_value = 'LBL_Bubble_Hover_Data',       @language = 'En', @ref_desc = '<b>%{customdata[0]}</b><br><b>%{customdata[1]}</b><br><b>%AXIS-X-A% %AXIS-X-B%</b>: %X-AXIS% <br><b>%AXIS-Y-A% %AXIS-Y-B%</b>: %Y-AXIS% <br><b>%AXIS-Z-A% %AXIS-Z-B%</b>: %Z-AXIS% <extra></extra>'
 EXEC InsertOPRef @ref_table = 'OPG001C', @ref_value = 'LBL_Bubble_Hover_Data',       @language = 'Fr', @ref_desc = '<b>%{customdata[0]}</b><br><b>%{customdata[1]}</b><br><b>%AXIS-X-A% %AXIS-X-B%</b>: %X-AXIS% <br><b>%AXIS-Y-A% %AXIS-Y-B%</b>: %Y-AXIS% <br><b>%AXIS-Z-A% %AXIS-Z-B%</b>: %Z-AXIS% <extra></extra>'
 
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Link', @language = 'En', @ref_desc = 'Master File'
+EXEC InsertOPRef @ref_table = 'OPG010', @ref_value = 'LBL_Link', @language = 'En', @ref_desc = 'Master File'
+EXEC InsertOPRef @ref_table = 'OPG011', @ref_value = 'LBL_Link', @language = 'En', @ref_desc = 'Master File'
+EXEC InsertOPRef @ref_table = 'OPG001C', @ref_value = 'LBL_Link', @language = 'En', @ref_desc = 'Master File'
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Link', @language = 'Fr', @ref_desc = 'Fr: Master File'
+EXEC InsertOPRef @ref_table = 'OPG010', @ref_value = 'LBL_Link', @language = 'Fr', @ref_desc = 'Fr: Master File'
+EXEC InsertOPRef @ref_table = 'OPG011', @ref_value = 'LBL_Link', @language = 'Fr', @ref_desc = 'Fr: Master File'
+EXEC InsertOPRef @ref_table = 'OPG001C', @ref_value = 'LBL_Link', @language = 'Fr', @ref_desc = 'Fr: Master File'
 
 EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG001', @language = 'En', @ref_desc = 'OPG 001 Time Series Measures'
 EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG001', @language = 'Fr', @ref_desc = 'OPG 001 Mesures de Séries Chronologiques'
@@ -335,8 +343,8 @@ EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG001C', @language = 'E
 EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG001C', @language = 'Fr', @ref_desc = 'OPG 001C Mesures de Séries Chronologiques'
 EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG010', @language = 'En', @ref_desc = 'OPG010 SanKey Series'
 EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG010', @language = 'Fr', @ref_desc = 'OPG010 Série SanKey'
-EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG011', @language = 'En', @ref_desc = 'OPG 011 Truncated Time Series Measures'
-EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG011', @language = 'Fr', @ref_desc = 'OPG 011 Mesures de séries chronologiques tronquées'
+--EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG011', @language = 'En', @ref_desc = 'OPG 011 Truncated Time Series Measures'
+--EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG011', @language = 'Fr', @ref_desc = 'OPG 011 Mesures de séries chronologiques tronquées'
 
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Parameters', @language = 'En', @ref_desc = 'Parameters'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Parameters',@language = 'Fr', @ref_desc = 'Paramètres'

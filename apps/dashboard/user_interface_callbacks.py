@@ -1468,12 +1468,12 @@ app.clientside_callback(
             changed_index = parseInt(triggered.match(/\d+/)[0]);
         }
         if (triggered != "" &&
-             (changed_index != null && n_click_load != ',,,,' && prev_selected[changed_index] == null ||
-             n_click_reset != ',,,,' ||
+             (changed_index != null && n_click_load != ',,,,' && 
+             (prev_selected[changed_index] == null || n_click_reset != ',,,,') ||
              (typeof float_menu_data != 'undefined' && float_menu_data[0] == 'dashboard_layouts' &&
               selected_dashboard != null && float_menu_result == 'ok') ||
-             (typeof prompt_data != 'undefined' && prompt_data[0] == 'load_dataset' && prompt_result != 'op-1' &&
-              prompt_result != 'close'))){
+             (typeof prompt_data != 'undefined' && prompt_data[0] == 'load_dataset' && prompt_result != "op-1" &&
+              prompt_result != "close" && !triggered.includes('confirm-load-data')))){
 
             let newDiv = document.createElement('div');
             newDiv.className = '_data-loading';
@@ -1519,7 +1519,8 @@ app.clientside_callback(
     """,
     Output('df-constants-storage', 'n_clicks'),
     [Input('df-constants-storage', 'data'),
-     Input({'type': 'graph_display', 'index': ALL}, 'children')],
+     Input({'type': 'graph_display', 'index': ALL}, 'children'),
+     Input({'type': 'float-menu-result', 'index': 1}, 'children')],
     State('num-tiles', 'data-num-tiles'),
     prevent_initial_call=True
 )

@@ -322,10 +322,12 @@ def get_layout_graph(report_name):
                            j.get('Start Secondary'),  # j['Start Secondary'],
                            j.get('End Secondary'),  # j['End Secondary']
                            df_const,
-                           j.get('Axes Title')[0],  # xtitle
-                           j.get('Axes Title')[1],  # ytitle
-                           j.get('Axes Title')[2],  # xlegpos
-                           j.get('Axes Title')[3])  # ylegpos
+                           j.get('Graph Options')[0],  # xtitle
+                           j.get('Graph Options')[1],  # ytitle
+                           j.get('Graph Options')[2],  # xlegpos
+                           j.get('Graph Options')[3],  # ylegpos
+                           j.get('Graph Options')[6],  # gridline
+                           j.get('Graph Options')[7])  # legend
 
     if graph is None:
         raise PreventUpdate

@@ -133,7 +133,7 @@ def _new_and_delete(_new_clicks, close_id, _dashboard_reset, tile_titles, tile_l
         num_tiles += 1
         input_tiles.append(None)
         children = get_tile_layout(num_tiles, tile_keys=input_tiles,
-                                   parent_df=parent_df if df_const is not None else None)
+                                   parent_df=parent_df if df_const[parent_df] is not None else None)
     # if RESET dashboard requested, set dashboard to default appearance
     elif 'dashboard-reset' in changed_id:
         num_tiles = 1
@@ -988,7 +988,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
     store = no_update
     options_triggers = [no_update] * 5
     date_picker_triggers = [no_update] * 5
-    df_name_confirm = None
+    df_name_confirm = no_update
     prompt_trigger = no_update
     data_set_val = [no_update] * 5
     df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
@@ -1125,6 +1125,8 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
         changed_index = int(search(r'\d+', changed_id).group())
         if '"type":"confirm-load-data"}.n_clicks' in changed_id \
                 and (prev_selection[changed_index] is not None):
+            if df_names[changed_index] not in session and prev_selection[changed_index] is not None:
+                df_name_confirm = None
             if changed_index == 4:  # prompt with trip prompt
                 prompt_trigger = dcc.Store(
                     id={'type': 'prompt-trigger', 'index': 5},

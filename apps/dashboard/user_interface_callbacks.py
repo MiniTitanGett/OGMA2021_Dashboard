@@ -1470,8 +1470,8 @@ app.clientside_callback(
             changed_index = parseInt(triggered.match(/\d+/)[0]);
         }
         if (triggered != "" &&
-             (changed_index != null && n_click_load != ',,,,' && 
-             (prev_selected[changed_index] == null || n_click_reset != ',,,,') ||
+             (changed_index != null && n_click_load != ',,,,' && prompt_result != "op-1" &&
+              prompt_result != "close" && prev_selected[changed_index] == null || n_click_reset != ',,,,' ||
              (typeof float_menu_data != 'undefined' && float_menu_data[0] == 'dashboard_layouts' &&
               selected_dashboard != null && float_menu_result == 'ok') ||
              (typeof prompt_data != 'undefined' && prompt_data[0] == 'load_dataset' && prompt_result != "op-1" &&
@@ -1500,7 +1500,7 @@ app.clientside_callback(
 
 app.clientside_callback(
     """
-    function datasetRemoveLoadScreen(data, graph_displays, num_tiles) {
+    function datasetRemoveLoadScreen(data, graph_displays, num_tiles, num_tiles2, num_tiles2, num_tiles3) {
         let triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
         if (triggered.includes("df-constants-storage.data")){
             try{
@@ -1523,7 +1523,10 @@ app.clientside_callback(
     [Input('df-constants-storage', 'data'),
      Input({'type': 'graph_display', 'index': ALL}, 'children'),
      Input({'type': 'float-menu-result', 'index': 1}, 'children')],
-    State('num-tiles', 'data-num-tiles'),
+    [State('num-tiles', 'data-num-tiles'),
+     State('num-tiles', 'data-num-tiles-2'),
+     State('num-tiles', 'data-num-tiles-3'),
+     State('num-tiles', 'data-num-tiles-4')],
     prevent_initial_call=True
 )
 

@@ -204,7 +204,7 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
 
             # set up hover label
             hovertemplate = get_label('LBL_Gen_Hover_Data', df_name)
-            hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event', df_name)).replace(
+            hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_of_Event', df_name)).replace(
                 '%AXIS-A%', '%{x}')
             hovertemplate = hovertemplate.replace('%AXIS-TITLE-B%', arg_value[1]).replace('%AXIS-B%', '%{y}')
             fig.update_traces(hovertemplate=hovertemplate)
@@ -454,7 +454,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 # set up hover label
 
                 hovertemplate = get_label('LBL_Gen_Hover_Data', df_name)
-                hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event', df_name)). \
+                hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_of_Event', df_name)). \
                     replace('%AXIS-A%', '%{x}')
                 hovertemplate = hovertemplate.replace('%AXIS-TITLE-B%', arg_value[4]).replace('%AXIS-B%',
                                                                                               '%{customdata[2]}')
@@ -715,7 +715,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             fig.update_layout(legend_title_text=legend_title_text)
             # set up hover label
             hovertemplate = get_label('LBL_Gen_Hover_Data', df_name)
-            hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event', df_name))
+            hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_of_Event', df_name))
             hovertemplate = hovertemplate.replace('%AXIS-A%', '%{customdata[2]}').replace('%AXIS-TITLE-B%',
                                                                                           arg_value[1])
             if arg_value[3] == 'Vertical':

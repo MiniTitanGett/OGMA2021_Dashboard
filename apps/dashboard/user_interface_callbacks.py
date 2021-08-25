@@ -1500,9 +1500,9 @@ app.clientside_callback(
 
 app.clientside_callback(
     """
-    function datasetRemoveLoadScreen(data, graph_displays, num_tiles, num_tiles2, num_tiles2, num_tiles3) {
+    function datasetRemoveLoadScreen(data, graph_displays, num_tiles) {
         let triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
-        if (triggered.includes("df-constants-storage.data")){
+        if (triggered.includes("df-constants-storage.data") || triggered.includes("num-tiles.data-num-tiles")){
             try{
                 document.getElementById('loading').remove();
             }catch{ /* Do Nothing */ }
@@ -1522,11 +1522,8 @@ app.clientside_callback(
     Output('df-constants-storage', 'n_clicks'),
     [Input('df-constants-storage', 'data'),
      Input({'type': 'graph_display', 'index': ALL}, 'children'),
-     Input({'type': 'float-menu-result', 'index': 1}, 'children')],
-    [State('num-tiles', 'data-num-tiles'),
-     State('num-tiles', 'data-num-tiles-2'),
-     State('num-tiles', 'data-num-tiles-3'),
-     State('num-tiles', 'data-num-tiles-4')],
+     Input({'type': 'float-menu-result', 'index': 1}, 'children'),
+     Input('num-tiles', 'data-num-tiles')],
     prevent_initial_call=True
 )
 

@@ -329,7 +329,6 @@ def get_layout_graph(report_name):
                            j.get('Graph Options')[6],  # gridline
                            j.get('Graph Options')[7])  # legend
 
-
     if graph is None:
         raise PreventUpdate
 

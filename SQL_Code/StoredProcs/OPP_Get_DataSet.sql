@@ -20,16 +20,25 @@ begin
   set @pr_dataset_name = isnull(@pr_dataset_name, 'NOTSET')
 
   if (@pr_dataset_name = 'OPG001')
-    select * from dbo.OPG001
+    select --'<a href="http://localhost/OPEN_Dev/open.dll/progressDocument?sessionID=1184960563&disID=' + [Activity Event Id] + '">' + [Activity Event Id] + '</a>' as [Activity Event Id Link],
+           --'[' + [Activity Event Id] + '](http://localhost/OPEN_Dev/open.dll/progressDocument?sessionID=1184960563&disID=' + [Activity Event Id] + ')' as [Activity Event Id Link],
+           'https://localhost/OPEN_Dev/open.dll/progressDocument?sessionID=1704525501&disID=' + [Activity Event Id] as [Link],
+           *
+      from dbo.OPG001
   
   else if (@pr_dataset_name = 'OPG010')
-    select * from dbo.OPG010
+    select 'https://localhost/OPEN_Dev/open.dll/progressDocument?sessionID=1704525501&disID=' + [Activity Event Id] as [Link],
+           *
+      from dbo.OPG010
 
   else if (@pr_dataset_name = 'OPG001C')
-    select * from dbo.OPG001C
+    select 'https://localhost/OPEN_Dev/open.dll/progressDocument?sessionID=1704525501&disID=' + [Activity Event Id] as [Link],
+           *
+      from dbo.OPG001
 
   else if (@pr_dataset_name = 'OPG011')
-    select --null [OPG Data Set],
+    select 'https://localhost/OPEN_Dev/open.dll/progressDocument?sessionID=1704525501&disID=' + dur.[Activity Event Id] as [Link],
+           --null [OPG Data Set],
            --null [Hierarchy One Name],
            --null [Hierarchy One Top],
            --null [Hierarchy One -1],

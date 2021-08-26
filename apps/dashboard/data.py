@@ -806,6 +806,7 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                             else:  # current_filter == "Quarter":
                                 test = yearly_data['Date of Event'].map(
                                     lambda day: (get_months(day) - 1) // 3 + 1)
+                                yearly_data = yearly_data.copy()
                                 yearly_data["Quarter"] = test
                                 unique_dates = test.unique()
                             for w in range(len(unique_dates)):
@@ -964,9 +965,10 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                             unique_dates = yearly_data["Date of Event"].dt.month.unique()
                         elif secondary_type == "Week":
                             unique_dates = yearly_data["Date of Event"].dt.isocalendar().week.unique()
-                        else: # secondary_type == "Quarter"
+                        else:  # secondary_type == "Quarter"
                             test = yearly_data['Date of Event'].map(
                                 lambda day: (get_months(day) - 1) // 3 + 1)
+                            yearly_data = yearly_data.copy()
                             yearly_data["Quarter"] = test
                             unique_dates = test.unique()
                         for w in range(len(unique_dates)):
@@ -1209,6 +1211,7 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                         else:  # current_filter == "Quarter":
                             test = yearly_data['Date of Event'].map(
                                 lambda day: (get_months(day) - 1) // 3 + 1)
+                            yearly_data = yearly_data.copy()
                             yearly_data["Quarter"] = test
                             unique_dates = test.unique()
                         for w in range(len(unique_dates)):
@@ -1362,6 +1365,7 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                     else:
                         test = yearly_data['Date of Event'].map(
                             lambda day: (get_months(day) - 1) // 3 + 1)
+                        yearly_data = yearly_data.copy()
                         yearly_data["Quarter"] = test
                         unique_dates = test.unique()
                     for w in range(len(unique_dates)):

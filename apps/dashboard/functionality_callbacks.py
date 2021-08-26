@@ -132,6 +132,8 @@ for x in range(4):
                 df_name = 'OPG001'
             elif 'OPG010' in df_name:
                 df_name = 'OPG010'
+            elif 'OPG011' in df_name:
+                df_name = 'OPG011'
 
         if '"type":"tile-view"}.className' in changed_id and df_name is None and parent_df_name is None:
             return None

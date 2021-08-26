@@ -524,11 +524,16 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
         df_name_parent = 'OPG001'
     elif 'OPG010' in df_name_parent:
         df_name_parent = 'OPG010'
+    elif 'OPG011' in df_name_parent:
+        df_name_parent = 'OPG011'
+
     if df_name is not None:
         if 'OPG001' in df_name:
             df_name = 'OPG001'
         elif 'OPG010' in df_name:
             df_name = 'OPG010'
+        elif 'OPG011' in df_name:
+            df_name = 'OPG011'
 
     # if new tile is created and is on a dataset that is not confirmed use previous data set that has been confirmed
     if '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-link' and df_confirm is not None:
@@ -536,6 +541,8 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
             df_confirm = 'OPG001'
         if 'OPG010' in df_confirm:
             df_confirm = 'OPG010'
+        if 'OPG011' in df_confirm:
+            df_confirm = 'OPG011'
         graph_options = GRAPH_OPTIONS[df_confirm]
         for i in graph_options:
             options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
@@ -546,7 +553,7 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
             graph_options = GRAPH_OPTIONS["OPG001"]
         elif "OPG010" in df_name_parent:
             graph_options = GRAPH_OPTIONS["OPG010"]
-        elif df_name_parent == "OPG011":
+        elif "OPG011" in df_name_parent:
             graph_options = GRAPH_OPTIONS["OPG011"]
         else:
             graph_options = []
@@ -573,7 +580,7 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
             graph_options = GRAPH_OPTIONS["OPG010"]
             # if graph_type is not None and graph_type not in graph_options:
             #     link_trigger = "fa fa-unlink"
-        elif trigger == "OPG011":
+        elif "OPG011" in trigger:
             graph_options = GRAPH_OPTIONS["OPG011"]
         else:
             graph_options = []
@@ -728,6 +735,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
             df_tile = 'OPG001'
         elif 'OPG010' in parent_df_name:
             df_tile = 'OPG010'
+        elif 'OPG011' in parent_df_name:
+            df_tile = 'OPG011'
         if selected_graph_type not in GRAPH_OPTIONS[df_tile] or selected_graph_type is None:
             return None, 1, no_update, no_update, True
         elif selected_graph_type in GRAPH_OPTIONS[df_tile]:
@@ -1070,6 +1079,8 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                                 df_tile = 'OPG001'
                             elif 'OPG010' in df_name:
                                 df_tile = 'OPG010'
+                            elif 'OPG011' in df_name:
+                                df_tile = 'OPG011'
                             if graph_types[i] is None or graph_types[i] in GRAPH_OPTIONS[df_tile]:
                                 graph_triggers[i] = df_name
                                 options_triggers[i] = df_name
@@ -1140,6 +1151,8 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                             df_tile = 'OPG001'
                         elif 'OPG010' in df_name:
                             df_tile = 'OPG010'
+                        elif 'OPG011' in df_name:
+                            df_tile = 'OPG011'
                         if graph_types[i] is None or graph_types[i] in GRAPH_OPTIONS[df_tile]:
                             graph_triggers[i] = df_name
                             options_triggers[i] = df_name
@@ -1190,6 +1203,8 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                                 df_tile = 'OPG001'
                             elif 'OPG010' in df_name:
                                 df_tile = 'OPG010'
+                            elif 'OPG011' in df_name:
+                                df_tile = 'OPG011'
 
                             # The graph type is none or mismatch and the option for unlink graph
                             if (graph_types[i] is None or graph_types[i] in GRAPH_OPTIONS[df_tile]) and \

@@ -695,6 +695,8 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
             graphs = GRAPH_OPTIONS['OPG010']
         elif 'OPG001' in df_name:
             graphs = GRAPH_OPTIONS['OPG001']
+        elif 'OPG011' in df_name:
+            graphs = GRAPH_OPTIONS['OPG011']
     graphs.sort()
     for i in graphs:
         options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})

@@ -460,6 +460,7 @@ def generate_constants(df_name):
     }
     return storage
 
+
 # ****************************************************DATE FUNCTIONS**************************************************
 
 
@@ -469,6 +470,7 @@ def get_last_day_of_month(day):
     return next_month - timedelta(days=next_month.day)
 
 
+# TODO: not used but can be used for daily data in the future.
 def get_week_number(day):
     """Given a date determines the week number."""
     # date_value.isocalendar()[1] - date_value.replace(day=1).isocalendar()[1] + 1
@@ -480,17 +482,6 @@ def get_last_day_of_week(year, week_number):
     first_day_of_week = datetime.strptime(f'{year}-W{int(week_number) - 1}-1', "%Y-W%W-%w").date()
     last_day_of_week = first_day_of_week + timedelta(days=6.9)
     return last_day_of_week
-
-
-def get_quarter_start(day):
-    """Given a date returns the start of a quarter."""
-    return date(day.year, (day.month - 1) // 3 * 3 + 1, 1)
-
-
-def get_last_day_of_quarter(day):
-    """Given a date returns the end of a quarter."""
-    quarter_start = get_quarter_start(day)
-    return quarter_start + relativedelta(months=3, days=-1)
 
 
 def get_last_day_of_year(year):
@@ -523,6 +514,7 @@ def get_date_of_quarter(quarter, year):
         return date(year, 9, 30)
     else:
         return date(year, 12, 31)
+
 
 # **********************************************DATA MANIPULATION FUNCTIONS*******************************************
 
@@ -578,10 +570,6 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
                                                df_const, df, hierarchy_toggle, hierarchy_level_dropdown,
                                                hierarchy_graph_children)
 
-        # TODO: Write hierarchy aggregator when date_time_aggregator is complete
-        # filtered_df = data_hierarchy_aggregator(filtered_df, hierarchy_path, hierarchy_toggle,
-        #                                         hierarchy_level_dropdown,hierarchy_graph_children, df_name, df_const)
-
     return filtered_df
 
 
@@ -617,47 +605,6 @@ def data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_drop
             filtered_df.dropna(subset=[df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)]], inplace=True)
     else:
         filtered_df = session[df_name]
-        # Filters out all rows that don't include path member at specific level
-        for i in range(len(hierarchy_path)):
-            filtered_df = filtered_df[filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i]]
-        # Filters out all rows that are more specific than given path
-        for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - len(hierarchy_path)):
-            bool_series = pd.isnull(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][
-                len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]])
-            filtered_df = filtered_df[bool_series]
-
-    return filtered_df
-
-
-def data_hierarchy_aggregator(filtered_df, hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
-                              hierarchy_graph_children, df_name, df_const):
-    # NOTE: This assumes hierarchy path is a list of all previously selected levels
-
-    if hierarchy_toggle == 'Level Filter' or (
-            (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == ['graph_children'])):
-        if hierarchy_toggle == 'Level Filter':
-            # If anything is in the drop down
-            if hierarchy_level_dropdown:
-                # Filter based on hierarchy level
-                filtered_df.dropna(subset=[hierarchy_level_dropdown], inplace=True)
-                for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - int(hierarchy_level_dropdown[1])):
-                    bool_series = pd.isnull(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][
-                        len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]])
-                    filtered_df = filtered_df[bool_series]
-            else:
-                # Returns empty data frame with column names
-                filtered_df = filtered_df[0:0]
-        else:
-            # Filters out all rows that are less specific than given path length
-            for i in range(len(hierarchy_path)):
-                filtered_df = filtered_df[filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i]]
-            # Filters out all rows that are more specific than given path length plus one to preserve the child column
-            for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - (len(hierarchy_path) + 1)):
-                bool_series = pd.isnull(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][
-                    len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]])
-                filtered_df = filtered_df[bool_series]
-            filtered_df.dropna(subset=[df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)]], inplace=True)
-    else:
         # Filters out all rows that don't include path member at specific level
         for i in range(len(hierarchy_path)):
             filtered_df = filtered_df[filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i]]
@@ -771,6 +718,20 @@ def data_time_filter(secondary_type, end_secondary, end_year, start_secondary, s
 def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year, start_secondary, start_year,
                          timeframe, fiscal_toggle, num_periods, period_type, df_name, df_const, filtered_df,
                          hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children):
+    measure_types = filtered_df['Measure Type'].unique().tolist()
+    variable_names = filtered_df['Variable Name'].unique().tolist()
+    """Used for figures that do require all measure types."""
+    if hierarchy_toggle == "Level Filter" or (
+            (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == ['graph_children'])):
+        if hierarchy_toggle == "Level Filter":
+            specific_items = filtered_df[hierarchy_level_dropdown].unique().tolist()
+        else:
+            specific_items = filtered_df["H" + str(len(hierarchy_path))].unique().tolist()
+    else:
+        specific_items = ['specific item']
+
+    row_list = []
+
     # account for date type (Gregorian vs Fiscal)
     if fiscal_toggle == 'Fiscal':
         year_prefix = 'Fiscal '
@@ -817,61 +778,89 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
             current_filter = 'Week'
 
         # Builds the data for the respective filter, either year, month or quarter
-        if df_name == "OPG011" and current_filter != 'Week':
-            measure_types = filtered_df['Measure Type'].unique().tolist()
-            variable_names = filtered_df['Variable Name'].unique().tolist()
-            row_list = []
+        if current_filter != 'Week':
+            # Builds data based on all measure types, variable names, hierarchy, and selected time frame
+            for p in range(len(specific_items)):
+                if specific_items[0] == 'specific item':
+                    further_filtered_df = filtered_df
+                else:
+                    if hierarchy_toggle == "Level Filter":
+                        further_filtered_df = filtered_df[filtered_df[hierarchy_level_dropdown] == specific_items[p]]
+                    else:
+                        further_filtered_df = filtered_df[
+                            filtered_df["H" + str(len(hierarchy_path))] == specific_items[p]]
+                # Builds data based on all measure types, variable names, and selected time frame
+                for x in range(len(measure_types)):
+                    measure_type = measure_types[x]
+                    reduced_df = further_filtered_df[further_filtered_df['Measure Type'] == measure_type]
+                    for y in range(len(variable_names)):
+                        variable_name = variable_names[y]
+                        further_reduced_df = reduced_df[reduced_df['Variable Name'] == variable_name]
+                        for z in range(end_date.year - start_date.year + 1):
+                            year = start_date.year + z
+                            yearly_data = further_reduced_df[further_reduced_df["Date of Event"].dt.year == year]
+                            if current_filter == "Year":
+                                unique_dates = yearly_data["Date of Event"].dt.year.unique()
+                            elif current_filter == "Month":
+                                unique_dates = yearly_data["Date of Event"].dt.month.unique()
+                            else:  # current_filter == "Quarter":
+                                test = yearly_data['Date of Event'].map(
+                                    lambda day: (get_months(day) - 1) // 3 + 1)
+                                yearly_data["Quarter"] = test
+                                unique_dates = test.unique()
+                            for w in range(len(unique_dates)):
+                                if current_filter == 'Year':
+                                    unique_secondary = unique_dates[w]
+                                    unique_data = yearly_data[yearly_data["Date of Event"].dt.year == unique_secondary]
+                                    date_of_event = get_last_day_of_year(year)
+                                    year_of_event = year
+                                    quarter = ""
+                                    month_of_event = ""
+                                    week_of_event = ""
+                                elif current_filter == 'Quarter':
+                                    unique_secondary = unique_dates[w]
+                                    unique_data = yearly_data[yearly_data["Quarter"] == unique_secondary]
+                                    date_of_event = get_date_of_quarter(unique_secondary, year)
+                                    year_of_event = year
+                                    quarter = unique_secondary
+                                    month_of_event = ""
+                                    week_of_event = ""
+                                else:
+                                    unique_secondary = unique_dates[w]
+                                    unique_data = yearly_data[yearly_data["Date of Event"].dt.month == unique_secondary]
+                                    date_of_event = get_last_day_of_month(date(year, int(unique_secondary), 1))
+                                    year_of_event = year
+                                    quarter = get_quarter(unique_dates[w])
+                                    month_of_event = unique_secondary
+                                    week_of_event = ""
 
-            # Builds data based on all measure types, variable names, and selected time frame
-            for x in range(len(measure_types)):
-                measure_type = measure_types[x]
-                reduced_df = filtered_df[filtered_df['Measure Type'] == measure_type]
-                for y in range(len(variable_names)):
-                    variable_name = variable_names[y]
-                    further_reduced_df = reduced_df[reduced_df['Variable Name'] == variable_name]
-                    for z in range(end_date.year - start_date.year + 1):
-                        year = start_date.year + z
-                        yearly_data = further_reduced_df[further_reduced_df["Date of Event"].dt.year == year]
-                        unique_dates = yearly_data["Date of Event"].unique()
-                        for w in range(len(unique_dates)):
-                            if current_filter == 'Year':
-                                unique_secondary = unique_dates[w].year
-                                unique_data = yearly_data[yearly_data["Date of Event"].year == unique_secondary]
-                                date_of_event = get_last_day_of_year(year)
-                                year_of_event = year
-                                quarter = ""
-                                month_of_event = ""
-                                week_of_event = ""
-                            elif current_filter == 'Quarter':
-                                unique_secondary = get_quarter(unique_dates[w])
-                                unique_data = yearly_data[get_quarter(yearly_data["Date of Event"]) == unique_secondary]
-                                date_of_event = get_last_day_of_quarter(date(year, int(get_month(unique_dates[w])), 1))
-                                year_of_event = year
-                                quarter = unique_secondary
-                                month_of_event = ""
-                                week_of_event = ""
-                            else:
-                                unique_secondary = get_month(unique_dates[w])
-                                unique_data = yearly_data[yearly_data["Date of Event"].dt.month == unique_secondary]
-                                date_of_event = get_last_day_of_month(date(year, int(unique_secondary), 1))
-                                year_of_event = year
-                                quarter = get_quarter(unique_dates[w])
-                                month_of_event = unique_secondary
-                                week_of_event = ""
+                                if hierarchy_toggle == "Level Filter" or (
+                                        (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == [
+                                            'graph_children'])):
+                                    h0 = unique_data['H0'].iloc[0]
+                                    h1 = unique_data['H1'].iloc[0]
+                                    h2 = unique_data['H2'].iloc[0]
+                                    h3 = unique_data['H3'].iloc[0]
+                                    h4 = unique_data['H4'].iloc[0]
+                                    h5 = unique_data['H5'].iloc[0]
+                                else:
+                                    h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else ''
+                                    h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else ''
+                                    h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else ''
+                                    h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else ''
+                                    h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else ''
+                                    h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else ''
 
-                            measure_value = unique_data['Measure Value'].sum()
-                            row_list.append(
-                                [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
-                                 hierarchy_path[0] if len(hierarchy_path) >= 1 else '',
-                                 hierarchy_path[1] if len(hierarchy_path) >= 2 else '',
-                                 hierarchy_path[2] if len(hierarchy_path) >= 3 else '',
-                                 hierarchy_path[3] if len(hierarchy_path) >= 4 else '',
-                                 hierarchy_path[4] if len(hierarchy_path) >= 5 else '',
-                                 hierarchy_path[5] if len(hierarchy_path) >= 6 else '',
-                                 variable_name, unique_data['Variable Name Qualifier'].iloc[0],
-                                 unique_data['Variable Name Sub Qualifier'].iloc[0],
-                                 date_of_event, current_filter, year_of_event, quarter, month_of_event, week_of_event,
-                                 '', '', '', '', '', '', measure_value, measure_type, ''])
+                                measure_value = unique_data['Measure Value'].sum()
+
+                                row_list.append(
+                                    [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
+                                     h0, h1, h2, h3, h4, h5, variable_name,
+                                     unique_data['Variable Name Qualifier'].iloc[0],
+                                     unique_data['Variable Name Sub Qualifier'].iloc[0], date_of_event, current_filter,
+                                     year_of_event, quarter, month_of_event, week_of_event, '', '', '', '', '', '',
+                                     measure_value, measure_type,
+                                     True if unique_data['Partial Period'].iloc[0] is True else np.nan])
 
             time_df = pd.DataFrame(row_list,
                                    columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
@@ -882,7 +871,71 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                                             'Activity Event Id', 'Measure Value', 'Measure Type', 'Partial Period'])
         # Creates a copy of the filtered data frame that just contains the weekly data
         else:  # elif df_name == "OPG011" and current_filter == 'Week':
-            time_df = filtered_df.copy()
+            # Builds data based on all measure types, variable names, and selected time frame
+            for p in range(len(specific_items)):
+                if specific_items[0] == 'specific item':
+                    further_filtered_df = filtered_df
+                else:
+                    if hierarchy_toggle == "Level Filter":
+                        further_filtered_df = filtered_df[filtered_df[hierarchy_level_dropdown] == specific_items[p]]
+                    else:
+                        further_filtered_df = filtered_df[
+                            filtered_df["H" + str(len(hierarchy_path))] == specific_items[p]]
+                for x in range(len(measure_types)):
+                    measure_type = measure_types[x]
+                    reduced_df = further_filtered_df[further_filtered_df['Measure Type'] == measure_type]
+                    for y in range(len(variable_names)):
+                        variable_name = variable_names[y]
+                        further_reduced_df = reduced_df[reduced_df['Variable Name'] == variable_name]
+                        for z in range(end_date.year - start_date.year + 1):
+                            year = start_date.year + z
+                            yearly_data = further_reduced_df[further_reduced_df["Date of Event"].dt.year == year]
+                            unique_dates = yearly_data["Date of Event"].dt.isocalendar().week.unique()
+                            for w in range(len(unique_dates)):
+                                unique_secondary = unique_dates[w]
+                                unique_data = yearly_data[
+                                    yearly_data["Date of Event"].dt.isocalendar().week == unique_secondary]
+                                date_of_event = get_last_day_of_week(year, unique_secondary)
+                                year_of_event = year
+                                quarter = get_quarter(unique_dates[w])
+                                month_of_event = get_month(unique_dates[w])
+                                week_of_event = unique_secondary
+
+                                measure_value = unique_data['Measure Value'].sum()
+
+                                if hierarchy_toggle == "Level Filter" or (
+                                        (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == [
+                                            'graph_children'])):
+                                    h0 = unique_data['H0'].iloc[0]
+                                    h1 = unique_data['H1'].iloc[0]
+                                    h2 = unique_data['H2'].iloc[0]
+                                    h3 = unique_data['H3'].iloc[0]
+                                    h4 = unique_data['H4'].iloc[0]
+                                    h5 = unique_data['H5'].iloc[0]
+                                else:
+                                    h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else ''
+                                    h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else ''
+                                    h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else ''
+                                    h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else ''
+                                    h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else ''
+                                    h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else ''
+
+                                row_list.append(
+                                    [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
+                                     h0, h1, h2, h3, h4, h5, variable_name,
+                                     unique_data['Variable Name Qualifier'].iloc[0],
+                                     unique_data['Variable Name Sub Qualifier'].iloc[0], date_of_event, current_filter,
+                                     year_of_event, quarter, month_of_event, week_of_event, '', '', '', '', '', '',
+                                     measure_value, measure_type,
+                                     True if unique_data['Partial Period'].iloc[0] is True else np.nan])
+
+            time_df = pd.DataFrame(row_list,
+                                   columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
+                                            'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
+                                            'Date of Event', 'Calendar Entry Type', 'Year of Event', 'Quarter',
+                                            'Month of Event', 'Week of Event', 'Fiscal Year of Event', 'Fiscal Quarter',
+                                            'Fiscal Month of Event', 'Fiscal Week of Event', 'Julian Day',
+                                            'Activity Event Id', 'Measure Value', 'Measure Type', 'Partial Period'])
 
         # Filter all dates inside range (inclusive)
         time_df = time_df[time_df['Date of Event'] >= start_date.date()]
@@ -890,49 +943,81 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
 
     # If not in year tab, filter using secondary selections
     elif not secondary_type == 'Year':
-        measure_types = filtered_df['Measure Type'].unique().tolist()
-        variable_names = filtered_df['Variable Name'].unique().tolist()
-        row_list = []
+        for p in range(len(specific_items)):
+            if specific_items[0] == 'specific item':
+                further_filtered_df = filtered_df
+            else:
+                if hierarchy_toggle == "Level Filter":
+                    further_filtered_df = filtered_df[filtered_df[hierarchy_level_dropdown] == specific_items[p]]
+                else:
+                    further_filtered_df = filtered_df[filtered_df["H" + str(len(hierarchy_path))] == specific_items[p]]
+            for x in range(len(measure_types)):
+                measure_type = measure_types[x]
+                reduced_df = further_filtered_df[further_filtered_df['Measure Type'] == measure_type]
+                for y in range(len(variable_names)):
+                    variable_name = variable_names[y]
+                    further_reduced_df = reduced_df[reduced_df['Variable Name'] == variable_name]
+                    for z in range(end_year - start_year + 1):
+                        year = start_year + z
+                        yearly_data = further_reduced_df[further_reduced_df["Date of Event"].dt.year == year]
+                        if secondary_type == "Month":
+                            unique_dates = yearly_data["Date of Event"].dt.month.unique()
+                        elif secondary_type == "Week":
+                            unique_dates = yearly_data["Date of Event"].dt.isocalendar().week.unique()
+                        else: # secondary_type == "Quarter"
+                            test = yearly_data['Date of Event'].map(
+                                lambda day: (get_months(day) - 1) // 3 + 1)
+                            yearly_data["Quarter"] = test
+                            unique_dates = test.unique()
+                        for w in range(len(unique_dates)):
+                            if secondary_type == 'Quarter':
+                                secondary = unique_dates[w]
+                                quarter = secondary
+                                unique_data = yearly_data[yearly_data["Quarter"] == secondary]
+                                date_of_event = get_date_of_quarter(secondary, year)
+                                month = ""
+                                week = ""
+                            elif secondary_type == "Week":
+                                secondary = unique_dates[w]
+                                unique_data = yearly_data[
+                                    yearly_data["Date of Event"].dt.isocalendar().week == secondary]
+                                date_of_event = get_last_day_of_week(year, secondary)
+                                quarter = get_quarter(unique_dates[w])
+                                month = get_month(unique_dates[w])
+                                week = secondary
+                            else:
+                                secondary = unique_dates[w]
+                                quarter = get_quarter(unique_dates[w])
+                                unique_data = yearly_data[yearly_data["Date of Event"].dt.month == secondary]
+                                date_of_event = get_last_day_of_month(date(year, int(secondary), 1))
+                                month = secondary
+                                week = ""
 
-        for x in range(len(measure_types)):
-            measure_type = measure_types[x]
-            reduced_df = filtered_df[filtered_df['Measure Type'] == measure_type]
-            for y in range(len(variable_names)):
-                variable_name = variable_names[y]
-                further_reduced_df = reduced_df[reduced_df['Variable Name'] == variable_name]
-                for z in range(end_year - start_year + 1):
-                    year = start_year + z
-                    yearly_data = further_reduced_df[further_reduced_df["Date of Event"].dt.year == year]
-                    if secondary_type == "Month":
-                        unique_dates = yearly_data["Date of Event"].dt.month.unique()
-                    # secondary_type == "Quarter"
-                    else:
-                        unique_dates = yearly_data["Date of Event"].unique()
-                    for w in range(len(unique_dates)):
-                        if secondary_type == 'Quarter':
-                            secondary = get_quarter(unique_dates[w])
-                            unique_data = yearly_data[get_quarter(yearly_data["Date of Event"]) == secondary]
-                        else:
-                            secondary = get_month(unique_dates[w])
-                            unique_data = yearly_data[yearly_data["Date of Event"].dt.month == secondary]
-                        measure_value = unique_data['Measure Value'].sum()
-                        row_list.append(
-                            [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
-                             hierarchy_path[0] if len(hierarchy_path) >= 1 else '',
-                             hierarchy_path[1] if len(hierarchy_path) >= 2 else '',
-                             hierarchy_path[2] if len(hierarchy_path) >= 3 else '',
-                             hierarchy_path[3] if len(hierarchy_path) >= 4 else '',
-                             hierarchy_path[4] if len(hierarchy_path) >= 5 else '',
-                             hierarchy_path[5] if len(hierarchy_path) >= 6 else '',
-                             variable_name, unique_data['Variable Name Qualifier'].iloc[0],
-                             unique_data['Variable Name Sub Qualifier'].iloc[0],
-                             get_last_day_of_month(date(year, int(secondary), 1)) if secondary_type == "Month" else
-                             get_last_day_of_quarter(date(year, int(get_month(unique_dates[w])), 1)),
-                             secondary_type, year,
-                             secondary if secondary_type == "Quarter" else get_quarter(unique_dates[w]),
-                             secondary if secondary_type == "Month" else "",
-                             '', '', '', '', '', '', '', measure_value,
-                             measure_type, ''])
+                            measure_value = unique_data['Measure Value'].sum()
+
+                            if hierarchy_toggle == "Level Filter" or (
+                                    (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == [
+                                        'graph_children'])):
+                                h0 = unique_data['H0'].iloc[0]
+                                h1 = unique_data['H1'].iloc[0]
+                                h2 = unique_data['H2'].iloc[0]
+                                h3 = unique_data['H3'].iloc[0]
+                                h4 = unique_data['H4'].iloc[0]
+                                h5 = unique_data['H5'].iloc[0]
+                            else:
+                                h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else ''
+                                h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else ''
+                                h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else ''
+                                h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else ''
+                                h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else ''
+                                h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else ''
+
+                            row_list.append(
+                                [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
+                                 h0, h1, h2, h3, h4, h5, variable_name, unique_data['Variable Name Qualifier'].iloc[0],
+                                 unique_data['Variable Name Sub Qualifier'].iloc[0], date_of_event, secondary_type,
+                                 year, quarter, month, week, '', '', '', '', '', '', measure_value, measure_type,
+                                 True if unique_data['Partial Period'].iloc[0] is True else np.nan])
 
         time_df = pd.DataFrame(row_list,
                                columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
@@ -969,34 +1054,50 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
             # Update working df
             time_df = range_df.copy()
     else:
-        measure_types = filtered_df['Measure Type'].unique().tolist()
-        variable_names = filtered_df['Variable Name'].unique().tolist()
-        row_list = []
+        for p in range(len(specific_items)):
+            if specific_items[0] == 'specific item':
+                further_filtered_df = filtered_df
+            else:
+                if hierarchy_toggle == "Level Filter":
+                    further_filtered_df = filtered_df[filtered_df[hierarchy_level_dropdown] == specific_items[p]]
+                else:
+                    further_filtered_df = filtered_df[filtered_df["H" + str(len(hierarchy_path))] == specific_items[p]]
+            for x in range(len(measure_types)):
+                measure_type = measure_types[x]
+                reduced_df = further_filtered_df[further_filtered_df['Measure Type'] == measure_type]
+                for y in range(len(variable_names)):
+                    variable_name = variable_names[y]
+                    further_reduced_df = reduced_df[reduced_df['Variable Name'] == variable_name]
+                    unique_secondary = further_reduced_df['Date of Event'].dt.year.unique().tolist()
+                    for z in range(len(unique_secondary)):
+                        secondary = unique_secondary[z]
+                        unique_data = further_reduced_df[further_reduced_df['Date of Event'].dt.year == secondary]
+                        measure_value = unique_data['Measure Value'].sum()
+                        date_of_event = get_last_day_of_year(secondary)
 
-        for x in range(len(measure_types)):
-            measure_type = measure_types[x]
-            reduced_df = filtered_df[filtered_df['Measure Type'] == measure_type]
-            for y in range(len(variable_names)):
-                variable_name = variable_names[y]
-                further_reduced_df = reduced_df[reduced_df['Variable Name'] == variable_name]
-                unique_secondary = further_reduced_df['Date of Event'].dt.year.unique().tolist()
-                for z in range(len(unique_secondary)):
-                    secondary = unique_secondary[z]
-                    unique_data = further_reduced_df[further_reduced_df['Date of Event'].dt.year == secondary]
-                    measure_value = unique_data['Measure Value'].sum()
-                    date_of_event = get_last_day_of_year(secondary)
-                    row_list.append(
-                        [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
-                         hierarchy_path[0] if len(hierarchy_path) >= 1 else '',
-                         hierarchy_path[1] if len(hierarchy_path) >= 2 else '',
-                         hierarchy_path[2] if len(hierarchy_path) >= 3 else '',
-                         hierarchy_path[3] if len(hierarchy_path) >= 4 else '',
-                         hierarchy_path[4] if len(hierarchy_path) >= 5 else '',
-                         hierarchy_path[5] if len(hierarchy_path) >= 6 else '',
-                         variable_name, unique_data['Variable Name Qualifier'].iloc[0],
-                         unique_data['Variable Name Sub Qualifier'].iloc[0],
-                         date_of_event, "Year", secondary, "", "", "",
-                         '', '', '', '', '', '', measure_value, measure_type, ''])
+                        if hierarchy_toggle == "Level Filter" or (
+                                (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == [
+                                    'graph_children'])):
+                            h0 = unique_data['H0'].iloc[0]
+                            h1 = unique_data['H1'].iloc[0]
+                            h2 = unique_data['H2'].iloc[0]
+                            h3 = unique_data['H3'].iloc[0]
+                            h4 = unique_data['H4'].iloc[0]
+                            h5 = unique_data['H5'].iloc[0]
+                        else:
+                            h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else ''
+                            h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else ''
+                            h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else ''
+                            h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else ''
+                            h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else ''
+                            h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else ''
+
+                        row_list.append(
+                            [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
+                             h0, h1, h2, h3, h4, h5, variable_name, unique_data['Variable Name Qualifier'].iloc[0],
+                             unique_data['Variable Name Sub Qualifier'].iloc[0], date_of_event, "Year", secondary, "",
+                             '', '', '', '', '', '', '', '', measure_value, measure_type,
+                             True if unique_data['Partial Period'].iloc[0] is True else np.nan])
 
         time_df = pd.DataFrame(row_list,
                                columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
@@ -1013,7 +1114,7 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                                     start_year, timeframe, fiscal_toggle, num_periods, period_type, df_name, df_const,
                                     arg_values, graph_type, df, hierarchy_toggle, hierarchy_level_dropdown,
                                     hierarchy_graph_children):
-
+    """Used for figures that do not require all measure types."""
     if graph_type == "Box":
         measure_type = arg_values[0]
         variable_names = arg_values[1]
@@ -1022,6 +1123,15 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
         variable_names = arg_values[2]
 
     filtered_df = df[df['Measure Type'] == measure_type]
+
+    if hierarchy_toggle == "Level Filter" or (
+            (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == ['graph_children'])):
+        if hierarchy_toggle == "Level Filter":
+            specific_items = filtered_df[hierarchy_level_dropdown].unique().tolist()
+        else:
+            specific_items = filtered_df["H" + str(len(hierarchy_path))].unique().tolist()
+    else:
+        specific_items = ['specific item']
 
     # ensure variable_names is a list of variable values
     if type(variable_names) is not list:
@@ -1075,66 +1185,85 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
             current_filter = 'Week'
 
         # Builds the data for the respective filter, either year, month or quarter
-        if df_name == "OPG011" and current_filter != 'Week':
-            # Builds data based on all measure types, variable names, and selected time frame
+        if current_filter != 'Week':
+            # Builds data based on hierarchy, variable names, and selected time frame
+            for p in range(len(specific_items)):
+                if specific_items[0] == 'specific item':
+                    further_filtered_df = filtered_df
+                else:
+                    if hierarchy_toggle == "Level Filter":
+                        further_filtered_df = filtered_df[filtered_df[hierarchy_level_dropdown] == specific_items[p]]
+                    else:
+                        further_filtered_df = filtered_df[
+                            filtered_df["H" + str(len(hierarchy_path))] == specific_items[p]]
+                for y in range(len(variable_names)):
+                    variable_name = variable_names[y]
+                    further_reduced_df = further_filtered_df[further_filtered_df['Variable Name'] == variable_name]
+                    for z in range(end_date.year - start_date.year + 1):
+                        year = start_date.year + z
+                        yearly_data = further_reduced_df[further_reduced_df["Date of Event"].dt.year == year]
+                        if current_filter == "Year":
+                            unique_dates = yearly_data["Date of Event"].dt.year.unique()
+                        elif current_filter == "Month":
+                            unique_dates = yearly_data["Date of Event"].dt.month.unique()
+                        else:  # current_filter == "Quarter":
+                            test = yearly_data['Date of Event'].map(
+                                lambda day: (get_months(day) - 1) // 3 + 1)
+                            yearly_data["Quarter"] = test
+                            unique_dates = test.unique()
+                        for w in range(len(unique_dates)):
+                            if current_filter == 'Year':
+                                unique_secondary = unique_dates[w]
+                                unique_data = yearly_data[yearly_data["Date of Event"].dt.year == unique_secondary]
+                                date_of_event = get_last_day_of_year(year)
+                                year_of_event = year
+                                quarter = ""
+                                month_of_event = ""
+                                week_of_event = ""
+                            elif current_filter == 'Quarter':
+                                unique_secondary = unique_dates[w]
+                                unique_data = yearly_data[yearly_data["Quarter"] == unique_secondary]
+                                date_of_event = get_date_of_quarter(unique_secondary, year)
+                                year_of_event = year
+                                quarter = unique_secondary
+                                month_of_event = ""
+                                week_of_event = ""
+                            else:
+                                unique_secondary = unique_dates[w]
+                                unique_data = yearly_data[yearly_data["Date of Event"].dt.month == unique_secondary]
+                                date_of_event = get_last_day_of_month(date(year, int(unique_secondary), 1))
+                                year_of_event = year
+                                quarter = get_quarter(unique_dates[w])
+                                month_of_event = unique_secondary
+                                week_of_event = ""
 
-            for y in range(len(variable_names)):
-                variable_name = variable_names[y]
-                further_reduced_df = filtered_df[filtered_df['Variable Name'] == variable_name]
-                for z in range(end_date.year - start_date.year + 1):
-                    year = start_date.year + z
-                    yearly_data = further_reduced_df[further_reduced_df["Date of Event"].dt.year == year]
-                    # Below is an array
-                    unique_dates = yearly_data["Date of Event"].unique()
-                    if current_filter == "Year":
-                        unique_dates = yearly_data["Date of Event"].dt.year.unique()
-                    elif current_filter == "Month":
-                        unique_dates = yearly_data["Date of Event"].dt.month.unique()
-                    else:  # current_filter == "Quarter":
-                        test = yearly_data['Date of Event'].map(
-                            lambda day: (get_months(day) - 1) // 3 + 1)
-                        yearly_data["Quarter"] = test
-                        unique_dates = test.unique()
-                    for w in range(len(unique_dates)):
-                        if current_filter == 'Year':
-                            unique_secondary = unique_dates[
-                                w]  # .astype('datetime64[Y]').astype(int)  # unique_dates[w].year
-                            unique_data = yearly_data[yearly_data["Date of Event"].dt.year == unique_secondary]
-                            date_of_event = get_last_day_of_year(year)
-                            year_of_event = year
-                            quarter = ""
-                            month_of_event = ""
-                            week_of_event = ""
-                        elif current_filter == 'Quarter':
-                            unique_secondary = unique_dates[w]
-                            unique_data = yearly_data[yearly_data["Quarter"] == unique_secondary]
-                            date_of_event = get_date_of_quarter(unique_secondary, year)
-                            year_of_event = year
-                            quarter = unique_secondary
-                            month_of_event = ""
-                            week_of_event = ""
-                        else:
-                            unique_secondary = unique_dates[w]
-                            unique_data = yearly_data[yearly_data["Date of Event"].dt.month == unique_secondary]
-                            date_of_event = get_last_day_of_month(date(year, int(unique_secondary), 1))
-                            year_of_event = year
-                            quarter = get_quarter(unique_dates[w])
-                            month_of_event = unique_secondary
-                            week_of_event = ""
+                            if hierarchy_toggle == "Level Filter" or (
+                                    (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == [
+                                        'graph_children'])):
+                                h0 = unique_data['H0'].iloc[0]
+                                h1 = unique_data['H1'].iloc[0]
+                                h2 = unique_data['H2'].iloc[0]
+                                h3 = unique_data['H3'].iloc[0]
+                                h4 = unique_data['H4'].iloc[0]
+                                h5 = unique_data['H5'].iloc[0]
+                            else:
+                                h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else ''
+                                h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else ''
+                                h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else ''
+                                h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else ''
+                                h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else ''
+                                h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else ''
 
-                        measure_value = unique_data['Measure Value'].sum()
-                        row_list.append(
-                            [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
-                             hierarchy_path[0] if len(hierarchy_path) >= 1 else '',
-                             hierarchy_path[1] if len(hierarchy_path) >= 2 else '',
-                             hierarchy_path[2] if len(hierarchy_path) >= 3 else '',
-                             hierarchy_path[3] if len(hierarchy_path) >= 4 else '',
-                             hierarchy_path[4] if len(hierarchy_path) >= 5 else '',
-                             hierarchy_path[5] if len(hierarchy_path) >= 6 else '',
-                             variable_name, unique_data['Variable Name Qualifier'].iloc[0],
-                             unique_data['Variable Name Sub Qualifier'].iloc[0],
-                             date_of_event, current_filter, year_of_event, quarter, month_of_event, week_of_event,
-                             '', '', '', '', '', '', measure_value, measure_type, False])
+                            measure_value = unique_data['Measure Value'].sum()
+
+                            row_list.append(
+                                [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
+                                 h0, h1, h2, h3, h4, h5, variable_name, unique_data['Variable Name Qualifier'].iloc[0],
+                                 unique_data['Variable Name Sub Qualifier'].iloc[0], date_of_event, current_filter,
+                                 year_of_event, quarter, month_of_event, week_of_event, '', '', '', '', '', '',
+                                 measure_value, measure_type,
+                                 True if unique_data['Partial Period'].iloc[0] is True else np.nan])
+
             time_df = pd.DataFrame(row_list,
                                    columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
                                             'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
@@ -1145,35 +1274,59 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
         # Creates a copy of the filtered data frame that just contains the weekly data
         else:  # elif df_name == "OPG011" and current_filter == 'Week':
             # Builds data based on all measure types, variable names, and selected time frame
-            for y in range(len(variable_names)):
-                variable_name = variable_names[y]
-                further_reduced_df = filtered_df[filtered_df['Variable Name'] == variable_name]
-                for z in range(end_date.year - start_date.year + 1):
-                    year = start_date.year + z
-                    yearly_data = further_reduced_df[further_reduced_df["Date of Event"].dt.year == year]
-                    unique_dates = yearly_data["Date of Event"].dt.isocalendar().week.unique()
-                    for w in range(len(unique_dates)):
-                        unique_secondary = unique_dates[w]
-                        unique_data = yearly_data[yearly_data["Date of Event"].dt.isocalendar().week == unique_secondary]
-                        date_of_event = get_last_day_of_week(year, unique_secondary)
-                        year_of_event = year
-                        quarter = get_quarter(unique_dates[w])  # TODO: error with this likely need to pass the date object
-                        month_of_event = get_month(unique_dates[w])  # TODO: error with this likely need to pass the date object
-                        week_of_event = unique_secondary  # unique_data["Week of Event"].iloc[0]
+            for p in range(len(specific_items)):
+                if specific_items[0] == 'specific item':
+                    further_filtered_df = filtered_df
+                else:
+                    if hierarchy_toggle == "Level Filter":
+                        further_filtered_df = filtered_df[filtered_df[hierarchy_level_dropdown] == specific_items[p]]
+                    else:
+                        further_filtered_df = filtered_df[
+                            filtered_df["H" + str(len(hierarchy_path))] == specific_items[p]]
+                for y in range(len(variable_names)):
+                    variable_name = variable_names[y]
+                    further_reduced_df = further_filtered_df[further_filtered_df['Variable Name'] == variable_name]
+                    for z in range(end_date.year - start_date.year + 1):
+                        year = start_date.year + z
+                        yearly_data = further_reduced_df[further_reduced_df["Date of Event"].dt.year == year]
+                        unique_dates = yearly_data["Date of Event"].dt.isocalendar().week.unique()
+                        for w in range(len(unique_dates)):
+                            unique_secondary = unique_dates[w]
+                            unique_data = yearly_data[
+                                yearly_data["Date of Event"].dt.isocalendar().week == unique_secondary]
+                            date_of_event = get_last_day_of_week(year, unique_secondary)
+                            year_of_event = year
+                            quarter = get_quarter(unique_dates[w])
+                            month_of_event = get_month(unique_dates[w])
+                            week_of_event = unique_secondary
 
-                        measure_value = unique_data['Measure Value'].sum()
-                        row_list.append(
-                            [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
-                             hierarchy_path[0] if len(hierarchy_path) >= 1 else '',
-                             hierarchy_path[1] if len(hierarchy_path) >= 2 else '',
-                             hierarchy_path[2] if len(hierarchy_path) >= 3 else '',
-                             hierarchy_path[3] if len(hierarchy_path) >= 4 else '',
-                             hierarchy_path[4] if len(hierarchy_path) >= 5 else '',
-                             hierarchy_path[5] if len(hierarchy_path) >= 6 else '',
-                             variable_name, unique_data['Variable Name Qualifier'].iloc[0],
-                             unique_data['Variable Name Sub Qualifier'].iloc[0],
-                             date_of_event, current_filter, year_of_event, quarter, month_of_event, week_of_event,
-                             '', '', '', '', '', '', measure_value, measure_type, False])
+                            measure_value = unique_data['Measure Value'].sum()
+
+                            if hierarchy_toggle == "Level Filter" or (
+                                    (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == [
+                                        'graph_children'])):
+                                h0 = unique_data['H0'].iloc[0]
+                                h1 = unique_data['H1'].iloc[0]
+                                h2 = unique_data['H2'].iloc[0]
+                                h3 = unique_data['H3'].iloc[0]
+                                h4 = unique_data['H4'].iloc[0]
+                                h5 = unique_data['H5'].iloc[0]
+                            else:
+                                h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else ''
+                                h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else ''
+                                h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else ''
+                                h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else ''
+                                h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else ''
+                                h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else ''
+
+                            row_list.append(
+                                [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
+                                 h0, h1, h2, h3, h4, h5, variable_name, unique_data['Variable Name Qualifier'].iloc[0],
+                                 unique_data['Variable Name Sub Qualifier'].iloc[0], date_of_event, current_filter,
+                                 year_of_event, quarter, month_of_event, week_of_event, '', '', '', '', '', '',
+                                 measure_value, measure_type,
+                                 True if unique_data['Partial Period'].iloc[0] is True else np.nan])
+
             time_df = pd.DataFrame(row_list,
                                    columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
                                             'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
@@ -1187,17 +1340,14 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
 
     # If not in year tab, filter using secondary selections
     elif not secondary_type == 'Year':
-
-        if hierarchy_toggle == "Level Filter":
-            specific_items = filtered_df[hierarchy_level_dropdown].unique().tolist()
-        else:
-            specific_items = ['specific item']
-
         for p in range(len(specific_items)):
             if specific_items[0] == 'specific item':
                 further_filtered_df = filtered_df
             else:
-                further_filtered_df = filtered_df[filtered_df[hierarchy_level_dropdown] == specific_items[p]]
+                if hierarchy_toggle == "Level Filter":
+                    further_filtered_df = filtered_df[filtered_df[hierarchy_level_dropdown] == specific_items[p]]
+                else:
+                    further_filtered_df = filtered_df[filtered_df["H" + str(len(hierarchy_path))] == specific_items[p]]
             for y in range(len(variable_names)):
                 variable_name = variable_names[y]
                 reduced_df = further_filtered_df[further_filtered_df['Variable Name'] == variable_name]
@@ -1226,12 +1376,10 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                             secondary = unique_dates[w]
                             unique_data = yearly_data[
                                 yearly_data["Date of Event"].dt.isocalendar().week == secondary]
-                            date_of_event = get_last_day_of_week(year, secondary)  # unique_data["Week of Event"].iloc[0]
-                            quarter = get_quarter(
-                                unique_dates[w])  # TODO: error with this likely need to pass the date object
-                            month = get_month(
-                                unique_dates[w])  # TODO: error with this likely need to pass the date object
-                            week = secondary  # unique_data["Week of Event"].iloc[0]
+                            date_of_event = get_last_day_of_week(year, secondary)
+                            quarter = get_quarter(unique_dates[w])
+                            month = get_month(unique_dates[w])
+                            week = secondary
                         else:
                             secondary = unique_dates[w]
                             quarter = get_quarter(unique_dates[w])
@@ -1239,28 +1387,32 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                             date_of_event = get_last_day_of_month(date(year, int(secondary), 1))
                             month = secondary
                             week = ""
+
                         measure_value = unique_data['Measure Value'].sum()
 
-                        if hierarchy_toggle == "Level Filter":
-                            h0 = specific_items[p]
-                            h1 = specific_items[p]
-                            h2 = specific_items[p]
-                            h3 = specific_items[p]
-                            h4 = specific_items[p]
-                            h5 = specific_items[p]
+                        if hierarchy_toggle == "Level Filter" or (
+                                (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == [
+                                    'graph_children'])):
+                            h0 = unique_data['H0'].iloc[0]
+                            h1 = unique_data['H1'].iloc[0]
+                            h2 = unique_data['H2'].iloc[0]
+                            h3 = unique_data['H3'].iloc[0]
+                            h4 = unique_data['H4'].iloc[0]
+                            h5 = unique_data['H5'].iloc[0]
                         else:
-                            h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else '',
-                            h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else '',
-                            h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else '',
-                            h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else '',
-                            h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else '',
-                            h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else '',
+                            h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else ''
+                            h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else ''
+                            h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else ''
+                            h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else ''
+                            h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else ''
+                            h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else ''
 
                         row_list.append(
                             [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
                              h0, h1, h2, h3, h4, h5, variable_name, unique_data['Variable Name Qualifier'].iloc[0],
                              unique_data['Variable Name Sub Qualifier'].iloc[0], date_of_event, secondary_type, year,
-                             quarter, month, week, '', '', '', '', '', '', measure_value, measure_type, False])
+                             quarter, month, week, '', '', '', '', '', '', measure_value, measure_type,
+                             True if unique_data['Partial Period'].iloc[0] is True else np.nan])
 
         time_df = pd.DataFrame(row_list,
                                columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
@@ -1297,27 +1449,46 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
             # Update working df
             time_df = range_df.copy()
     else:
-        for y in range(len(variable_names)):
-            variable_name = variable_names[y]
-            further_reduced_df = filtered_df[filtered_df['Variable Name'] == variable_name]
-            unique_secondary = further_reduced_df['Date of Event'].dt.year.unique().tolist()
-            for z in range(len(unique_secondary)):
-                secondary = unique_secondary[z]
-                unique_data = further_reduced_df[further_reduced_df['Date of Event'].dt.year == secondary]
-                measure_value = unique_data['Measure Value'].sum()
-                date_of_event = get_last_day_of_year(secondary)
-                row_list.append(
-                    [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
-                     hierarchy_path[0] if len(hierarchy_path) >= 1 else '',
-                     hierarchy_path[1] if len(hierarchy_path) >= 2 else '',
-                     hierarchy_path[2] if len(hierarchy_path) >= 3 else '',
-                     hierarchy_path[3] if len(hierarchy_path) >= 4 else '',
-                     hierarchy_path[4] if len(hierarchy_path) >= 5 else '',
-                     hierarchy_path[5] if len(hierarchy_path) >= 6 else '',
-                     variable_name, unique_data['Variable Name Qualifier'].iloc[0],
-                     unique_data['Variable Name Sub Qualifier'].iloc[0],
-                     date_of_event, "Year", secondary, "", "", "",
-                     '', '', '', '', '', '', measure_value, measure_type, False])
+        for p in range(len(specific_items)):
+            if specific_items[0] == 'specific item':
+                further_filtered_df = filtered_df
+            else:
+                if hierarchy_toggle == "Level Filter":
+                    further_filtered_df = filtered_df[filtered_df[hierarchy_level_dropdown] == specific_items[p]]
+                else:
+                    further_filtered_df = filtered_df[filtered_df["H" + str(len(hierarchy_path))] == specific_items[p]]
+            for y in range(len(variable_names)):
+                variable_name = variable_names[y]
+                further_reduced_df = further_filtered_df[further_filtered_df['Variable Name'] == variable_name]
+                unique_secondary = further_reduced_df['Date of Event'].dt.year.unique().tolist()
+                for z in range(len(unique_secondary)):
+                    secondary = unique_secondary[z]
+                    unique_data = further_reduced_df[further_reduced_df['Date of Event'].dt.year == secondary]
+                    measure_value = unique_data['Measure Value'].sum()
+                    date_of_event = get_last_day_of_year(secondary)
+
+                    if hierarchy_toggle == "Level Filter" or (
+                            (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == ['graph_children'])):
+                        h0 = unique_data['H0'].iloc[0]
+                        h1 = unique_data['H1'].iloc[0]
+                        h2 = unique_data['H2'].iloc[0]
+                        h3 = unique_data['H3'].iloc[0]
+                        h4 = unique_data['H4'].iloc[0]
+                        h5 = unique_data['H5'].iloc[0]
+                    else:
+                        h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else ''
+                        h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else ''
+                        h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else ''
+                        h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else ''
+                        h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else ''
+                        h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else ''
+
+                    row_list.append(
+                        [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
+                         h0, h1, h2, h3, h4, h5, variable_name, unique_data['Variable Name Qualifier'].iloc[0],
+                         unique_data['Variable Name Sub Qualifier'].iloc[0], date_of_event, "Year", secondary, "", "",
+                         '', '', '', '', '', '', '', measure_value, measure_type,
+                         True if unique_data['Partial Period'].iloc[0] is True else np.nan])
 
         time_df = pd.DataFrame(row_list,
                                columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',

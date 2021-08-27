@@ -728,7 +728,7 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
     """
     measure_types = filtered_df['Measure Type'].unique().tolist()
     variable_names = filtered_df['Variable Name'].unique().tolist()
-    """Used for figures that do require all measure types."""
+
     if hierarchy_toggle == "Level Filter" or (
             (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == ['graph_children'])):
         if hierarchy_toggle == "Level Filter":
@@ -736,7 +736,10 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
         else:
             specific_items = filtered_df["H" + str(len(hierarchy_path))].unique().tolist()
     else:
-        specific_items = ['specific item']
+        if hierarchy_path:
+            specific_items = ['specific item']
+        else:
+            specific_items = []
 
     row_list = []
 
@@ -1146,7 +1149,10 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
         else:
             specific_items = filtered_df["H" + str(len(hierarchy_path))].unique().tolist()
     else:
-        specific_items = ['specific item']
+        if hierarchy_path:
+            specific_items = ['specific item']
+        else:
+            specific_items = []
 
     # ensure variable_names is a list of variable values
     if type(variable_names) is not list:

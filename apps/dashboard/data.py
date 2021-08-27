@@ -823,17 +823,17 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                                     unique_data = yearly_data[yearly_data["Date of Event"].dt.year == unique_secondary]
                                     date_of_event = get_last_day_of_year(year)
                                     year_of_event = year
-                                    quarter = ""
-                                    month_of_event = ""
-                                    week_of_event = ""
+                                    quarter = np.nan
+                                    month_of_event = np.nan
+                                    week_of_event = np.nan
                                 elif current_filter == 'Quarter':
                                     unique_secondary = unique_dates[w]
                                     unique_data = yearly_data[yearly_data["Quarter"] == unique_secondary]
                                     date_of_event = get_date_of_quarter(unique_secondary, year)
                                     year_of_event = year
                                     quarter = unique_secondary
-                                    month_of_event = ""
-                                    week_of_event = ""
+                                    month_of_event = np.nan
+                                    week_of_event = np.nan
                                 else:
                                     unique_secondary = unique_dates[w]
                                     unique_data = yearly_data[yearly_data["Date of Event"].dt.month == unique_secondary]
@@ -841,7 +841,7 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                                     year_of_event = year
                                     quarter = get_quarter(unique_dates[w])
                                     month_of_event = unique_secondary
-                                    week_of_event = ""
+                                    week_of_event = np.nan
 
                                 if hierarchy_toggle == "Level Filter" or (
                                         (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == [
@@ -853,12 +853,12 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                                     h4 = unique_data['H4'].iloc[0]
                                     h5 = unique_data['H5'].iloc[0]
                                 else:
-                                    h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else ''
-                                    h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else ''
-                                    h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else ''
-                                    h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else ''
-                                    h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else ''
-                                    h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else ''
+                                    h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else np.nan
+                                    h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else np.nan
+                                    h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else np.nan
+                                    h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else np.nan
+                                    h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else np.nan
+                                    h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else np.nan
 
                                 measure_value = unique_data['Measure Value'].sum()
 
@@ -867,8 +867,8 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                                      h0, h1, h2, h3, h4, h5, variable_name,
                                      unique_data['Variable Name Qualifier'].iloc[0],
                                      unique_data['Variable Name Sub Qualifier'].iloc[0], date_of_event, current_filter,
-                                     year_of_event, quarter, month_of_event, week_of_event, '', '', '', '', '', '',
-                                     measure_value, measure_type,
+                                     year_of_event, quarter, month_of_event, week_of_event, np.nan, np.nan, np.nan,
+                                     np.nan, np.nan, np.nan, measure_value, measure_type,
                                      True if unique_data['Partial Period'].iloc[0] is True else np.nan])
 
             time_df = pd.DataFrame(row_list,
@@ -922,20 +922,20 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                                     h4 = unique_data['H4'].iloc[0]
                                     h5 = unique_data['H5'].iloc[0]
                                 else:
-                                    h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else ''
-                                    h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else ''
-                                    h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else ''
-                                    h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else ''
-                                    h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else ''
-                                    h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else ''
+                                    h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else np.nan
+                                    h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else np.nan
+                                    h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else np.nan
+                                    h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else np.nan
+                                    h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else np.nan
+                                    h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else np.nan
 
                                 row_list.append(
                                     [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
                                      h0, h1, h2, h3, h4, h5, variable_name,
                                      unique_data['Variable Name Qualifier'].iloc[0],
                                      unique_data['Variable Name Sub Qualifier'].iloc[0], date_of_event, current_filter,
-                                     year_of_event, quarter, month_of_event, week_of_event, '', '', '', '', '', '',
-                                     measure_value, measure_type,
+                                     year_of_event, quarter, month_of_event, week_of_event, np.nan, np.nan, np.nan,
+                                     np.nan, np.nan, np.nan, measure_value, measure_type,
                                      True if unique_data['Partial Period'].iloc[0] is True else np.nan])
 
             time_df = pd.DataFrame(row_list,
@@ -985,8 +985,8 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                                 quarter = secondary
                                 unique_data = yearly_data[yearly_data["Quarter"] == secondary]
                                 date_of_event = get_date_of_quarter(secondary, year)
-                                month = ""
-                                week = ""
+                                month = np.nan
+                                week = np.nan
                             elif secondary_type == "Week":
                                 secondary = unique_dates[w]
                                 unique_data = yearly_data[
@@ -1001,7 +1001,7 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                                 unique_data = yearly_data[yearly_data["Date of Event"].dt.month == secondary]
                                 date_of_event = get_last_day_of_month(date(year, int(secondary), 1))
                                 month = secondary
-                                week = ""
+                                week = np.nan
 
                             measure_value = unique_data['Measure Value'].sum()
 
@@ -1015,18 +1015,19 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                                 h4 = unique_data['H4'].iloc[0]
                                 h5 = unique_data['H5'].iloc[0]
                             else:
-                                h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else ''
-                                h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else ''
-                                h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else ''
-                                h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else ''
-                                h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else ''
-                                h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else ''
+                                h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else np.nan
+                                h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else np.nan
+                                h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else np.nan
+                                h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else np.nan
+                                h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else np.nan
+                                h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else np.nan
 
                             row_list.append(
                                 [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
                                  h0, h1, h2, h3, h4, h5, variable_name, unique_data['Variable Name Qualifier'].iloc[0],
                                  unique_data['Variable Name Sub Qualifier'].iloc[0], date_of_event, secondary_type,
-                                 year, quarter, month, week, '', '', '', '', '', '', measure_value, measure_type,
+                                 year, quarter, month, week, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan,
+                                 measure_value, measure_type,
                                  True if unique_data['Partial Period'].iloc[0] is True else np.nan])
 
         time_df = pd.DataFrame(row_list,
@@ -1095,19 +1096,19 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                             h4 = unique_data['H4'].iloc[0]
                             h5 = unique_data['H5'].iloc[0]
                         else:
-                            h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else ''
-                            h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else ''
-                            h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else ''
-                            h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else ''
-                            h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else ''
-                            h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else ''
+                            h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else np.nan
+                            h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else np.nan
+                            h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else np.nan
+                            h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else np.nan
+                            h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else np.nan
+                            h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else np.nan
 
                         row_list.append(
                             [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
                              h0, h1, h2, h3, h4, h5, variable_name, unique_data['Variable Name Qualifier'].iloc[0],
-                             unique_data['Variable Name Sub Qualifier'].iloc[0], date_of_event, "Year", secondary, "",
-                             '', '', '', '', '', '', '', '', measure_value, measure_type,
-                             True if unique_data['Partial Period'].iloc[0] is True else np.nan])
+                             unique_data['Variable Name Sub Qualifier'].iloc[0], date_of_event, "Year", secondary,
+                             np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, measure_value,
+                             measure_type, True if unique_data['Partial Period'].iloc[0] is True else np.nan])
 
         time_df = pd.DataFrame(row_list,
                                columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
@@ -1232,17 +1233,17 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                                 unique_data = yearly_data[yearly_data["Date of Event"].dt.year == unique_secondary]
                                 date_of_event = get_last_day_of_year(year)
                                 year_of_event = year
-                                quarter = ""
-                                month_of_event = ""
-                                week_of_event = ""
+                                quarter = np.nan
+                                month_of_event = np.nan
+                                week_of_event = np.nan
                             elif current_filter == 'Quarter':
                                 unique_secondary = unique_dates[w]
                                 unique_data = yearly_data[yearly_data["Quarter"] == unique_secondary]
                                 date_of_event = get_date_of_quarter(unique_secondary, year)
                                 year_of_event = year
                                 quarter = unique_secondary
-                                month_of_event = ""
-                                week_of_event = ""
+                                month_of_event = np.nan
+                                week_of_event = np.nan
                             else:
                                 unique_secondary = unique_dates[w]
                                 unique_data = yearly_data[yearly_data["Date of Event"].dt.month == unique_secondary]
@@ -1250,7 +1251,7 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                                 year_of_event = year
                                 quarter = get_quarter(unique_dates[w])
                                 month_of_event = unique_secondary
-                                week_of_event = ""
+                                week_of_event = np.nan
 
                             if hierarchy_toggle == "Level Filter" or (
                                     (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == [
@@ -1262,12 +1263,12 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                                 h4 = unique_data['H4'].iloc[0]
                                 h5 = unique_data['H5'].iloc[0]
                             else:
-                                h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else ''
-                                h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else ''
-                                h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else ''
-                                h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else ''
-                                h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else ''
-                                h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else ''
+                                h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else np.nan
+                                h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else np.nan
+                                h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else np.nan
+                                h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else np.nan
+                                h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else np.nan
+                                h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else np.nan
 
                             measure_value = unique_data['Measure Value'].sum()
 
@@ -1275,8 +1276,8 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                                 [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
                                  h0, h1, h2, h3, h4, h5, variable_name, unique_data['Variable Name Qualifier'].iloc[0],
                                  unique_data['Variable Name Sub Qualifier'].iloc[0], date_of_event, current_filter,
-                                 year_of_event, quarter, month_of_event, week_of_event, '', '', '', '', '', '',
-                                 measure_value, measure_type,
+                                 year_of_event, quarter, month_of_event, week_of_event, np.nan, np.nan, np.nan, np.nan,
+                                 np.nan, np.nan, measure_value, measure_type,
                                  True if unique_data['Partial Period'].iloc[0] is True else np.nan])
 
             time_df = pd.DataFrame(row_list,
@@ -1327,19 +1328,19 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                                 h4 = unique_data['H4'].iloc[0]
                                 h5 = unique_data['H5'].iloc[0]
                             else:
-                                h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else ''
-                                h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else ''
-                                h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else ''
-                                h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else ''
-                                h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else ''
-                                h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else ''
+                                h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else np.nan
+                                h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else np.nan
+                                h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else np.nan
+                                h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else np.nan
+                                h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else np.nan
+                                h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else np.nan
 
                             row_list.append(
                                 [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
                                  h0, h1, h2, h3, h4, h5, variable_name, unique_data['Variable Name Qualifier'].iloc[0],
                                  unique_data['Variable Name Sub Qualifier'].iloc[0], date_of_event, current_filter,
-                                 year_of_event, quarter, month_of_event, week_of_event, '', '', '', '', '', '',
-                                 measure_value, measure_type,
+                                 year_of_event, quarter, month_of_event, week_of_event, np.nan, np.nan, np.nan, np.nan,
+                                 np.nan, np.nan, measure_value, measure_type,
                                  True if unique_data['Partial Period'].iloc[0] is True else np.nan])
 
             time_df = pd.DataFrame(row_list,
@@ -1386,8 +1387,8 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                             quarter = secondary
                             unique_data = yearly_data[yearly_data["Quarter"] == secondary]
                             date_of_event = get_date_of_quarter(secondary, year)
-                            month = ""
-                            week = ""
+                            month = np.nan
+                            week = np.nan
                         elif secondary_type == "Week":
                             secondary = unique_dates[w]
                             unique_data = yearly_data[
@@ -1402,7 +1403,7 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                             unique_data = yearly_data[yearly_data["Date of Event"].dt.month == secondary]
                             date_of_event = get_last_day_of_month(date(year, int(secondary), 1))
                             month = secondary
-                            week = ""
+                            week = np.nan
 
                         measure_value = unique_data['Measure Value'].sum()
 
@@ -1416,19 +1417,19 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                             h4 = unique_data['H4'].iloc[0]
                             h5 = unique_data['H5'].iloc[0]
                         else:
-                            h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else ''
-                            h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else ''
-                            h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else ''
-                            h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else ''
-                            h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else ''
-                            h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else ''
+                            h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else np.nan
+                            h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else np.nan
+                            h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else np.nan
+                            h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else np.nan
+                            h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else np.nan
+                            h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else np.nan
 
                         row_list.append(
                             [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
                              h0, h1, h2, h3, h4, h5, variable_name, unique_data['Variable Name Qualifier'].iloc[0],
                              unique_data['Variable Name Sub Qualifier'].iloc[0], date_of_event, secondary_type, year,
-                             quarter, month, week, '', '', '', '', '', '', measure_value, measure_type,
-                             True if unique_data['Partial Period'].iloc[0] is True else np.nan])
+                             quarter, month, week, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, measure_value,
+                             measure_type, True if unique_data['Partial Period'].iloc[0] is True else np.nan])
 
         time_df = pd.DataFrame(row_list,
                                columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
@@ -1492,18 +1493,18 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                         h4 = unique_data['H4'].iloc[0]
                         h5 = unique_data['H5'].iloc[0]
                     else:
-                        h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else ''
-                        h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else ''
-                        h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else ''
-                        h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else ''
-                        h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else ''
-                        h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else ''
+                        h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else np.nan
+                        h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else np.nan
+                        h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else np.nan
+                        h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else np.nan
+                        h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else np.nan
+                        h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else np.nan
 
                     row_list.append(
                         [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
                          h0, h1, h2, h3, h4, h5, variable_name, unique_data['Variable Name Qualifier'].iloc[0],
-                         unique_data['Variable Name Sub Qualifier'].iloc[0], date_of_event, "Year", secondary, "", "",
-                         '', '', '', '', '', '', '', measure_value, measure_type,
+                         unique_data['Variable Name Sub Qualifier'].iloc[0], date_of_event, "Year", secondary, np.nan,
+                         np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, measure_value, measure_type,
                          True if unique_data['Partial Period'].iloc[0] is True else np.nan])
 
         time_df = pd.DataFrame(row_list,

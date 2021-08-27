@@ -345,6 +345,7 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
     return graph
 
 
+# TODO: currently the queries do not work with OPG011, see below TODO
 def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
                       hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const,
                       xaxis_title, yaxis_title, xlegend, ylegend, gridline, legend):
@@ -385,6 +386,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                                                   values='Measure Value').reset_index()
         else:
             # Specialty filtering
+            # pandas.core.computation.ops.UndefinedVariableError: name 'BACKTICK_QUOTED_STRING__LBRACE_0_RBRACE_'
+            # is not defined # TODO: Error
             filtered_df = dff.copy().query(
                 "(`{0}` == @arg_value[0] and `Measure Type` == @arg_value[1]) or "
                 "(`{0}` == @arg_value[2] and `Measure Type` == @arg_value[3]) or "

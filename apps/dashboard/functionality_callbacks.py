@@ -812,25 +812,17 @@ for x in range(4):
         """
         function _hide_animated_bubble_options(xaxis, graph_type){
             let hide_xaxis_measure = dash_clientside.no_update;
-            let hide_yaxis_measure = dash_clientside.no_update;
-            let hide_size_measure = dash_clientside.no_update;
             if (xaxis == 'Time' && graph_type == 'Bubble'){
                 hide_xaxis_measure = {'display': 'none'};
-                hide_yaxis_measure = {'display': 'none'};
-                hide_size_measure = {'display': 'none'};
                 }
             else{
                 hide_xaxis_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
-                hide_yaxis_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
-                hide_size_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
                 }
-            return [hide_xaxis_measure, hide_yaxis_measure, hide_size_measure];
+            return hide_xaxis_measure;
         }
             """,
 
-        [Output({'type': 'hide-xaxis-measure', 'index': x}, 'style'),
-         Output({'type': 'hide-yaxis-measure', 'index': x}, 'style'),
-         Output({'type': 'hide-size-measure', 'index': x}, 'style')],
+        Output({'type': 'hide-xaxis-measure', 'index': x}, 'style'),
         Input({'type': 'args-value: {}'.replace("{}", str(x)), 'index': 0}, 'value'),
         State({'type': 'graph-type-dropdown', 'index': x}, 'value'),
         prevent_initial_call=True

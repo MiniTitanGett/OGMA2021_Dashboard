@@ -204,7 +204,7 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
 
             # set up hover label
             hovertemplate = get_label('LBL_Gen_Hover_Data', df_name)
-            hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_of_Event', df_name)).replace(
+            hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event', df_name)).replace(
                 '%AXIS-A%', '%{x}')
             hovertemplate = hovertemplate.replace('%AXIS-TITLE-B%', arg_value[1]).replace('%AXIS-B%', '%{y}')
             fig.update_traces(hovertemplate=hovertemplate)
@@ -369,14 +369,13 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
         if arg_value[0] == 'Time':
             filtered_df = dff.copy().query(
                 "`Variable Name` == @arg_value[0] or "
-                "`Variable Name` == @arg_value[2] or "
-                "`Variable Name` == @arg_value[4]")
-            filtered_df[['Date of Event', 'Variable Name', 'Partial Period', color]] = \
-                filtered_df[
-                    ['Date of Event', 'Variable Name', 'Partial Period', color]].astype(str)
+                "(`Variable Name` == @arg_value[2] and `Measure Type` == @arg_value[3]) or "
+                "(`Variable Name` == @arg_value[4] and `Measure Type` == @arg_value[5])")
+            filtered_df[['Date of Event', 'Variable Name', 'Partial Period', color]] = filtered_df[
+                        ['Date of Event', 'Variable Name', 'Partial Period', color]].astype(str)
             filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color],
-                                                  columns=['Variable Name'],
-                                                  values='Measure Value').reset_index()
+            columns=['Variable Name', 'Measure Type'],
+            values='Measure Value').reset_index()
         else:
             # Specialty filtering
             filtered_df = dff.copy().query(
@@ -444,21 +443,25 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 fig = px.scatter(
                     title=title,
                     x=filtered_df['Date of Event'],
-                    y=filtered_df[arg_value[2]],
-                    size=filtered_df[arg_value[4]],
+                    y=filtered_df[arg_value[2], arg_value[3]],
+                    size=filtered_df[arg_value[4], arg_value[5]],
                     color=filtered_df[color],
-                    custom_data=[filtered_df[color], filtered_df['Date of Event'], filtered_df[arg_value[4]]])
+                    custom_data=[filtered_df[color], filtered_df['Date of Event'], filtered_df[arg_value[4],
+                                                                                               arg_value[5]]]
+                )
                 fig.update_layout(
                     legend_title_text='Size: <br> &#9; {}<br> <br>{}'.format(arg_value[4],
                                                                              legend_title_text))
                 # set up hover label
-
-                hovertemplate = get_label('LBL_Gen_Hover_Data', df_name)
-                hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_of_Event', df_name)). \
+                hovertemplate = get_label('LBL_Bubble_Fixed_Hover_Data', df_name)
+                hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event', df_name)). \
                     replace('%AXIS-A%', '%{x}')
-                hovertemplate = hovertemplate.replace('%AXIS-TITLE-B%', arg_value[4]).replace('%AXIS-B%',
-                                                                                              '%{customdata[2]}')
-
+                hovertemplate = hovertemplate.replace('%AXIS-Y-A%', arg_value[2]).replace('%AXIS-Y-B%',
+                                                                                          arg_value[3]).replace(
+                    '%Y-AXIS%', '%{y}')
+                hovertemplate = hovertemplate.replace('%AXIS-Z-A%', arg_value[4]).replace('%AXIS-Z-B%',
+                                                                                          arg_value[5]).replace(
+                    '%Z-AXIS%', '%{customdata[2]}')
                 fig.update_traces(hovertemplate=hovertemplate)
             else:
                 # generate graph
@@ -715,7 +718,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             fig.update_layout(legend_title_text=legend_title_text)
             # set up hover label
             hovertemplate = get_label('LBL_Gen_Hover_Data', df_name)
-            hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_of_Event', df_name))
+            hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event', df_name))
             hovertemplate = hovertemplate.replace('%AXIS-A%', '%{customdata[2]}').replace('%AXIS-TITLE-B%',
                                                                                           arg_value[1])
             if arg_value[3] == 'Vertical':

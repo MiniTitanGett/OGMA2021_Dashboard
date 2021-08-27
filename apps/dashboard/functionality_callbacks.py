@@ -729,15 +729,15 @@ def _update_table(page_current, page_size, sort_by, filter_query, _graph_trigger
         if not hierarchy_options:
             list_of_names.pop()
 
-        # If "Last ___ ____" is active and the num_periods is invalid (None), return an empty graph
-        if timeframe == 'to-current' and not num_periods:
-            return [], 0
-        # else, filter normally
-        else:
-            dff = data_manipulator(list_of_names, hierarchy_toggle, hierarchy_level_dropdown,
-                                   hierarchy_graph_children, df_name, df_const, secondary_type, end_secondary,
-                                   end_year, start_secondary, start_year, timeframe, fiscal_toggle, num_periods,
-                                   period_type)
+    # If "Last ___ ____" is active and the num_periods is invalid (None), return an empty graph
+    if timeframe == 'to-current' and not num_periods:
+        return [], 0
+    # else, filter normally
+    else:
+        dff = data_manipulator(list_of_names, hierarchy_toggle, hierarchy_level_dropdown,
+                               hierarchy_graph_children, df_name, df_const, secondary_type, end_secondary,
+                               end_year, start_secondary, start_year, timeframe, fiscal_toggle, num_periods,
+                               period_type)
 
     # Reformat date column
     dff['Date of Event'] = dff['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))

@@ -19,8 +19,9 @@ import pandas as pd
 import plotly.graph_objects as go
 
 # Internal Modules
-from apps.dashboard.data import get_label,  customize_menu_filter, linear_regression, polynomial_regression,\
+from apps.dashboard.data import get_label, customize_menu_filter, linear_regression, polynomial_regression, \
     data_manipulator
+
 
 # ***********************************************HELPER FUNCTIONS****************************************************
 
@@ -100,6 +101,7 @@ def get_hierarchy_col(hierarchy_type, hierarchy_level_dropdown, hierarchy_graph_
         hierarchy_col = df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path) - 1]
 
     return hierarchy_col
+
 
 # ************************************************GRAPH FUNCTIONS**************************************************
 
@@ -184,7 +186,7 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
 
             # filter the dataframe down to the partial period selected
             filtered_df['Partial Period'] = filtered_df['Partial Period'].astype(str).transform(
-                lambda j: get_label('LBL_TRUE') if j != 'nan' else get_label('LBL_FALSE'))
+                lambda j: get_label('LBL_TRUE') if j == 'True' else get_label('LBL_FALSE'))
             filtered_df.sort_values(by=[color, 'Date of Event'], inplace=True)
             # generate graph
             fig = px.line(
@@ -373,21 +375,26 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
             filtered_df = dff.copy().query(
                 "`{0}` == @arg_value[0] or "
                 "(`{0}` == @arg_value[2] and `Measure Type` == @arg_value[3]) or "
-                "(`{0}` == @arg_value[4] and `Measure Type` == @arg_value[5])").format(df_const[df_name]['VARIABLE_LEVEL'])
+                "(`{0}` == @arg_value[4] and `Measure Type` == @arg_value[5])").format(
+                df_const[df_name]['VARIABLE_LEVEL'])
             filtered_df[['Date of Event', 'Variable Name', 'Partial Period', color]] = \
                 filtered_df[
                     ['Date of Event', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]].astype(str)
             filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color],
-                                                  columns=[df_const[df_name]['VARIABLE_LEVEL'],  'Measure Type'],
+                                                  columns=[df_const[df_name]['VARIABLE_LEVEL'], 'Measure Type'],
                                                   values='Measure Value').reset_index()
         else:
             # Specialty filtering
             filtered_df = dff.copy().query(
                 "(`{0}` == @arg_value[0] and `Measure Type` == @arg_value[1]) or "
                 "(`{0}` == @arg_value[2] and `Measure Type` == @arg_value[3]) or "
-                "(`{0}` == @arg_value[4] and `Measure Type` == @arg_value[5])").format(df_const[df_name]['VARIABLE_LEVEL'])
-            filtered_df[['Date of Event', 'Measure Type', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]] = filtered_df[
-                ['Date of Event', 'Measure Type', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]].astype(str)
+                "(`{0}` == @arg_value[4] and `Measure Type` == @arg_value[5])").format(
+                df_const[df_name]['VARIABLE_LEVEL'])
+            filtered_df[
+                ['Date of Event', 'Measure Type', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]] = \
+            filtered_df[
+                ['Date of Event', 'Measure Type', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]].astype(
+                str)
             filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color],
                                                   columns=[df_const[df_name]['VARIABLE_LEVEL'], 'Measure Type'],
                                                   values='Measure Value').reset_index()
@@ -439,7 +446,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 'LBL_' + hierarchy_level_dropdown, df_name) if hierarchy_type == 'Level Filter' else 'Traces'
             # filter the dataframe down to the partial period selected
             filtered_df['Partial Period'] = filtered_df['Partial Period'].astype(str).transform(
-                lambda j: get_label('LBL_TRUE') if j != 'nan' else get_label('LBL_FALSE'))
+                lambda j: get_label('LBL_TRUE') if j == 'True' else get_label('LBL_FALSE'))
+            # lambda j: get_label('LBL_TRUE') if j != 'nan' else get_label('LBL_FALSE'))
             filtered_df.sort_values(by=['Date of Event', color], inplace=True)
             filtered_df['Date of Event'] = filtered_df['Date of Event'].astype(str)
 
@@ -906,7 +914,7 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             filtered_df['Date of Event'] = filtered_df['Date of Event'].transform(
                 lambda i: i.strftime(format='%Y-%m-%d'))
             filtered_df['Partial Period'] = filtered_df['Partial Period'].astype(str).transform(
-                lambda j: get_label('LBL_TRUE') if j != 'nan' else get_label('LBL_FALSE'))
+                lambda j: get_label('LBL_TRUE') if j == 'True' else get_label('LBL_FALSE'))
 
             # generate graph
             fig = px.box(

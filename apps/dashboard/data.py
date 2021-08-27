@@ -246,6 +246,7 @@ def generate_constants(df_name):
     COLUMN_NAMES = df.columns.values  # list of column names
 
     MEASURE_TYPE_OPTIONS = df['Measure Type'].dropna().unique().tolist()  # list of measure type options
+
     MEASURE_TYPE_OPTIONS.sort()
 
     if df_name == 'OPG011':
@@ -523,6 +524,7 @@ def get_date_of_quarter(quarter, year):
 def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children, df_name,
                      df_const, secondary_type, end_secondary, end_year, start_secondary, start_year, timeframe,
                      fiscal_toggle, num_periods, period_type, arg_values=None, graph_type=None):
+    """Returns the filtered/aggregted data frame for visualization."""
     if df_name != 'OPG011':
         filtered_df = data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
                                             hierarchy_graph_children, df_name, df_const)
@@ -564,7 +566,6 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
                                                           num_periods, period_type, df_name, df_const, arg_values,
                                                           graph_type, df, hierarchy_toggle, hierarchy_level_dropdown,
                                                           hierarchy_graph_children)
-
         else:
             filtered_df = data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year, start_secondary,
                                                start_year, timeframe, fiscal_toggle, num_periods, period_type, df_name,
@@ -576,6 +577,7 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
 
 def data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children, df_name,
                           df_const):
+    """Returns filtered the data frame based on hierarchy selections."""
     # NOTE: This assumes hierarchy path is a list of all previously selected levels
 
     if hierarchy_toggle == 'Level Filter' or (
@@ -620,6 +622,7 @@ def data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_drop
 
 def data_time_filter(secondary_type, end_secondary, end_year, start_secondary, start_year, timeframe, fiscal_toggle,
                      num_periods, period_type, df_name, df_const, filtered_df):
+    """Returns filtered data frame dependent on date picker selections."""
     # account for date type (Gregorian vs Fiscal)
     if fiscal_toggle == 'Fiscal':
         year_prefix = 'Fiscal '
@@ -719,6 +722,10 @@ def data_time_filter(secondary_type, end_secondary, end_year, start_secondary, s
 def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year, start_secondary, start_year,
                          timeframe, fiscal_toggle, num_periods, period_type, df_name, df_const, filtered_df,
                          hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children):
+    """
+    Returns aggregated data frame dependent on date picker selections, hierarchy selection and graph type selection.
+    This aggregator does not filter based on measure type.
+    """
     measure_types = filtered_df['Measure Type'].unique().tolist()
     variable_names = filtered_df['Variable Name'].unique().tolist()
     """Used for figures that do require all measure types."""
@@ -1117,7 +1124,11 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                                     start_year, timeframe, fiscal_toggle, num_periods, period_type, df_name, df_const,
                                     arg_values, graph_type, df, hierarchy_toggle, hierarchy_level_dropdown,
                                     hierarchy_graph_children):
-    """Used for figures that do not require all measure types."""
+    """
+    Returns aggregated data frame dependent on date picker selections, hierarchy selection and graph type selection.
+    This aggregator does filter based on measure type to be used for figures that do not require all measure types to
+    avoid aggregating unnecessary data.
+    """
     if graph_type == "Box":
         measure_type = arg_values[0]
         variable_names = arg_values[1]

@@ -133,7 +133,8 @@ def _new_and_delete(_new_clicks, close_id, _dashboard_reset, tile_titles, tile_l
         num_tiles += 1
         input_tiles.append(None)
         children = get_tile_layout(num_tiles, tile_keys=input_tiles,
-                                   parent_df=parent_df if df_const[parent_df] is not None else None)
+                                   parent_df=parent_df if (
+                                               df_const is not None and df_const[parent_df] is not None) else None)
     # if RESET dashboard requested, set dashboard to default appearance
     elif 'dashboard-reset' in changed_id:
         num_tiles = 1

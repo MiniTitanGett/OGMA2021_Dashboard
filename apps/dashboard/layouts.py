@@ -1364,12 +1364,12 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                         "{}:".format(get_label('LBL_Y_Axis_Measure')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
-                            'margin-right': '5px'}),
+                           'margin-right': '5px'}),
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
                         options=[] if df_const is None else [{'label': i, 'value': i} for i in
-                                                            df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                                                             df_const[df_name]['MEASURE_TYPE_OPTIONS']],
                         value=y_measure,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -1395,12 +1395,12 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                         "{}:".format(get_label('LBL_Size_Measure')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
                     style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
-                               'margin-right': '5px'}),
+                           'margin-right': '5px'}),
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
                         options=[] if df_const is None else [{'label': i, 'value': i} for i in
-                                                            df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                                                             df_const[df_name]['MEASURE_TYPE_OPTIONS']],
                         value=size_measure,
                         clearable=False,
                         style={'font-size': '13px'})],

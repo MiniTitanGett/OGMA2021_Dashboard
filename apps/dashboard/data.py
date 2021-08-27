@@ -560,7 +560,9 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
             # Filters out all rows that are more specific than given path
             df.loc[:, df_const[df_name]['HIERARCHY_LEVELS'][int(len(hierarchy_path)):]] = np.nan
 
-        if graph_type == "Line" or graph_type == "Scatter" or graph_type == "Bar" or graph_type == "Box":
+        print(graph_type)
+
+        if graph_type == "Line" or graph_type == "Scatter" or graph_type == "Bar" or graph_type == "Box_Plot":
             filtered_df = data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondary, end_year,
                                                           start_secondary, start_year, timeframe, fiscal_toggle,
                                                           num_periods, period_type, df_name, df_const, arg_values,
@@ -726,6 +728,9 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
     Returns aggregated data frame dependent on date picker selections, hierarchy selection and graph type selection.
     This aggregator does not filter based on measure type.
     """
+
+    print("I am here")
+
     measure_types = filtered_df['Measure Type'].unique().tolist()
     variable_names = filtered_df['Variable Name'].unique().tolist()
     """Used for figures that do require all measure types."""
@@ -1129,9 +1134,14 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
     This aggregator does filter based on measure type to be used for figures that do not require all measure types to
     avoid aggregating unnecessary data.
     """
-    if graph_type == "Box":
+
+    print("I am here")
+
+    if graph_type == "Box_Plot":
         measure_type = arg_values[0]
+        print(measure_type)
         variable_names = arg_values[1]
+        print(variable_names)
     else:
         measure_type = arg_values[1]
         variable_names = arg_values[2]

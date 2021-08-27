@@ -560,7 +560,7 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
             # Filters out all rows that are more specific than given path
             df.loc[:, df_const[df_name]['HIERARCHY_LEVELS'][int(len(hierarchy_path)):]] = np.nan
 
-        if graph_type == "Line" or graph_type == "Scatter" or graph_type == "Bar" or graph_type == "Box":
+        if graph_type == "Line" or graph_type == "Scatter" or graph_type == "Bar" or graph_type == "Box_Plot":
             filtered_df = data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondary, end_year,
                                                           start_secondary, start_year, timeframe, fiscal_toggle,
                                                           num_periods, period_type, df_name, df_const, arg_values,
@@ -1130,7 +1130,7 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
     This aggregator does filter based on measure type to be used for figures that do not require all measure types to
     avoid aggregating unnecessary data.
     """
-    if graph_type == "Box":
+    if graph_type == "Box_Plot":
         measure_type = arg_values[0]
         variable_names = arg_values[1]
     else:

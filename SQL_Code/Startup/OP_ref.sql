@@ -345,8 +345,8 @@ EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG001C', @language = 'E
 EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG001C', @language = 'Fr', @ref_desc = 'OPG 001C Mesures de Séries Chronologiques'
 EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG010', @language = 'En', @ref_desc = 'OPG010 SanKey Series'
 EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG010', @language = 'Fr', @ref_desc = 'OPG010 Série SanKey'
---EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG011', @language = 'En', @ref_desc = 'OPG 011 Truncated Time Series Measures'
---EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG011', @language = 'Fr', @ref_desc = 'OPG 011 Mesures de séries chronologiques tronquées'
+EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG011', @language = 'En', @ref_desc = 'OPG 011 Truncated Time Series Measures'
+EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG011', @language = 'Fr', @ref_desc = 'OPG 011 Mesures de séries chronologiques tronquées'
 
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Parameters', @language = 'En', @ref_desc = 'Parameters'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Parameters',@language = 'Fr', @ref_desc = 'Paramètres'

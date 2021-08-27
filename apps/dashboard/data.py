@@ -228,10 +228,11 @@ def dataset_to_df(df_name):
         df = create_categories(df, ['Variable Value', 'Variable Name', 'Variable Name Qualifier',
                                     'Variable Name Sub Qualifier', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5'])
 
-    logging.debug("dataset {} loaded.".format(df_name))
-
     # If we are dealing with links in the future we must format them as follows and edit the table drawer
-    # dataframe_table.Link = list(map(lambda x: '[Link]({})'.format(x), dataframe_table.Link))
+    if 'Link' in df.columns:
+        df.Link = list(map(lambda x: '[Link]({})'.format(x), df.Link))
+
+    logging.debug("dataset {} loaded.".format(df_name))
     return df
 
 
@@ -1663,7 +1664,9 @@ def polynomial_regression(df, x, y, degree, ci):
 
 
 def confidence_intervals(model):
-    # calculates standard deviation and confidence interval for prediction
+    """
+    Calculates standard deviation and confidence interval for prediction and returns the upper and lower confidence
+    interval.
+    """
     _, lower, upper = wls_prediction_std(model)
-    # returns the upper and lower confidence interval
     return lower, upper

@@ -9,6 +9,7 @@ Contains functions to generate graphs.
 # External Packages
 from _datetime import datetime
 from flask import session
+from parse import parse
 import plotly.express as px
 import dash_core_components as dcc
 import dash_table
@@ -105,7 +106,7 @@ def get_hierarchy_col(hierarchy_type, hierarchy_level_dropdown, hierarchy_graph_
 
 def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
                             hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const,
-                            xaxis_title, yaxis_title, xlegend, ylegend):
+                            xaxis_title, yaxis_title, xlegend, ylegend, gridline, legend):
     """Returns the line graph figure."""
     # ------------------------------------------------Arg Values--------------------------------------------------------
     # arg_value[0] = xaxis selector
@@ -115,8 +116,6 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
     # arg_value[4] = fit
     # arg_value[5] = degree
     # arg_value[6] = confidence interval
-    # arg_value[7] = grid lines
-    # arg_value[8] = legend
     # ------------------------------------------------------------------------------------------------------------------
 
     language = session["language"]
@@ -317,13 +316,13 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
     fig.update_layout(
         yaxis_title=yaxis,
         xaxis_title=xaxis,
-        showlegend=False if arg_value[8] else True,
+        showlegend=False if legend else True,
         overwrite=True,
         plot_bgcolor='rgba(0, 0, 0, 0)',
         paper_bgcolor='rgba(0, 0, 0, 0)')
 
-    # checks for the arg_value[7]: grid line is toggled
-    if arg_value[7]:
+    # checks for gridline is toggled
+    if gridline:
         fig.update_xaxes(showgrid=True, zeroline=True)
         fig.update_yaxes(showgrid=True, zeroline=True)
     else:
@@ -346,7 +345,7 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
 
 def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
                       hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const,
-                      xaxis_title, yaxis_title, xlegend, ylegend):
+                      xaxis_title, yaxis_title, xlegend, ylegend, gridline, legend):
     """Returns the bubble graph figure."""
     # ------------------------------------------------Arg Values--------------------------------------------------------
     # args_value[0] = x-axis
@@ -355,11 +354,11 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
     # args_value[3] = y-axis measure
     # args_value[4] = size
     # args_value[5] = size measure
-    # args_value[6] = grid line toggle
-    # args_value[7] = legend toggle
     # ------------------------------------------------------------------------------------------------------------------
 
     language = session["language"]
+    xaxis = None
+    yaxis = None
 
     # Check whether we have enough information to attempt getting data for a graph
     if hierarchy_type == 'Level Filter' and None not in [arg_value, hierarchy_level_dropdown, hierarchy_type,
@@ -373,13 +372,13 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
         if arg_value[0] == 'Time':
             filtered_df = dff.copy().query(
                 "`{0}` == @arg_value[0] or "
-                "`{0}` == @arg_value[2] or "
-                "`{0}` == @arg_value[4]").format(df_const[df_name]['VARIABLE_LEVEL'])
-            filtered_df[['Date of Event', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]] = \
+                "(`{0}` == @arg_value[2] and `Measure Type` == @arg_value[3]) or "
+                "(`{0}` == @arg_value[4] and `Measure Type` == @arg_value[5])").format(df_const[df_name]['VARIABLE_LEVEL'])
+            filtered_df[['Date of Event', 'Variable Name', 'Partial Period', color]] = \
                 filtered_df[
                     ['Date of Event', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]].astype(str)
             filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color],
-                                                  columns=[df_const[df_name]['VARIABLE_LEVEL']],
+                                                  columns=[df_const[df_name]['VARIABLE_LEVEL'],  'Measure Type'],
                                                   values='Measure Value').reset_index()
         else:
             # Specialty filtering
@@ -448,21 +447,25 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 fig = px.scatter(
                     title=title,
                     x=filtered_df['Date of Event'],
-                    y=filtered_df[arg_value[2]],
-                    size=filtered_df[arg_value[4]],
+                    y=filtered_df[arg_value[2], arg_value[3]],
+                    size=filtered_df[arg_value[4], arg_value[5]],
                     color=filtered_df[color],
-                    custom_data=[filtered_df[color], filtered_df['Date of Event'], filtered_df[arg_value[4]]])
+                    custom_data=[filtered_df[color], filtered_df['Date of Event'], filtered_df[arg_value[4],
+                                                                                               arg_value[5]]]
+                )
                 fig.update_layout(
                     legend_title_text='Size: <br> &#9; {}<br> <br>{}'.format(arg_value[4],
                                                                              legend_title_text))
                 # set up hover label
-
-                hovertemplate = get_label('LBL_Gen_Hover_Data', df_name)
+                hovertemplate = get_label('LBL_Bubble_Fixed_Hover_Data', df_name)
                 hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event', df_name)). \
                     replace('%AXIS-A%', '%{x}')
-                hovertemplate = hovertemplate.replace('%AXIS-TITLE-B%', arg_value[4]).replace('%AXIS-B%',
-                                                                                              '%{customdata[2]}')
-
+                hovertemplate = hovertemplate.replace('%AXIS-Y-A%', arg_value[2]).replace('%AXIS-Y-B%',
+                                                                                          arg_value[3]).replace(
+                    '%Y-AXIS%', '%{y}')
+                hovertemplate = hovertemplate.replace('%AXIS-Z-A%', arg_value[4]).replace('%AXIS-Z-B%',
+                                                                                          arg_value[5]).replace(
+                    '%Z-AXIS%', '%{customdata[2]}')
                 fig.update_traces(hovertemplate=hovertemplate)
             else:
                 # generate graph
@@ -505,17 +508,28 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                                            df_name, df_const))
 
     # set title
-    if arg_value[0] == 'Time' and (xaxis_title == 'Time' or xaxis_title is None):
-        xaxis = '{} '.format(arg_value[0])
-    elif xaxis_title:
-        xaxis = xaxis_title
+    if xaxis_title:
+        result = parse('{} ({})', xaxis_title)
+        if result is None:
+            xaxis = xaxis_title
+        elif any(element in result[0] for element in df_const[df_name]['Variable_Option_Lists']) and \
+                result[1] in df_const[df_name]['MEASURE_TYPE_OPTIONS']:
+            xaxis = '{} ({})'.format(arg_value[0], arg_value[1])
+    elif arg_value[0] == 'Time' and (xaxis_title == 'Time' or xaxis_title is None):
+        xaxis = '{}'.format(arg_value[0])
     else:
         xaxis = '{} ({})'.format(arg_value[0], arg_value[1])
 
-    if arg_value[0] == 'Time' and (yaxis_title in df_const[df_name]['Variable_Options_Lists'] or yaxis_title is None):
-        yaxis = '{} '.format(arg_value[2])
+    if arg_value[0] == 'Time' and (any(element in arg_value[2] for element in
+                                       df_const[df_name]['Variable_Option_Lists']) or yaxis_title is None):
+        yaxis = '{}'.format(arg_value[2])
     elif yaxis_title:
-        yaxis = yaxis_title
+        result = parse('{} ({})', yaxis_title)
+        if result is None:
+            yaxis = yaxis_title
+        elif any(element in result[0] for element in df_const[df_name]['Variable_Option_Lists']) and \
+                result[1] in df_const[df_name]['MEASURE_TYPE_OPTIONS']:
+            yaxis = '{} ({})'.format(arg_value[2], arg_value[3])
     else:
         yaxis = '{} ({})'.format(arg_value[2], arg_value[3])
 
@@ -529,13 +543,13 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
     fig.update_layout(
         xaxis_title=xaxis,
         yaxis_title=yaxis,
-        showlegend=False if arg_value[7] else True,
+        showlegend=False if legend else True,
         overwrite=True,
         plot_bgcolor='rgba(0, 0, 0, 0)',
         paper_bgcolor='rgba(0, 0, 0, 0)')
 
-    # checks for the arg_value[6]: grid line is toggled
-    if arg_value[6]:
+    # checks for gridline is toggled
+    if gridline:
         fig.update_xaxes(showgrid=True, zeroline=True)
         fig.update_yaxes(showgrid=True, zeroline=True)
     else:
@@ -559,7 +573,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
 # bar graph layout TODO: VERTICAL TICKS OVERLAPPING WITH THE ANIMATION SLIDER
 def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
                    hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const, xaxis_title, yaxis_title,
-                   xlegend, ylegend):
+                   xlegend, ylegend, gridline, legend):
     """Returns the bar graph figure."""
     # ------------------------------------------------Arg Values--------------------------------------------------------
     # arg_value[0] = group by (x axis)
@@ -567,11 +581,11 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
     # arg_value[2] = variable names selector
     # arg_value[3] = orientation
     # arg_value[4] = animation bool
-    # arg_value[5] = grid line toggle
-    # arg_value[6] = legend toggle
     # ---------------------------------------Variable Declarations------------------------------------------------------
     language = session["language"]
     filtered_df = None
+    xaxis = None
+    yaxis = None
     # ------------------------------------------------------------------------------------------------------------------
 
     # Check whether we have enough information to attempt getting data for a graph
@@ -734,15 +748,35 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                                            df_name, df_const))
 
     # set title
-    if xaxis_title:
-        xaxis = xaxis_title
-    else:
-        xaxis = None
+    if arg_value[3] == 'Horizontal':
+        if xaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title == '' and xaxis_title is not \
+                None:
+            yaxis = xaxis_title
+        else:
+            yaxis = arg_value[1]
 
-    if yaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and yaxis_title is not None:
-        yaxis = yaxis_title
+        if yaxis_title:
+            xaxis = yaxis_title
+        else:
+            xaxis = ''
     else:
-        yaxis = arg_value[1]
+        # when switching back to vertical the label will change with the arg value
+        if xaxis_title in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title is not None:
+            yaxis = arg_value[1]
+        # default axis label
+        elif xaxis_title:
+            xaxis = xaxis_title
+        else:
+            xaxis = ''
+
+        # when switching back to vertical
+        if yaxis_title == '':
+            xaxis = yaxis_title
+        # default axis label
+        elif yaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and yaxis_title is not None:
+            yaxis = yaxis_title
+        else:
+            yaxis = arg_value[1]
 
     # set legend position
     if xlegend and ylegend:
@@ -755,13 +789,13 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         # x and y axis location change depending on graph arg_value[4] orientation
         xaxis_title=xaxis if arg_value[3] == 'Vertical' else yaxis,
         yaxis_title=yaxis if arg_value[3] == 'Vertical' else xaxis,
-        showlegend=False if arg_value[6] else True,
+        showlegend=False if legend else True,
         overwrite=True,
         plot_bgcolor='rgba(0, 0, 0, 0)',
         paper_bgcolor='rgba(0, 0, 0, 0)')
 
-    # checks for the arg_value[5]: grid line is toggled
-    if arg_value[5]:
+    # checks for gridline is toggled
+    if gridline:
         fig.update_xaxes(showgrid=True, zeroline=True)
         fig.update_yaxes(showgrid=True, zeroline=True)
     else:
@@ -791,15 +825,13 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
 
 def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
                    hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const, xaxis_title, yaxis_title,
-                   xlegend, ylegend):
+                   xlegend, ylegend, gridline, legend):
     """Returns the box plot figure."""
     # ------------------------------------------------Arg Values--------------------------------------------------------
     # arg_value[0] = measure type selector
     # arg_value[1] = variable selector
     # arg_value[2] = orientation toggle
     # arg_value[3] = data points toggle
-    # arg_value[4] = grid line toggle
-    # arg_value[5] = legend toggle
     # ---------------------------------------Variable Declarations------------------------------------------------------
     language = session["language"]
     # ------------------------------------------------------------------------------------------------------------------
@@ -898,14 +930,32 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                                            df_name, df_const))
 
     # set title
-    if xaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title is not None:
-        xaxis = xaxis_title
+    if arg_value[2] == 'Vertical':
+        if xaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title is not None:
+            xaxis = xaxis_title
+        else:
+            xaxis = arg_value[0]
+
+        if yaxis_title:
+            yaxis = yaxis_title
+        else:
+            yaxis = ''
     else:
-        xaxis = arg_value[0]
-    if yaxis_title:
-        yaxis = yaxis_title
-    else:
-        yaxis = None
+        # when switching back to vertical the label will change with the arg value
+        if xaxis_title in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title is not None:
+            xaxis = arg_value[0]
+        elif xaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title is not None:
+            xaxis = xaxis_title
+        else:
+            xaxis = arg_value[0]
+
+        # when switching back to vertical the label will change with the arg value
+        if yaxis_title == '':
+            yaxis = yaxis_title
+        elif yaxis_title:
+            yaxis = yaxis_title
+        else:
+            yaxis = ''
 
     # set legend position
     if xlegend and ylegend:
@@ -919,15 +969,15 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         xaxis_title=xaxis if arg_value[2] == 'Horizontal' else yaxis,
         yaxis_title=yaxis if arg_value[2] == 'Horizontal' else xaxis,
         legend_title_text=get_label('LBL_Variable_Names'),
-        showlegend=False if arg_value[5] else True,
+        showlegend=False if legend else True,
         boxgap=0.1,
         boxgroupgap=0.5,
         overwrite=True,
         plot_bgcolor='rgba(0, 0, 0, 0)',
         paper_bgcolor='rgba(0, 0, 0, 0)')
 
-    # checks for the arg_value[4]: grid line is toggled
-    if arg_value[4]:
+    # checks for gridline is toggled
+    if gridline:
         fig.update_xaxes(showgrid=True, zeroline=True)
         fig.update_yaxes(showgrid=True, zeroline=True)
     else:
@@ -1024,6 +1074,9 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
         cond_style.append({'if': {'column_id': col}, 'minWidth': pixel})
 
     cond_style.append({'if': {'row_index': 'odd'}, 'backgroundColor': 'rgb(248, 248, 248)'})
+
+    cond_style.append(
+        {'if': {'column_id': 'Link'}, 'cursor': 'pointer', 'color': 'blue', 'text-decoration': 'underline'})
 
     # check arg_value[1]: num of pages is a whole integer if not assign 10
     if arg_value[1] is None or type(arg_value[1]) is not int:
@@ -1176,7 +1229,7 @@ def get_sankey_figure(arg_value, dff, hierarchy_level_dropdown, hierarchy_path, 
 def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods, period_type,
                    hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options,
                    state_of_display, secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
-                   end_secondary, df_const, xtitle, ytitle, xlegend, ylegend):
+                   end_secondary, df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend):
     """Update graph internal - can be called from callbacks or programmatically"""
     # Creates a hierarchy trail from the display
     if type(state_of_display) == dict:
@@ -1214,22 +1267,22 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
         return get_line_scatter_figure(graph_options, filtered_df, hierarchy_specific_dropdown,
                                        hierarchy_level_dropdown, list_of_names, hierarchy_toggle,
                                        hierarchy_graph_children, graph_title, df_name, df_const, xtitle, ytitle,
-                                       xlegend, ylegend)
+                                       xlegend, ylegend, gridline, legend)
     # bubble graph creation
     elif graph_type == 'Bubble':
         return get_bubble_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
                                  list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
-                                 df_const, xtitle, ytitle, xlegend, ylegend)
+                                 df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend)
     # bar graph creation
     elif graph_type == 'Bar':
         return get_bar_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
                               list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
-                              df_const, xtitle, ytitle, xlegend, ylegend)
+                              df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend)
     # box plot creation
     elif graph_type == 'Box_Plot':
         return get_box_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
                               list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
-                              df_const, xtitle, ytitle, xlegend, ylegend)
+                              df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend)
     # table creation
     elif graph_type == 'Table':
         changed_index = dash.callback_context.inputs_list[2]['id']['index']

@@ -10,7 +10,7 @@ Stores all callbacks for the user interface.
 import copy
 from re import search
 from urllib.parse import parse_qsl
-
+import dash_core_components as dcc
 import dash
 import dash_html_components as html
 from dash import no_update
@@ -25,6 +25,7 @@ from apps.dashboard.data import DATA_CONTENT_HIDE, DATA_CONTENT_SHOW, get_label,
 from apps.dashboard.layouts import get_line_scatter_graph_menu, get_bar_graph_menu, get_table_graph_menu, \
     get_tile_layout, change_index, get_box_plot_menu, get_default_tab_content, get_layout_dashboard, get_layout_graph, \
     get_data_menu, get_sankey_menu, get_dashboard_title_input, get_bubble_graph_menu
+
 
 # *************************************************MAIN LAYOUT********************************************************
 
@@ -136,18 +137,18 @@ def _new_and_delete(_new_clicks, close_id, _dashboard_reset, tile_titles, tile_l
         num_tiles += 1
         input_tiles.append(None)
         children = get_tile_layout(num_tiles, tile_keys=input_tiles,
-                                   parent_df=parent_df if df_const is not None else None)
+                                   parent_df=parent_df if df_const[parent_df] is not None else None)
     # if RESET dashboard requested, set dashboard to default appearance
     elif 'dashboard-reset' in changed_id:
         num_tiles = 1
-        children = get_tile_layout(num_tiles, [], parent_df=parent_df)
+        children = get_tile_layout(num_tiles, [], parent_df=None)
     # else, a tab change was made, prevent update
     else:
         raise PreventUpdate
     # disable the NEW button
     new_button = html.Button(
         className='parent-nav', n_clicks=0, children=get_label('LBL_Add_Tile'), id='button-new', disabled=True)
-    return deleted_tile, children, LAYOUTS[num_tiles-1], new_button, num_tiles
+    return deleted_tile, children, LAYOUTS[num_tiles - 1], new_button, num_tiles
 
 
 # unlock NEW button after end of callback chain
@@ -333,7 +334,7 @@ def _update_tab_title(title, active_tab, list_of_children):
 # Serve the float menu to the user.
 for x in range(4):
     @app.callback(
-        [Output({'type': 'float-menu-trigger', 'index': x}, 'data-'),
+        [Output({'type': 'float-menu-trigger-wrapper', 'index': x}, 'children'),
          Output({'type': 'tile-customize', 'index': x}, 'className'),
          Output({'type': 'tile-layouts', 'index': x}, 'className'),
          Output({'type': 'tile-customize-content-wrapper', 'index': x}, 'children')],
@@ -370,12 +371,15 @@ for x in range(4):
         if 'tile-customize' in changed_id:
             # [[mode/prompt_trigger, tile, stored_menu_for_cancel], menu_style/show_hide, menu_title,
             # show_hide_load_warning, isTrip]
-            float_menu_trigger = [['customize', tile, customize_menu], {}, get_label('LBL_Edit_Graph'),
-                                  session['tile_edited'][tile]]
+            float_menu_trigger = dcc.Store(id={'type': 'float-menu-trigger', 'index': tile},
+                                           data=[['customize', tile, customize_menu], {}, get_label('LBL_Edit_Graph'),
+                                                 session['tile_edited'][tile]])
             customize_className = 'tile-nav tile-nav--customize tile-nav--selected'
             layouts_className = 'tile-nav tile-nav--layout'
         elif 'tile-layouts' in changed_id:
-            float_menu_trigger = [['layouts', tile], {}, get_label('LBL_Load_Graph'), session['tile_edited'][tile]]
+            float_menu_trigger = dcc.Store(id={'type': 'float-menu-trigger', 'index': tile},
+                                           data=[['layouts', tile], {}, get_label('LBL_Load_Graph'),
+                                                 session['tile_edited'][tile]])
             customize_className = 'tile-nav tile-nav--customize'
             layouts_className = 'tile-nav tile-nav--layout tile-nav--selected'
         elif float_menu_result == 'ok':
@@ -471,17 +475,18 @@ app.clientside_callback(
      Output({'type': 'float-menu-result', 'index': 0}, 'children'),  # _manage_tile_save_load_trigger() callback
      Output({'type': 'float-menu-result', 'index': 1}, 'children'),  # _manage_dashboard_saves_and_reset() callback
      Output({'type': 'float-menu-result', 'index': 2}, 'children')],  # _serve_float_menu_and_take_result() callback
-    [Input({'type': 'float-menu-trigger', 'index': 0}, 'data-'),
-     Input({'type': 'float-menu-trigger', 'index': 1}, 'data-'),
-     Input({'type': 'float-menu-trigger', 'index': 2}, 'data-'),
-     Input({'type': 'float-menu-trigger', 'index': 3}, 'data-'),
-     Input({'type': 'float-menu-trigger', 'index': 4}, 'data-'),
+    [Input({'type': 'float-menu-trigger', 'index': 0}, 'data'),
+     Input({'type': 'float-menu-trigger', 'index': 1}, 'data'),
+     Input({'type': 'float-menu-trigger', 'index': 2}, 'data'),
+     Input({'type': 'float-menu-trigger', 'index': 3}, 'data'),
+     Input({'type': 'float-menu-trigger', 'index': 4}, 'data'),
      Input('float-menu-close', 'n_clicks'),
      Input('float-menu-cancel', 'n_clicks'),
      Input('float-menu-ok', 'n_clicks')],
     [State('float-menu-title', 'data-')],
     prevent_initial_call=True
 )
+
 
 # ************************************************CUSTOMIZE TAB*******************************************************
 
@@ -613,7 +618,7 @@ app.clientside_callback(
         if (hierarchy_toggle == 'Specific Item' && graph_all.equals([])){
             for (let i = 0; i < style.length; i++){
                 if (isEquivalent(style[i], {'display': 'inline-block', 'width': '80%', 'max-width': '125px'})){
-                    style[i] = no_update;
+                    style[i] = dash_clientside.no_update;
                 } else {
                     if (link_state[i] == "fa fa-link" && (
                             selected_graph_type[i] == "Line" || selected_graph_type[i] == "Scatter")){
@@ -626,7 +631,7 @@ app.clientside_callback(
                 }
             }
         }
-        else if (hierarchy_toggle == 'Level Filter' && !graph_all.equals([])){
+        else if (hierarchy_toggle == 'Level Filter' || (hierarchy_toggle == 'Specific Item' && !graph_all.equals([]))){
             for (let i = 0; i < style.length; i++){
                 if (isEquivalent(style[i], {'display': 'inline-block', 'width': '80%', 'max-width': '125px'})){
                     style[i] = dash_clientside.no_update;
@@ -777,6 +782,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
                                            yaxis=None,
                                            xpos=None,
                                            ypos=None,
+                                           xmodified=None,
+                                           ymodified=None,
                                            df_name=df_name,
                                            df_const=df_const,
                                            data_fitting=data_fitting,
@@ -795,6 +802,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
                                   yaxis=None,
                                   xpos=None,
                                   ypos=None,
+                                  xmodified=None,
+                                  ymodified=None,
                                   df_name=df_name,
                                   df_const=df_const)
     elif selected_graph_type == 'Bubble':
@@ -817,6 +826,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
                                      yaxis=None,
                                      xpos=None,
                                      ypos=None,
+                                     xmodified=None,
+                                     ymodified=None,
                                      df_name=df_name,
                                      df_const=df_const)
     elif selected_graph_type == 'Table':
@@ -824,7 +835,10 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
                                     xaxis=None,
                                     yaxis=None,
                                     xpos=None,
-                                    ypos=None)
+                                    ypos=None,
+                                    xmodified=None,
+                                    ymodified=None)
+
     elif selected_graph_type == 'Box_Plot':
         menu = get_box_plot_menu(tile=tile,
                                  axis_measure=None if df_const is None else
@@ -840,6 +854,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
                                  yaxis=None,
                                  xpos=None,
                                  ypos=None,
+                                 xmodified=None,
+                                 ymodified=None,
                                  df_const=df_const)
     elif selected_graph_type == 'Sankey':
         menu = get_sankey_menu(tile=tile,
@@ -850,7 +866,10 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
                                xaxis=None,
                                yaxis=None,
                                xpos=None,
-                               ypos=None)
+                               ypos=None,
+                               xmodified=None,
+                               ymodified=None)
+
     else:
         raise PreventUpdate
 
@@ -861,6 +880,7 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
         update_graph_trigger = no_update
 
     return menu, update_graph_trigger, no_update, no_update, True
+
 
 # ************************************************DATA SIDE-MENU******************************************************
 
@@ -906,7 +926,7 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
      Output({'type': 'set-graph-options-trigger', 'index': 1}, 'options-'),
      Output({'type': 'set-graph-options-trigger', 'index': 2}, 'options-'),
      Output({'type': 'set-graph-options-trigger', 'index': 3}, 'options-'),
-     Output({'type': 'prompt-trigger', 'index': 5}, 'data-'),
+     Output({'type': 'prompt-trigger-wrapper', 'index': 5}, 'children'),
      Output({'type': 'data-set-parent', 'index': 4}, 'value'),
      Output({'type': 'update-date-picker-trigger', 'index': 0}, 'data-boolean'),
      Output({'type': 'update-date-picker-trigger', 'index': 1}, 'data-boolean'),
@@ -987,7 +1007,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
     store = no_update
     options_triggers = [no_update] * 5
     date_picker_triggers = [no_update] * 5
-    df_name_confirm = None
+    df_name_confirm = no_update
     prompt_trigger = no_update
     data_set_val = [no_update] * 5
     df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
@@ -1091,16 +1111,20 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                     options_triggers[changed_index] = df_name
             # send out a prompt
             elif changed_index == 4:  # prompt with trip prompt
-                prompt_trigger = [['loaded_dataset_swap', changed_index], {}, get_label('LBL_Load_Dataset'),
-                                  get_label('LBL_Load_Dataset_Prompt'), True]
+                prompt_trigger = dcc.Store(
+                    id={'type': 'prompt-trigger', 'index': 5},
+                    data=[['loaded_dataset_swap', changed_index], {}, get_label('LBL_Load_Dataset'),
+                          get_label('LBL_Load_Dataset_Prompt'), True])
                 for i in range(len(links_style)):
                     if links_style[i] == 'fa fa-link':
                         confirm_button[i] = DATA_CONTENT_HIDE
                         refresh_button[i] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
                                              'position': 'relative', 'vertical-align': 'top'}
             else:  # prompt with only two options
-                prompt_trigger = [['loaded_dataset_swap', changed_index], {}, get_label('LBL_Load_Dataset'),
-                                  get_label('LBL_Load_Dataset_Duo_Prompt'), False]
+                prompt_trigger = dcc.Store(
+                    id={'type': 'prompt-trigger', 'index': 5},
+                    data=[['loaded_dataset_swap', changed_index], {}, get_label('LBL_Load_Dataset'),
+                          get_label('LBL_Load_Dataset_Duo_Prompt'), False])
         else:
             # trigger update for all tiles that are linked to the active data menu
             if changed_index == 4:
@@ -1122,12 +1146,18 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
         changed_index = int(search(r'\d+', changed_id).group())
         if '"type":"confirm-load-data"}.n_clicks' in changed_id \
                 and (prev_selection[changed_index] is not None):
+            if df_names[changed_index] not in session and prev_selection[changed_index] is not None:
+                df_name_confirm = None
             if changed_index == 4:  # prompt with trip prompt
-                prompt_trigger = [['load_dataset', changed_index], {}, get_label('LBL_Load_Dataset'),
-                                  get_label('LBL_Load_Dataset_Prompt'), True]
+                prompt_trigger = dcc.Store(
+                    id={'type': 'prompt-trigger', 'index': 5},
+                    data=[['load_dataset', changed_index], {}, get_label('LBL_Load_Dataset'),
+                          get_label('LBL_Load_Dataset_Prompt'), True])
             else:  # prompt with only two options
-                prompt_trigger = [['load_dataset', changed_index], {}, get_label('LBL_Load_Dataset'),
-                                  get_label('LBL_Load_Dataset_Duo_Prompt'), False]
+                prompt_trigger = dcc.Store(
+                    id={'type': 'prompt-trigger', 'index': 5},
+                    data=[['load_dataset', changed_index], {}, get_label('LBL_Load_Dataset'),
+                          get_label('LBL_Load_Dataset_Duo_Prompt'), False])
         # The first instance that the datasets are loaded in
         else:
             df_name = df_names[changed_index]
@@ -1379,7 +1409,6 @@ app.clientside_callback(
     Input({'type': 'data-tile', 'index': ALL}, 'style'),
 )
 
-
 # http://adripofjavascript.com/blog/drips/object-equality-in-javascript.html#:~:text=Here%20is%20a%20very%20basic,are%20not%20equivalent%20if%20(aProps.
 app.clientside_callback(
     """
@@ -1466,12 +1495,12 @@ app.clientside_callback(
             changed_index = parseInt(triggered.match(/\d+/)[0]);
         }
         if (triggered != "" &&
-             (changed_index != null && n_click_load != ',,,,' && prev_selected[changed_index] == null ||
-             n_click_reset != ',,,,' ||
+             (changed_index != null && n_click_load != ',,,,' && prompt_result != "op-1" &&
+              prompt_result != "close" && prev_selected[changed_index] == null || n_click_reset != ',,,,' ||
              (typeof float_menu_data != 'undefined' && float_menu_data[0] == 'dashboard_layouts' &&
               selected_dashboard != null && float_menu_result == 'ok') ||
-             (typeof prompt_data != 'undefined' && prompt_data[0] == 'load_dataset' && prompt_result != 'op-1' &&
-              prompt_result != 'close'))){
+             (typeof prompt_data != 'undefined' && prompt_data[0] == 'load_dataset' && prompt_result != "op-1" &&
+              prompt_result != "close" && !triggered.includes('confirm-load-data')))){
 
             let newDiv = document.createElement('div');
             newDiv.className = '_data-loading';
@@ -1498,7 +1527,7 @@ app.clientside_callback(
     """
     function datasetRemoveLoadScreen(data, graph_displays, num_tiles) {
         let triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
-        if (triggered.includes("df-constants-storage.data")){
+        if (triggered.includes("df-constants-storage.data") || triggered.includes("num-tiles.data-num-tiles")){
             try{
                 document.getElementById('loading').remove();
             }catch{ /* Do Nothing */ }
@@ -1517,8 +1546,9 @@ app.clientside_callback(
     """,
     Output('df-constants-storage', 'n_clicks'),
     [Input('df-constants-storage', 'data'),
-     Input({'type': 'graph_display', 'index': ALL}, 'children')],
-    State('num-tiles', 'data-num-tiles'),
+     Input({'type': 'graph_display', 'index': ALL}, 'children'),
+     Input({'type': 'float-menu-result', 'index': 1}, 'children'),
+     Input('num-tiles', 'data-num-tiles')],
     prevent_initial_call=True
 )
 
@@ -1599,12 +1629,12 @@ app.clientside_callback(
      Output({'type': 'prompt-result', 'index': 2}, 'children'),  # _manage_data_sidemenus() callback
      Output('prompt-button-wrapper-duo', 'style'),
      Output('prompt-button-wrapper-trip', 'style')],
-    [Input({'type': 'prompt-trigger', 'index': 0}, 'data-'),  # tile 0
-     Input({'type': 'prompt-trigger', 'index': 1}, 'data-'),  # tile 1
-     Input({'type': 'prompt-trigger', 'index': 2}, 'data-'),  # tile 2
-     Input({'type': 'prompt-trigger', 'index': 3}, 'data-'),  # tile 3
-     Input({'type': 'prompt-trigger', 'index': 4}, 'data-'),  # dashboard
-     Input({'type': 'prompt-trigger', 'index': 5}, 'data-'),  # sidemenus
+    [Input({'type': 'prompt-trigger', 'index': 0}, 'data'),  # tile 0
+     Input({'type': 'prompt-trigger', 'index': 1}, 'data'),  # tile 1
+     Input({'type': 'prompt-trigger', 'index': 2}, 'data'),  # tile 2
+     Input({'type': 'prompt-trigger', 'index': 3}, 'data'),  # tile 3
+     Input({'type': 'prompt-trigger', 'index': 4}, 'data'),  # dashboard
+     Input({'type': 'prompt-trigger', 'index': 5}, 'data'),  # sidemenus
      Input('prompt-close', 'n_clicks'),
      Input('prompt-cancel', 'n_clicks'),
      Input('prompt-ok', 'n_clicks'),
@@ -1635,6 +1665,8 @@ app.clientside_callback(
                     let y_axis = dash_clientside.no_update;
                     let x_legend = dash_clientside.no_update;
                     let y_legend = dash_clientside.no_update;
+                    let x_modified = false;
+                    let y_modified = false;
                     
                     // try setting the values if they exist
                     try { 
@@ -1655,7 +1687,9 @@ app.clientside_callback(
                         'event': {'x_axis': x_axis, 
                                   'y_axis': y_axis,
                                   'x_legend': x_legend,
-                                  'y_legend': y_legend}
+                                  'y_legend': y_legend,
+                                  'x_modified': x_modified,
+                                  'y_modified': y_modified}
                     });
                 });
             `
@@ -1675,14 +1709,194 @@ app.clientside_callback(
 # axis_titles
 app.clientside_callback(
     """
-    function _update_axes_titles(event){
-        return [event.x_axis, event.y_axis, event.x_legend, event.y_legend];
+    function _update_axes_titles(event, dfConst, graphType, dfName, dfNameParent, linkState,argValue){
+        if(linkState == 'fa fa-link'){
+                dfName=dfNameParent;
+            }
+        if(event.x_axis != ""){
+            switch(graphType){
+                case 'Line':
+                case 'Scatter':
+                    if(event.x_axis != 'Date of Event'){
+                        event.x_modified = true;
+                        break;
+                    }
+                    else{
+                        event.x_modified = false;
+                        break;
+                    }
+                case 'Bar':
+                    if (argValue[3] == 'Horizontal'){
+                        if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(event.x_axis)){
+                            event.x_modified = false;
+                            break;
+                        }
+                        else{
+                            event.x_modified = true;
+                            break;
+                        }
+                    }
+                    else if (event.x_axis == ""){
+                        event.x_modified = false;
+                        break;
+                    }
+                    else{
+                        event.x_modified = true;
+                        break;
+                    }
+                case 'Bubble':
+                    string= event.x_axis.split(" (")
+                    if(string.length==1){
+                        if(argValue[0]=='Time' && event.x_axis == 'Time'){
+                            event.x_modified = false;
+                            break;
+                        }
+                        else{ 
+                            event.x_modified = true;
+                            break;
+                        }
+                    }
+                    else{
+                        string[1]=string[1].replace(')','')
+                        let num=dfConst[dfName]['Variable_Option_Lists'].length
+                        for(let i=0;i<num;i++){
+                            if(dfConst[dfName]['Variable_Option_Lists'][i].includes(string[0])){
+                                if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(string[1])){
+                                    event.x_modified = false;
+                                    break;
+                                }
+                            }
+                            event.x_modified = true;
+                        }
+                        break;
+                    }
+                case 'Box_Plot':
+                    if(argValue[2]=='Vertical'){
+                        if (event.x_axis == ""){
+                            event.x_modified = false;
+                            break;
+                        }
+                        else{
+                            event.x_modified = true;
+                            break;
+                        }  
+                    }
+                    else if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(event.x_axis)){
+                        event.x_modified = false;
+                        break;
+                    }
+                    else{
+                        event.x_modified = true;
+                        break;
+                    }
+                default:
+                    event.x_modified = false;
+                    break;
+            }
+        }
+        if(event.y_axis != ""){
+            switch(graphType){
+                case 'Line':
+                case 'Scatter':
+                    if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(event.y_axis)){
+                    event.y_modified = false;
+                    break;
+                    }
+                    else{
+                        event.y_modified = true;
+                        break;
+                    }
+                case 'Bar':
+                    if (argValue[3] == 'Horizontal'){
+                        if (event.y_axis == ""){
+                            event.y_modified = false;
+                            break;
+                        }
+                        else{
+                            event.y_modified = true;
+                            break;
+                        }  
+                    }
+                    else if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(event.y_axis)){
+                        event.y_modified = false;
+                        break;
+                    }
+                    else{
+                       event.y_modified = true;
+                       break;
+                    }
+                case 'Bubble':
+                    string= event.y_axis.split(" (")
+                    if(string.length==1){
+                        if(argValue[0]=='Time'){
+                            let num=dfConst[dfName]['Variable_Option_Lists'].length
+                            for(let i=0;i<num;i++){
+                                if(dfConst[dfName]['Variable_Option_Lists'][i].includes(string[0])){
+                                    event.y_modified = false;
+                                    break;
+                                }
+                                event.y_modified = true;
+                            }
+                            break;
+                        }
+                        else{ 
+                            event.y_modified = true;
+                            break;
+                        }
+                    }
+                    else{
+                        string[1]=string[1].replace(')','')
+                        let num=dfConst[dfName]['Variable_Option_Lists'].length
+                        for(let i=0;i<num;i++){
+                            if(dfConst[dfName]['Variable_Option_Lists'][i].includes(string[0])){
+                                if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(string[1])){
+                                    event.y_modified = false;
+                                    break;
+                                }
+                            }
+                        event.y_modified = true;
+                        }
+                        break;
+                    }
+                case 'Box_Plot':
+                    if(argValue[2]=='Vertical'){
+                        if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(event.y_axis)){
+                            event.y_modified = false;
+                            break;
+                        }
+                        else{
+                            event.y_modified = true;
+                            break;
+                        }
+                    }
+                    else if (event.y_axis == ""){
+                        event.y_modified = false;
+                        break;
+                    }
+                    else{
+                        event.y_modified = true;
+                        break;
+                    }  
+                default:
+                    event.y_modified = false;
+                    break;
+            }
+        }
+        return [event.x_axis, event.y_axis, event.x_legend, event.y_legend, event.x_modified, event.y_modified];
     }
     """,
     [Output({"type": "xaxis-title", "index": MATCH}, 'value'),
      Output({"type": "yaxis-title", "index": MATCH}, 'value'),
      Output({'type': 'x-pos-legend', 'index': MATCH}, 'value'),
-     Output({'type': 'y-pos-legend', 'index': MATCH}, 'value')],
+     Output({'type': 'y-pos-legend', 'index': MATCH}, 'value'),
+     Output({'type': 'x-modified', 'index': MATCH}, 'data'),
+     Output({'type': 'y-modified', 'index': MATCH}, 'data')],
     Input({'type': 'javascript', 'index': MATCH}, 'event'),
+    [State('df-constants-storage', 'data'),
+     State({'type': 'graph-type-dropdown', 'index': MATCH}, 'value'),
+     State({'type': 'data-set', 'index': MATCH}, 'value'),
+     State({'type': 'data-set', 'index': 4}, 'value'),
+     State({'type': 'tile-link', 'index': MATCH}, 'className'),
+     State({'type': 'args-value: {}'.replace("{}", str(0)), 'index': ALL}, 'value')],
     prevent_initial_call=True
 )

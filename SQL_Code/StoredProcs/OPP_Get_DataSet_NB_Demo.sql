@@ -8,7 +8,7 @@ Create Procedure dbo.OPP_Get_DataSet
 
 @pr_session_id    int,
 @pr_language      varchar(20),
-@pr_dataset_name  varchar(64),
+@pr_dataset_name  varchar(64),        
 @p_result_status  varchar (255) output
 
 as
@@ -20,16 +20,25 @@ begin
   set @pr_dataset_name = isnull(@pr_dataset_name, 'NOTSET')
 
   if (@pr_dataset_name = 'OPG001')
-    select * from dbo.OPG001
-
+    select --'<a href="http://localhost/OPEN_Dev/open.dll/progressDocument?sessionID=1184960563&disID=' + [Activity Event Id] + '">' + [Activity Event Id] + '</a>' as [Activity Event Id Link],
+           --'[' + [Activity Event Id] + '](http://localhost/OPEN_Dev/open.dll/progressDocument?sessionID=1184960563&disID=' + [Activity Event Id] + ')' as [Activity Event Id Link],
+           'http://qbert.ogma.local/OPEN_Dev/open.dll/progressDocument?sessionID=569680816&disID=' + [Activity Event Id] as [Link],
+           *
+      from dbo.OPG001
+  
   else if (@pr_dataset_name = 'OPG010')
-    select * from dbo.OPG010
+    select 'http://qbert.ogma.local/OPEN_Dev/open.dll/progressDocument?sessionID=569680816&disID=' + [Activity Event Id] as [Link],
+           *
+      from dbo.OPG010
 
   else if (@pr_dataset_name = 'OPG001C')
-    select * from dbo.OPG001C
+    select 'http://qbert.ogma.local/OPEN_Dev/open.dll/progressDocument?sessionID=569680816&disID=' + [Activity Event Id] as [Link],
+           *
+      from dbo.OPG001
 
   else if (@pr_dataset_name = 'OPG011')
-    select --null [OPG Data Set],
+    select 'http://qbert.ogma.local/OPEN_Dev/open.dll/progressDocument?sessionID=569680816&disID=' + dur.[Activity Event Id] as [Link],
+           --null [OPG Data Set],
            --null [Hierarchy One Name],
            --null [Hierarchy One Top],
            --null [Hierarchy One -1],
@@ -79,7 +88,7 @@ begin
            dur.[Partial Period]
       from dbo.OPG001 as dur with (nolock)
       left outer join dbo.OPG001 as cou with (nolock)
-        on cou.[Measure Type] = 'Count'
+        on cou.[Measure Type] = 'Count' 
        and cou.[Date of Event] = dur.[Date of Event]
        and cou.[Calendar Entry Type] = 'Week'
        and trim(isnull(cou.[Variable Name Qualifier], '')) = trim(isnull(dur.[Variable Name Qualifier], ''))
@@ -89,7 +98,7 @@ begin
        and trim(isnull(cou.[Hierarchy One -3], '')) = trim(isnull(dur.[Hierarchy One -3], ''))
        and trim(isnull(cou.[Hierarchy One -4], '')) = trim(isnull(dur.[Hierarchy One -4], ''))
       left outer join dbo.OPG001 as dol with (nolock)
-        on dol.[Measure Type] = 'Dollar'
+        on dol.[Measure Type] = 'Dollar' 
        and dol.[Date of Event] = dur.[Date of Event]
        and dol.[Calendar Entry Type] = 'Week'
        and trim(isnull(dol.[Variable Name Qualifier], '')) = trim(isnull(dur.[Variable Name Qualifier], ''))
@@ -110,7 +119,7 @@ begin
     set @p_result_status = 'OPP_Get_Dataset001|Invalid dataset name: ' + @pr_dataset_name
     return
   end
-
+  
   set @p_result_status = 'OK'
 end
 

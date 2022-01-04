@@ -213,6 +213,7 @@ EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Bubble_Hover_Data',   
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Bubble_Hover_Data',       @language = 'Fr', @ref_desc = '<b>%{customdata[0]}</b><br><b>%{customdata[1]}</b><br><b>%AXIS-X-A% -  %AXIS-X-B%</b>: %X-AXIS% <br><b>%AXIS-Y-A% -  %AXIS-Y-B%</b>: %Y-AXIS% <br><b>%AXIS-Z-A% -  %AXIS-Z-B%</b>: %Z-AXIS% <extra></extra>'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Bubble_Fixed_Hover_Data',       @language = 'En', @ref_desc = '<b>%{customdata[0]}</b><br><b>%{customdata[1]}</b><br><b>%AXIS-TITLE-A%</b>: %AXIS-A%<br><b>%AXIS-Y-A% -  %AXIS-Y-B%</b>: %Y-AXIS% <br><b>%AXIS-Z-A% -  %AXIS-Z-B%</b>: %Z-AXIS% <extra></extra>'
 EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Bubble_Fixed_Hover_Data',       @language = 'Fr', @ref_desc = '<b>%{customdata[0]}</b><br><b>%{customdata[1]}</b><br><b>%AXIS-X-A% -  %AXIS-X-B%</b>: %X-AXIS% <br><b>%AXIS-Y-A% -  %AXIS-Y-B%</b>: %Y-AXIS% <br><b>%AXIS-Z-A% -  %AXIS-Z-B%</b>: %Z-AXIS% <extra></extra>'
+EXEC InsertOPRef @ref_table = 'OPG001', @ref_value = 'LBL_Variable_Value', @language = 'En', @ref_desc = '<b>%%GROUP-BY%%</b>'
 
 EXEC InsertOPRef @ref_table = 'OPG011', @ref_value = 'LBL_H0', @language = 'Fr', @ref_desc = 'Niveau d''Organisation 1 (Haut)'
 EXEC InsertOPRef @ref_table = 'OPG011', @ref_value = 'LBL_H0', @language = 'En', @ref_desc = 'Organization Level 1 (Top)'

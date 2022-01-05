@@ -1502,11 +1502,22 @@ app.clientside_callback(
               selected_dashboard != null && float_menu_result == 'ok') ||
              (typeof prompt_data != 'undefined' && prompt_data[0] == 'load_dataset' && prompt_result != "op-1" &&
               prompt_result != "close" && !triggered.includes('confirm-load-data')))){
-
-            let newDiv = document.createElement('div');
-            newDiv.className = '_data-loading';
-            newDiv.id = 'loading';
-            document.body.appendChild(newDiv, document.getElementById('content'));
+            if ($("._data-loading")[0]){
+                if (prompt_result == "cancel"){
+                    try{
+                        document.getElementById('loading').remove();
+                    }catch{ /* Do Nothing */ }
+                }
+                else{
+                    return 0;
+                }
+            } else {
+                // Do something if class does not exist
+                let newDiv = document.createElement('div');
+                newDiv.className = '_data-loading';
+                newDiv.id = 'loading';
+                document.body.appendChild(newDiv, document.getElementById('content'));
+            }   
 
         }
         return 0;
@@ -1526,7 +1537,7 @@ app.clientside_callback(
 
 app.clientside_callback(
     """
-    function datasetRemoveLoadScreen(data, graph_displays, num_tiles) {
+    function datasetRemoveLoadScreen(data, graph_displays, num_tiles,result_0,result_1,result_2) {
         let triggered = dash_clientside.callback_context.triggered.map(t => t.prop_id);
         if (triggered.includes("df-constants-storage.data") || triggered.includes("num-tiles.data-num-tiles")){
             try{

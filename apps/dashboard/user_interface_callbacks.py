@@ -705,8 +705,7 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
 
     # prevents update if hierarchy toggle or graph all children is selected when the graph type is not line or
     # scatter
-    if ('"type":"graph_children_toggle"}.value' in changed_id
-        or '"type":"hierarchy-toggle"}.value' in changed_id) and \
+    if ('"type":"hierarchy-toggle"}.value' in changed_id) and \
             selected_graph_type != "Line" and selected_graph_type != "Scatter":
         raise PreventUpdate
 

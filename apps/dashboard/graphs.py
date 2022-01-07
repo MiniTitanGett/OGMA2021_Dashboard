@@ -376,8 +376,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
             filtered_df = dff.copy().query(
                 "`{0}` == @arg_value[0] or "
                 "(`{0}` == @arg_value[2] and `Measure Type` == @arg_value[3]) or "
-                "(`{0}` == @arg_value[4] and `Measure Type` == @arg_value[5])").format(
-                df_const[df_name]['VARIABLE_LEVEL'])
+                "(`{0}` == @arg_value[4] and `Measure Type` == @arg_value[5])".format(
+                df_const[df_name]['VARIABLE_LEVEL']))
             filtered_df[['Date of Event', 'Variable Name', 'Partial Period', color]] = \
                 filtered_df[
                     ['Date of Event', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]].astype(str)
@@ -391,8 +391,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
             filtered_df = dff.copy().query(
                 "(`{0}` == @arg_value[0] and `Measure Type` == @arg_value[1]) or "
                 "(`{0}` == @arg_value[2] and `Measure Type` == @arg_value[3]) or "
-                "(`{0}` == @arg_value[4] and `Measure Type` == @arg_value[5])").format(
-                df_const[df_name]['VARIABLE_LEVEL'])
+                "(`{0}` == @arg_value[4] and `Measure Type` == @arg_value[5])".format(
+                    df_const[df_name]['VARIABLE_LEVEL']))
             filtered_df[
                 ['Date of Event', 'Measure Type', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]] = \
             filtered_df[

@@ -752,7 +752,7 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
     # if the data set is selected but has not been confirmed, use previous data set
     if 'graph-type-dropdown' in changed_id and link_state == 'fa fa-link' and df_confirm is not None:
         df_name = df_confirm
-    elif link_state == 'fa fa-link':
+    elif link_state == 'fa fa-link' and 'graph_children_toggle"}.value' not in changed_id:
         df_name = parent_df_name
 
     # if graph menu trigger has value 'tile closed' then a tile was closed, don't update menu, still update table
@@ -1325,14 +1325,6 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                                             'margin-right': '10px', 'margin-left': '10px',
                                             'vertical-align': 'top'}
 
-                    if parent_timeframe == "select-range":
-                        date_picker_triggers[tile] = {"Input Method": parent_timeframe,
-                                                      "Start Year Selection": parent_start_year,
-                                                      "End Year Selection": parent_end_year,
-                                                      "Start Secondary Selection": parent_start_secondary,
-                                                      "End Secondary Selection": parent_end_secondary,
-                                                      "Tab": parent_secondary_type}
-
                     options_triggers[tile] = df_name
                     sidemenu_styles[tile] = DATA_CONTENT_SHOW
                     prev_selection[tile] = df_name
@@ -1358,6 +1350,13 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
             if links_style[changed_index] == 'fa fa-unlink':
                 parent_copy = copy.deepcopy(data_states[4])
                 data[changed_index] = change_index(parent_copy, changed_index)
+            elif links_style[changed_index] == 'fa fa-link':
+                df_name = df_names[4]
+                data_set_val[changed_index] = df_name
+                graph_triggers[changed_index] = df_name
+                options_triggers[changed_index] = df_name
+                df_names[changed_index] = df_name
+
         # if tile is child to parent and a layout was not selected, display parent data
         if links_style[changed_index] == 'fa fa-link' and '"type":"select-layout-dropdown"}.value' not in changed_id:
             # if 'data' requested or a data menu is already open, display parent data

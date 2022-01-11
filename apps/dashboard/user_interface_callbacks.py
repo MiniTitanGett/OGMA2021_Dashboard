@@ -709,6 +709,9 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
             selected_graph_type != "Line" and selected_graph_type != "Scatter":
         raise PreventUpdate
 
+    if link_state == 'fa fa-link' and 'graph_children_toggle"}.value' in changed_id and parent_df_name != df_name:
+        raise PreventUpdate
+
     # Sets the data_fitting boolean to true or false dependant on the link-state of the tile being modified and then the
     # tiles associated data menu
     if link_state == 'fa fa-link':
@@ -752,7 +755,7 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, h
     # if the data set is selected but has not been confirmed, use previous data set
     if 'graph-type-dropdown' in changed_id and link_state == 'fa fa-link' and df_confirm is not None:
         df_name = df_confirm
-    elif link_state == 'fa fa-link' and 'graph_children_toggle"}.value' not in changed_id:
+    elif link_state == 'fa fa-link':
         df_name = parent_df_name
 
     # if graph menu trigger has value 'tile closed' then a tile was closed, don't update menu, still update table
@@ -1352,6 +1355,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                 data[changed_index] = change_index(parent_copy, changed_index)
             elif links_style[changed_index] == 'fa fa-link':
                 df_name = df_names[4]
+                prev_selection[changed_index] = df_name
                 data_set_val[changed_index] = df_name
                 graph_triggers[changed_index] = df_name
                 options_triggers[changed_index] = df_name

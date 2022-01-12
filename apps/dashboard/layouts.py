@@ -1075,8 +1075,66 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                         html.P(
                             "{}:".format(get_label('LBL_Data_Fitting')),
                             style={'color': CLR['text1'], 'font-size': '13px', 'position': 'relative'})
-                    ], style={'display': 'inline-block', 'width': '40px', 'position': 'relative',
-                              'margin-right': '15px', 'vertical-align': 'top'}),
+                    ], style={'display': 'inline-block', 'position': 'relative', 'vertical-align': 'top'}),
+                    html.I(
+                        html.Span(
+                            children=get_label("LBL_Data_Fitting_Shown_Info") if data_fitting else
+                            get_label("LBL_Data_Fitting_Hidden_Info"),
+                            className='save-symbols-tooltip'
+                        ),
+                        className='fa fa-question-circle-o',
+                        id={'type': 'data-fitting-info', 'index': tile},
+                        style={'position': 'relative', 'vertical-align': 'top', 'padding-top': '4px'}),
+                    # html.Div(
+                    #     id={'type': 'data-fitting-wrapper', 'index': tile},
+                    #     children=[
+                    #         dcc.RadioItems(
+                    #             id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
+                    #             options=[{'label': get_label('LBL_No_Fit'), 'value': 'no-fit'},
+                    #                      {'label': get_label('LBL_Linear_Fit'), 'value': 'linear-fit'},
+                    #                      {'label': get_label('LBL_Curve_Fit'), 'value': 'curve-fit'}],
+                    #             value=data_fit if data_fit else 'no-fit',
+                    #             style={'display': 'inline-block', 'font-size': '13px'}),
+                    #
+                    #         html.Div(
+                    #             id={'type': 'degree-input-wrapper', 'index': tile},
+                    #             children=html.Div([
+                    #                 dcc.Input(
+                    #                     id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
+                    #                     value=degree if degree else 3,
+                    #                     type='number',
+                    #                     required=True,
+                    #                     min=1,
+                    #                     style={'width': '45px', 'height': '29px', 'margin': '0', 'padding': '0',
+                    #                            'font-size': '15px',
+                    #                            'text-align': 'center', 'padding-top': '3px', 'border-radius': '5px',
+                    #                            'color': '#333', 'max-height': '26px'})
+                    #             ], style={'display': 'inline-block', 'top': '-10px', 'padding-left': '5px'}),
+                    #             style={'display': 'none'}
+                    #         ),
+                    #         html.Div(
+                    #             id={'type': 'confidence-interval-wrapper', 'index': tile},
+                    #             children=dcc.Checklist(
+                    #                 id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 6},
+                    #                 options=[{'label': get_label('LBL_Confidence_Interval'), 'value': 'ci'}],
+                    #                 value=ci if ci else [],
+                    #                 style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
+                    #             style={'display': 'none'}
+                    #         ),
+                    #     ],
+                    #     style={'display': 'inline-block', 'width': '80%',
+                    #            'max-width': '130px'} if data_fitting else DATA_CONTENT_HIDE),
+                    # html.I(
+                    #     html.Span(
+                    #         children=get_label("LBL_Data_Fitting_Shown_Info") if data_fitting else
+                    #         get_label("LBL_Data_Fitting_Hidden_Info"),
+                    #         className='save-symbols-tooltip'
+                    #     ),
+                    #     className='fa fa-question-circle-o',
+                    #     id={'type': 'data-fitting-info', 'index': tile},
+                    #     style={'position': 'relative', 'vertical-align': 'top'})
+                ]),
+                html.Div([
                     html.Div(
                         id={'type': 'data-fitting-wrapper', 'index': tile},
                         children=[
@@ -1086,7 +1144,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                                          {'label': get_label('LBL_Linear_Fit'), 'value': 'linear-fit'},
                                          {'label': get_label('LBL_Curve_Fit'), 'value': 'curve-fit'}],
                                 value=data_fit if data_fit else 'no-fit',
-                                style={'display': 'inline-block', 'font-size': '13px'}),
+                                style={'display': 'inline-block', 'font-size': '13px', 'padding-left': '20px'}),
 
                             html.Div(
                                 id={'type': 'degree-input-wrapper', 'index': tile},
@@ -1104,28 +1162,28 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                                 ], style={'display': 'inline-block', 'top': '-10px', 'padding-left': '5px'}),
                                 style={'display': 'none'}
                             ),
+                            html.Div(
+                                id={'type': 'confidence-interval-wrapper', 'index': tile},
+                                children=dcc.Checklist(
+                                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 6},
+                                    options=[{'label': get_label('LBL_Confidence_Interval'), 'value': 'ci'}],
+                                    value=ci if ci else [],
+                                    style={'color': 'black', 'width': '200px', 'display': 'inline-block'}),
+                                style={'display': 'none'}
+                            ),
                         ],
                         style={'display': 'inline-block', 'width': '80%',
-                               'max-width': '125px'} if data_fitting else DATA_CONTENT_HIDE),
-                    html.I(
-                        html.Span(
-                            children=get_label("LBL_Data_Fitting_Shown_Info") if data_fitting else
-                            get_label("LBL_Data_Fitting_Hidden_Info"),
-                            className='save-symbols-tooltip'
-                        ),
-                        className='fa fa-question-circle-o',
-                        id={'type': 'data-fitting-info', 'index': tile},
-                        style={'position': 'relative', 'vertical-align': 'top'})
+                               'max-width': '130px'} if data_fitting else DATA_CONTENT_HIDE),
                 ]),
-                html.Div(
-                    id={'type': 'confidence-interval-wrapper', 'index': tile},
-                    children=dcc.Checklist(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 6},
-                        options=[{'label': get_label('LBL_Confidence_Interval'), 'value': 'ci'}],
-                        value=ci if ci else [],
-                        style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
-                    style={'display': 'none'}
-                ),
+                # html.Div(
+                #     id={'type': 'confidence-interval-wrapper', 'index': tile},
+                #     children=dcc.Checklist(
+                #         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 6},
+                #         options=[{'label': get_label('LBL_Confidence_Interval'), 'value': 'ci'}],
+                #         value=ci if ci else [],
+                #         style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
+                #     style={'display': 'none'}
+                # ),
                 html.Div(
                     html.Div(
                         children=get_default_graph_options(xaxis=xaxis, yaxis=yaxis, xpos=xpos, ypos=ypos,

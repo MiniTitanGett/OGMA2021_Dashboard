@@ -634,7 +634,7 @@ app.clientside_callback(
         }
         else if (hierarchy_toggle == 'Level Filter' || (hierarchy_toggle == 'Specific Item' && !graph_all.equals([]))){
             for (let i = 0; i < style.length; i++){
-                if (isEquivalent(style[i], {'display': 'inline-block', 'width': '80%', 'max-width': '125px'})){
+                if (isEquivalent(style[i], {'display': 'none'})){
                     style[i] = dash_clientside.no_update;
                 } else {
                     if (link_state[i] == "fa fa-link" && (

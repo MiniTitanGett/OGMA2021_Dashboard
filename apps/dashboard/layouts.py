@@ -636,6 +636,54 @@ def get_layout_dashboard():
             color='dark',
             style={'position': 'absolute', 'right': '47%', 'top': '80%', 'margin-right': '-100px', 'z-index': '1070'},
             duration=4000),
+
+        dcc.Store(id={'type': 'data-fitting-trigger', 'index': 0}),  # tile 0
+
+
+        dcc.Store(id={'type': 'data-fitting-trigger', 'index': 1}),  # tile 1
+
+
+        dcc.Store(id={'type': 'data-fitting-trigger', 'index': 2}),  # tile 2
+
+
+        dcc.Store(id={'type': 'data-fitting-trigger', 'index': 3}),  # tile 3
+
+        dbc.Alert(
+            'Auto Un-Checking Data Fitting Options',
+            id={'type': 'fitting-popup', 'index': 0},
+            is_open=False,
+            color='dark',
+            style={'position': 'absolute', 'right': '47%', 'top': '80%', 'margin-right': '-100px', 'z-index': '1070'},
+            duration=4000),
+        dbc.Alert(
+            'Auto Un-Checking Data Fitting Options',
+            id={'type': 'fitting-popup', 'index': 1},
+            is_open=False,
+            color='dark',
+            style={'position': 'absolute', 'right': '47%', 'top': '80%', 'margin-right': '-100px', 'z-index': '1070'},
+            duration=4000),
+        dbc.Alert(
+            'Auto Un-Checking Data Fitting Options',
+            id={'type': 'fitting-popup', 'index': 2},
+            is_open=False,
+            color='dark',
+            style={'position': 'absolute', 'right': '47%', 'top': '80%', 'margin-right': '-100px', 'z-index': '1070'},
+            duration=4000),
+        dbc.Alert(
+            'Auto Un-Checking Data Fitting Options',
+            id={'type': 'fitting-popup', 'index': 3},
+            is_open=False,
+            color='dark',
+            style={'position': 'absolute', 'right': '47%', 'top': '80%', 'margin-right': '-100px', 'z-index': '1070'},
+            duration=4000),
+        dbc.Alert(
+            'Auto Un-Checking Data Fitting Options',
+            id={'type': 'parent-fitting-popup', 'index': 4},
+            is_open=False,
+            color='dark',
+            style={'position': 'absolute', 'right': '47%', 'top': '80%', 'margin-right': '-100px', 'z-index': '1070'},
+            duration=4000),
+
         # dashboard-reset-confirmation is used by the prompts to reset the viewport
         dcc.Store(id='dashboard-reset-confirmation'),
         # javascript visdcc object for running the javascript required to handle plotly_relayout events
@@ -792,6 +840,13 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
                         None,  # graph_type,
                         style={'max-width': '405px', 'width': '100%', 'font-size': '13px'}),
                 ),
+                html.Div(
+                    dcc.Input(
+                        id={'type': 'previous-graph-type', 'index': tile},
+                        type="text",
+                        value=None,
+                        style={'display': 'None'},
+                        debounce=True),),
             ],
             style=DATA_CONTENT_HIDE if df_name is None else
             {'margin-left': '15px'}),

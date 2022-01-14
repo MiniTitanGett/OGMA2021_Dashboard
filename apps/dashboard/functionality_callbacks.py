@@ -44,7 +44,10 @@ for x in range(4):
     @app.callback(
         [Output({'type': 'graph_display', 'index': x}, 'children'),
          Output({'type': 'axes-popup', 'index': x}, 'children'),
-         Output({'type': 'axes-popup', 'index': x}, 'is_open')],
+         Output({'type': 'axes-popup', 'index': x}, 'is_open'),
+         Output({'type': 'data-fitting-trigger', 'index': x}, 'value'),
+         Output({'type': 'fitting-popup', 'index': x}, 'children'),
+         Output({'type': 'fitting-popup', 'index': x}, 'is_open'),],
         # Graph menu update graph trigger
         [Input({'type': 'update-graph-trigger', 'index': x}, 'data-graph_menu_trigger'),
          # Customize menu inputs
@@ -110,7 +113,8 @@ for x in range(4):
          # Axes Modified
          State({'type': 'x-modified', 'index': x}, 'data'),
          State({'type': 'y-modified', 'index': x}, 'data'),
-         State('num-tiles', 'data-num-tiles')],
+         State('num-tiles', 'data-num-tiles'),
+         State({'type': 'data-fitting-trigger', 'index': x}, 'value')],
         prevent_initial_call=True
     )
     def _update_graph(_df_trigger, arg_value, gridline, legend, graph_type, tile_title, _datepicker_trigger,
@@ -122,7 +126,7 @@ for x in range(4):
                       parent_secondary_type, parent_timeframe, parent_fiscal_toggle, parent_start_year, parent_end_year,
                       parent_start_secondary, parent_end_secondary, graph_display, df_name, parent_df_name,
                       link_state, hierarchy_options, parent_hierarchy_options, df_const, df_confirm, xaxis, yaxis,
-                      xlegend, ylegend, xmodified, ymodified, num_tiles):
+                      xlegend, ylegend, xmodified, ymodified, num_tiles,prev_fitting_trigger):
 
         # -------------------------------------------Variable Declarations----------------------------------------------
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
@@ -130,6 +134,9 @@ for x in range(4):
         df_tile = None
         popup_text = no_update
         popup_is_open = no_update
+        data = no_update
+        fitting_popup_text = no_update
+        fitting_popup_is_open = no_update
         # --------------------------------------------------------------------------------------------------------------
 
         # check if keyword in df_name
@@ -143,14 +150,14 @@ for x in range(4):
                 df_name = 'OPG011'
 
         if '"type":"tile-view"}.className' in changed_id and df_name is None and parent_df_name is None:
-            return None, popup_text, popup_is_open
+            return None, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open
 
         # if new/delete while the graph already exists, prevent update
         if changed_id == '.' and graph_display:
             raise PreventUpdate
 
         if len(arg_value) == 0:
-            return None, popup_text, popup_is_open
+            return None, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open
 
         # if unlinked and parent changes, prevent update
         if (link_state == 'fa fa-unlink' and '"index":4' in changed_id) and 'args-value' not in changed_id:
@@ -173,13 +180,15 @@ for x in range(4):
                 (df_name is None and df_confirm is not None and parent_df_name != df_confirm):
             if df_confirm is not None:
                 df_tile = df_confirm
+
             graph = __update_graph(df_tile, arg_value, graph_type, tile_title, num_periods,
                                    period_type, hierarchy_toggle,
                                    hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options,
                                    state_of_display,
                                    secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
                                    end_secondary, df_const, xaxis, yaxis, xlegend, ylegend, gridline, legend)
-            return graph, popup_text, popup_is_open
+
+            return graph, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open
 
         # account for tile being linked or not
         if link_state == 'fa fa-link':
@@ -222,6 +231,18 @@ for x in range(4):
         if graph_type == "Line" or graph_type == "Scatter":
             if arg_value[4] != 'no-fit' and (hierarchy_toggle != 'Specific Item' or hierarchy_graph_children != []):
                 arg_value[4] = 'no-fit'
+                data = "hide-selected-options"
+                fitting_popup_text = get_label('LBL_Auto_Un_Check_Fitting_Options')
+                fitting_popup_is_open = True
+            elif arg_value[4] != 'no-fit' and hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == []:
+                data = "show-selected-options"
+                if prev_fitting_trigger == "hide-selected-options":
+                    fitting_popup_text=get_label('LBL_Auto_Select_Fitting_Options')
+                    fitting_popup_is_open = True
+            elif hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == []:
+                data = "show"
+            else:
+                data = "hide"
 
         graph = __update_graph(df_name, arg_value, graph_type, tile_title, num_periods, period_type, hierarchy_toggle,
                                hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options, state_of_display,
@@ -231,7 +252,7 @@ for x in range(4):
         if graph is None:
             raise PreventUpdate
 
-        return graph, popup_text, popup_is_open
+        return graph, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open
 
 # *******************************************************HIERARCHY***************************************************
 

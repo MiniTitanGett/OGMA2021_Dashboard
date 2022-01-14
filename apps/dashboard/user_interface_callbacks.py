@@ -614,53 +614,33 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
 # Reveals the data-fitting options when conditions needed for data-fitting are met.
 app.clientside_callback(
     """
-    function _update_data_fitting(graph_all, hierarchy_toggle, selected_graph_type, link_state, style){
+    function _update_data_fitting(trigger, style){
+        if (trigger.includes('show')){
+            if (isEquivalent(style, {'display': 'inline-block', 'width': '80%', 'max-width': '130px'})){
+                style = dash_clientside.no_update;
+            }
+            else{
+                style = {'display': 'inline-block', 'width': '80%', 'max-width': '130px'};
+            }
+        }
 
-        if (hierarchy_toggle == 'Specific Item' && graph_all.equals([])){
-            for (let i = 0; i < style.length; i++){
-                if (isEquivalent(style[i], {'display': 'inline-block', 'width': '80%', 'max-width': '125px'})){
-                    style[i] = dash_clientside.no_update;
-                } else {
-                    if (link_state[i] == "fa fa-link" && (
-                            selected_graph_type[i] == "Line" || selected_graph_type[i] == "Scatter")){
-                        style[i] = {'display': 'inline-block', 'width': '80%', 'max-width': '125px'};
-                    }
-                    else if (link_state[i] == "fa fa-unlink" && (
-                            selected_graph_type[i] == "Line" || selected_graph_type[i] == "Scatter")){
-                        style[i] = dash_clientside.no_update;
-                    }
-                }
+        else if(trigger.includes('hide')){
+            if (isEquivalent(style, {'display': 'none'})){
+                style = dash_clientside.no_update;
+            } 
+            else {
+                style = {'display': 'none'}
             }
         }
-        else if (hierarchy_toggle == 'Level Filter' || (hierarchy_toggle == 'Specific Item' && !graph_all.equals([]))){
-            for (let i = 0; i < style.length; i++){
-                if (isEquivalent(style[i], {'display': 'none'})){
-                    style[i] = dash_clientside.no_update;
-                } else {
-                    if (link_state[i] == "fa fa-link" && (
-                            selected_graph_type[i] == "Line" || selected_graph_type[i] == "Scatter")){
-                        style[i] = {'display': 'none'};
-                    }
-                    else if (link_state[i] == "fa fa-unlink" && (
-                            selected_graph_type[i] == "Line" || selected_graph_type[i] == "Scatter")){
-                        style[i] = dash_clientside.no_update;
-                    }
-                }
-            }
-        }
-        else {
+        else{
             throw dash_clientside.PreventUpdate;
         }
-
         return style;
     }
     """,
-    Output({'type': 'data-fitting-wrapper', 'index': ALL}, 'style'),
-    [Input({'type': 'graph_children_toggle', 'index': 4}, 'value'),
-     Input({'type': 'hierarchy-toggle', 'index': 4}, 'value'),
-     Input({'type': 'graph-type-dropdown', 'index': ALL}, 'value'), ],
-    [State({'type': 'tile-link', 'index': ALL}, 'className'),
-     State({'type': 'data-fitting-wrapper', 'index': ALL}, 'style')],
+    Output({'type': 'data-fitting-wrapper', 'index': MATCH}, 'style'),
+    Input({'type': 'data-fitting-trigger', 'index': MATCH}, 'value'),
+    State({'type': 'data-fitting-wrapper', 'index': MATCH}, 'style'),
     prevent_initial_call=True
 )
 
@@ -674,9 +654,7 @@ app.clientside_callback(
      Output({'type': 'tile-rebuild-menu-flag', 'index': MATCH}, 'data')],
     [Input({'type': 'graph-menu-trigger', 'index': MATCH}, 'data-'),
      Input({'type': 'graph-type-dropdown', 'index': MATCH}, 'value'),
-     Input({'type': 'tile-link', 'index': MATCH}, 'className'),
-     Input({'type': 'graph_children_toggle', 'index': MATCH}, 'value'),
-     Input({'type': 'hierarchy-toggle', 'index': MATCH}, 'value')],
+     Input({'type': 'tile-link', 'index': MATCH}, 'className')],
     [State({'type': 'tile-rebuild-menu-flag', 'index': MATCH}, 'data'),
      State({'type': 'tile-customize-content', 'index': MATCH}, 'data-loaded'),
      State({'type': 'data-set', 'index': MATCH}, 'value'),
@@ -684,12 +662,14 @@ app.clientside_callback(
      State('df-constants-storage', 'data'),
      State({'type': 'data-set-parent', 'index': 4}, 'value'),
      State({'type': 'graph_children_toggle', 'index': 4}, 'value'),
-     State({'type': 'hierarchy-toggle', 'index': 4}, 'value')],
+     State({'type': 'hierarchy-toggle', 'index': 4}, 'value'),
+     State({'type': 'graph_children_toggle', 'index': MATCH}, 'value'),
+     State({'type': 'hierarchy-toggle', 'index': MATCH}, 'value')],
     prevent_initial_call=True
 )
-def _update_graph_menu(gm_trigger, selected_graph_type, link_state, graph_all, hierarchy_toggle, rebuild_menu,
+def _update_graph_menu(gm_trigger, selected_graph_type, link_state , rebuild_menu,
                        is_loaded, df_name, parent_df_name, df_const, df_confirm, parent_graph_all,
-                       parent_hierarchy_toggle):
+                       parent_hierarchy_toggle, graph_all, hierarchy_toggle):
     """
     :param selected_graph_type: Selected graph type, ie. 'bar', 'line', etc.
     :return: Graph menu corresponding to selected graph type
@@ -1245,6 +1225,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                                 graph_triggers[i] = df_name
                                 options_triggers[i] = df_name
                                 df_names[i] = df_name
+                                prev_selection[i] = df_name
                             else:
                                 # [i]= 'fa-fa-unlink'
                                 # set the dataset of the new menu from unlinking

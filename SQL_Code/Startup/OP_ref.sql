@@ -718,6 +718,10 @@ EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Axes_Graph_Labels_Modi
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Axes_Graph_Labels_Modified', @language = 'Fr', @ref_desc = 'Fr: Your Axes Labels May Not Reflect The Graph'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Axes_Graphs_Labels_Modified', @language = 'En', @ref_desc = 'Your Axes Labels May Not Reflect The Graphs'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Axes_Graphs_Labels_Modified', @language = 'Fr', @ref_desc = 'Fr: Your Axes Labels May Not Reflect The Graphs'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Auto_Un_Check_Fitting_Options', @language = 'En', @ref_desc = 'Auto Un-Checking Data Fitting Options'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Auto_Un_Check_Fitting_Options', @language = 'Fr', @ref_desc = 'Fr: Auto Un-Checking Data Fitting Options'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Auto_Select_Fitting_Options', @language = 'En', @ref_desc = 'Auto Reselecting Data Fitting Options'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Auto_Select_Fitting_Options', @language = 'Fr', @ref_desc = 'Fr: Auto Reselecting Data Fitting Options'
 
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'En',@ref_desc = 'Hierarchy Selection''s Children'
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'Fr',@ref_desc = 'Enfants de la Sélection de Hiérarchie'

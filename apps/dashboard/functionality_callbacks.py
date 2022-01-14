@@ -47,7 +47,7 @@ for x in range(4):
          Output({'type': 'axes-popup', 'index': x}, 'is_open'),
          Output({'type': 'data-fitting-trigger', 'index': x}, 'value'),
          Output({'type': 'fitting-popup', 'index': x}, 'children'),
-         Output({'type': 'fitting-popup', 'index': x}, 'is_open'),],
+         Output({'type': 'fitting-popup', 'index': x}, 'is_open')],
         # Graph menu update graph trigger
         [Input({'type': 'update-graph-trigger', 'index': x}, 'data-graph_menu_trigger'),
          # Customize menu inputs
@@ -126,7 +126,7 @@ for x in range(4):
                       parent_secondary_type, parent_timeframe, parent_fiscal_toggle, parent_start_year, parent_end_year,
                       parent_start_secondary, parent_end_secondary, graph_display, df_name, parent_df_name,
                       link_state, hierarchy_options, parent_hierarchy_options, df_const, df_confirm, xaxis, yaxis,
-                      xlegend, ylegend, xmodified, ymodified, num_tiles,prev_fitting_trigger):
+                      xlegend, ylegend, xmodified, ymodified, num_tiles, prev_fitting_trigger):
 
         # -------------------------------------------Variable Declarations----------------------------------------------
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
@@ -237,7 +237,7 @@ for x in range(4):
             elif arg_value[4] != 'no-fit' and hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == []:
                 data = "show-selected-options"
                 if prev_fitting_trigger == "hide-selected-options":
-                    fitting_popup_text=get_label('LBL_Auto_Select_Fitting_Options')
+                    fitting_popup_text = get_label('LBL_Auto_Select_Fitting_Options')
                     fitting_popup_is_open = True
             elif hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == []:
                 data = "show"

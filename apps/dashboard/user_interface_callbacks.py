@@ -667,7 +667,7 @@ app.clientside_callback(
      State({'type': 'hierarchy-toggle', 'index': MATCH}, 'value')],
     prevent_initial_call=True
 )
-def _update_graph_menu(gm_trigger, selected_graph_type, link_state , rebuild_menu,
+def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu,
                        is_loaded, df_name, parent_df_name, df_const, df_confirm, parent_graph_all,
                        parent_hierarchy_toggle, graph_all, hierarchy_toggle):
     """

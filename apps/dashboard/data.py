@@ -10,7 +10,11 @@ Contains arbitrary constants, data constants, and data manipulation functions.
 from datetime import datetime, timedelta, date
 import numpy as np
 import pandas as pd
+import vaex
+import fastnumbers
 import logging
+
+import pyodbc
 from dateutil.relativedelta import relativedelta
 from flask import session
 import statsmodels.api as sm
@@ -18,6 +22,7 @@ from statsmodels.sandbox.regression.predstd import wls_prediction_std
 from sklearn.preprocessing import PolynomialFeatures
 
 # Internal Modules
+import config
 from conn import get_ref, exec_storedproc_results
 from server import get_hierarchy_parent, get_variable_parent
 
@@ -85,18 +90,24 @@ DATA_CONTENT_HIDE = {'display': 'none'}
 def dataset_to_df(df_name):
     """Queries for the dataset and returns a formatted pandas data frame."""
     logging.debug("loading dataset {}...".format(df_name))
-    # conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
-    # sql_query = pd.read_sql_query(
-    #     '''
-    # SELECT * FROM [OGMA_Test].[dbo].[{}]
-    # '''.format(df_name.split('.')[0]), conn)
+    conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
+    sql_query = pd.read_sql_query(
+        '''
+    SELECT * FROM [OGMA_Test].[dbo].[{}]
+    '''.format(df_name.split('.')[0]), conn)
     # df = pd.DataFrame(sql_query)
-    query = """\
-    declare @p_result_status varchar(255)
-    exec dbo.OPP_Get_DataSet {}, \'{}\', \'{}\', @p_result_status output
-    select @p_result_status as result_status
-    """.format(session["sessionID"], session["language"], df_name)
-    df = exec_storedproc_results(query)
+    df_pandas = pd.DataFrame(sql_query)
+    df_pandas = df_pandas.astype({'Week of Event': float, 'Fiscal Year of Event': float, 'Fiscal Quarter': float,
+                                  'Fiscal Month of Event': float, 'Fiscal Week of Event': float, 'Julian Day': float,
+                                  'Activity Event Id': float, 'Measure Value': float})
+    df = vaex.from_pandas(df_pandas)
+    logging.debug("done converting pandas to vaex")
+    # query = """\
+    # declare @p_result_status varchar(255)
+    # exec dbo.OPP_Get_DataSet {}, \'{}\', \'{}\', @p_result_status output
+    # select @p_result_status as result_status
+    # """.format(session["sessionID"], session["language"], df_name)
+    # df = exec_storedproc_results(query)
 
     if df_name == 'OPG010':
         query = """\
@@ -160,48 +171,60 @@ def dataset_to_df(df_name):
         df[["Variable Value"]] = col
 
     else:
-        df[['Year of Event',
-            'Quarter',
-            'Month of Event',
-            'Week of Event',
-            'Fiscal Year of Event',
-            'Fiscal Quarter',
-            'Fiscal Month of Event',
-            'Fiscal Week of Event',
-            'Julian Day',
-            'Activity Event Id',
-            'Measure Value']] = df[['Year of Event',
-                                    'Quarter',
-                                    'Month of Event',
-                                    'Week of Event',
-                                    'Fiscal Year of Event',
-                                    'Fiscal Quarter',
-                                    'Fiscal Month of Event',
-                                    'Fiscal Week of Event',
-                                    'Julian Day',
-                                    'Activity Event Id',
-                                    'Measure Value']].apply(pd.to_numeric)
+        df['Week of Event']=df['Week of Event'].fillmissing(value=np.nan)
+        df['Fiscal Year of Event'] = df['Fiscal Year of Event'].fillmissing(value=np.nan)
+        df['Fiscal Quarter'] = df['Fiscal Quarter'].fillmissing(value=np.nan)
+        df['Fiscal Month of Event'] = df['Fiscal Month of Event'].fillmissing(value=np.nan)
+        df['Fiscal Week of Event'] = df['Fiscal Week of Event'].fillmissing(value=np.nan)
+        df['Julian Day'] = df['Julian Day'].fillmissing(value=np.nan)
+        df['Activity Event Id'] = df['Activity Event Id'].fillmissing(value=np.nan)
+        df['Measure Value'] = df['Measure Value'].fillmissing(value=np.nan)
+        print(df)
+
+
+        # df[['Year of Event',
+        #     'Quarter',
+        #     'Month of Event',
+        #     'Week of Event',
+        #     'Fiscal Year of Event',
+        #     'Fiscal Quarter',
+        #     'Fiscal Month of Event',
+        #     'Fiscal Week of Event',
+        #     'Julian Day',
+        #     'Activity Event Id',
+        #     'Measure Value']] = df[['Year of Event',
+        #                             'Quarter',
+        #                             'Month of Event',
+        #                             'Week of Event',
+        #                             'Fiscal Year of Event',
+        #                             'Fiscal Quarter',
+        #                             'Fiscal Month of Event',
+        #                             'Fiscal Week of Event',
+        #                             'Julian Day',
+        #                             'Activity Event Id',
+        #                             'Measure Value']].apply(pd.to_numeric)
         # add all variable names without qualifiers to col
-        col = pd.Series(df['Variable Name'][df['Variable Name Qualifier'].isna()])
+        # col = pd.Series(df_pandas['Variable Name'][df_pandas['Variable Name Qualifier'].isna()])
+        # col = df.dropna(column_names=['Variable Name', 'Variable Name Qualifier'])
         # combine variable hierarchy columns into col for rows with qualifiers
-        col = col.append(
-            pd.Series(
-                df['Variable Name'][df['Variable Name Qualifier'].notna()]
-                + " "
-                + df['Variable Name Qualifier'][df['Variable Name Qualifier'].notna()]))
-        df[['Variable Value']] = col
+        # col = col.append(
+        #    pd.Series(
+        #        df['Variable Name'][df['Variable Name Qualifier'].notna()]
+        #        + " "
+        #        + df['Variable Name Qualifier'][df['Variable Name Qualifier'].notna()]))
+        # df[['Variable Value']] = col
 
     # Can be redone to exclude hierarchy one name and to include more levels
-    df = df.rename(columns={'Hierarchy One Top': 'H0',
-                            'Hierarchy One -1': 'H1',
-                            'Hierarchy One -2': 'H2',
-                            'Hierarchy One -3': 'H3',
-                            'Hierarchy One -4': 'H4',
-                            'Hierarchy One Leaf': 'H5'})
+    df.rename('Hierarchy One Top', 'H0')
+    df.rename('Hierarchy One -1', 'H1')
+    df.rename('Hierarchy One -2', 'H2')
+    df.rename('Hierarchy One -3', 'H3')
+    df.rename('Hierarchy One -4', 'H4')
+    df.rename('Hierarchy One Leaf', 'H5')
 
     # replaces all strings that are just spaces with NaN
-    df.replace(to_replace=r'^\s*$', value=np.NaN, regex=True, inplace=True)
-    df.replace(to_replace='', value=np.NaN, inplace=True)
+    # df.replace(to_replace=r'^\s*$', value=np.NaN, regex=True, inplace=True)
+    # df.replace(to_replace='', value=np.NaN, inplace=True)
 
     # if OPG011 we need to construct the tree by asking for the parents of unique values
     if df_name == "OPG011":
@@ -1553,7 +1576,7 @@ def create_categories(dff, hierarchy_columns=None):
     if hierarchy_columns is None:
         hierarchy_columns = []
     for i in hierarchy_columns:
-        dff[i] = pd.Categorical(dff[i])
+        dff[i] = dff.categorize(i)
 
     return dff
 
@@ -1688,3 +1711,15 @@ def confidence_intervals(model):
     """
     _, lower, upper = wls_prediction_std(model)
     return lower, upper
+
+# def numerical_check(x):
+#     fastnumbers.fast_float(x, on_fail=on_fail)
+#
+# def on_fail(x):
+#     return np.nan
+
+
+
+
+if __name__ == '__main__':
+    dataset_to_df("OPG001")

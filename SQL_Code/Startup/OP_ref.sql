@@ -1,4 +1,4 @@
-USE [OGMA_Test]
+USE [OPEN_Dev_Dashboard]
 GO
 
 /****** Object:  Table [dbo].[OP_ref_insert]    Script Date: 2021-05-19 12:03:31 PM ******/

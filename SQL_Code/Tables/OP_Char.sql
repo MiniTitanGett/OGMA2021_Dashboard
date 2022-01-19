@@ -1,4 +1,4 @@
-USE [OGMA_Test]
+USE [OPEN_Dev_Dashboard]
 GO
 
 IF OBJECT_ID('dbo.OP_Char') IS NOT NULL

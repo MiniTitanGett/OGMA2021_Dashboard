@@ -550,8 +550,9 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
         if 'OPG011' in df_confirm:
             df_confirm = 'OPG011'
         graph_options = GRAPH_OPTIONS[df_confirm]
-        for i in graph_options:
-            options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+        # for i in graph_options:
+        #    options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+        options = [{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in graph_options]
 
     # when dataset is swapped to a different dataset get parent graph options
     elif '"type":"tile-link"}.className' in changed_id:
@@ -563,20 +564,24 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
             graph_options = GRAPH_OPTIONS["OPG011"]
         else:
             graph_options = []
-        for i in graph_options:
-            options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+        # for i in graph_options:
+        #     options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+        options = [{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in graph_options]
+
     # set customize menu of the unlinked tile
     elif trigger == 'fa fa-unlink':
         link_trigger = "fa fa-unlink"
         if df_name is not None:
             graph_options = GRAPH_OPTIONS[df_name]
-            for i in graph_options:
-                options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+            # for i in graph_options:
+            #     options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+            options = [{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in graph_options]
     # set customize menu back to parent dataset
     elif trigger == 'fa fa-link':
         graph_options = GRAPH_OPTIONS[df_name_parent]
-        for i in graph_options:
-            options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+        # for i in graph_options:
+        #     options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+        options = [{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in graph_options]
     else:
         if "OPG001" in trigger:
             graph_options = GRAPH_OPTIONS["OPG001"]
@@ -590,8 +595,9 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
             graph_options = GRAPH_OPTIONS["OPG011"]
         else:
             graph_options = []
-        for i in graph_options:
-            options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+        # for i in graph_options:
+        #     options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+        options = [{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in graph_options]
 
     # loads in a default graph when dataset is first chosen
     if '"type":"tile-link"}.className' not in changed_id and graph_type is None:

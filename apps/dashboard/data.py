@@ -95,12 +95,9 @@ def dataset_to_df(df_name):
         '''
     SELECT * FROM [OGMA_Test].[dbo].[{}]
     '''.format(df_name.split('.')[0]), conn)
-    # df = pd.DataFrame(sql_query)
-    df_pandas = pd.DataFrame(sql_query)
-    df_pandas = df_pandas.astype({'Week of Event': float, 'Fiscal Year of Event': float, 'Fiscal Quarter': float,
-                                  'Fiscal Month of Event': float, 'Fiscal Week of Event': float, 'Julian Day': float,
-                                  'Activity Event Id': float, 'Measure Value': float})
-    df = vaex.from_pandas(df_pandas)
+    df =df_pandas = pd.DataFrame(sql_query)
+    df_vaex = vaex.from_pandas(df_pandas)
+
     logging.debug("done converting pandas to vaex")
     # query = """\
     # declare @p_result_status varchar(255)
@@ -171,60 +168,59 @@ def dataset_to_df(df_name):
         df[["Variable Value"]] = col
 
     else:
-        df['Week of Event']=df['Week of Event'].fillmissing(value=np.nan)
-        df['Fiscal Year of Event'] = df['Fiscal Year of Event'].fillmissing(value=np.nan)
-        df['Fiscal Quarter'] = df['Fiscal Quarter'].fillmissing(value=np.nan)
-        df['Fiscal Month of Event'] = df['Fiscal Month of Event'].fillmissing(value=np.nan)
-        df['Fiscal Week of Event'] = df['Fiscal Week of Event'].fillmissing(value=np.nan)
-        df['Julian Day'] = df['Julian Day'].fillmissing(value=np.nan)
-        df['Activity Event Id'] = df['Activity Event Id'].fillmissing(value=np.nan)
-        df['Measure Value'] = df['Measure Value'].fillmissing(value=np.nan)
-        print(df)
+        none = df_vaex['Month of Event'].isnan()
+        var = df_vaex['Fiscal Year of Event'].isna()
+        df_vaex['Week of Event'] = df_vaex['Week of Event'].astype('float64')
+        df_vaex['Activity Event Id'] = df_vaex['Activity Event Id'].astype('float64')
+        df_vaex['Fiscal Year of Event'] = df_vaex['Fiscal Year of Event'].astype('float64')
+        df_vaex['Fiscal Quarter'] = df_vaex['Fiscal Quarter'].astype('float64')
+        df_vaex['Fiscal Month of Event'] = df_vaex['Fiscal Month of Event'].astype('float64')
+        df_vaex['Fiscal Week of Event'] = df_vaex['Fiscal Week of Event'].astype('float64')
+        df_vaex['Julian Day'] = df_vaex['Julian Day'].astype('float64')
 
 
-        # df[['Year of Event',
-        #     'Quarter',
-        #     'Month of Event',
-        #     'Week of Event',
-        #     'Fiscal Year of Event',
-        #     'Fiscal Quarter',
-        #     'Fiscal Month of Event',
-        #     'Fiscal Week of Event',
-        #     'Julian Day',
-        #     'Activity Event Id',
-        #     'Measure Value']] = df[['Year of Event',
-        #                             'Quarter',
-        #                             'Month of Event',
-        #                             'Week of Event',
-        #                             'Fiscal Year of Event',
-        #                             'Fiscal Quarter',
-        #                             'Fiscal Month of Event',
-        #                             'Fiscal Week of Event',
-        #                             'Julian Day',
-        #                             'Activity Event Id',
-        #                             'Measure Value']].apply(pd.to_numeric)
+        df[['Year of Event',
+            'Quarter',
+            'Month of Event',
+            'Week of Event',
+            'Fiscal Year of Event',
+            'Fiscal Quarter',
+            'Fiscal Month of Event',
+            'Fiscal Week of Event',
+            'Julian Day',
+            'Activity Event Id',
+            'Measure Value']] = df[['Year of Event',
+                                    'Quarter',
+                                    'Month of Event',
+                                    'Week of Event',
+                                    'Fiscal Year of Event',
+                                    'Fiscal Quarter',
+                                    'Fiscal Month of Event',
+                                    'Fiscal Week of Event',
+                                    'Julian Day',
+                                    'Activity Event Id',
+                                    'Measure Value']].apply(pd.to_numeric)
         # add all variable names without qualifiers to col
-        # col = pd.Series(df_pandas['Variable Name'][df_pandas['Variable Name Qualifier'].isna()])
+        col = pd.Series(df['Variable Name'][df['Variable Name Qualifier'].isna()])
         # col = df.dropna(column_names=['Variable Name', 'Variable Name Qualifier'])
         # combine variable hierarchy columns into col for rows with qualifiers
-        # col = col.append(
-        #    pd.Series(
-        #        df['Variable Name'][df['Variable Name Qualifier'].notna()]
-        #        + " "
-        #        + df['Variable Name Qualifier'][df['Variable Name Qualifier'].notna()]))
-        # df[['Variable Value']] = col
+        col = col.append(
+           pd.Series(
+               df['Variable Name'][df['Variable Name Qualifier'].notna()]
+               + " "
+               + df['Variable Name Qualifier'][df['Variable Name Qualifier'].notna()]))
+        df[['Variable Value']] = col
 
     # Can be redone to exclude hierarchy one name and to include more levels
-    df.rename('Hierarchy One Top', 'H0')
-    df.rename('Hierarchy One -1', 'H1')
-    df.rename('Hierarchy One -2', 'H2')
-    df.rename('Hierarchy One -3', 'H3')
-    df.rename('Hierarchy One -4', 'H4')
-    df.rename('Hierarchy One Leaf', 'H5')
-
+    df = df.rename(columns={'Hierarchy One Top': 'H0',
+                            'Hierarchy One -1': 'H1',
+                            'Hierarchy One -2': 'H2',
+                            'Hierarchy One -3': 'H3',
+                            'Hierarchy One -4': 'H4',
+                            'Hierarchy One Leaf': 'H5'})
     # replaces all strings that are just spaces with NaN
     # df.replace(to_replace=r'^\s*$', value=np.NaN, regex=True, inplace=True)
-    # df.replace(to_replace='', value=np.NaN, inplace=True)
+    df.replace(to_replace='', value=np.NaN, inplace=True)
 
     # if OPG011 we need to construct the tree by asking for the parents of unique values
     if df_name == "OPG011":
@@ -254,7 +250,7 @@ def dataset_to_df(df_name):
     # If we are dealing with links in the future we must format them as follows and edit the table drawer
     if 'Link' in df.columns:
         df.Link = list(map(lambda x: '[Link]({})'.format(x), df.Link))
-
+    df_vaex = vaex.from_pandas(df)
     logging.debug("dataset {} loaded.".format(df_name))
     return df
 
@@ -1576,7 +1572,8 @@ def create_categories(dff, hierarchy_columns=None):
     if hierarchy_columns is None:
         hierarchy_columns = []
     for i in hierarchy_columns:
-        dff[i] = dff.categorize(i)
+        dff[i] = pd.Categorical(dff[i])
+
 
     return dff
 

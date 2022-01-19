@@ -10,7 +10,11 @@ Contains arbitrary constants, data constants, and data manipulation functions.
 from datetime import datetime, timedelta, date
 import numpy as np
 import pandas as pd
+import vaex
+import fastnumbers
 import logging
+
+import pyodbc
 from dateutil.relativedelta import relativedelta
 from flask import session
 import statsmodels.api as sm
@@ -18,6 +22,7 @@ from statsmodels.sandbox.regression.predstd import wls_prediction_std
 from sklearn.preprocessing import PolynomialFeatures
 
 # Internal Modules
+import config
 from conn import get_ref, exec_storedproc_results
 from server import get_hierarchy_parent, get_variable_parent
 
@@ -85,18 +90,21 @@ DATA_CONTENT_HIDE = {'display': 'none'}
 def dataset_to_df(df_name):
     """Queries for the dataset and returns a formatted pandas data frame."""
     logging.debug("loading dataset {}...".format(df_name))
-    # conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
-    # sql_query = pd.read_sql_query(
-    #     '''
-    # SELECT * FROM [OGMA_Test].[dbo].[{}]
-    # '''.format(df_name.split('.')[0]), conn)
-    # df = pd.DataFrame(sql_query)
-    query = """\
-    declare @p_result_status varchar(255)
-    exec dbo.OPP_Get_DataSet {}, \'{}\', \'{}\', @p_result_status output
-    select @p_result_status as result_status
-    """.format(session["sessionID"], session["language"], df_name)
-    df = exec_storedproc_results(query)
+    conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
+    sql_query = pd.read_sql_query(
+        '''
+    SELECT * FROM [OGMA_Test].[dbo].[{}]
+    '''.format(df_name.split('.')[0]), conn)
+    df =df_pandas = pd.DataFrame(sql_query)
+    df_vaex = vaex.from_pandas(df_pandas)
+
+    logging.debug("done converting pandas to vaex")
+    # query = """\
+    # declare @p_result_status varchar(255)
+    # exec dbo.OPP_Get_DataSet {}, \'{}\', \'{}\', @p_result_status output
+    # select @p_result_status as result_status
+    # """.format(session["sessionID"], session["language"], df_name)
+    # df = exec_storedproc_results(query)
 
     if df_name == 'OPG010':
         query = """\
@@ -160,6 +168,17 @@ def dataset_to_df(df_name):
         df[["Variable Value"]] = col
 
     else:
+        none = df_vaex['Month of Event'].isnan()
+        var = df_vaex['Fiscal Year of Event'].isna()
+        df_vaex['Week of Event'] = df_vaex['Week of Event'].astype('float64')
+        df_vaex['Activity Event Id'] = df_vaex['Activity Event Id'].astype('float64')
+        df_vaex['Fiscal Year of Event'] = df_vaex['Fiscal Year of Event'].astype('float64')
+        df_vaex['Fiscal Quarter'] = df_vaex['Fiscal Quarter'].astype('float64')
+        df_vaex['Fiscal Month of Event'] = df_vaex['Fiscal Month of Event'].astype('float64')
+        df_vaex['Fiscal Week of Event'] = df_vaex['Fiscal Week of Event'].astype('float64')
+        df_vaex['Julian Day'] = df_vaex['Julian Day'].astype('float64')
+
+
         df[['Year of Event',
             'Quarter',
             'Month of Event',
@@ -183,12 +202,13 @@ def dataset_to_df(df_name):
                                     'Measure Value']].apply(pd.to_numeric)
         # add all variable names without qualifiers to col
         col = pd.Series(df['Variable Name'][df['Variable Name Qualifier'].isna()])
+        # col = df.dropna(column_names=['Variable Name', 'Variable Name Qualifier'])
         # combine variable hierarchy columns into col for rows with qualifiers
         col = col.append(
-            pd.Series(
-                df['Variable Name'][df['Variable Name Qualifier'].notna()]
-                + " "
-                + df['Variable Name Qualifier'][df['Variable Name Qualifier'].notna()]))
+           pd.Series(
+               df['Variable Name'][df['Variable Name Qualifier'].notna()]
+               + " "
+               + df['Variable Name Qualifier'][df['Variable Name Qualifier'].notna()]))
         df[['Variable Value']] = col
 
     # Can be redone to exclude hierarchy one name and to include more levels
@@ -198,9 +218,8 @@ def dataset_to_df(df_name):
                             'Hierarchy One -3': 'H3',
                             'Hierarchy One -4': 'H4',
                             'Hierarchy One Leaf': 'H5'})
-
     # replaces all strings that are just spaces with NaN
-    df.replace(to_replace=r'^\s*$', value=np.NaN, regex=True, inplace=True)
+    # df.replace(to_replace=r'^\s*$', value=np.NaN, regex=True, inplace=True)
     df.replace(to_replace='', value=np.NaN, inplace=True)
 
     # if OPG011 we need to construct the tree by asking for the parents of unique values
@@ -231,7 +250,7 @@ def dataset_to_df(df_name):
     # If we are dealing with links in the future we must format them as follows and edit the table drawer
     if 'Link' in df.columns:
         df.Link = list(map(lambda x: '[Link]({})'.format(x), df.Link))
-
+    df_vaex = vaex.from_pandas(df)
     logging.debug("dataset {} loaded.".format(df_name))
     return df
 
@@ -1555,6 +1574,7 @@ def create_categories(dff, hierarchy_columns=None):
     for i in hierarchy_columns:
         dff[i] = pd.Categorical(dff[i])
 
+
     return dff
 
 
@@ -1688,3 +1708,15 @@ def confidence_intervals(model):
     """
     _, lower, upper = wls_prediction_std(model)
     return lower, upper
+
+# def numerical_check(x):
+#     fastnumbers.fast_float(x, on_fail=on_fail)
+#
+# def on_fail(x):
+#     return np.nan
+
+
+
+
+if __name__ == '__main__':
+    dataset_to_df("OPG001")

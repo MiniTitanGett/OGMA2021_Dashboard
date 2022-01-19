@@ -802,8 +802,9 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
         elif 'OPG011' in df_name:
             graphs = GRAPH_OPTIONS['OPG011']
     graphs.sort()
-    for i in graphs:
-        options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+    # for i in graphs:
+    #     options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
+    options = [{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in graphs]
 
     return [
         html.Div(
@@ -984,11 +985,13 @@ def get_tile_layout(num_tiles, tile_keys=None, parent_df=None):
         children = []
     elif 5 > num_tiles:
         if tile_keys:
-            for i in range(num_tiles):
-                tile.append(get_tile(i, tile_keys[i], df_name=parent_df))
+            # for i in range(num_tiles):
+            #     tile.append(get_tile(i, tile_keys[i], df_name=parent_df))
+            tile = [get_tile(i, tile_keys[i], df_name=parent_df) for i in range(num_tiles)]
         else:
-            for i in range(num_tiles):
-                tile.append(get_tile(i, df_name=parent_df))
+            # for i in range(num_tiles):
+            #     tile.append(get_tile(i, df_name=parent_df))
+            tile = [get_tile(i, df_name=parent_df) for i in range(num_tiles)]
         children = tile
 
     else:

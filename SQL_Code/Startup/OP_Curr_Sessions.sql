@@ -1,4 +1,4 @@
-USE [OPEN_Dev_Dashboard];
+USE [OGMA_Test];
 GO
 
 /****** Object:  Table [dbo].[OP_Curr_Sessions]    Script Date: 2021-05-21 1:15:51 PM ******/

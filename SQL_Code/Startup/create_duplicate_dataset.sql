@@ -1,4 +1,4 @@
-USE [OPEN_Dev_Dashboard]
+USE [OGMA_Test]
 GO
 /*Create a duplicate dataset*/
 SELECT * INTO [dbo].[OPG001C]

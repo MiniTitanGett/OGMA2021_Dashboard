@@ -10,8 +10,6 @@ Contains arbitrary constants, data constants, and data manipulation functions.
 from datetime import datetime, timedelta, date
 import numpy as np
 import pandas as pd
-import vaex
-import fastnumbers
 import logging
 
 import pyodbc
@@ -95,8 +93,7 @@ def dataset_to_df(df_name):
         '''
     SELECT * FROM [OGMA_Test].[dbo].[{}]
     '''.format(df_name.split('.')[0]), conn)
-    df =df_pandas = pd.DataFrame(sql_query)
-    df_vaex = vaex.from_pandas(df_pandas)
+    df = pd.DataFrame(sql_query)
 
     logging.debug("done converting pandas to vaex")
     # query = """\
@@ -168,17 +165,6 @@ def dataset_to_df(df_name):
         df[["Variable Value"]] = col
 
     else:
-        none = df_vaex['Month of Event'].isnan()
-        var = df_vaex['Fiscal Year of Event'].isna()
-        df_vaex['Week of Event'] = df_vaex['Week of Event'].astype('float64')
-        df_vaex['Activity Event Id'] = df_vaex['Activity Event Id'].astype('float64')
-        df_vaex['Fiscal Year of Event'] = df_vaex['Fiscal Year of Event'].astype('float64')
-        df_vaex['Fiscal Quarter'] = df_vaex['Fiscal Quarter'].astype('float64')
-        df_vaex['Fiscal Month of Event'] = df_vaex['Fiscal Month of Event'].astype('float64')
-        df_vaex['Fiscal Week of Event'] = df_vaex['Fiscal Week of Event'].astype('float64')
-        df_vaex['Julian Day'] = df_vaex['Julian Day'].astype('float64')
-
-
         df[['Year of Event',
             'Quarter',
             'Month of Event',
@@ -250,7 +236,6 @@ def dataset_to_df(df_name):
     # If we are dealing with links in the future we must format them as follows and edit the table drawer
     if 'Link' in df.columns:
         df.Link = list(map(lambda x: '[Link]({})'.format(x), df.Link))
-    df_vaex = vaex.from_pandas(df)
     logging.debug("dataset {} loaded.".format(df_name))
     return df
 
@@ -1708,15 +1693,3 @@ def confidence_intervals(model):
     """
     _, lower, upper = wls_prediction_std(model)
     return lower, upper
-
-# def numerical_check(x):
-#     fastnumbers.fast_float(x, on_fail=on_fail)
-#
-# def on_fail(x):
-#     return np.nan
-
-
-
-
-if __name__ == '__main__':
-    dataset_to_df("OPG001")

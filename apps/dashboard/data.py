@@ -91,9 +91,10 @@ def dataset_to_df(df_name):
     conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
     sql_query = pd.read_sql_query(
         '''
-    SELECT * FROM [OGMA_Test].[dbo].[{}]
+    SELECT * FROM [OPEN_Dev_Dashboard].[dbo].[{}]
     '''.format(df_name.split('.')[0]), conn)
     df = pd.DataFrame(sql_query)
+
 
     logging.debug("done converting pandas to vaex")
     # query = """\

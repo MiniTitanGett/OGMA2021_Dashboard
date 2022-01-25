@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 import logging
 import vaex
-import pyodbc
+# import pyodbc
 from dateutil.relativedelta import relativedelta
 from flask import session
 import statsmodels.api as sm
@@ -20,7 +20,7 @@ from statsmodels.sandbox.regression.predstd import wls_prediction_std
 from sklearn.preprocessing import PolynomialFeatures
 
 # Internal Modules
-import config
+# import config
 from conn import get_ref, exec_storedproc_results
 from server import get_hierarchy_parent, get_variable_parent
 
@@ -101,7 +101,9 @@ def dataset_to_df(df_name):
     select @p_result_status as result_status
     """.format(session["sessionID"], session["language"], df_name)
     df = exec_storedproc_results(query)
+    logging.debug("done converting query to pandas")
     df_vaex = vaex.from_pandas(df)
+    df_vaex.variables['nan'] = np.nan
     logging.debug("done converting pandas to vaex")
 
     if df_name == 'OPG010':
@@ -114,22 +116,22 @@ def dataset_to_df(df_name):
         node_df = exec_storedproc_results(query)
         node_df_vaex = vaex.from_pandas(node_df)
 
-        node_df[['x_coord', 'y_coord']] = node_df[['x_coord', 'y_coord']].apply(pd.to_numeric)
+        # node_df[['x_coord', 'y_coord']] = node_df[['x_coord', 'y_coord']].apply(pd.to_numeric)
         df_vaex['x_coord'] = df_vaex['x_coord'].astype('float64')
         df_vaex['y_coord'] = df_vaex['y_coord'].astype('float64')
 
-        #session[df_name + "_NodeData"] = node_df_vaex
-        session[df_name + "_NodeData"] = node_df
+        session[df_name + "_NodeData"] = node_df_vaex
+        # session[df_name + "_NodeData"] = node_df
 
         # add all variable names without qualifiers to col
-        col = pd.Series(df['Variable Name'][df['Variable Name Qualifier'].isna()])
+        # col = pd.Series(df['Variable Name'][df['Variable Name Qualifier'].isna()])
         # combine variable hierarchy columns into col for rows with qualifiers
-        col = col.append(
-            pd.Series(
-                df['Variable Name'][df['Variable Name Qualifier'].notna()]
-                + " "
-                + df['Variable Name Qualifier'][df['Variable Name Qualifier'].notna()]))
-        df[['Variable Value']] = col
+        # col = col.append(
+        #     pd.Series(
+        #         df['Variable Name'][df['Variable Name Qualifier'].notna()]
+        #         + " "
+        #         + df['Variable Name Qualifier'][df['Variable Name Qualifier'].notna()]))
+        # df[['Variable Value']] = col
 
         df_vaex['Variable Value'] = df_vaex['Variable Name'] + " " + df_vaex['Variable Name Qualifier']
 
@@ -174,17 +176,18 @@ def dataset_to_df(df_name):
 
     else:
 
-        df_vaex['Week of Event'] = df_vaex.func.where(df_vaex['Week of Event'] == "", None, df_vaex['Week of Event'])
-        df_vaex['Activity Event Id'] = df_vaex.func.where(df_vaex['Activity Event Id'] == "", None,
+        df_vaex['Week of Event'] = df_vaex.func.where(df_vaex['Week of Event'] == "", np.nan, df_vaex['Week of Event'])
+        df_vaex['Activity Event Id'] = df_vaex.func.where(df_vaex['Activity Event Id'] == "", np.nan,
                                                           df_vaex['Activity Event Id'])
-        df_vaex['Fiscal Year of Event'] = df_vaex.func.where(df_vaex['Fiscal Year of Event'] == "", None,
+        df_vaex['Fiscal Year of Event'] = df_vaex.func.where(df_vaex['Fiscal Year of Event'] == "", np.nan,
                                                              df_vaex['Fiscal Year of Event'])
-        df_vaex['Fiscal Quarter'] = df_vaex.func.where(df_vaex['Fiscal Quarter'] == "", None, df_vaex['Fiscal Quarter'])
-        df_vaex['Fiscal Month of Event'] = df_vaex.func.where(df_vaex['Fiscal Month of Event'] == "", None,
+        df_vaex['Fiscal Quarter'] = df_vaex.func.where(df_vaex['Fiscal Quarter'] == "", np.nan,
+                                                       df_vaex['Fiscal Quarter'])
+        df_vaex['Fiscal Month of Event'] = df_vaex.func.where(df_vaex['Fiscal Month of Event'] == "", np.nan,
                                                               df_vaex['Fiscal Month of Event'])
-        df_vaex['Fiscal Week of Event'] = df_vaex.func.where(df_vaex['Fiscal Week of Event'] == "", None,
+        df_vaex['Fiscal Week of Event'] = df_vaex.func.where(df_vaex['Fiscal Week of Event'] == "", np.nan,
                                                              df_vaex['Fiscal Week of Event'])
-        df_vaex['Julian Day'] = df_vaex.func.where(df_vaex['Julian Day'] == "", None, df_vaex['Julian Day'])
+        df_vaex['Julian Day'] = df_vaex.func.where(df_vaex['Julian Day'] == "", np.nan, df_vaex['Julian Day'])
         df_vaex['Week of Event'] = df_vaex['Week of Event'].astype('float64')
         df_vaex['Activity Event Id'] = df_vaex['Activity Event Id'].astype('float64')
         df_vaex['Fiscal Year of Event'] = df_vaex['Fiscal Year of Event'].astype('float64')
@@ -193,37 +196,37 @@ def dataset_to_df(df_name):
         df_vaex['Fiscal Week of Event'] = df_vaex['Fiscal Week of Event'].astype('float64')
         df_vaex['Julian Day'] = df_vaex['Julian Day'].astype('float64')
 
-        df[['Year of Event',
-            'Quarter',
-            'Month of Event',
-            'Week of Event',
-            'Fiscal Year of Event',
-            'Fiscal Quarter',
-            'Fiscal Month of Event',
-            'Fiscal Week of Event',
-            'Julian Day',
-            'Activity Event Id',
-            'Measure Value']] = df[['Year of Event',
-                                    'Quarter',
-                                    'Month of Event',
-                                    'Week of Event',
-                                    'Fiscal Year of Event',
-                                    'Fiscal Quarter',
-                                    'Fiscal Month of Event',
-                                    'Fiscal Week of Event',
-                                    'Julian Day',
-                                    'Activity Event Id',
-                                    'Measure Value']].apply(pd.to_numeric)
+        # df[['Year of Event',
+        #     'Quarter',
+        #     'Month of Event',
+        #     'Week of Event',
+        #     'Fiscal Year of Event',
+        #     'Fiscal Quarter',
+        #     'Fiscal Month of Event',
+        #     'Fiscal Week of Event',
+        #     'Julian Day',
+        #     'Activity Event Id',
+        #     'Measure Value']] = df[['Year of Event',
+        #                             'Quarter',
+        #                             'Month of Event',
+        #                             'Week of Event',
+        #                             'Fiscal Year of Event',
+        #                             'Fiscal Quarter',
+        #                             'Fiscal Month of Event',
+        #                             'Fiscal Week of Event',
+        #                             'Julian Day',
+        #                             'Activity Event Id',
+        #                             'Measure Value']].apply(pd.to_numeric)
         # add all variable names without qualifiers to col
-        col = pd.Series(df['Variable Name'][df['Variable Name Qualifier'].isna()])
+        # col = pd.Series(df['Variable Name'][df['Variable Name Qualifier'].isna()])
         # column = df_vaex.func._to_pandas_series(df[df['Variable Name']&df['Variable Name Qualifier']!=-1])
         # combine variable hierarchy columns into col for rows with qualifiers
-        col = col.append(
-           pd.Series(
-               df['Variable Name'][df['Variable Name Qualifier'].notna()]
-               + " "
-               + df['Variable Name Qualifier'][df['Variable Name Qualifier'].notna()]))
-        df['Variable Value'] = col
+        # col = col.append(
+        #    pd.Series(
+        #        df['Variable Name'][df['Variable Name Qualifier'].notna()]
+        #        + " "
+        #        + df['Variable Name Qualifier'][df['Variable Name Qualifier'].notna()]))
+        # df['Variable Value'] = col
 
         df_vaex['Variable Value'] = df_vaex['Variable Name'] + " " + df_vaex['Variable Name Qualifier']
 
@@ -235,23 +238,23 @@ def dataset_to_df(df_name):
     df_vaex.rename('Hierarchy One -4', 'H4')
     df_vaex.rename('Hierarchy One Leaf', 'H5')
 
-    df = df.rename(columns={'Hierarchy One Top': 'H0',
-                            'Hierarchy One -1': 'H1',
-                            'Hierarchy One -2': 'H2',
-                            'Hierarchy One -3': 'H3',
-                            'Hierarchy One -4': 'H4',
-                            'Hierarchy One Leaf': 'H5'})
+    # df = df.rename(columns={'Hierarchy One Top': 'H0',
+    #                         'Hierarchy One -1': 'H1',
+    #                         'Hierarchy One -2': 'H2',
+    #                         'Hierarchy One -3': 'H3',
+    #                         'Hierarchy One -4': 'H4',
+    #                         'Hierarchy One Leaf': 'H5'})
     # replaces all strings that are just spaces with NaN
     # df.replace(to_replace=r'^\s*$', value=np.NaN, regex=True, inplace=True)
-    df.replace(to_replace='', value=np.NaN, inplace=True)
+    # df.replace(to_replace='', value=np.NaN, inplace=True)
 
     df_vaex['OPG Data Set'] = df_vaex.func.where(df_vaex['OPG Data Set'] == "", None, df_vaex['OPG Data Set'])
-    df_vaex.H0 = df_vaex.func.where(df_vaex.H0 == '', None, df_vaex.H0)
-    df_vaex.H1 = df_vaex.func.where(df_vaex.H1 == '', None, df_vaex.H1)
-    df_vaex.H2 = df_vaex.func.where(df_vaex.H2 == '', None, df_vaex.H2)
-    df_vaex.H3 = df_vaex.func.where(df_vaex.H3 == '', None, df_vaex.H3)
-    df_vaex.H4 = df_vaex.func.where(df_vaex.H4 == '', None, df_vaex.H4)
-    df_vaex.H5 = df_vaex.func.where(df_vaex.H5 == '', None, df_vaex.H5)
+    df_vaex['H0'] = df_vaex.func.where(df_vaex['H0'] == '', None, df_vaex['H0'])
+    df_vaex['H1'] = df_vaex.func.where(df_vaex['H1'] == '', None, df_vaex['H1'])
+    df_vaex['H2'] = df_vaex.func.where(df_vaex['H2'] == '', None, df_vaex['H2'])
+    df_vaex['H3'] = df_vaex.func.where(df_vaex['H3'] == '', None, df_vaex['H3'])
+    df_vaex['H4'] = df_vaex.func.where(df_vaex['H4'] == '', None, df_vaex['H4'])
+    df_vaex['H5'] = df_vaex.func.where(df_vaex['H5'] == '', None, df_vaex['H5'])
     df_vaex['Variable Name'] = df_vaex.func.where(df_vaex['Variable Name'] == '', None, df_vaex['Variable Name'])
     df_vaex['Variable Name Qualifier'] = df_vaex.func.where(df_vaex['Variable Name Qualifier'] == '', None,
                                                             df_vaex['Variable Name Qualifier'])
@@ -284,7 +287,7 @@ def dataset_to_df(df_name):
                 # insert parent into table
                 df.loc[df["H{}".format(depth)] == node, "H{}".format(depth - 1)] = parent
 
-    else:
+    # else:
         # df_vaex = df_vaex.label_encode('Variable Value')
         # df_vaex = df_vaex.label_encode('Variable Name')
         # df_vaex = df_vaex.label_encode('Variable Name Qualifier')
@@ -296,18 +299,18 @@ def dataset_to_df(df_name):
         # df_vaex = df_vaex.label_encode('H4')
         # df_vaex = df_vaex.label_encode('H5')
 
-        df = create_categories(df, ['Variable Value', 'Variable Name', 'Variable Name Qualifier',
-                                    'Variable Name Sub Qualifier', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5'])
+        # df = create_categories(df, ['Variable Value', 'Variable Name', 'Variable Name Qualifier',
+        #                             'Variable Name Sub Qualifier', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5'])
 
     # If we are dealing with links in the future we must format them as follows and edit the table drawer
-    if 'Link' in df.columns:
-        df.Link = list(map(lambda x: '[Link]({})'.format(x), df.Link))
+    # if 'Link' in df.columns:
+    #     df.Link = list(map(lambda x: '[Link]({})'.format(x), df.Link))
     if 'Link' in df_vaex.column_names:
         df_vaex.Link = list(map(lambda x: '[Link]({})'.format(x), df.Link))
 
     logging.debug("dataset {} loaded.".format(df_name))
-    # return df_vaex
-    return df
+    return df_vaex
+    # return df
 
 def generate_constants(df_name):
     """Generates the constants required to be stored for the given dataset."""
@@ -316,11 +319,11 @@ def generate_constants(df_name):
 
     VARIABLE_LEVEL = 'Variable Value'  # list of variable column names
 
-    # COLUMN_NAMES = df.get_column_names()  # vaex
-    # MEASURE_TYPE_OPTIONS = df['Measure Type'].unique(dropmissing=True)  # vaex
+    COLUMN_NAMES = df.get_column_names()  # vaex
+    MEASURE_TYPE_OPTIONS = df['Measure Type'].unique(dropmissing=True)  # vaex
 
-    COLUMN_NAMES = df.columns.values  # list of column names
-    MEASURE_TYPE_OPTIONS = df['Measure Type'].dropna().unique().tolist()  # list of measure type options
+    # COLUMN_NAMES = df.columns.values  # list of column names
+    # MEASURE_TYPE_OPTIONS = df['Measure Type'].dropna().unique().tolist()  # list of measure type options
 
     MEASURE_TYPE_OPTIONS.sort()
 
@@ -406,51 +409,51 @@ def generate_constants(df_name):
         MAX_DATE_UNF = max_date_unf.strftime('%m/%d/%Y')
     else:
         # New date picker values
-        GREGORIAN_MIN_YEAR = int(df['Year of Event'].min())
-        GREGORIAN_YEAR_MAX = int(df['Year of Event'][df['Calendar Entry Type'] == 'Year'].max())
-        GREGORIAN_QUARTER_MAX_YEAR = int(df['Year of Event'][df['Calendar Entry Type'] == 'Quarter'].max())
-        GREGORIAN_QUARTER_FRINGE_MIN = int(df['Quarter'][df['Year of Event'] == GREGORIAN_MIN_YEAR].min())
-        GREGORIAN_QUARTER_FRINGE_MAX = \
-            int(df['Quarter'][df['Year of Event'] == GREGORIAN_QUARTER_MAX_YEAR].max())
-        GREGORIAN_MONTH_MAX_YEAR = int(df['Year of Event'][df['Calendar Entry Type'] == 'Month'].max())
-        GREGORIAN_MONTH_FRINGE_MIN = \
-            int(df['Month of Event'][df['Year of Event'] == GREGORIAN_MIN_YEAR].min())
-        GREGORIAN_MONTH_FRINGE_MAX = \
-            int(df['Month of Event'][df['Year of Event'] == GREGORIAN_MONTH_MAX_YEAR].max())
-
         # GREGORIAN_MIN_YEAR = int(df['Year of Event'].min())
-        # dff = df.filter(df['Calendar Entry Type'] == 'Year')
-        # GREGORIAN_YEAR_MAX = int(dff['Year of Event'].max())
-        # dff = df.filter(df['Calendar Entry Type'] == 'Quarter')
-        # GREGORIAN_QUARTER_MAX_YEAR = int(dff['Year of Event'].max())
-        # dff = df.filter(df['Year of Event'] == GREGORIAN_MIN_YEAR)
-        # GREGORIAN_MONTH_FRINGE_MIN = int(df['Month of Event'].min())
-        # GREGORIAN_QUARTER_FRINGE_MIN = int(dff['Quarter'].min())
-        # dff = df.filter(df['Year of Event'] == GREGORIAN_QUARTER_MAX_YEAR)
-        # GREGORIAN_QUARTER_FRINGE_MAX = int(dff['Quarter'].max())
-        # dff = df.filter(df['Calendar Entry Type'] == 'Month')
-        # GREGORIAN_MONTH_MAX_YEAR = int(dff['Year of Event'].max())
-        # dff = df.filter(df['Year of Event'] == GREGORIAN_MONTH_MAX_YEAR)
-        # GREGORIAN_MONTH_FRINGE_MAX = int(dff['Month of Event'].max())
-        #
-        # dff = df.filter(df['Calendar Entry Type'] == 'Week')
-        # if int(dff.count(df['Calendar Entry Type']).min()) > 0:
+        # GREGORIAN_YEAR_MAX = int(df['Year of Event'][df['Calendar Entry Type'] == 'Year'].max())
+        # GREGORIAN_QUARTER_MAX_YEAR = int(df['Year of Event'][df['Calendar Entry Type'] == 'Quarter'].max())
+        # GREGORIAN_QUARTER_FRINGE_MIN = int(df['Quarter'][df['Year of Event'] == GREGORIAN_MIN_YEAR].min())
+        # GREGORIAN_QUARTER_FRINGE_MAX = \
+        #     int(df['Quarter'][df['Year of Event'] == GREGORIAN_QUARTER_MAX_YEAR].max())
+        # GREGORIAN_MONTH_MAX_YEAR = int(df['Year of Event'][df['Calendar Entry Type'] == 'Month'].max())
+        # GREGORIAN_MONTH_FRINGE_MIN = \
+        #     int(df['Month of Event'][df['Year of Event'] == GREGORIAN_MIN_YEAR].min())
+        # GREGORIAN_MONTH_FRINGE_MAX = \
+        #     int(df['Month of Event'][df['Year of Event'] == GREGORIAN_MONTH_MAX_YEAR].max())
 
-        if len(df[df['Calendar Entry Type'] == 'Week']) > 0:
-            GREGORIAN_WEEK_AVAILABLE = True  # not currently used
-            GREGORIAN_WEEK_MAX_YEAR = int(df['Year of Event'][df['Calendar Entry Type'] == 'Week'].max())
-            GREGORIAN_WEEK_FRINGE_MIN = int(
-                df['Week of Event'][df['Year of Event'] == GREGORIAN_MIN_YEAR].min())
-            GREGORIAN_WEEK_FRINGE_MAX = int(
-                df['Week of Event'][df['Year of Event'] == GREGORIAN_WEEK_MAX_YEAR].max())
+        GREGORIAN_MIN_YEAR = int(df['Year of Event'].min())
+        dff = df.filter(df['Calendar Entry Type'] == 'Year')
+        GREGORIAN_YEAR_MAX = int(dff['Year of Event'].max())
+        dff = df.filter(df['Calendar Entry Type'] == 'Quarter')
+        GREGORIAN_QUARTER_MAX_YEAR = int(dff['Year of Event'].max())
+        dff = df.filter(df['Year of Event'] == GREGORIAN_MIN_YEAR)
+        GREGORIAN_MONTH_FRINGE_MIN = int(df['Month of Event'].min())
+        GREGORIAN_QUARTER_FRINGE_MIN = int(dff['Quarter'].min())
+        dff = df.filter(df['Year of Event'] == GREGORIAN_QUARTER_MAX_YEAR)
+        GREGORIAN_QUARTER_FRINGE_MAX = int(dff['Quarter'].max())
+        dff = df.filter(df['Calendar Entry Type'] == 'Month')
+        GREGORIAN_MONTH_MAX_YEAR = int(dff['Year of Event'].max())
+        dff = df.filter(df['Year of Event'] == GREGORIAN_MONTH_MAX_YEAR)
+        GREGORIAN_MONTH_FRINGE_MAX = int(dff['Month of Event'].max())
 
+        dff = df.filter(df['Calendar Entry Type'] == 'Week')
+        if int(dff.count(df['Calendar Entry Type']).min()) > 0:
+
+        # if len(df[df['Calendar Entry Type'] == 'Week']) > 0:
             # GREGORIAN_WEEK_AVAILABLE = True  # not currently used
-            # dff = df.filter(df['Calendar Entry Type'] == 'Week')
-            # GREGORIAN_WEEK_MAX_YEAR = int(dff['Year of Event'].max())
-            # dff = df.filter(df['Year of Event'] == GREGORIAN_MIN_YEAR)
-            # GREGORIAN_WEEK_FRINGE_MIN = int(dff['Week of Event'].min())
-            # dff = df.filter(df['Year of Event'] == GREGORIAN_WEEK_MAX_YEAR)
-            # GREGORIAN_WEEK_FRINGE_MAX = int(dff['Week of Event'].max())
+            # GREGORIAN_WEEK_MAX_YEAR = int(df['Year of Event'][df['Calendar Entry Type'] == 'Week'].max())
+            # GREGORIAN_WEEK_FRINGE_MIN = int(
+            #     df['Week of Event'][df['Year of Event'] == GREGORIAN_MIN_YEAR].min())
+            # GREGORIAN_WEEK_FRINGE_MAX = int(
+            #     df['Week of Event'][df['Year of Event'] == GREGORIAN_WEEK_MAX_YEAR].max())
+
+            GREGORIAN_WEEK_AVAILABLE = True  # not currently used
+            dff = df.filter(df['Calendar Entry Type'] == 'Week')
+            GREGORIAN_WEEK_MAX_YEAR = int(dff['Year of Event'].max())
+            dff = df.filter(df['Year of Event'] == GREGORIAN_MIN_YEAR)
+            GREGORIAN_WEEK_FRINGE_MIN = int(dff['Week of Event'].min())
+            dff = df.filter(df['Year of Event'] == GREGORIAN_WEEK_MAX_YEAR)
+            GREGORIAN_WEEK_FRINGE_MAX = int(dff['Week of Event'].max())
         else:
             GREGORIAN_WEEK_AVAILABLE = False  # not currently used, so set fake values
             GREGORIAN_WEEK_MAX_YEAR = 52
@@ -458,54 +461,54 @@ def generate_constants(df_name):
             GREGORIAN_WEEK_FRINGE_MAX = 52
 
         if len(df['Fiscal Year of Event'].unique()) != 1 and df['Fiscal Year of Event'].unique()[0] is not None:
-            FISCAL_AVAILABLE = True
-
-            FISCAL_MIN_YEAR = int(df['Fiscal Year of Event'].min())
-            FISCAL_YEAR_MAX = int(df['Fiscal Year of Event'][df['Calendar Entry Type'] == 'Fiscal Year'].max())
-            FISCAL_QUARTER_MAX_YEAR = int(df['Fiscal Year of Event'][df['Calendar Entry Type'] == 'Quarter'].max())
-            FISCAL_QUARTER_FRINGE_MIN = \
-                int(df['Fiscal Quarter'][df['Fiscal Year of Event'] == FISCAL_MIN_YEAR].min())
-            FISCAL_QUARTER_FRINGE_MAX = int(
-                df['Fiscal Quarter'][df['Fiscal Year of Event'] == FISCAL_QUARTER_MAX_YEAR].max())
-            FISCAL_MONTH_MAX_YEAR = int(df['Fiscal Year of Event'][df['Calendar Entry Type'] == 'Month'].max())
-            FISCAL_MONTH_FRINGE_MIN = \
-                int(df['Fiscal Month of Event'][df['Fiscal Year of Event'] == FISCAL_MIN_YEAR].min())
-            FISCAL_MONTH_FRINGE_MAX = int(
-                df['Fiscal Month of Event'][df['Fiscal Year of Event'] == FISCAL_MONTH_MAX_YEAR].max())
-            FISCAL_WEEK_MAX_YEAR = int(df['Fiscal Year of Event'][df['Calendar Entry Type'] == 'Week'].max())
-            FISCAL_WEEK_FRINGE_MIN = int(df['Fiscal Week of Event'][df['Fiscal Year of Event']
-                                                                    == FISCAL_MIN_YEAR].min())
-            FISCAL_WEEK_FRINGE_MAX = int(df['Fiscal Week of Event'][df['Fiscal Year of Event']
-                                                                    == FISCAL_WEEK_MAX_YEAR].max())
-
             # FISCAL_AVAILABLE = True
+            #
             # FISCAL_MIN_YEAR = int(df['Fiscal Year of Event'].min())
-            #
-            # dff = df.filter(df['Calendar Entry Type'] == 'Fiscal Year')
-            # FISCAL_YEAR_MAX = int(dff['Fiscal Year of Event'].max())
-            #
-            # dff = df.filter(df['Calendar Entry Type'] == 'Quarter')
-            # FISCAL_QUARTER_MAX_YEAR = int(dff['Fiscal Year of Event'].max())
-            #
-            # dff = df.filter(df['Fiscal Year of Event'] == FISCAL_MIN_YEAR)
-            # FISCAL_QUARTER_FRINGE_MIN = int(dff['Fiscal Quarter'].min())
-            # FISCAL_MONTH_FRINGE_MIN = int(dff['Fiscal Month of Event'].min())
-            # FISCAL_WEEK_FRINGE_MIN = int(dff['Fiscal Week of Event'].min())
-            #
-            # dff = df.filter(df['Fiscal Year of Event'] == FISCAL_QUARTER_MAX_YEAR)
-            # FISCAL_QUARTER_FRINGE_MAX = int(dff['Fiscal Quarter'].max())
-            #
-            # dff = df.filter(df['Calender Entry Type'] == 'Month')
-            # FISCAL_MONTH_MAX_YEAR = int(dff['Fiscal Year of Event'].max())
-            #
-            # dff = df.filter(df['Fiscal Year of Event'] == FISCAL_MONTH_MAX_YEAR)
-            # FISCAL_MONTH_FRINGE_MAX = int(dff['Fiscal Month of Event'].max())
-            #
-            # dff = df.filter(df['Calendar Entry Type'] == 'Week')
-            # FISCAL_WEEK_MAX_YEAR = int(dff['Fiscal Year of Event'].max())
-            #
-            # dff = df.filter(df['Fiscal Year of Event']== FISCAL_WEEK_MAX_YEAR)
-            # FISCAL_WEEK_FRINGE_MAX = int(dff['Fiscal Week of Event'].max())
+            # FISCAL_YEAR_MAX = int(df['Fiscal Year of Event'][df['Calendar Entry Type'] == 'Fiscal Year'].max())
+            # FISCAL_QUARTER_MAX_YEAR = int(df['Fiscal Year of Event'][df['Calendar Entry Type'] == 'Quarter'].max())
+            # FISCAL_QUARTER_FRINGE_MIN = \
+            #     int(df['Fiscal Quarter'][df['Fiscal Year of Event'] == FISCAL_MIN_YEAR].min())
+            # FISCAL_QUARTER_FRINGE_MAX = int(
+            #     df['Fiscal Quarter'][df['Fiscal Year of Event'] == FISCAL_QUARTER_MAX_YEAR].max())
+            # FISCAL_MONTH_MAX_YEAR = int(df['Fiscal Year of Event'][df['Calendar Entry Type'] == 'Month'].max())
+            # FISCAL_MONTH_FRINGE_MIN = \
+            #     int(df['Fiscal Month of Event'][df['Fiscal Year of Event'] == FISCAL_MIN_YEAR].min())
+            # FISCAL_MONTH_FRINGE_MAX = int(
+            #     df['Fiscal Month of Event'][df['Fiscal Year of Event'] == FISCAL_MONTH_MAX_YEAR].max())
+            # FISCAL_WEEK_MAX_YEAR = int(df['Fiscal Year of Event'][df['Calendar Entry Type'] == 'Week'].max())
+            # FISCAL_WEEK_FRINGE_MIN = int(df['Fiscal Week of Event'][df['Fiscal Year of Event']
+            #                                                         == FISCAL_MIN_YEAR].min())
+            # FISCAL_WEEK_FRINGE_MAX = int(df['Fiscal Week of Event'][df['Fiscal Year of Event']
+            #                                                         == FISCAL_WEEK_MAX_YEAR].max())
+
+            FISCAL_AVAILABLE = True
+            FISCAL_MIN_YEAR = int(df['Fiscal Year of Event'].min())
+
+            dff = df.filter(df['Calendar Entry Type'] == 'Fiscal Year')
+            FISCAL_YEAR_MAX = int(dff['Fiscal Year of Event'].max())
+
+            dff = df.filter(df['Calendar Entry Type'] == 'Quarter')
+            FISCAL_QUARTER_MAX_YEAR = int(dff['Fiscal Year of Event'].max())
+
+            dff = df.filter(df['Fiscal Year of Event'] == FISCAL_MIN_YEAR)
+            FISCAL_QUARTER_FRINGE_MIN = int(dff['Fiscal Quarter'].min())
+            FISCAL_MONTH_FRINGE_MIN = int(dff['Fiscal Month of Event'].min())
+            FISCAL_WEEK_FRINGE_MIN = int(dff['Fiscal Week of Event'].min())
+
+            dff = df.filter(df['Fiscal Year of Event'] == FISCAL_QUARTER_MAX_YEAR)
+            FISCAL_QUARTER_FRINGE_MAX = int(dff['Fiscal Quarter'].max())
+
+            dff = df.filter(df['Calender Entry Type'] == 'Month')
+            FISCAL_MONTH_MAX_YEAR = int(dff['Fiscal Year of Event'].max())
+
+            dff = df.filter(df['Fiscal Year of Event'] == FISCAL_MONTH_MAX_YEAR)
+            FISCAL_MONTH_FRINGE_MAX = int(dff['Fiscal Month of Event'].max())
+
+            dff = df.filter(df['Calendar Entry Type'] == 'Week')
+            FISCAL_WEEK_MAX_YEAR = int(dff['Fiscal Year of Event'].max())
+
+            dff = df.filter(df['Fiscal Year of Event']== FISCAL_WEEK_MAX_YEAR)
+            FISCAL_WEEK_FRINGE_MAX = int(dff['Fiscal Week of Event'].max())
 
         else:
             FISCAL_AVAILABLE = False
@@ -525,31 +528,31 @@ def generate_constants(df_name):
         # MAX_DATE_UNF = datetime.strptime(str(df.loc[df['Date of Event'].idxmax(), 'Date of Event']), '%Y%m%d')
         #
         # this is a hack until we get the data delivered from the database
-        try:
-            MIN_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(),
-                                                    'Date of Event'], '%Y/%m/%d')
-        except TypeError:
-            MIN_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(),
-                                  'Date of Event'].strftime('%m/%d/%Y')
-
-        try:
-            MAX_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64[ns]').idxmax(),
-                                                    'Date of Event'], '%Y/%m/%d')
-        except TypeError:
-            MAX_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmax(),
-                                  'Date of Event'].strftime('%m/%d/%Y')
+        # try:
+        #     MIN_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(),
+        #                                             'Date of Event'], '%Y/%m/%d')
+        # except TypeError:
+        #     MIN_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(),
+        #                           'Date of Event'].strftime('%m/%d/%Y')
+        #
+        # try:
+        #     MAX_DATE_UNF = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64[ns]').idxmax(),
+        #                                             'Date of Event'], '%Y/%m/%d')
+        # except TypeError:
+        #     MAX_DATE_UNF = df.loc[df['Date of Event'].astype('datetime64[ns]').idxmax(),
+        #                           'Date of Event'].strftime('%m/%d/%Y')
 
         MIN_DATE_UNF = df['Date of Event'].dt.date.values.min()
         MAX_DATE_UNF = df['Date of Event'].dt.date.values.max()
 
         # replaces all Y in Partial Period with True & False
-        df['Partial Period'] = df['Partial Period'].transform(lambda x: x == 'Y')
+        # df['Partial Period'] = df['Partial Period'].transform(lambda x: x == 'Y')
 
-        # df['Partial Period'] = df.func.where(df['Partial Period'] == 'F', 'False',
-        #                                                df['Partial Period'])
-        # df['Partial Period'] = df.func.where(df['Partial Period'] == 'T', 'True',
-        #                                      df['Partial Period'])
-        # df['Partial Period'] = df['Partial Period'].astype('bool')
+        df['Partial Period'] = df.func.where(df['Partial Period'] == 'F', 'False',
+                                                       df['Partial Period'])
+        df['Partial Period'] = df.func.where(df['Partial Period'] == 'T', 'True',
+                                             df['Partial Period'])
+        df['Partial Period'] = df['Partial Period'].astype('bool')
 
         # Sets the Date of Event in the df to be in the correct format for Plotly
         # df['Date of Event'] = df['Date of Event'].transform(
@@ -557,11 +560,11 @@ def generate_constants(df_name):
         options = []
         variable_option_lists = []
 
-        unique_vars = df[VARIABLE_LEVEL].unique()
-        cleaned_list = [x for x in unique_vars if str(x) != 'nan']
+        # unique_vars = df[VARIABLE_LEVEL].unique()
+        # cleaned_list = [x for x in unique_vars if str(x) != 'nan']
 
-        # cleaned_list = df[VARIABLE_LEVEL].unique(dropmissing=True)
-        # cleaned_list.sort()
+        cleaned_list = df[VARIABLE_LEVEL].unique(dropmissing=True)
+        cleaned_list.sort()
 
         for unique_var in cleaned_list:
             variable_option_lists.append(unique_var)
@@ -732,11 +735,13 @@ def data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_drop
             # If anything is in the drop down
             if hierarchy_level_dropdown:
                 # Filter based on hierarchy level
-                filtered_df.dropna(subset=[hierarchy_level_dropdown], inplace=True)
+                # filtered_df.dropna(subset=[hierarchy_level_dropdown], inplace=True)
+                filtered_df = filtered_df.filter(filtered_df[hierarchy_level_dropdown].notna())
                 for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - (int(hierarchy_level_dropdown[1]) + 1)):
-                    bool_series = pd.isnull(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][
-                        len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]])
-                    filtered_df = filtered_df[bool_series]
+                    # bool_series = pd.isnull(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][
+                    #     len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]])
+                    # filtered_df = filtered_df[bool_series]
+                    filtered_df = filtered_df.filter(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]].ismissing())
             else:
                 # Returns empty data frame with column names
                 filtered_df = filtered_df[0:0]
@@ -757,9 +762,11 @@ def data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_drop
             filtered_df = filtered_df[filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i]]
         # Filters out all rows that are more specific than given path
         for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - len(hierarchy_path)):
-            bool_series = pd.isnull(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][
-                len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]])
-            filtered_df = filtered_df[bool_series]
+            # bool_series = pd.isnull(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][
+            #     len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]])
+            # filtered_df = filtered_df[bool_series]
+            filtered_df = filtered_df.filter(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][
+                len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]].ismissing())
 
     return filtered_df
 
@@ -849,7 +856,8 @@ def data_time_filter(secondary_type, end_secondary, end_year, start_secondary, s
             # Filter end year below threshold
             time_df = time_df[time_df['{}Year of Event'.format(year_prefix)] == end_year]
             time_df = time_df[time_df[division_column] < end_secondary]
-            range_df = range_df.append(time_df)
+            dff = range_df.concat(time_df)
+            #range_df = range_df.append(time_df)
             # Update working df
             time_df = range_df.copy()
     else:
@@ -1680,13 +1688,17 @@ def customize_menu_filter(dff, df_name, measure_type, variable_names, df_const):
         if type(variable_names) is not list:
             variable_names = [variable_names]
 
+        pandas_df = filtered_df.to_pandas_df()
         aggregate_df = pd.DataFrame()
+
 
         # for each selection, add the rows defined by the selection
         for variable_name in variable_names:
             # Filters based on rows that match the variable name path
+            # aggregate_df = aggregate_df.append(
+            #     filtered_df[filtered_df[df_const[df_name]['VARIABLE_LEVEL']] == variable_name])
             aggregate_df = aggregate_df.append(
-                filtered_df[filtered_df[df_const[df_name]['VARIABLE_LEVEL']] == variable_name])
+                pandas_df[pandas_df[df_const[df_name]['VARIABLE_LEVEL']] == variable_name])
 
         filtered_df = aggregate_df
     return filtered_df

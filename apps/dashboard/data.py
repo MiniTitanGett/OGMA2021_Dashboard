@@ -117,8 +117,8 @@ def dataset_to_df(df_name):
         node_df_vaex = vaex.from_pandas(node_df)
 
         # node_df[['x_coord', 'y_coord']] = node_df[['x_coord', 'y_coord']].apply(pd.to_numeric)
-        df_vaex['x_coord'] = df_vaex['x_coord'].astype('float64')
-        df_vaex['y_coord'] = df_vaex['y_coord'].astype('float64')
+        node_df_vaex['x_coord'] = node_df_vaex['x_coord'].astype('float64')
+        node_df_vaex['y_coord'] = node_df_vaex['y_coord'].astype('float64')
 
         session[df_name + "_NodeData"] = node_df_vaex
         # session[df_name + "_NodeData"] = node_df
@@ -748,18 +748,21 @@ def data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_drop
         else:
             # Filters out all rows that are less specific than given path length
             for i in range(len(hierarchy_path)):
-                filtered_df = filtered_df[filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i]]
+                filtered_df = filtered_df.filter(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i])
             # Filters out all rows that are more specific than given path length plus one to preserve the child column
             for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - (len(hierarchy_path) + 1)):
-                bool_series = pd.isnull(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][
-                    len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]])
-                filtered_df = filtered_df[bool_series]
-            filtered_df.dropna(subset=[df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)]], inplace=True)
+                # bool_series = pd.isnull(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][
+                #     len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]])
+                # filtered_df = filtered_df[bool_series]
+                filtered_df = filtered_df.filter(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][
+                    len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]].ismissing())
+            filtered_df = filtered_df.filter(filtered_df[hierarchy_level_dropdown].notna())
+            # filtered_df.dropna(subset=[df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)]], inplace=True)
     else:
         filtered_df = session[df_name]
         # Filters out all rows that don't include path member at specific level
         for i in range(len(hierarchy_path)):
-            filtered_df = filtered_df[filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i]]
+            filtered_df = filtered_df.filter(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i])
         # Filters out all rows that are more specific than given path
         for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - len(hierarchy_path)):
             # bool_series = pd.isnull(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][
@@ -824,8 +827,8 @@ def data_time_filter(secondary_type, end_secondary, end_year, start_secondary, s
         time_df = time_df[time_df['Calendar Entry Type'] == current_filter]
 
         # Filter all dates inside range (inclusive)
-        time_df = time_df[time_df['Date of Event'] >= start_date]
-        time_df = time_df[time_df['Date of Event'] <= end_date]
+        time_df = time_df[time_df['Date of Event'] >= np.datetime64(start_date)]
+        time_df = time_df[time_df['Date of Event'] <= np.datetime64(end_date)]
 
     # If not in year tab, filter using secondary selections
     elif not secondary_type == 'Year':
@@ -850,8 +853,9 @@ def data_time_filter(secondary_type, end_secondary, end_year, start_secondary, s
 
             for i in range(end_year - start_year - 1):
                 # Include entirety of in-between years
-                range_df = range_df.append(
-                    time_df[time_df['{}Year of Event'.format(year_prefix)] == (start_year + i + 1)])
+                # range_df = range_df.append(
+                #     time_df[time_df['{}Year of Event'.format(year_prefix)] == (start_year + i + 1)])
+                range_df = range_df.concat(time_df[time_df['{}Year of Event'.format(year_prefix)] == (start_year + i + 1)])
 
             # Filter end year below threshold
             time_df = time_df[time_df['{}Year of Event'.format(year_prefix)] == end_year]

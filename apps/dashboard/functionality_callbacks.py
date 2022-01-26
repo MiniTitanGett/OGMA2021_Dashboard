@@ -16,6 +16,7 @@ import dash_core_components as dcc
 from re import search
 from flask import session
 from dash import no_update
+import vaex
 
 # Internal Modules
 from apps.dashboard.graphs import __update_graph
@@ -138,6 +139,9 @@ for x in range(4):
         fitting_popup_text = no_update
         fitting_popup_is_open = no_update
         # --------------------------------------------------------------------------------------------------------------
+        # if new/delete while the graph already exists, prevent update
+        if changed_id == '.' and graph_display:
+            raise PreventUpdate
 
         # check if keyword in df_name
         if df_name is not None:
@@ -151,10 +155,6 @@ for x in range(4):
 
         if '"type":"tile-view"}.className' in changed_id and df_name is None and parent_df_name is None:
             return None, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open
-
-        # if new/delete while the graph already exists, prevent update
-        if changed_id == '.' and graph_display:
-            raise PreventUpdate
 
         if len(arg_value) == 0:
             return None, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open
@@ -761,8 +761,8 @@ def _update_table(page_current, page_size, sort_by, filter_query, _graph_trigger
                                period_type)
 
     # Reformat date column
-    dff['Date of Event'] = dff['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
-
+    # dff['Date of Event'] = dff['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
+    dff = dff.to_pandas_df()
     # Filter based on data table filters
     filtering_expressions = filter_query.split(' && ')
     for filter_part in filtering_expressions:

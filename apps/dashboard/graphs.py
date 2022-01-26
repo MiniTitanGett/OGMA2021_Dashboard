@@ -16,6 +16,7 @@ import dash_table
 import dash_html_components as html
 import dash
 import pandas as pd
+import vaex
 import plotly.graph_objects as go
 
 # Internal Modules
@@ -372,6 +373,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
         color = get_hierarchy_col(hierarchy_type, hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_path,
                                   df_name, df_const)
 
+        dff=dff.to_pandas_df()
         if arg_value[0] == 'Time':
             filtered_df = dff.copy().query(
                 "`{0}` == @arg_value[0] or "
@@ -1019,6 +1021,7 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
     language = session["language"]
     title = ''
     # Clean dataframe to display nicely
+    dff = dff.to_pandas_df()
     dff = dff.dropna(how='all', axis=1)
     # ------------------------------------------------------------------------------------------------------------------
 

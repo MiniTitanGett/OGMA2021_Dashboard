@@ -16,7 +16,6 @@ import dash_table
 import dash_html_components as html
 import dash
 import pandas as pd
-import vaex
 import plotly.graph_objects as go
 
 # Internal Modules
@@ -171,7 +170,7 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                         title = '{}: {} vs {}'.format(hierarchy_path[-1], arg_value[1], get_label('LBL_Time'))
 
         # df is not empty, create graph
-        if not filtered_df.empty:
+        if len(filtered_df) != 0:
             title += '<br><sub>{} {} </sub>'.format(get_label('LBL_Data_Accessed_On'), datetime.date(datetime.now()))
 
             # hierarchy type is "Level Filter", or "Specific Item" while "Graph all in Dropdown" is selected
@@ -186,6 +185,7 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                 legend_title_text = get_label('LBL_Variable_Names')
 
             # filter the dataframe down to the partial period selected
+            filtered_df = filtered_df.to_pandas_df()
             filtered_df['Partial Period'] = filtered_df['Partial Period'].astype(str).transform(
                 lambda j: get_label('LBL_TRUE') if j == 'True' else get_label('LBL_FALSE'))
             filtered_df.sort_values(by=[color, 'Date of Event'], inplace=True)
@@ -373,7 +373,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
         color = get_hierarchy_col(hierarchy_type, hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_path,
                                   df_name, df_const)
 
-        dff=dff.to_pandas_df()
+        dff = dff.to_pandas_df()
         if arg_value[0] == 'Time':
             filtered_df = dff.copy().query(
                 "`{0}` == @arg_value[0] or "
@@ -444,8 +444,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                         title = '{}: {} vs {}'.format(hierarchy_path[-1], arg_value[2], arg_value[4])
 
         # df is not empty, create graph
-        if not filtered_df.empty:
-
+        if len(filtered_df) != 0:
             title += '<br><sub>{} {} </sub>'.format(get_label('LBL_Data_Accessed_On'), datetime.date(datetime.now()))
             legend_title_text = get_label(
                 'LBL_' + hierarchy_level_dropdown, df_name) if hierarchy_type == 'Level Filter' else 'Traces'
@@ -701,8 +700,8 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             #     xaxis = {'type': 'date'}
 
         # df is not empty, create graph
-        if not filtered_df.empty:
-
+        if len(filtered_df) != 0:
+            filtered_df = filtered_df.to_pandas_df()
             # filter the dataframe down to the partial period selected
             filtered_df['Partial Period'] = filtered_df['Partial Period'].astype(str).transform(
                 lambda y: get_label('LBL_TRUE') if y != 'nan' else get_label('LBL_FALSE'))
@@ -725,7 +724,6 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                                         ignore_index=True)
 
             filtered_df.sort_values(by=['Date of Event', hierarchy_col, color], inplace=True)
-
             # generate graph
             fig = px.bar(
                 title=title,
@@ -897,7 +895,7 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                         title = '{}: {} {}'.format(hierarchy_path[-1], arg_value[0], get_label('LBL_Distribution'))
 
         # df is not empty, create graph
-        if not filtered_df.empty:
+        if len(filtered_df) != 0:
             title += '<br><sub>{} {} </sub>'.format(get_label('LBL_Data_Accessed_On'), datetime.date(datetime.now()))
 
             # if hierarchy type is "Level Filter", or "Specific Item" while "Graph all in Dropdown" is selected
@@ -908,16 +906,16 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                     y = hierarchy_level_dropdown
                 else:
                     y = df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)]
-                filtered_df.sort_values(by=[df_const[df_name]['VARIABLE_LEVEL'], y, x], inplace=True)
+                filtered_df.sort(by=[df_const[df_name]['VARIABLE_LEVEL'], y, x])
             # hierarchy type is specific item while "Graph all in Dropdown" is unselected
             else:
                 x = 'Measure Value'
                 y = None
-                filtered_df.sort_values(by=[df_const[df_name]['VARIABLE_LEVEL'], 'Measure Value'])
-
+                filtered_df.sort(by=[df_const[df_name]['VARIABLE_LEVEL'], 'Measure Value'])
+            filtered_df = filtered_df.to_pandas_df()
             # filter the dataframe down to the partial period selected
-            filtered_df['Date of Event'] = filtered_df['Date of Event'].transform(
-                lambda i: i.strftime(format='%Y-%m-%d'))
+            # filtered_df['Date of Event'] = filtered_df['Date of Event'].transform(
+            #     lambda i: i.strftime(format='%Y-%m-%d'))
             filtered_df['Partial Period'] = filtered_df['Partial Period'].astype(str).transform(
                 lambda j: get_label('LBL_TRUE') if j == 'True' else get_label('LBL_FALSE'))
 
@@ -1021,8 +1019,9 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
     language = session["language"]
     title = ''
     # Clean dataframe to display nicely
-    dff = dff.to_pandas_df()
-    dff = dff.dropna(how='all', axis=1)
+    n_samples = len(dff)
+    empty_cols = [col for col in dff.column_names if dff[col].countna() == n_samples]
+    dff = dff.drop(empty_cols)
     # ------------------------------------------------------------------------------------------------------------------
 
     # use special data title if no data
@@ -1068,8 +1067,8 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
     # Create table
     # If dataframe has a link column Links should be displayed in markdown w/ the form (https://www.---------):
     columns_for_dash_table = []
-
-    for i in dff.columns:
+    columns_names = dff.get_column_names(regex="^[a-zA-Z]")
+    for i in columns_names:
         if i == "Link":
             columns_for_dash_table.append(
                 {"name": get_label("LBL_Link", df_name), "id": i, "type": "text", "presentation": "markdown",
@@ -1081,7 +1080,7 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
     cond_style = []
 
     # appends dff columns to build the table
-    for col in dff.columns:
+    for col in columns_names:
         name_length = len(get_label('LBL_' + col.replace(' ', '_')))
         pixel = 50 + round(name_length * 6)
         pixel = str(pixel) + "px"
@@ -1147,7 +1146,7 @@ def get_sankey_figure(arg_value, dff, hierarchy_level_dropdown, hierarchy_path, 
     filtered_df = customize_menu_filter(dff, df_name, 'Link', arg_value[0], df_const)
 
     # df is not empty, create empty sankey graph
-    if filtered_df.empty:
+    if len(filtered_df) == 0:
         title += get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, arg_value[0],
                                           df_name, df_const)
         return dcc.Graph(

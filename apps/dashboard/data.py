@@ -148,6 +148,18 @@ def dataset_to_df(df_name):
             "Variable Name Qualifier",
             "Variable Name Sub Qualifier"]] = np.NaN
 
+        df_vaex["OPG Data Set"] = np.full(len(df), None, dtype=np.object)
+        df_vaex["Hierarchy One Name"] = np.full(len(df), None, dtype=np.object)
+        df_vaex["Hierarchy One Top"] = np.full(len(df), None, dtype=np.object)
+        df_vaex["Hierarchy One -1"] = np.full(len(df), None, dtype=np.object)
+        df_vaex["Hierarchy One -2"] = np.full(len(df), None, dtype=np.object)
+        df_vaex["Hierarchy One -3"] = np.full(len(df), None, dtype=np.object)
+        df_vaex["Hierarchy One -4"] = np.full(len(df), None, dtype=np.object)
+        df_vaex["Hierarchy One Leaf"] = np.full(len(df), None, dtype=np.object)
+        df_vaex["Variable Name"] = np.full(len(df), None, dtype=np.object)
+        df_vaex["Variable Name Qualifier"] = np.full(len(df), None, dtype=np.object)
+        df_vaex["Variable Name Sub Qualifier"] = np.full(len(df), None, dtype=np.object)
+
         # TODO: REPLACE VAR HIERARCHY ITERATION HERE
         list_of_depths = [[], [], []]
         var_levels = ["Variable Name", "Variable Name Qualifier", "Variable Name Sub Qualifier"]
@@ -1704,7 +1716,8 @@ def customize_menu_filter(dff, df_name, measure_type, variable_names, df_const):
             aggregate_df = aggregate_df.append(
                 pandas_df[pandas_df[df_const[df_name]['VARIABLE_LEVEL']] == variable_name])
 
-        filtered_df = aggregate_df
+        # filtered_df = aggregate_df
+        filtered_df = vaex.from_pandas(aggregate_df)
     return filtered_df
 
 

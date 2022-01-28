@@ -148,27 +148,59 @@ def dataset_to_df(df_name):
             "Variable Name Qualifier",
             "Variable Name Sub Qualifier"]] = np.NaN
 
-        df_vaex["OPG Data Set"] = np.full(len(df), None, dtype=np.object)
-        df_vaex["Hierarchy One Name"] = np.full(len(df), None, dtype=np.object)
-        df_vaex["Hierarchy One Top"] = np.full(len(df), None, dtype=np.object)
-        df_vaex["Hierarchy One -1"] = np.full(len(df), None, dtype=np.object)
-        df_vaex["Hierarchy One -2"] = np.full(len(df), None, dtype=np.object)
-        df_vaex["Hierarchy One -3"] = np.full(len(df), None, dtype=np.object)
-        df_vaex["Hierarchy One -4"] = np.full(len(df), None, dtype=np.object)
-        df_vaex["Hierarchy One Leaf"] = np.full(len(df), None, dtype=np.object)
-        df_vaex["Variable Name"] = np.full(len(df), None, dtype=np.object)
-        df_vaex["Variable Name Qualifier"] = np.full(len(df), None, dtype=np.object)
-        df_vaex["Variable Name Sub Qualifier"] = np.full(len(df), None, dtype=np.object)
+
+        df_vaex["OPG Data Set"] = np.ones(len(df), dtype=np.str)
+        df_vaex["Hierarchy One Name"] = np.ones(len(df), dtype=np.str)
+        df_vaex["Hierarchy One Top"] = np.ones(len(df), dtype=np.str)
+        df_vaex["Hierarchy One -1"] = np.ones(len(df), dtype=np.str)
+        df_vaex["Hierarchy One -2"] = np.ones(len(df), dtype=np.str)
+        df_vaex["Hierarchy One -3"] = np.ones(len(df), dtype=np.str)
+        df_vaex["Hierarchy One -4"] = np.ones(len(df), dtype=np.str)
+        df_vaex["Hierarchy One Leaf"] = np.ones(len(df), dtype=np.str)
+        df_vaex["Variable Name"] = np.ones(len(df), dtype=np.str)
+        df_vaex["Variable Name Qualifier"] = np.ones(len(df), dtype=np.str)
+        df_vaex["Variable Name Sub Qualifier"] = np.ones(len(df), dtype=np.str)
+
+        df_vaex['OPG Data Set'] = df_vaex.func.where(df_vaex['OPG Data Set'] == "1", '', df_vaex['OPG Data Set'])
+        df_vaex["Hierarchy One Name"] = df_vaex.func.where(df_vaex["Hierarchy One Name"] == '1', '',
+                                                           df_vaex["Hierarchy One Name"])
+        df_vaex["Hierarchy One Top"] = df_vaex.func.where(df_vaex["Hierarchy One Top"] == '1', '',
+                                                          df_vaex["Hierarchy One Top"])
+        df_vaex["Hierarchy One -1"] = df_vaex.func.where(df_vaex["Hierarchy One -1"] == '1', '',
+                                                         df_vaex["Hierarchy One -1"])
+        df_vaex["Hierarchy One -2"] = df_vaex.func.where(df_vaex["Hierarchy One -2"] == '1', '',
+                                                         df_vaex["Hierarchy One -2"])
+        df_vaex["Hierarchy One -3"] = df_vaex.func.where(df_vaex["Hierarchy One -3"] == '1', '',
+                                                         df_vaex["Hierarchy One -3"])
+        df_vaex["Hierarchy One -4"] = df_vaex.func.where(df_vaex["Hierarchy One -4"] == '1', '',
+                                                         df_vaex["Hierarchy One -4"])
+        df_vaex["Hierarchy One Leaf"] = df_vaex.func.where(df_vaex["Hierarchy One Leaf"] == '1', '',
+                                                           df_vaex["Hierarchy One Leaf"])
+        df_vaex['Variable Name'] = df_vaex.func.where(df_vaex['Variable Name'] == '1', '', df_vaex['Variable Name'])
+        df_vaex['Variable Name Qualifier'] = df_vaex.func.where(df_vaex['Variable Name Qualifier'] == '1', '',
+                                                            df_vaex['Variable Name Qualifier'])
+        df_vaex['Variable Name Sub Qualifier'] = df_vaex.func.where(df_vaex['Variable Name Sub Qualifier'] == '1', '',
+                                                                df_vaex['Variable Name Sub Qualifier'])
 
         # TODO: REPLACE VAR HIERARCHY ITERATION HERE
         list_of_depths = [[], [], []]
         var_levels = ["Variable Name", "Variable Name Qualifier", "Variable Name Sub Qualifier"]
-        dff = df[["Variable Value", "Variable Level"]].drop_duplicates()
+        # dff = df[["Variable Value", "Variable Level"]].drop_duplicates()
+        dff_vaex = df_vaex[["Variable Value", "Variable Level"]]
+        unique_value = dff_vaex["Variable Value"].unique()
         # init the depth lists
-        for x in dff["Variable Value"]:
-            depth = int(dff.loc[dff["Variable Value"] == x]["Variable Level"].iloc[0])
+        for x in unique_value:
+            depth_dff = dff_vaex[dff_vaex["Variable Value"] == x]
+            depth = depth_dff.evaluate("Variable Level")[0]
             list_of_depths[depth].append(x)
-            df.loc[df["Variable Value"] == x, var_levels[depth]] = x
+            df_vaex[var_levels[depth]] = df_vaex.func.where(df_vaex["Variable Value"] == x, x,
+                                                                 df_vaex[var_levels[depth]])
+
+        # list_of_depths = [[], [], []]
+        # for x in dff["Variable Value"]:
+        #     depth = int(dff.loc[dff["Variable Value"] == x]["Variable Level"].iloc[0])
+        #     list_of_depths[depth].append(x)
+        #     df.loc[df["Variable Value"] == x, var_levels[depth]] = x
 
         # begin reverse breadth first traversal, filling hierarchy along the way
         depth = 3
@@ -179,12 +211,29 @@ def dataset_to_df(df_name):
                 if parent not in list_of_depths[depth - 1]:
                     list_of_depths[depth - 1].append(parent)
                 # insert parent into table
-                df.loc[df[var_levels[depth]] == node, var_levels[depth - 1]] = parent
+                df_vaex[var_levels[depth-1]] = df_vaex.func.where(df_vaex[var_levels[depth]] == node, parent,
+                                                                df_vaex[var_levels[depth-1]])
+
+
+        # depth = 3
+        # for nodes_at_depth in reversed(list_of_depths):
+        #     depth = depth - 1
+        #     for node in nodes_at_depth:
+        #         parent = get_variable_parent(node, depth)
+        #         if parent not in list_of_depths[depth - 1]:
+        #             list_of_depths[depth - 1].append(parent)
+        #         # insert parent into table
+        #         df.loc[df[var_levels[depth]] == node, var_levels[depth - 1]] = parent
+
 
         # combine variable hierarchy columns into col for rows with qualifiers
         col = df[['Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier']].astype(
             str).agg(' '.join, axis=1)
         df[["Variable Value"]] = col
+        if df_vaex.data_type(df_vaex['Variable Name Sub Qualifier']) == str:
+            df_vaex['Variable Value'] = df_vaex['Variable Name'] + " " + df_vaex['Variable Name Qualifier'] + " " + df_vaex['Variable Name Sub Qualifier']
+        else:
+            df_vaex['Variable Value'] = df_vaex['Variable Name'] + " " + df_vaex['Variable Name Qualifier']
 
     else:
 
@@ -250,43 +299,53 @@ def dataset_to_df(df_name):
     df_vaex.rename('Hierarchy One -4', 'H4')
     df_vaex.rename('Hierarchy One Leaf', 'H5')
 
-    # df = df.rename(columns={'Hierarchy One Top': 'H0',
-    #                         'Hierarchy One -1': 'H1',
-    #                         'Hierarchy One -2': 'H2',
-    #                         'Hierarchy One -3': 'H3',
-    #                         'Hierarchy One -4': 'H4',
-    #                         'Hierarchy One Leaf': 'H5'})
+    df = df.rename(columns={'Hierarchy One Top': 'H0',
+                            'Hierarchy One -1': 'H1',
+                            'Hierarchy One -2': 'H2',
+                            'Hierarchy One -3': 'H3',
+                            'Hierarchy One -4': 'H4',
+                            'Hierarchy One Leaf': 'H5'})
     # replaces all strings that are just spaces with NaN
     # df.replace(to_replace=r'^\s*$', value=np.NaN, regex=True, inplace=True)
-    # df.replace(to_replace='', value=np.NaN, inplace=True)
+    df.replace(to_replace='', value=np.NaN, inplace=True)
 
-    df_vaex['OPG Data Set'] = df_vaex.func.where(df_vaex['OPG Data Set'] == "", None, df_vaex['OPG Data Set'])
-    df_vaex['H0'] = df_vaex.func.where(df_vaex['H0'] == '', None, df_vaex['H0'])
-    df_vaex['H1'] = df_vaex.func.where(df_vaex['H1'] == '', None, df_vaex['H1'])
-    df_vaex['H2'] = df_vaex.func.where(df_vaex['H2'] == '', None, df_vaex['H2'])
-    df_vaex['H3'] = df_vaex.func.where(df_vaex['H3'] == '', None, df_vaex['H3'])
-    df_vaex['H4'] = df_vaex.func.where(df_vaex['H4'] == '', None, df_vaex['H4'])
-    df_vaex['H5'] = df_vaex.func.where(df_vaex['H5'] == '', None, df_vaex['H5'])
-    df_vaex['Variable Name'] = df_vaex.func.where(df_vaex['Variable Name'] == '', None, df_vaex['Variable Name'])
-    df_vaex['Variable Name Qualifier'] = df_vaex.func.where(df_vaex['Variable Name Qualifier'] == '', None,
-                                                            df_vaex['Variable Name Qualifier'])
-    df_vaex['Variable Name Sub Qualifier'] = df_vaex.func.where(df_vaex['Variable Name Sub Qualifier'] == '', None,
-                                                                df_vaex['Variable Name Sub Qualifier'])
-    df_vaex['Calendar Entry Type'] = df_vaex.func.where(df_vaex['Calendar Entry Type'] == '', None,
-                                                        df_vaex['Calendar Entry Type'])
-    df_vaex['Measure Type']  = df_vaex.func.where(df_vaex['Measure Type']  == '', None, df_vaex['Measure Type'] )
-    df_vaex['Partial Period'] = df_vaex.func.where(df_vaex['Partial Period'] == '', 'False', df_vaex['Partial Period'])
-    df_vaex['Variable Value'] = df_vaex.func.where(df_vaex['Variable Value'] == '', None, df_vaex['Variable Value'])
+    # df_vaex['OPG Data Set'] = df_vaex.func.where(df_vaex['OPG Data Set'] == "", None, df_vaex['OPG Data Set'])
+    # df_vaex['H0'] = df_vaex.func.where(df_vaex['H0'] == '', None, df_vaex['H0'])
+    # df_vaex['H1'] = df_vaex.func.where(df_vaex['H1'] == '', None, df_vaex['H1'])
+    # df_vaex['H2'] = df_vaex.func.where(df_vaex['H2'] == '', None, df_vaex['H2'])
+    # df_vaex['H3'] = df_vaex.func.where(df_vaex['H3'] == '', None, df_vaex['H3'])
+    # df_vaex['H4'] = df_vaex.func.where(df_vaex['H4'] == '', None, df_vaex['H4'])
+    # df_vaex['H5'] = df_vaex.func.where(df_vaex['H5'] == '', None, df_vaex['H5'])
+    # df_vaex['Variable Name'] = df_vaex.func.where(df_vaex['Variable Name'] == '', None, df_vaex['Variable Name'])
+    # df_vaex['Variable Name Qualifier'] = df_vaex.func.where(df_vaex['Variable Name Qualifier'] == '', None,
+    #                                                         df_vaex['Variable Name Qualifier'])
+    # df_vaex['Variable Name Sub Qualifier'] = df_vaex.func.where(df_vaex['Variable Name Sub Qualifier'] == '', None,
+    #                                                             df_vaex['Variable Name Sub Qualifier'])
+    # df_vaex['Calendar Entry Type'] = df_vaex.func.where(df_vaex['Calendar Entry Type'] == '', None,
+    #                                                     df_vaex['Calendar Entry Type'])
+    # df_vaex['Measure Type'] = df_vaex.func.where(df_vaex['Measure Type'] == '', None, df_vaex['Measure Type'])
+    # df_vaex['Partial Period'] = df_vaex.func.where(df_vaex['Partial Period'] == '', 'False', df_vaex['Partial Period'])
+    # df_vaex['Variable Value'] = df_vaex.func.where(df_vaex['Variable Value'] == '', None, df_vaex['Variable Value'])
 
     # if OPG011 we need to construct the tree by asking for the parents of unique values
     if df_name == "OPG011":
         list_of_depths = [[], [], [], [], [], []]
-        dff = df[["Hierarchy Value", "Hierarchy Level"]].drop_duplicates()
+        # dff = df[["Hierarchy Value", "Hierarchy Level"]].drop_duplicates()
+
+        dff_vaex = df_vaex[["Hierarchy Value", "Hierarchy Level"]]
+        unique_value = df_vaex["Hierarchy Value"].unique()
         # init the depth lists
-        for x in dff["Hierarchy Value"]:
-            depth = int(dff.loc[dff["Hierarchy Value"] == x]["Hierarchy Level"].iloc[0])
+        for x in unique_value:
+            depth_dff = dff_vaex[dff_vaex["Hierarchy Value"] == x]
+            depth = depth_dff.evaluate("Hierarchy Level")[0]
             list_of_depths[depth].append(x)
-            df.loc[df["Hierarchy Value"] == x, "H{}".format(depth)] = x
+            df_vaex["H{}".format(depth)] = df_vaex.func.where(df_vaex["Hierarchy Value"] == x, x,
+                                                                 df_vaex["H{}".format(depth)])
+        #
+        # for x in dff["Hierarchy Value"]:
+        #     depth = int(dff.loc[dff["Hierarchy Value"] == x]["Hierarchy Level"].iloc[0])
+        #     list_of_depths[depth].append(x)
+        #     df.loc[df["Hierarchy Value"] == x, "H{}".format(depth)] = x
 
         # begin reverse breadth first traversal, filling hierarchy along the way
         depth = 6
@@ -297,7 +356,19 @@ def dataset_to_df(df_name):
                 if parent not in list_of_depths[depth - 1]:
                     list_of_depths[depth - 1].append(parent)
                 # insert parent into table
-                df.loc[df["H{}".format(depth)] == node, "H{}".format(depth - 1)] = parent
+                df_vaex["H{}".format(depth - 1)] = df_vaex.func.where(df_vaex["H{}".format(depth)] == node, parent,
+                                                            df_vaex["H{}".format(depth - 1)])
+                # df.loc[df["H{}".format(depth)] == node, "H{}".format(depth - 1)] = parent
+
+        # depth = 6
+        # for nodes_at_depth in reversed(list_of_depths):
+        #     depth = depth - 1
+        #     for node in nodes_at_depth:
+        #         parent = get_hierarchy_parent(node, depth)
+        #         if parent not in list_of_depths[depth - 1]:
+        #             list_of_depths[depth - 1].append(parent)
+        #         # insert parent into table
+        #         df.loc[df["H{}".format(depth)] == node, "H{}".format(depth - 1)] = parent
 
     # else:
         # df_vaex = df_vaex.label_encode('Variable Value')
@@ -315,14 +386,15 @@ def dataset_to_df(df_name):
         #                             'Variable Name Sub Qualifier', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5'])
 
     # If we are dealing with links in the future we must format them as follows and edit the table drawer
-    # if 'Link' in df.columns:
-    #     df.Link = list(map(lambda x: '[Link]({})'.format(x), df.Link))
-    if 'Link' in df_vaex.column_names:
-        df_vaex.Link = list(map(lambda x: '[Link]({})'.format(x), df.Link))
+    if 'Link' in df.columns:
+        df.Link = list(map(lambda x: '[Link]({})'.format(x), df.Link))
+    # if 'Link' in df_vaex.column_names:
+    #     df_vaex.Link = list(map(lambda x: '[Link]({})'.format(x), df.Link))
 
     logging.debug("dataset {} loaded.".format(df_name))
     return df_vaex
-    # return df
+    #return df
+
 
 def generate_constants(df_name):
     """Generates the constants required to be stored for the given dataset."""
@@ -340,8 +412,13 @@ def generate_constants(df_name):
     MEASURE_TYPE_OPTIONS.sort()
 
     if df_name == 'OPG011':
+        # df = vaex.from_pandas(df)
         # TODO: Remove when variable value is created in OPG011 time_df
         VARIABLE_LEVEL = 'Variable Name'
+        # min_date_unf = df['Date of Event'].dt.date.values.min()
+        # max_date_unf = df['Date of Event'].dt.date.values.max()
+        # min_date_unf = min_date_unf.astype(datetime)
+        # max_date_unf = max_date_unf.astype(datetime)
         try:
             min_date_unf = datetime.strptime(df.loc[df['Date of Event'].astype('datetime64[ns]').idxmin(),
                                                     'Date of Event'], '%Y/%m/%d')
@@ -394,6 +471,12 @@ def generate_constants(df_name):
         # replaces all Y in Partial Period with True & False
         df['Partial Period'] = df['Partial Period'].transform(lambda x: x == 'Y')
 
+        # df['Partial Period'] = df.func.where(df['Partial Period'] == 'F', 'False',
+        #                                      df['Partial Period'])
+        # df['Partial Period'] = df.func.where(df['Partial Period'] == 'T', 'True',
+        #                                      df['Partial Period'])
+        # df['Partial Period'] = df['Partial Period'].astype('bool')
+
         # Sets the Date of Event in the df to be in the correct format for Plotly
         # df['Date of Event'] = df['Date of Event'].transform(
         #     lambda x: pd.to_datetime(x, format='%Y%m%d', errors='ignore'))
@@ -401,6 +484,11 @@ def generate_constants(df_name):
         options = []
         variable_option_lists = []
         # appends all versions of the hierarchy to the unique vars list (ex) a child is b child is c -> [a, a b, a b c]
+        one= df['Variable Name'].unique().astype(str).tolist()
+        two=df[['Variable Name', 'Variable Name Qualifier']].fillna(
+            '').astype(str).agg(' '.join, axis=1).unique().tolist()
+        all=df[['Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier']].fillna(
+            '').astype(str).agg(' '.join, axis=1).unique().tolist()
         unique_vars = df['Variable Name'].unique().astype(str).tolist() + \
                       df[['Variable Name', 'Variable Name Qualifier']].fillna(
                           '').astype(str).agg(' '.join, axis=1).unique().tolist() + \
@@ -519,7 +607,7 @@ def generate_constants(df_name):
             dff = df.filter(df['Calendar Entry Type'] == 'Week')
             FISCAL_WEEK_MAX_YEAR = int(dff['Fiscal Year of Event'].max())
 
-            dff = df.filter(df['Fiscal Year of Event']== FISCAL_WEEK_MAX_YEAR)
+            dff = df.filter(df['Fiscal Year of Event'] == FISCAL_WEEK_MAX_YEAR)
             FISCAL_WEEK_FRINGE_MAX = int(dff['Fiscal Week of Event'].max())
 
         else:
@@ -556,6 +644,8 @@ def generate_constants(df_name):
 
         MIN_DATE_UNF = df['Date of Event'].dt.date.values.min()
         MAX_DATE_UNF = df['Date of Event'].dt.date.values.max()
+        MIN_DATE_UNF = MIN_DATE_UNF.astype(datetime).strftime('%m/%d/%Y')
+        MAX_DATE_UNF = MAX_DATE_UNF.astype(datetime).strftime('%m/%d/%Y')
 
         # replaces all Y in Partial Period with True & False
         # df['Partial Period'] = df['Partial Period'].transform(lambda x: x == 'Y')
@@ -753,14 +843,16 @@ def data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_drop
                     # bool_series = pd.isnull(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][
                     #     len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]])
                     # filtered_df = filtered_df[bool_series]
-                    filtered_df = filtered_df.filter(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]].ismissing())
+                    filtered_df = filtered_df.filter(filtered_df[df_const[df_name]['HIERARCHY_LEVELS']
+                                                     [len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]].ismissing())
             else:
                 # Returns empty data frame with column names
                 filtered_df = filtered_df[0:0]
         else:
             # Filters out all rows that are less specific than given path length
             for i in range(len(hierarchy_path)):
-                filtered_df = filtered_df.filter(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i])
+                filtered_df = filtered_df.filter(filtered_df[df_const[df_name]
+                                                 ['HIERARCHY_LEVELS'][i]] == hierarchy_path[i])
             # Filters out all rows that are more specific than given path length plus one to preserve the child column
             for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - (len(hierarchy_path) + 1)):
                 # bool_series = pd.isnull(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][
@@ -867,15 +959,16 @@ def data_time_filter(secondary_type, end_secondary, end_year, start_secondary, s
                 # Include entirety of in-between years
                 # range_df = range_df.append(
                 #     time_df[time_df['{}Year of Event'.format(year_prefix)] == (start_year + i + 1)])
-                range_df = range_df.concat(time_df[time_df['{}Year of Event'.format(year_prefix)] == (start_year + i + 1)])
+                range_df = range_df.concat(time_df[time_df
+                                                   ['{}Year of Event'.format(year_prefix)] == (start_year + i + 1)])
 
             # Filter end year below threshold
             time_df = time_df[time_df['{}Year of Event'.format(year_prefix)] == end_year]
             time_df = time_df[time_df[division_column] < end_secondary]
             dff = range_df.concat(time_df)
-            #range_df = range_df.append(time_df)
+            # range_df = range_df.append(time_df)
             # Update working df
-            time_df = range_df.copy()
+            time_df = dff
     else:
         # Data frame filtered to be in inputted year range
         time_df = filtered_df.copy()
@@ -1706,7 +1799,6 @@ def customize_menu_filter(dff, df_name, measure_type, variable_names, df_const):
 
         pandas_df = filtered_df.to_pandas_df()
         aggregate_df = pd.DataFrame()
-
 
         # for each selection, add the rows defined by the selection
         for variable_name in variable_names:

@@ -705,8 +705,8 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             # filter the dataframe down to the partial period selected
             filtered_df['Partial Period'] = filtered_df['Partial Period'].astype(str).transform(
                 lambda y: get_label('LBL_TRUE') if y != 'nan' else get_label('LBL_FALSE'))
-            filtered_df['Date of Event'] = \
-                filtered_df['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
+            # filtered_df['Date of Event'] = \
+            #     filtered_df['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
 
             # checks if arg_value[4]: animation is toggled
             if arg_value[4]:

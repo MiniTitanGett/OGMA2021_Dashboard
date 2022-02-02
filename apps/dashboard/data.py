@@ -1968,7 +1968,7 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                     #      True if unique_data['Partial Period'].iloc[0] is True else np.nan])
                     row_list.append(
                         [unique_data.evaluate('OPG Data Set')[0],
-                         unique_data.evaluate('Hierarchy One Name')[0].as_py(),
+                         unique_data.evaluate('Hierarchy One Name')[0],
                          h0.as_py() if isinstance(h0, pyarrow.Scalar) else h0,
                          h1.as_py() if isinstance(h1, pyarrow.Scalar) else h1,
                          h2.as_py() if isinstance(h2, pyarrow.Scalar) else h2,

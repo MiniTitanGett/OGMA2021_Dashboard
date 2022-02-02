@@ -759,6 +759,8 @@ def _update_table(page_current, page_size, sort_by, filter_query, _graph_trigger
                                hierarchy_graph_children, df_name, df_const, secondary_type, end_secondary,
                                end_year, start_secondary, start_year, timeframe, fiscal_toggle, num_periods,
                                period_type)
+        if len(dff) == 0:
+            return [], 0
 
     # Reformat date column
     # dff['Date of Event'] = dff['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))

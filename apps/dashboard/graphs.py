@@ -363,6 +363,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
     language = session["language"]
     xaxis = None
     yaxis = None
+    filtered_df = []
 
     # Check whether we have enough information to attempt getting data for a graph
     if hierarchy_type == 'Level Filter' and None not in [arg_value, hierarchy_level_dropdown, hierarchy_type,
@@ -372,39 +373,39 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
 
         color = get_hierarchy_col(hierarchy_type, hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_path,
                                   df_name, df_const)
-
-        dff = dff.to_pandas_df()
-        if arg_value[0] == 'Time':
-            filtered_df = dff.copy().query(
-                "`{0}` == @arg_value[0] or "
-                "(`{0}` == @arg_value[2] and `Measure Type` == @arg_value[3]) or "
-                "(`{0}` == @arg_value[4] and `Measure Type` == @arg_value[5])".format(
-                df_const[df_name]['VARIABLE_LEVEL']))
-            filtered_df[['Date of Event', 'Variable Name', 'Partial Period', color]] = \
-                filtered_df[
-                    ['Date of Event', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]].astype(str)
-            filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color],
-                                                  columns=[df_const[df_name]['VARIABLE_LEVEL'], 'Measure Type'],
-                                                  values='Measure Value').reset_index()
-        else:
-            # Specialty filtering
-            # pandas.core.computation.ops.UndefinedVariableError: name 'BACKTICK_QUOTED_STRING__LBRACE_0_RBRACE_'
-            # is not defined # TODO: Error
-            filtered_df = dff.copy().query(
-                "(`{0}` == @arg_value[0] and `Measure Type` == @arg_value[1]) or "
-                "(`{0}` == @arg_value[2] and `Measure Type` == @arg_value[3]) or "
-                "(`{0}` == @arg_value[4] and `Measure Type` == @arg_value[5])".format(
+        if len(dff) != 0:
+            dff = dff.to_pandas_df()
+            if arg_value[0] == 'Time':
+                filtered_df = dff.copy().query(
+                    "`{0}` == @arg_value[0] or "
+                    "(`{0}` == @arg_value[2] and `Measure Type` == @arg_value[3]) or "
+                    "(`{0}` == @arg_value[4] and `Measure Type` == @arg_value[5])".format(
                     df_const[df_name]['VARIABLE_LEVEL']))
-            filtered_df[
-                ['Date of Event', 'Measure Type', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]] = \
-            filtered_df[
-                ['Date of Event', 'Measure Type', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]].astype(
-                str)
-            filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color],
-                                                  columns=[df_const[df_name]['VARIABLE_LEVEL'], 'Measure Type'],
-                                                  values='Measure Value').reset_index()
+                filtered_df[['Date of Event', 'Variable Name', 'Partial Period', color]] = \
+                    filtered_df[
+                        ['Date of Event', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]].astype(str)
+                filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color],
+                                                      columns=[df_const[df_name]['VARIABLE_LEVEL'], 'Measure Type'],
+                                                      values='Measure Value').reset_index()
+            else:
+                # Specialty filtering
+                # pandas.core.computation.ops.UndefinedVariableError: name 'BACKTICK_QUOTED_STRING__LBRACE_0_RBRACE_'
+                # is not defined # TODO: Error
+                filtered_df = dff.copy().query(
+                    "(`{0}` == @arg_value[0] and `Measure Type` == @arg_value[1]) or "
+                    "(`{0}` == @arg_value[2] and `Measure Type` == @arg_value[3]) or "
+                    "(`{0}` == @arg_value[4] and `Measure Type` == @arg_value[5])".format(
+                        df_const[df_name]['VARIABLE_LEVEL']))
+                filtered_df[
+                    ['Date of Event', 'Measure Type', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]] = \
+                filtered_df[
+                    ['Date of Event', 'Measure Type', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]].astype(
+                    str)
+                filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color],
+                                                      columns=[df_const[df_name]['VARIABLE_LEVEL'], 'Measure Type'],
+                                                      values='Measure Value').reset_index()
 
-        filtered_df = filtered_df.dropna()
+            filtered_df = filtered_df.dropna()
 
         # hierarchy type is "Level Filter", or "Specific Item" while "Graph all in Dropdown" is selected
         if hierarchy_type == 'Level Filter' or (hierarchy_type == 'Specific Item' and
@@ -1019,9 +1020,10 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
     language = session["language"]
     title = ''
     # Clean dataframe to display nicely
-    n_samples = len(dff)
-    empty_cols = [col for col in dff.column_names if dff[col].countna() == n_samples]
-    dff = dff.drop(empty_cols)
+    length_dff = len(dff)
+    if length_dff != 0:
+        empty_cols = [col for col in dff.column_names if dff[col].countna() == length_dff]
+        dff = dff.drop(empty_cols)
     # ------------------------------------------------------------------------------------------------------------------
 
     # use special data title if no data

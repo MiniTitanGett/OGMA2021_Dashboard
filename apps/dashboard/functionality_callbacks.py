@@ -764,8 +764,7 @@ def _update_table(page_current, page_size, sort_by, filter_query, _graph_trigger
 
     # Reformat date column
     # dff['Date of Event'] = dff['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
-    dff = dff.to_pandas_df()
-    # Filter based on data table filters
+        # Filter based on data table filters
     filtering_expressions = filter_query.split(' && ')
     for filter_part in filtering_expressions:
         col_name, operator, filter_value = split_filter_part(filter_part)

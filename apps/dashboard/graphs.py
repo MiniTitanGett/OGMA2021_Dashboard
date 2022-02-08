@@ -188,6 +188,8 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
             filtered_df = filtered_df.to_pandas_df()
             filtered_df['Partial Period'] = filtered_df['Partial Period'].astype(str).transform(
                 lambda j: get_label('LBL_TRUE') if j == 'True' else get_label('LBL_FALSE'))
+            filtered_df['Date of Event'] = \
+                filtered_df['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
             filtered_df.sort_values(by=[color, 'Date of Event'], inplace=True)
             # generate graph
             fig = px.line(
@@ -364,7 +366,6 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
     xaxis = None
     yaxis = None
     filtered_df = []
-
     # Check whether we have enough information to attempt getting data for a graph
     if hierarchy_type == 'Level Filter' and None not in [arg_value, hierarchy_level_dropdown, hierarchy_type,
                                                          hierarchy_graph_children, df_name, df_const] \
@@ -374,7 +375,6 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
         color = get_hierarchy_col(hierarchy_type, hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_path,
                                   df_name, df_const)
         if len(dff) != 0:
-            dff = dff.to_pandas_df()
             if arg_value[0] == 'Time':
                 filtered_df = dff.copy().query(
                     "`{0}` == @arg_value[0] or "
@@ -452,6 +452,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
             # filter the dataframe down to the partial period selected
             filtered_df['Partial Period'] = filtered_df['Partial Period'].astype(str).transform(
                 lambda j: get_label('LBL_TRUE') if j == 'True' else get_label('LBL_FALSE'))
+            filtered_df['Date of Event'] = \
+                filtered_df['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
             # lambda j: get_label('LBL_TRUE') if j != 'nan' else get_label('LBL_FALSE'))
             filtered_df.sort_values(by=['Date of Event', color], inplace=True)
             filtered_df['Date of Event'] = filtered_df['Date of Event'].astype(str)
@@ -702,12 +704,11 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
 
         # df is not empty, create graph
         if len(filtered_df) != 0:
-            filtered_df = filtered_df.to_pandas_df()
             # filter the dataframe down to the partial period selected
             filtered_df['Partial Period'] = filtered_df['Partial Period'].astype(str).transform(
                 lambda y: get_label('LBL_TRUE') if y != 'nan' else get_label('LBL_FALSE'))
-            # filtered_df['Date of Event'] = \
-            #     filtered_df['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
+            filtered_df['Date of Event'] = \
+                filtered_df['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
 
             # checks if arg_value[4]: animation is toggled
             if arg_value[4]:
@@ -907,16 +908,16 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                     y = hierarchy_level_dropdown
                 else:
                     y = df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)]
-                filtered_df.sort(by=[df_const[df_name]['VARIABLE_LEVEL'], y, x])
+                filtered_df.sort_values(by=[df_const[df_name]['VARIABLE_LEVEL'], y, x], inplace=True)
             # hierarchy type is specific item while "Graph all in Dropdown" is unselected
             else:
                 x = 'Measure Value'
                 y = None
-                filtered_df.sort(by=[df_const[df_name]['VARIABLE_LEVEL'], 'Measure Value'])
-            filtered_df = filtered_df.to_pandas_df()
+                filtered_df.sort_values(by=[df_const[df_name]['VARIABLE_LEVEL'], 'Measure Value'], inplace=True)
+
             # filter the dataframe down to the partial period selected
-            # filtered_df['Date of Event'] = filtered_df['Date of Event'].transform(
-            #     lambda i: i.strftime(format='%Y-%m-%d'))
+            filtered_df['Date of Event'] = filtered_df['Date of Event'].transform(
+                lambda i: i.strftime(format='%Y-%m-%d'))
             filtered_df['Partial Period'] = filtered_df['Partial Period'].astype(str).transform(
                 lambda j: get_label('LBL_TRUE') if j == 'True' else get_label('LBL_FALSE'))
 
@@ -1021,9 +1022,10 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
     title = ''
     # Clean dataframe to display nicely
     length_dff = len(dff)
-    if length_dff != 0:
-        empty_cols = [col for col in dff.column_names if dff[col].countna() == length_dff]
-        dff = dff.drop(empty_cols)
+    dff = dff.dropna(how='all', axis=1)
+    # if length_dff != 0:
+    #     empty_cols = [col for col in dff.column_names if dff[col].countna() == length_dff]
+    #     dff = dff.drop(empty_cols)
     # ------------------------------------------------------------------------------------------------------------------
 
     # use special data title if no data
@@ -1069,8 +1071,7 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
     # Create table
     # If dataframe has a link column Links should be displayed in markdown w/ the form (https://www.---------):
     columns_for_dash_table = []
-    columns_names = dff.get_column_names(regex="^[a-zA-Z]")
-    for i in columns_names:
+    for i in dff.columns:
         if i == "Link":
             columns_for_dash_table.append(
                 {"name": get_label("LBL_Link", df_name), "id": i, "type": "text", "presentation": "markdown",
@@ -1082,7 +1083,7 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
     cond_style = []
 
     # appends dff columns to build the table
-    for col in columns_names:
+    for col in dff.columns:
         name_length = len(get_label('LBL_' + col.replace(' ', '_')))
         pixel = 50 + round(name_length * 6)
         pixel = str(pixel) + "px"

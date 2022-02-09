@@ -1244,7 +1244,6 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                                     nid_path += '^||^{}'.format(button['props']['children'])
 
                                 df_names[i] = prev_selection[i]
-                                df_const[df_names[i]] = generate_constants(df_names[i])
                                 data[i] = get_data_menu(i, df_names[i],
                                                         hierarchy_toggle=parent_hierarchy_toggle,
                                                         level_value=parent_hierarchy_drop,
@@ -1500,7 +1499,24 @@ app.clientside_callback(
                 else{
                     return 0;
                 }
-            } else {
+            }
+            else if(triggered.includes('"prompt-result')){
+                if (prompt_result == "cancel"){
+                    try{
+                            document.getElementById('loading').remove();
+                        }catch{ /* Do Nothing */ }
+                }
+                else if (prompt_result == "op-2"){
+                        let newDiv = document.createElement('div');
+                        newDiv.className = '_data-loading';
+                        newDiv.id = 'loading';
+                        document.body.appendChild(newDiv, document.getElementById('content'));
+                }
+                else {
+                        return 0;
+                }
+            } 
+            else {
                 // Do something if class does not exist
                 let newDiv = document.createElement('div');
                 newDiv.className = '_data-loading';

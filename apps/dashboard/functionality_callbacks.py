@@ -267,12 +267,13 @@ for x in range(5):
          Input({'type': 'hierarchy_to_top', 'index': x}, 'n_clicks'),
          Input({'type': 'button: {}'.replace("{}", str(x)), 'index': ALL}, 'n_clicks')],
         [State({'type': 'hierarchy_display_button', 'index': x}, 'children'),
-         State({'type': 'data-set', 'index': x}, 'value')],
+         State({'type': 'data-set', 'index': x}, 'value'),
+         State('df-constants-storage', 'data')],
         prevent_initial_call=True
     )
     def _print_choice_to_display_and_modify_dropdown(dropdown_val, _n_clicks_r, _n_clicks_tt,
                                                      n_clicks_click_history, state_of_display,
-                                                     df_name):
+                                                     df_name, df_const):
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
         # if page loaded - prevent update
         if changed_id == '.':
@@ -311,26 +312,28 @@ for x in range(5):
             state_of_display.pop()
             display_button = state_of_display
             nid_path = get_nid_path(sod=state_of_display)
-            dropdown = generate_dropdown(changed_index, df_name, nid_path)
+            dropdown = generate_dropdown(changed_index, df_name, nid_path, df_const)
         elif 'hierarchy_to_top' in changed_id or 'data-set' in changed_id:
             display_button = []
             nid_path = get_nid_path()
-            dropdown = generate_dropdown(changed_index, df_name, nid_path)
+            dropdown = generate_dropdown(changed_index, df_name, nid_path, df_const)
         elif 'hierarchy_specific_dropdown' in changed_id:
             # If dropdown has been remade, do not modify the history
             if dropdown_val is None:
                 raise PreventUpdate
             # If nothing in history return value
             elif not state_of_display:
-                display_button = generate_history_button(dropdown_val, 0, changed_index)
-                nid_path = get_nid_path(dropdown_value=dropdown_val)
-                dropdown = generate_dropdown(changed_index, df_name, nid_path)
+                display_button = generate_history_button(dropdown_val, 0, changed_index, df_name, df_const)
+                nid_path = get_nid_path(dropdown_value=df_const[df_name]["Categorical_Data"]["H"+str(0)]["labels"]
+                                                    [dropdown_val] if isinstance(dropdown_val, int) else dropdown_val)
+                dropdown = generate_dropdown(changed_index, df_name, nid_path, df_const)
             # If something is in the history preserve it and add value to it
             else:
                 display_button = state_of_display + [
-                    (generate_history_button(dropdown_val, len(state_of_display), changed_index))]
-                nid_path = get_nid_path(sod=state_of_display, dropdown_value=dropdown_val)
-                dropdown = generate_dropdown(changed_index, df_name, nid_path)
+                    (generate_history_button(dropdown_val, len(state_of_display), changed_index, df_name, df_const))]
+                nid_path = get_nid_path(sod=state_of_display, dropdown_value=df_const[df_name]["Categorical_Data"]["H"+str(len(state_of_display))]["labels"]
+                                                    [dropdown_val] if isinstance(dropdown_val, int) else dropdown_val)
+                dropdown = generate_dropdown(changed_index, df_name, nid_path, df_const)
         # If update triggered due to creation of a button do not update anything
         elif all(i == 0 for i in n_clicks_click_history):
             raise PreventUpdate
@@ -341,7 +344,7 @@ for x in range(5):
             history[index]['props']['n_clicks'] = 0
             display_button = history
             nid_path = get_nid_path(sod=history)
-            dropdown = generate_dropdown(changed_index, df_name, nid_path)
+            dropdown = generate_dropdown(changed_index, df_name, nid_path, df_const)
 
         # check if leaf node, if so say graph all siblings instead of graph all in dropdown
         if 'options=[]' not in str(dropdown):
@@ -793,6 +796,124 @@ def _update_table(page_current, page_size, sort_by, filter_query, _graph_trigger
 
     return dff.iloc[page_current * page_size: (page_current + 1) * page_size].to_dict('records'), \
            math.ceil(dff.iloc[:, 0].size / page_size)
+
+
+# @app.callback(
+#         Output({'type': 'pivottable', 'index': MATCH}, 'data'),
+#         # update graph trigger
+#         [Input({'type': 'update-graph-trigger', 'index': MATCH}, 'data-graph_menu_trigger'),
+#         Input({'type': 'update-graph-trigger', 'index': MATCH}, 'data-graph_menu_pivottable_trigger')],
+#         # Link state
+#         [State({'type': 'tile-link', 'index': MATCH}, 'className'),
+#          # Data set state
+#          State({'type': 'data-set', 'index': MATCH}, 'value'),
+#          # Date picker state
+#          State({'type': 'start-year-input', 'index': MATCH}, 'name'),
+#          State({'type': 'radio-timeframe', 'index': MATCH}, 'value'),
+#          State({'type': 'fiscal-year-toggle', 'index': MATCH}, 'value'),
+#          State({'type': 'start-year-input', 'index': MATCH}, 'value'),
+#          State({'type': 'end-year-input', 'index': MATCH}, 'value'),
+#          State({'type': 'start-secondary-input', 'index': MATCH}, 'value'),
+#          State({'type': 'end-secondary-input', 'index': MATCH}, 'value'),
+#          State({'type': 'num-periods', 'index': MATCH}, 'value'),
+#          State({'type': 'period-type', 'index': MATCH}, 'value'),
+#          # Hierarchy states for tile
+#          State({'type': 'hierarchy-toggle', 'index': MATCH}, 'value'),
+#          State({'type': 'hierarchy_level_dropdown', 'index': MATCH}, 'value'),
+#          State({'type': 'hierarchy_display_button', 'index': MATCH}, 'children'),
+#          State({'type': 'graph_children_toggle', 'index': MATCH}, 'value'),
+#          State({'type': 'hierarchy_specific_dropdown', 'index': MATCH}, 'options'),
+#          # Date picker states for parent data menu
+#          State({'type': 'start-year-input', 'index': 4}, 'name'),
+#          State({'type': 'radio-timeframe', 'index': 4}, 'value'),
+#          State({'type': 'fiscal-year-toggle', 'index': 4}, 'value'),
+#          State({'type': 'start-year-input', 'index': 4}, 'value'),
+#          State({'type': 'end-year-input', 'index': 4}, 'value'),
+#          State({'type': 'start-secondary-input', 'index': 4}, 'value'),
+#          State({'type': 'end-secondary-input', 'index': 4}, 'value'),
+#          State({'type': 'num-periods', 'index': 4}, 'value'),
+#          State({'type': 'period-type', 'index': 4}, 'value'),
+#          # Hierarchy States for parent data menu
+#          State({'type': 'hierarchy-toggle', 'index': 4}, 'value'),
+#          State({'type': 'hierarchy_level_dropdown', 'index': 4}, 'value'),
+#          State({'type': 'hierarchy_display_button', 'index': 4}, 'children'),
+#          State({'type': 'graph_children_toggle', 'index': 4}, 'value'),
+#          State({'type': 'hierarchy_specific_dropdown', 'index': 4}, 'options'),
+#          # Parent Data set
+#          State({'type': 'data-set', 'index': 4}, 'value'),
+#          State('df-constants-storage', 'data'),
+#          State({'type': 'data-set-parent', 'index': 4}, 'value'),
+#          # pivottable
+#          State({'type': 'pivottable', 'index': MATCH}, 'row'),
+#          State({'type': 'pivottable', 'index': MATCH}, 'col'),
+#          State({'type': 'pivottable', 'index': MATCH}, 'data')]
+# )
+# def _update_pivot_table(_graph_trigger, _table_trigger, link_state,
+#                       df_name, secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
+#                       end_secondary, num_periods, period_type, hierarchy_toggle, hierarchy_level_dropdown,
+#                       state_of_display, hierarchy_graph_children, hierarchy_options, parent_secondary_type,
+#                       parent_timeframe, parent_fiscal_toggle, parent_start_year, parent_end_year,
+#                       parent_start_secondary, parent_end_secondary, parent_num_periods, parent_period_type,
+#                       parent_hierarchy_toggle, parent_hierarchy_level_dropdown, parent_state_of_display,
+#                       parent_hierarchy_graph_children, parent_hierarchy_options, parent_df_name, df_const, df_confirm, row, col, data):
+#
+#     if link_state == 'fa fa-link' and df_name is None:
+#         secondary_type = parent_secondary_type
+#         timeframe = parent_timeframe
+#         fiscal_toggle = parent_fiscal_toggle
+#         start_year = parent_start_year
+#         end_year = parent_end_year
+#         start_secondary = parent_start_secondary
+#         end_secondary = parent_end_secondary
+#         hierarchy_toggle = parent_hierarchy_toggle
+#         hierarchy_level_dropdown = parent_hierarchy_level_dropdown
+#         state_of_display = parent_state_of_display
+#         hierarchy_graph_children = parent_hierarchy_graph_children
+#         num_periods = parent_num_periods
+#         period_type = parent_period_type
+#         hierarchy_options = parent_hierarchy_options
+#         if df_confirm is not None:
+#             df_name = df_confirm
+#         else:
+#             df_name = parent_df_name
+#
+#     # prevent update if invalid selections exist - should be handled by update_datepicker, but double check
+#     if not start_year or not end_year or not start_secondary or not end_secondary:
+#         raise PreventUpdate
+#
+#     # Creates a hierarchy trail from the display
+#     if type(state_of_display) == dict:
+#         state_of_display = [state_of_display]
+#     list_of_names = []
+#     if len(state_of_display) > 0:
+#         for obj in state_of_display:
+#             list_of_names.append(obj['props']['children'])
+#
+#     if hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == ['graph_children']:
+#         # If at a leaf node then display it's parents data
+#         nid_path = "root"
+#         for i in list_of_names:
+#             nid_path += ('^||^{}'.format(i))
+#         if not hierarchy_options:
+#             list_of_names.pop()
+#
+#     # If "Last ___ ____" is active and the num_periods is invalid (None), return an empty graph
+#     if timeframe == 'to-current' and not num_periods:
+#         return [], 0
+#     # else, filter normally
+#     else:
+#         dff = data_manipulator(list_of_names, hierarchy_toggle, hierarchy_level_dropdown,
+#                                hierarchy_graph_children, df_name, df_const, secondary_type, end_secondary,
+#                                end_year, start_secondary, start_year, timeframe, fiscal_toggle, num_periods,
+#                                period_type)
+#         if dff.empty:
+#             return [], 0
+#
+#
+#
+#
+#
+#     return dff.to_dict("records")
 
 
 # *************************************************DATA-FITTING******************************************************

@@ -8,6 +8,8 @@ Contains functions to generate graphs.
 
 # External Packages
 from _datetime import datetime
+
+from dash_pivottable import PivotTable
 from flask import session
 from parse import parse
 import plotly.express as px
@@ -1242,6 +1244,27 @@ def get_sankey_figure(arg_value, dff, hierarchy_level_dropdown, hierarchy_path, 
         figure=fig)
 
 
+def get_pivot_table(dff, tile, df_const, df_name):
+    dff = dff.dropna(how='all', axis=1)
+    return [
+        html.Div([
+        html.Div(style={'height': '10px'}),
+        html.Sub('{} {}'.format(get_label('LBL_Data_Accessed_On'), datetime.date(datetime.now())),
+                 style={'margin-left': 'calc(5% - 9px)', 'cursor': 'default', 'font-size': '12px',
+                        'font-family': '"Open Sans", verdana, arial, sans-serif'}),
+
+        PivotTable(
+            id={'type': "%s" % datetime.now(), 'index': tile},
+            data=dff.to_dict("records"),
+            cols=[],
+            rows=[],
+            vals=df_const[df_name]['MEASURE_TYPE_OPTIONS'],
+            unusedOrientationCutoff=0,
+            rendererName='pivottable'
+        )], style={'height': '90%', 'width': 'auto', 'overflow-y': 'auto', 'overflow-x': 'auto',
+                   'margin-left': '10px', 'margin-right': '10px'})]
+
+
 def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods, period_type,
                    hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options,
                    state_of_display, secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
@@ -1299,6 +1322,12 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
         return get_box_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
                               list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
                               df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend)
+
+    # pivot table creation
+    elif graph_type == 'Pivot_Table':
+        changed_index = dash.callback_context.inputs_list[2]['id']['index']
+        return get_pivot_table(filtered_df, changed_index, df_const, df_name)
+
     # table creation
     elif graph_type == 'Table':
         changed_index = dash.callback_context.inputs_list[2]['id']['index']

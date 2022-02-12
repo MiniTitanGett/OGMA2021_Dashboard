@@ -1805,7 +1805,7 @@ def get_default_graph_options(xaxis, yaxis, xpos, ypos, xmodified, ymodified, ti
                           'value': 'legend'}],
                 value=legend if legend else [],
                 style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
-        ], style={'display': 'None'} if graph_type == 'Sankey' or graph_type == 'Table' else {}),
+        ], style={'display': 'None'} if graph_type == 'Sankey' or 'Table' in graph_type else {}),
 
         html.Div([
             dcc.Input(
@@ -1841,7 +1841,29 @@ def get_default_graph_options(xaxis, yaxis, xpos, ypos, xmodified, ymodified, ti
         ], style={'display': 'None'})]
 
 
-# empty graph menu
+def get_pivot_table_menu(tile, xaxis, yaxis, xpos, ypos, xmodified, ymodified):
+    return[
+    html.Div([
+        # id is used by create_graph callback to verify that the table menu is created before it activates
+        dcc.Dropdown(
+            id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
+            options=[{'label': tile, 'value': tile}],
+            value=tile,
+            clearable=False,
+            style={'display': 'none'}),
+        # page_size for table
+        html.Div(
+            html.Div(
+                children=get_default_graph_options(xaxis=xaxis, yaxis=yaxis, xpos=xpos, ypos=ypos,
+                                                   xmodified=xmodified, ymodified=ymodified, tile=tile,
+                                                   gridline=None, legend=None, graph_type='Pivot_Table'),
+                style=CUSTOMIZE_CONTENT_HIDE,
+                id={'type': 'default-graph-options', 'index': tile}),
+            id={'type': 'default-graph-options-wrapper', 'index': tile})
+    ], style={'font-size': '13px'})]
+
+
+    # empty graph menu
 def empty_graph_menu(tile):
     return [
         html.Div([

@@ -1091,7 +1091,9 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
     cond_style.append({'if': {'row_index': 'odd'}, 'backgroundColor': 'rgb(248, 248, 248)'})
 
     cond_style.append(
-        {'if': {'column_id': 'Link'}, 'cursor': 'pointer', 'color': 'blue', 'text-decoration': 'underline'})
+        {'if': {'column_id': 'Link'}, 'cursor': 'pointer', 'color': 'blue', 'text-decoration': 'underline',
+        'overflow': 'hidden',
+        'maxWidth': 0})
 
     # check arg_value[1]: num of pages is a whole integer if not assign 10
     if arg_value[1] is None or type(arg_value[1]) is not int:
@@ -1122,6 +1124,7 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
             sort_by=[],
 
             cell_selectable=False,
+            style_cell={'textAlign': 'left'},
 
             style_data_conditional=cond_style,
 
@@ -1253,7 +1256,7 @@ def get_pivot_table(dff, tile, df_const, df_name):
                         rows=[],
                         vals=df_const[df_name]['MEASURE_TYPE_OPTIONS'],
                         unusedOrientationCutoff=0)
-    ], style={'height': '95%', 'width': '95%', 'overflow-y': 'auto', 'overflow-x': 'auto',
+    ], style={'height': '70%', 'width': '95%', 'overflow-y': 'auto', 'overflow-x': 'auto',
                    'margin-left': '10px', 'margin-right': '10px'})
 
 

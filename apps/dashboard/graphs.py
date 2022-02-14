@@ -187,7 +187,6 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                 legend_title_text = get_label('LBL_Variable_Names')
 
             # filter the dataframe down to the partial period selected
-            filtered_df = filtered_df.to_pandas_df()
             filtered_df['Partial Period'] = filtered_df['Partial Period'].astype(str).transform(
                 lambda j: get_label('LBL_TRUE') if j == 'True' else get_label('LBL_FALSE'))
             filtered_df['Date of Event'] = \
@@ -454,8 +453,6 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
             # filter the dataframe down to the partial period selected
             filtered_df['Partial Period'] = filtered_df['Partial Period'].astype(str).transform(
                 lambda j: get_label('LBL_TRUE') if j == 'True' else get_label('LBL_FALSE'))
-            filtered_df['Date of Event'] = \
-                filtered_df['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
             # lambda j: get_label('LBL_TRUE') if j != 'nan' else get_label('LBL_FALSE'))
             filtered_df.sort_values(by=['Date of Event', color], inplace=True)
             filtered_df['Date of Event'] = filtered_df['Date of Event'].astype(str)
@@ -1245,24 +1242,19 @@ def get_sankey_figure(arg_value, dff, hierarchy_level_dropdown, hierarchy_path, 
 
 
 def get_pivot_table(dff, tile, df_const, df_name):
+    language = session["language"]
     dff = dff.dropna(how='all', axis=1)
-    return [
-        html.Div([
-        html.Div(style={'height': '10px'}),
-        html.Sub('{} {}'.format(get_label('LBL_Data_Accessed_On'), datetime.date(datetime.now())),
-                 style={'margin-left': 'calc(5% - 9px)', 'cursor': 'default', 'font-size': '12px',
-                        'font-family': '"Open Sans", verdana, arial, sans-serif'}),
 
-        PivotTable(
-            id={'type': "%s" % datetime.now(), 'index': tile},
-            data=dff.to_dict("records"),
-            cols=[],
-            rows=[],
-            vals=df_const[df_name]['MEASURE_TYPE_OPTIONS'],
-            unusedOrientationCutoff=0,
-            rendererName='pivottable'
-        )], style={'height': '90%', 'width': 'auto', 'overflow-y': 'auto', 'overflow-x': 'auto',
-                   'margin-left': '10px', 'margin-right': '10px'})]
+    return html.Div([
+                PivotTable(
+                        id={'type': "Pivottable", 'index': tile},
+                        data=dff.to_dict("records"),
+                        cols=[],
+                        rows=[],
+                        vals=df_const[df_name]['MEASURE_TYPE_OPTIONS'],
+                        unusedOrientationCutoff=0)
+    ], style={'height': '95%', 'width': '95%', 'overflow-y': 'auto', 'overflow-x': 'auto',
+                   'margin-left': '10px', 'margin-right': '10px'})
 
 
 def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods, period_type,

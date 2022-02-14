@@ -16,7 +16,7 @@ from apps.dashboard.data import get_label, session, CLR
 # ***********************************************HELPER FUNCTIONS****************************************************
 
 
-def generate_dropdown(tile, df_name, nid_path):
+def generate_dropdown(tile, df_name, nid_path, df_const):
     """Helper function to generate and return hierarchy drop-down."""
     if df_name:
         # using a subset of our dataframe, turn it into a multiindex df, and access unique values for option
@@ -29,12 +29,17 @@ def generate_dropdown(tile, df_name, nid_path):
             # df = df.set_index(['H{}'.format(i) for i in range(llen)])
             # option_list = df.loc[tuple(hierarchy_nid_list)]['H{}'.format(llen)].dropna().unique()
             for i in range(llen):
-                df = df.filter(df['H{}'.format(i)] == hierarchy_nid_list[i])
+                level = df_const[df_name]["Categorical_Data"]["H"+str(i)]["labels"].index(hierarchy_nid_list[i]) if df_name == "OPG011" else hierarchy_nid_list[i]
+                df = df.filter(df['H{}'.format(i)] == level)
                 df = df.drop('H{}'.format(i))
             option_list = df['H{}'.format(llen)].unique(dropmissing=True)
         else:
             option_list = df['H0'].unique()
-        options = [{'label': i, 'value': i} for i in option_list]
+        if df_name == "OPG011":
+            options = [{'label': df_const[df_name]["Categorical_Data"]["H"+str(llen)]["labels"]
+                                                    [i], 'value': i} for i in option_list]
+        else:
+            options = [{'label': i, 'value': i} for i in option_list]
         options = sorted(options, key=lambda k: k['label'])
 
         return dcc.Dropdown(
@@ -50,10 +55,11 @@ def generate_dropdown(tile, df_name, nid_path):
             placeholder='{}...'.format(get_label('LBL_Select')))
 
 
-def generate_history_button(name, index, tile):
+def generate_history_button(name, index, tile, df_name, df_const):
     """helper function to generate and return a hierarchy button for the hierarchy path."""
     return html.Button(
-        name,
+        df_const[df_name]["Categorical_Data"]["H" + str(index)]["labels"]
+        [name] if isinstance(name, int) else name,
         id={'type': 'button: {}'.replace("{}", str(tile)), 'index': index},
         n_clicks=0,
         style={'background': 'none', 'border': 'none', 'padding': '5px', 'color': '#006699',
@@ -136,7 +142,7 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
                             style={'min-width': '45px', 'display': 'inline-block', 'padding': '0 0 0 0'})],
                         style={'height': '0px', 'display': 'inline-block'}),
                     html.Div(
-                        children=generate_dropdown(tile, df_name, nid_path),
+                        children=generate_dropdown(tile, df_name, nid_path, df_const),
                         id={'type': 'hierarchy_specific_dropdown_container', 'index': tile},
                         style={'color': 'black', 'flex-grow': '1', 'textAlign': 'center', 'display': 'inline-block'})],
                     style={'display': 'flex'})],
@@ -194,7 +200,7 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
                             style={'min-width': '45px', 'display': 'inline-block', 'padding': '0 0 0 0'})],
                         style={'height': '0px', 'display': 'inline-block'}),
                     html.Div(
-                        children=generate_dropdown(tile, df_name, nid_path),
+                        children=generate_dropdown(tile, df_name, nid_path, df_const),
                         id={'type': 'hierarchy_specific_dropdown_container', 'index': tile},
                         style={'color': 'black', 'flex-grow': '1', 'textAlign': 'center', 'display': 'inline-block'})],
                     style={'display': 'flex'})],

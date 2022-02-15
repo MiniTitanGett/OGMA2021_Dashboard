@@ -43,11 +43,13 @@ begin
            --[Variable Name Sub Qualifier],
            case
              when isnull(dur.[Variable Name Sub Qualifier], '') <> '' then dur.[Variable Name Sub Qualifier]
-             else dur.[Variable Name Qualifier]
+             when isnull(dur.[Variable Name Qualifier], '') <> '' then dur.[Variable Name Qualifier]
+             else dur.[Variable Name]
            end as [Variable Value],
            case
              when isnull(dur.[Variable Name Sub Qualifier], '') <> '' then 2
-             else 1
+             when isnull(dur.[Variable Name Qualifier], '') <> '' then 1
+             else 0
            end as [Variable Level],
            dur.[Date of Event],
            dur.[Calendar Entry Type],
@@ -103,7 +105,6 @@ begin
        -- but since the data doesn't include any values in Sub Qualifier, we are ok
        and trim(isnull(dur.[Variable Name Qualifier], '')) <> ''
        and dur.[Calendar Entry Type] = 'Week'
-       and dur.[Measure Type] = 'Duration'
 
   else
   begin

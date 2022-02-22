@@ -43,13 +43,11 @@ begin
            --[Variable Name Sub Qualifier],
            case
              when isnull(dur.[Variable Name Sub Qualifier], '') <> '' then dur.[Variable Name Sub Qualifier]
-             when isnull(dur.[Variable Name Qualifier], '') <> '' then dur.[Variable Name Qualifier]
-             else dur.[Variable Name]
+             else dur.[Variable Name Qualifier]
            end as [Variable Value],
            case
              when isnull(dur.[Variable Name Sub Qualifier], '') <> '' then 2
-             when isnull(dur.[Variable Name Qualifier], '') <> '' then 1
-             else 0
+             else 1
            end as [Variable Level],
            dur.[Date of Event],
            dur.[Calendar Entry Type],

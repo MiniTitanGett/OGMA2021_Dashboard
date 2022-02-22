@@ -23,6 +23,7 @@ from apps.dashboard.data import GRAPH_OPTIONS, CLR, DATA_CONTENT_SHOW, DATA_CONT
     BAR_X_AXIS_OPTIONS, CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LAYOUT_CONTENT_HIDE, LAYOUTS, \
     dataset_to_df, generate_constants
 from apps.dashboard.hierarchy_filter import get_hierarchy_layout
+from apps.dashboard.document_filter import get_document_hierarchy_layout
 from apps.dashboard.datepicker import get_date_picker
 from apps.dashboard.graphs import __update_graph
 
@@ -1336,7 +1337,7 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
                     html.P(
                         "{}:".format(get_label('LBL_Graphed_Variables')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '60px', 'position': 'relative', 'top': '-3px',
+                    style={'display': 'inline', 'width': '100px', 'position': 'relative', 'top': '-3px',
                            'margin-right': '15px'}),
                 html.Div([
                     dcc.Dropdown(
@@ -1345,8 +1346,13 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
                         value=y,
                         multi=True,
                         clearable=False,
-                        style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})]),
+                        style={'font-size': '13px'} if df_name != 'OPG011' else {'display': 'None'})]),
+                    html.Div(
+                        get_document_hierarchy_layout(tile, df_name, hierarchy_toggle='Level Filter',
+                                                    level_value='Variable Name',
+                                                       graph_all_toggle=None, nid_path="root", df_const=df_const),
+                    style={'display': 'inline-block','margin-right': '15px'}if df_name == 'OPG011' else {'display': 'None'})],
+                        style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'}),
             html.Div([
                 html.Div([
                     html.P(
@@ -1861,7 +1867,6 @@ def get_pivot_table_menu(tile, xaxis, yaxis, xpos, ypos, xmodified, ymodified):
                 id={'type': 'default-graph-options', 'index': tile}),
             id={'type': 'default-graph-options-wrapper', 'index': tile})
     ], style={'font-size': '13px'})]
-
 
     # empty graph menu
 def empty_graph_menu(tile):

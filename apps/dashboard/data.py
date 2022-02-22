@@ -294,7 +294,13 @@ def generate_constants(df_name):
     """Generates the constants required to be stored for the given dataset."""
     HIERARCHY_LEVELS = ['H{}'.format(i) for i in range(6)]
     df = session[df_name]
-    Categorical_Dictionary=None
+    Categorical_Dictionary = None
+
+    DOCUMENT_LEVELS = ["Variable Name", "Variable Name Qualifier", "Variable Name Sub Qualifier"]
+
+    Variable_Name = df['Variable Name'].unique()
+    Variable_Name_Qualifier = df['Variable Name Qualifier'].unique()
+    Variable_Name_Sub_Qualifier = df['Variable Name Sub Qualifier'].unique()
 
     VARIABLE_LEVEL = 'Variable Value'  # list of variable column names
 
@@ -306,7 +312,7 @@ def generate_constants(df_name):
     if df_name == 'OPG011':
         # df = vaex.from_pandas(df)
         # TODO: Remove when variable value is created in OPG011 time_df
-        VARIABLE_LEVEL = 'Variable Name'
+        # VARIABLE_LEVEL = 'Variable Name'
         min_date_unf = df['Date of Event'].dt.date.values.min()
         max_date_unf = df['Date of Event'].dt.date.values.max()
         min_date_unf = min_date_unf.astype(datetime)
@@ -381,7 +387,6 @@ def generate_constants(df_name):
                 modified_var.append(category["Variable Name"]["labels"][int(variable[0])] + " " +
                                 category["Variable Name Qualifier"]["labels"][int(variable[1])])
             else:
-                value=category["Variable Name Sub Qualifier"]["labels"][int(variable[2])]
                 modified_var.append(category["Variable Name"]["labels"][int(variable[0])] + " " +
                                 category["Variable Name Qualifier"]["labels"][int(variable[1])] + " " +
                                 " " if category["Variable Name Sub Qualifier"]["labels"][int(variable[2])] == np.nan
@@ -509,6 +514,10 @@ def generate_constants(df_name):
     storage = {
         'HIERARCHY_LEVELS': HIERARCHY_LEVELS,
         'VARIABLE_LEVEL': VARIABLE_LEVEL,
+        'DOCUMENT_LEVELS': DOCUMENT_LEVELS,
+        'Variable Name': Variable_Name,
+        'Variable Name Qualifier': Variable_Name_Qualifier,
+        'Variable Name Sub Qualifier': Variable_Name_Sub_Qualifier,
         'COLUMN_NAMES': COLUMN_NAMES,
         'MEASURE_TYPE_OPTIONS': MEASURE_TYPE_OPTIONS,
         'GREGORIAN_MIN_YEAR': GREGORIAN_MIN_YEAR,
@@ -605,7 +614,9 @@ def get_date_of_quarter(quarter, year):
 
 def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children, df_name,
                      df_const, secondary_type, end_secondary, end_year, start_secondary, start_year, timeframe,
-                     fiscal_toggle, num_periods, period_type, arg_values=None, graph_type=None):
+                     fiscal_toggle, num_periods, period_type, arg_values=None, graph_type=None,
+                     document_state_of_display=None, document_hierarchy_toggle=None, document_level_dropdown=None,
+                     document_graph_children=None, document_options=None):
     """Returns the filtered/aggregted data frame for visualization."""
     if df_name != 'OPG011':
         filtered_df = data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
@@ -634,8 +645,8 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
             else:
                 # Filters out all rows that are less specific than given path length
                 for i in range(len(hierarchy_path)):
-                    df = df[
-                        df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i]]
+                    df = df[df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == df_const[df_name]["Categorical_Data"]
+                                                                    ["H" + str(i)]["labels"].index(hierarchy_path[i])]
                 # Filters out all rows that are more specific than given path length plus one to preserve the children
                 for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - (len(hierarchy_path)+1)):
                     df[df_const[df_name]['HIERARCHY_LEVELS']
@@ -648,7 +659,7 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
                 [len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]] = np.full(len(df), np.nan, np.float64)
             for i in range(len(hierarchy_path)):
                 df = df[df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == df_const[df_name]
-                                                ["Categorical_Data"]["H"+ str(i)]["labels"].index(hierarchy_path[i])]
+                                                ["Categorical_Data"]["H" + str(i)]["labels"].index(hierarchy_path[i])]
             # Filters out all rows that are more specific than given path
 
         if graph_type == "Line" or graph_type == "Scatter" or graph_type == "Bar" or graph_type == "Box_Plot":
@@ -656,7 +667,9 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
                                                           start_secondary, start_year, timeframe, fiscal_toggle,
                                                           num_periods, period_type, df_name, df_const, arg_values,
                                                           graph_type, df, hierarchy_toggle, hierarchy_level_dropdown,
-                                                          hierarchy_graph_children)
+                                                          hierarchy_graph_children, document_state_of_display,
+                                                          document_hierarchy_toggle, document_level_dropdown,
+                                                          document_graph_children, document_options)
         else:
             filtered_df = data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year, start_secondary,
                                                start_year, timeframe, fiscal_toggle, num_periods, period_type, df_name,
@@ -693,8 +706,9 @@ def data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_drop
             # Filters out all rows that are more specific than given path length plus one to preserve the child column
             for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - (len(hierarchy_path) + 1)):
                 filtered_df = filtered_df.filter(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][
-                    len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]].ismissing())
-            filtered_df = filtered_df.filter(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)]].notna())
+                                                    len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]].ismissing())
+            filtered_df = filtered_df.filter(filtered_df[df_const[df_name]['HIERARCHY_LEVELS']
+                                                                                        [len(hierarchy_path)]].notna())
     else:
         filtered_df = session[df_name]
         # Filters out all rows that don't include path member at specific level
@@ -886,11 +900,6 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
             # Builds data based on all measure types, variable names, hierarchy, and selected time frame
             for p in range(len(specific_items)):
                 if isinstance(specific_items[0], str):
-                    item = specific_items[0]
-                else:
-                    item = df_const[df_name]["Categorical_Data"][hierarchy_level_dropdown]["labels"][specific_items[0]]
-
-                if item == 'specific item':
                     further_filtered_df = filtered_df
                 else:
                     if hierarchy_toggle == "Level Filter":
@@ -978,7 +987,10 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                                 row_list.append(
                                     [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
                                      h0, h1, h2, h3, h4, h5,
-                                     df_const[df_name]["Categorical_Data"]["Variable Name"]["labels"][variable_name],
+                                     df_const[df_name]["Categorical_Data"]["Variable Value"]["labels"]
+                                     [unique_data['Variable Value'].iloc[0]],
+                                     df_const[df_name]["Categorical_Data"]["Variable Name"]
+                                     ["labels"][unique_data['Variable Name'].iloc[0]],
                                      df_const[df_name]["Categorical_Data"]["Variable Name Qualifier"]
                                      ["labels"][unique_data['Variable Name Qualifier'].iloc[0]],
                                      df_const[df_name]["Categorical_Data"]["Variable Name Sub Qualifier"]["labels"]
@@ -989,24 +1001,18 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
 
             time_df = pd.DataFrame(row_list,
                                    columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
+                                            'Variable Value',
                                             'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
                                             'Date of Event', 'Calendar Entry Type', 'Year of Event', 'Quarter',
                                             'Month of Event', 'Week of Event', 'Fiscal Year of Event', 'Fiscal Quarter',
                                             'Fiscal Month of Event', 'Fiscal Week of Event', 'Julian Day',
                                             'Activity Event Id', 'Measure Value', 'Measure Type', 'Partial Period'])
 
-
         # Creates a copy of the filtered data frame that just contains the weekly data
         else:  # elif df_name == "OPG011" and current_filter == 'Week':
             # Builds data based on all measure types, variable names, and selected time frame
             for p in range(len(specific_items)):
                 if isinstance(specific_items[0], str):
-                    item = specific_items[0]
-                else:
-                    item = df_const[df_name]["Categorical_Data"][hierarchy_level_dropdown]["labels"][specific_items[0]]
-
-                if item == 'specific item':
-
                     further_filtered_df = filtered_df
                 else:
                     if hierarchy_toggle == "Level Filter":
@@ -1023,7 +1029,6 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                         for z in range(end_date.year - start_date.year + 1):
                             year = start_date.year + z
                             yearly_data = further_reduced_df[further_reduced_df["Date of Event"].dt.year == year]
-                            yearly_data = yearly_data.to_pandas_df()
                             unique_dates = yearly_data["Date of Event"].dt.isocalendar().week.unique()
                             for w in range(len(unique_dates)):
                                 unique_secondary = unique_dates[w]
@@ -1069,7 +1074,10 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                                 row_list.append(
                                     [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
                                      h0, h1, h2, h3, h4, h5,
-                                     df_const[df_name]["Categorical_Data"]["Variable Name"]["labels"][variable_name],
+                                     df_const[df_name]["Categorical_Data"]["Variable Value"]["labels"]
+                                     [unique_data['Variable Value'].iloc[0]],
+                                     df_const[df_name]["Categorical_Data"]["Variable Name"]
+                                     ["labels"][unique_data['Variable Name'].iloc[0]],
                                      df_const[df_name]["Categorical_Data"]["Variable Name Qualifier"]
                                      ["labels"][unique_data['Variable Name Qualifier'].iloc[0]],
                                      df_const[df_name]["Categorical_Data"]["Variable Name Sub Qualifier"]["labels"]
@@ -1080,6 +1088,7 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
 
             time_df = pd.DataFrame(row_list,
                                    columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
+                                            'Variable Value',
                                             'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
                                             'Date of Event', 'Calendar Entry Type', 'Year of Event', 'Quarter',
                                             'Month of Event', 'Week of Event', 'Fiscal Year of Event', 'Fiscal Quarter',
@@ -1094,11 +1103,6 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
     elif not secondary_type == 'Year':
         for p in range(len(specific_items)):
             if isinstance(specific_items[0], str):
-                item = specific_items[0]
-            else:
-                item = df_const[df_name]["Categorical_Data"][hierarchy_level_dropdown]["labels"][specific_items[0]]
-
-            if item == 'specific item':
                 further_filtered_df = filtered_df
             else:
                 if hierarchy_toggle == "Level Filter":
@@ -1176,7 +1180,10 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                             row_list.append(
                                 [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
                                  h0, h1, h2, h3, h4, h5,
-                                 df_const[df_name]["Categorical_Data"]["Variable Name"]["labels"][variable_name],
+                                 df_const[df_name]["Categorical_Data"]["Variable Value"]["labels"]
+                                 [unique_data['Variable Value'].iloc[0]],
+                                 df_const[df_name]["Categorical_Data"]["Variable Name"]
+                                 ["labels"][unique_data['Variable Name'].iloc[0]],
                                  df_const[df_name]["Categorical_Data"]["Variable Name Qualifier"]
                                  ["labels"][unique_data['Variable Name Qualifier'].iloc[0]],
                                  df_const[df_name]["Categorical_Data"]["Variable Name Sub Qualifier"]["labels"]
@@ -1185,8 +1192,9 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                                  measure_value, measure_type,
                                  True if unique_data['Partial Period'].iloc[0] is True else np.nan])
 
-        time_df = pd.DataFrame(row_list,
+            time_df = pd.DataFrame(row_list,
                                columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
+                                        'Variable Value',
                                         'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
                                         'Date of Event', 'Calendar Entry Type', 'Year of Event', 'Quarter',
                                         'Month of Event', 'Week of Event', 'Fiscal Year of Event', 'Fiscal Quarter',
@@ -1225,11 +1233,6 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
     else:
         for p in range(len(specific_items)):
             if isinstance(specific_items[0], str):
-                item = specific_items[0]
-            else:
-                item = df_const[df_name]["Categorical_Data"][hierarchy_level_dropdown]["labels"][specific_items[0]]
-
-            if item == 'specific item':
                 further_filtered_df = filtered_df
             else:
                 if hierarchy_toggle == "Level Filter":
@@ -1276,7 +1279,10 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                         row_list.append(
                             [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
                              h0, h1, h2, h3, h4, h5,
-                             df_const[df_name]["Categorical_Data"]["Variable Name"]["labels"][variable_name],
+                             df_const[df_name]["Categorical_Data"]["Variable Value"]["labels"]
+                             [unique_data['Variable Value'].iloc[0]],
+                             df_const[df_name]["Categorical_Data"]["Variable Name"]
+                             ["labels"][unique_data['Variable Name'].iloc[0]],
                              df_const[df_name]["Categorical_Data"]["Variable Name Qualifier"]
                              ["labels"][unique_data['Variable Name Qualifier'].iloc[0]],
                              df_const[df_name]["Categorical_Data"]["Variable Name Sub Qualifier"]["labels"]
@@ -1299,19 +1305,27 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
 def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondary, end_year, start_secondary,
                                     start_year, timeframe, fiscal_toggle, num_periods, period_type, df_name, df_const,
                                     arg_values, graph_type, df, hierarchy_toggle, hierarchy_level_dropdown,
-                                    hierarchy_graph_children):
+                                    hierarchy_graph_children, document_path, document_hierarchy_toggle,
+                                    document_level_dropdown, document_graph_children, document_options):
     """
     Returns aggregated data frame dependent on date picker selections, hierarchy selection and graph type selection.
     This aggregator does filter based on measure type to be used for figures that do not require all measure types to
     avoid aggregating unnecessary data.
     """
-    df=df.to_pandas_df()
+    df = df.to_pandas_df()
+
+    if document_hierarchy_toggle == 'Level Filter':
+        variable = df_const[df_name][document_level_dropdown]
+    elif document_hierarchy_toggle == 'Specific Item' and document_graph_children == ['graph_children']:
+        variable = [option['label'] for option in document_options]
+    else:
+        variable = document_path[-1]
     if graph_type == "Box_Plot":
         measure_type = arg_values[0]
-        variable_names = arg_values[1]
+        variable_names = variable
     else:
         measure_type = arg_values[1]
-        variable_names = arg_values[2]
+        variable_names = variable
 
     filtered_df = df[df['Measure Type'] == measure_type]
 
@@ -1384,11 +1398,6 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
             len_item = len(specific_items)
             for p in range(len_item):
                 if isinstance(specific_items[0], str):
-                    item = specific_items[0]
-                else:
-                    item = df_const[df_name]["Categorical_Data"][hierarchy_level_dropdown]["labels"][specific_items[0]]
-
-                if item == 'specific item':
                     further_filtered_df = filtered_df
                 else:
                     if hierarchy_toggle == "Level Filter":
@@ -1399,8 +1408,26 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                 len_var = len(variable_names)
                 for y in range(len_var):
                     variable_name = variable_names[y]
-                    further_reduced_df = further_filtered_df[further_filtered_df['Variable Name'] == df_const[df_name]
-                                                ["Categorical_Data"]["Variable Name"]["labels"].index(variable_name)]
+                    if document_hierarchy_toggle == "Level Filter":
+                        further_reduced_df = further_filtered_df[further_filtered_df[document_level_dropdown] ==
+                                                                 variable_name]
+                    else:
+                        if variable_name is None:
+                            further_reduced_df = further_filtered_df[further_filtered_df[document_level_dropdown] ==
+                                                                     variable_name]
+                        elif document_hierarchy_toggle == 'Specific Item' and document_graph_children == [
+                                                                                                    'graph_children']:
+                            further_reduced_df = further_filtered_df[
+                                further_filtered_df[df_const[df_name]['DOCUMENT_LEVELS']
+                                [len(document_path)]] == df_const[df_name]
+                                ["Categorical_Data"][df_const[df_name]['DOCUMENT_LEVELS'][len(document_path)]][
+                                    "labels"].index(variable_name)]
+                        else:
+                            further_reduced_df = further_filtered_df[
+                                further_filtered_df[df_const[df_name]['DOCUMENT_LEVELS']
+                                [len(document_path) - 1]] == df_const[df_name]
+                                ["Categorical_Data"][df_const[df_name]['DOCUMENT_LEVELS'][len(document_path) - 1]][
+                                    "labels"].index(variable_name)]
                     for z in range(end_date.year - start_date.year + 1):
                         year = start_date.year + z
                         yearly_data = further_reduced_df[further_reduced_df["Date of Event"].dt.year == year]
@@ -1470,7 +1497,11 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                             row_list.append(
                                 [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
                                  h0, h1, h2, h3, h4, h5,
-                                 variable_name, df_const[df_name]["Categorical_Data"]["Variable Name Qualifier"]
+                                 df_const[df_name]["Categorical_Data"]["Variable Value"]["labels"]
+                                 [unique_data['Variable Value'].iloc[0]],
+                                 df_const[df_name]["Categorical_Data"]["Variable Name"]
+                                 ["labels"][unique_data['Variable Name'].iloc[0]],
+                                 df_const[df_name]["Categorical_Data"]["Variable Name Qualifier"]
                                  ["labels"][unique_data['Variable Name Qualifier'].iloc[0]],
                                  df_const[df_name]["Categorical_Data"]["Variable Name Sub Qualifier"]["labels"]
                                  [unique_data['Variable Name Sub Qualifier'].iloc[0]], date_of_event, current_filter,
@@ -1480,6 +1511,7 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
 
             time_df = pd.DataFrame(row_list,
                                    columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
+                                            'Variable Value',
                                             'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
                                             'Date of Event', 'Calendar Entry Type', 'Year of Event', 'Quarter',
                                             'Month of Event', 'Week of Event', 'Fiscal Year of Event', 'Fiscal Quarter',
@@ -1492,11 +1524,6 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
             len_item = len(specific_items)
             for p in range(len_item):
                 if isinstance(specific_items[0], str):
-                    item = specific_items[0]
-                else:
-                    item = df_const[df_name]["Categorical_Data"][hierarchy_level_dropdown]["labels"][specific_items[0]]
-
-                if item == 'specific item':
                     further_filtered_df = filtered_df
                 else:
                     if hierarchy_toggle == "Level Filter":
@@ -1507,8 +1534,25 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                 len_var = len(variable_names)
                 for y in range(len_var):
                     variable_name = variable_names[y]
-                    further_reduced_df = further_filtered_df[further_filtered_df['Variable Name'] == df_const[df_name]
-                ["Categorical_Data"]["Variable Name"]["labels"].index(variable_name)]
+                    if document_hierarchy_toggle == "Level Filter":
+                        further_reduced_df = further_filtered_df[further_filtered_df[document_level_dropdown] ==
+                                                                 variable_name]
+                    else:
+                        if variable_name is None:
+                            further_reduced_df = further_filtered_df[further_filtered_df[document_level_dropdown] ==
+                                                                     variable_name]
+                        elif document_hierarchy_toggle == 'Specific Item' and document_graph_children == [
+                                                                                                    'graph_children']:
+                            further_reduced_df = further_filtered_df[
+                                further_filtered_df[df_const[df_name]['DOCUMENT_LEVELS']
+                                [len(document_path)]] == df_const[df_name]
+                                ["Categorical_Data"][df_const[df_name]['DOCUMENT_LEVELS'][len(document_path)]][
+                                    "labels"].index(variable_name)]
+                        else:
+                            further_reduced_df = further_filtered_df[further_filtered_df[df_const[df_name][
+                                                        'DOCUMENT_LEVELS'][len(document_path) - 1]] == df_const[df_name]
+                                    ["Categorical_Data"][df_const[df_name]['DOCUMENT_LEVELS'][len(document_path) - 1]][
+                                                                                        "labels"].index(variable_name)]
                     for z in range(end_date.year - start_date.year + 1):
                         year = start_date.year + z
                         yearly_data = further_reduced_df[further_reduced_df["Date of Event"].dt.year == year]
@@ -1553,7 +1597,11 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                             row_list.append(
                                 [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
                                  h0, h1, h2, h3, h4, h5,
-                                 variable_name, df_const[df_name]["Categorical_Data"]["Variable Name Qualifier"]
+                                 df_const[df_name]["Categorical_Data"]["Variable Value"]["labels"]
+                                 [unique_data['Variable Value'].iloc[0]],
+                                 df_const[df_name]["Categorical_Data"]["Variable Name"]
+                                 ["labels"][unique_data['Variable Name'].iloc[0]],
+                                 df_const[df_name]["Categorical_Data"]["Variable Name Qualifier"]
                                  ["labels"][unique_data['Variable Name Qualifier'].iloc[0]],
                                  df_const[df_name]["Categorical_Data"]["Variable Name Sub Qualifier"]["labels"]
                                  [unique_data['Variable Name Sub Qualifier'].iloc[0]], date_of_event, current_filter,
@@ -1563,6 +1611,7 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
 
         time_df = pd.DataFrame(row_list,
                                    columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
+                                            'Variable Value',
                                             'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
                                             'Date of Event', 'Calendar Entry Type', 'Year of Event', 'Quarter',
                                             'Month of Event', 'Week of Event', 'Fiscal Year of Event', 'Fiscal Quarter',
@@ -1576,25 +1625,39 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
     elif not secondary_type == 'Year':
         len_item = len(specific_items)
         for p in range(len_item):
+
             if isinstance(specific_items[0], str):
-                item = specific_items[0]
-            else:
-                item = df_const[df_name]["Categorical_Data"][hierarchy_level_dropdown]["labels"][specific_items[0]]
-            if item == 'specific item':
                 further_filtered_df = filtered_df
             else:
                 if hierarchy_toggle == "Level Filter":
                     further_filtered_df = filtered_df[filtered_df[hierarchy_level_dropdown] == specific_items[p]]
                 else:
                     further_filtered_df = filtered_df[filtered_df["H" + str(len(hierarchy_path))] == specific_items[p]]
+
             len_var = len(variable_names)
             for y in range(len_var):
                 variable_name = variable_names[y]
-                reduced_df = further_filtered_df[further_filtered_df['Variable Name'] == df_const[df_name]
-                                                ["Categorical_Data"]["Variable Name"]["labels"].index(variable_name)]
+                if document_hierarchy_toggle == "Level Filter":
+                    further_reduced_df = further_filtered_df[further_filtered_df[document_level_dropdown] ==
+                                                                                                        variable_name]
+                else:
+                    if variable_name is None:
+                        further_reduced_df = further_filtered_df[further_filtered_df[document_level_dropdown] ==
+                                                                 variable_name]
+                    elif document_hierarchy_toggle == 'Specific Item' and document_graph_children == ['graph_children']:
+                        further_reduced_df = further_filtered_df[
+                            further_filtered_df[df_const[df_name]['DOCUMENT_LEVELS']
+                            [len(document_path)]] == df_const[df_name]
+                            ["Categorical_Data"][df_const[df_name]['DOCUMENT_LEVELS'][len(document_path)]][
+                                "labels"].index(variable_name)]
+                    else:
+                        further_reduced_df = further_filtered_df[further_filtered_df[df_const[df_name][
+                                    'DOCUMENT_LEVELS'][len(document_path)-1]] == df_const[df_name]["Categorical_Data"]
+                            [df_const[df_name]['DOCUMENT_LEVELS'][len(document_path)-1]]["labels"].index(variable_name)]
+
                 for z in range(end_year - start_year + 1):
                     year = start_year + z
-                    yearly_data = reduced_df[reduced_df["Date of Event"].dt.year == year]
+                    yearly_data = further_reduced_df[further_reduced_df["Date of Event"].dt.year == year]
                     if secondary_type == "Month":
                         unique_dates = yearly_data["Date of Event"].dt.month.unique()
                     elif secondary_type == "Week":
@@ -1606,7 +1669,7 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                         yearly_data = yearly_data.copy()
                         yearly_data["Quarter"] = test
                         unique_dates = test.unique()
-                    unique =len(unique_dates)
+                    unique = len(unique_dates)
                     for w in range(unique):
                         if secondary_type == 'Quarter':
                             secondary = unique_dates[w]
@@ -1659,7 +1722,11 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                         row_list.append(
                                 [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
                                  h0, h1, h2, h3, h4, h5,
-                                 variable_name, df_const[df_name]["Categorical_Data"]["Variable Name Qualifier"]
+                                 df_const[df_name]["Categorical_Data"]["Variable Value"]
+                                 ["labels"][unique_data['Variable Value'].iloc[0]],
+                                 df_const[df_name]["Categorical_Data"]["Variable Name"]
+                                 ["labels"][unique_data['Variable Name'].iloc[0]],
+                                 df_const[df_name]["Categorical_Data"]["Variable Name Qualifier"]
                                  ["labels"][unique_data['Variable Name Qualifier'].iloc[0]],
                                  df_const[df_name]["Categorical_Data"]["Variable Name Sub Qualifier"]["labels"]
                                  [unique_data['Variable Name Sub Qualifier'].iloc[0]], date_of_event, secondary_type,
@@ -1669,6 +1736,7 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
 
         time_df = pd.DataFrame(row_list,
                                columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
+                                        'Variable Value',
                                         'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
                                         'Date of Event', 'Calendar Entry Type', 'Year of Event', 'Quarter',
                                         'Month of Event', 'Week of Event', 'Fiscal Year of Event', 'Fiscal Quarter',
@@ -1704,10 +1772,6 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
         len_item = len(specific_items)
         for p in range(len_item):
             if isinstance(specific_items[0], str):
-                item = specific_items[0]
-            else:
-                item = df_const[df_name]["Categorical_Data"][hierarchy_level_dropdown]["labels"][specific_items[0]]
-            if item == 'specific item':
                 further_filtered_df = filtered_df
             else:
                 if hierarchy_toggle == "Level Filter":
@@ -1717,8 +1781,24 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
             len_var = len(variable_names)
             for y in range(len_var):
                 variable_name = variable_names[y]
-                further_reduced_df = further_filtered_df[further_filtered_df['Variable Name'] == df_const[df_name]
-                                                ["Categorical_Data"]["Variable Name"]["labels"].index(variable_name)]
+                if document_hierarchy_toggle == "Level Filter":
+                    further_reduced_df = further_filtered_df[further_filtered_df[document_level_dropdown] ==
+                                                                                                        variable_name]
+                else:
+                    if variable_name is None:
+                        further_reduced_df = further_filtered_df[further_filtered_df[document_level_dropdown] ==
+                                                                 variable_name]
+                    elif document_hierarchy_toggle == 'Specific Item' and document_graph_children == ['graph_children']:
+                        further_reduced_df = further_filtered_df[
+                            further_filtered_df[df_const[df_name]['DOCUMENT_LEVELS']
+                            [len(document_path)]] == df_const[df_name]
+                            ["Categorical_Data"][df_const[df_name]['DOCUMENT_LEVELS'][len(document_path)]][
+                                "labels"].index(variable_name)]
+                    else:
+                        further_reduced_df = further_filtered_df[further_filtered_df[df_const[df_name][
+                                    'DOCUMENT_LEVELS'][len(document_path)-1]] == df_const[df_name]["Categorical_Data"]
+                            [df_const[df_name]['DOCUMENT_LEVELS'][len(document_path)-1]]["labels"].index(variable_name)]
+
                 unique_secondary = further_reduced_df['Date of Event'].dt.year.unique()
                 len_unique = len(unique_secondary)
                 for z in range(len_unique):
@@ -1752,7 +1832,11 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                     row_list.append(
                         [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
                          h0, h1, h2, h3, h4, h5,
-                         variable_name, df_const[df_name]["Categorical_Data"]["Variable Name Qualifier"]
+                         df_const[df_name]["Categorical_Data"]["Variable Value"]["labels"]
+                         [unique_data['Variable Value'].iloc[0]],
+                         df_const[df_name]["Categorical_Data"]["Variable Name"]
+                         ["labels"][unique_data['Variable Name'].iloc[0]],
+                         df_const[df_name]["Categorical_Data"]["Variable Name Qualifier"]
                          ["labels"][unique_data['Variable Name Qualifier'].iloc[0]],
                          df_const[df_name]["Categorical_Data"]["Variable Name Sub Qualifier"]["labels"]
                          [unique_data['Variable Name Sub Qualifier'].iloc[0]], date_of_event, "Year", secondary,
@@ -1761,6 +1845,7 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
 
         time_df = pd.DataFrame(row_list,
                                columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
+                                        'Variable Value',
                                         'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
                                         'Date of Event', 'Calendar Entry Type', 'Year of Event', 'Quarter',
                                         'Month of Event', 'Week of Event', 'Fiscal Year of Event', 'Fiscal Quarter',

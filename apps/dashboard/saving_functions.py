@@ -93,7 +93,7 @@ def delete_dashboard(dashboard_id):
     del session['saved_dashboards'][dashboard_id]
 
 
-def load_graph_menu(graph_type, tile, df_name, args_list, graph_options, df_const):
+def load_graph_menu(graph_type, tile, df_name, args_list, graph_options, graph_variable, df_const):
     """Retuns the graph menu dependent on the graph type."""
     if graph_type == 'Line' or graph_type == 'Scatter':
         graph_menu = get_line_scatter_graph_menu(tile=tile, x=args_list[0], y=args_list[2], measure_type=args_list[1],
@@ -102,25 +102,37 @@ def load_graph_menu(graph_type, tile, df_name, args_list, graph_options, df_cons
                                                  xaxis=graph_options[0], yaxis=graph_options[1], data_fitting=True,
                                                  xpos=graph_options[2], ypos=graph_options[3],
                                                  xmodified=graph_options[0], ymodified=graph_options[1],
-                                                 df_name=df_name, df_const=df_const)
+                                                 df_name=df_name, df_const=df_const,
+                                                 level_value=graph_variable[0],
+                                                 nid_path=graph_variable[1],
+                                                 hierarchy_toggle=graph_variable[2],
+                                                 graph_all_toggle=graph_variable[3])
     elif graph_type == 'Bar':
         graph_menu = get_bar_graph_menu(tile=tile, x=args_list[0], y=args_list[2], measure_type=args_list[1],
                                         orientation=args_list[3], animate=args_list[4], gridline=graph_options[6],
                                         legend=graph_options[7], xaxis=graph_options[0], yaxis=graph_options[1],
                                         df_name=df_name, xmodified=graph_options[4], ymodified=graph_options[5],
-                                        xpos=graph_options[2], ypos=graph_options[3], df_const=df_const)
+                                        xpos=graph_options[2], ypos=graph_options[3], df_const=df_const,
+                                        level_value=graph_variable[0],
+                                        nid_path=graph_variable[1],
+                                        hierarchy_toggle=graph_variable[2],
+                                        graph_all_toggle=graph_variable[3])
     elif graph_type == 'Table':
         graph_menu = get_table_graph_menu(tile=tile, number_of_columns=args_list[1], xaxis=graph_options[0],
                                           yaxis=graph_options[1], xpos=graph_options[2], ypos=graph_options[3],
-                                          xmodified=graph_options[4], ymodified=graph_options[5],
-                                          )
+                                          xmodified=graph_options[4], ymodified=graph_options[5], df_name=df_name,
+                                          df_const=df_const)
     elif graph_type == 'Box_Plot':
         graph_menu = get_box_plot_menu(tile=tile, axis_measure=args_list[0], graphed_variables=args_list[1],
                                        graph_orientation=args_list[2], show_data_points=args_list[3],
                                        gridline=graph_options[6], legend=graph_options[7], xaxis=graph_options[0],
                                        yaxis=graph_options[1], df_name=df_name, df_const=df_const,
                                        xmodified=graph_options[4], ymodified=graph_options[5],
-                                       xpos=graph_options[2], ypos=graph_options[3])
+                                       xpos=graph_options[2], ypos=graph_options[3],
+                                       level_value=graph_variable[0],
+                                       nid_path=graph_variable[1],
+                                       hierarchy_toggle=graph_variable[2],
+                                       graph_all_toggle=graph_variable[3])
     elif graph_type == 'Sankey':
         graph_menu = get_sankey_menu(tile=tile, graphed_options=args_list[0], df_name=df_name, df_const=df_const,
                                      xaxis=graph_options[0], yaxis=graph_options[1], xpos=graph_options[2],

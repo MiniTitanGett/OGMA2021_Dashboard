@@ -8,6 +8,8 @@ Contains functions to generate graphs.
 
 # External Packages
 from _datetime import datetime
+
+from dash_pivottable import PivotTable
 from flask import session
 from parse import parse
 import plotly.express as px
@@ -108,7 +110,8 @@ def get_hierarchy_col(hierarchy_type, hierarchy_level_dropdown, hierarchy_graph_
 
 def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
                             hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const,
-                            xaxis_title, yaxis_title, xlegend, ylegend, gridline, legend):
+                            xaxis_title, yaxis_title, xlegend, ylegend, gridline, legend,
+                            document_level_dropdown, document_path, document_type, document_graph_children):
     """Returns the line graph figure."""
     # ------------------------------------------------Arg Values--------------------------------------------------------
     # arg_value[0] = xaxis selector
@@ -130,8 +133,16 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
         # Specialty filtering
         if df_name != "OPG011":
             filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[2], df_const)
+            category = df_const[df_name]['VARIABLE_LEVEL']
         else:
             filtered_df = dff.copy()
+            if document_type == 'Level Filter':
+                category = document_level_dropdown
+            elif document_type == 'Specific Item' and document_graph_children == ['graph_children']:
+                category = df_const[df_name]['DOCUMENT_LEVELS'][len(document_path)]
+            else:
+                category = df_const[df_name]['DOCUMENT_LEVELS'][len(document_path) - 1] if len(document_path) != 0 \
+                                                                                                    else 'Vairable Name'
 
         hierarchy_col = get_hierarchy_col(hierarchy_type, hierarchy_level_dropdown, hierarchy_graph_children,
                                           hierarchy_path, df_name, df_const)
@@ -170,23 +181,25 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                         title = '{}: {} vs {}'.format(hierarchy_path[-1], arg_value[1], get_label('LBL_Time'))
 
         # df is not empty, create graph
-        if not filtered_df.empty:
+        if len(filtered_df) != 0:
             title += '<br><sub>{} {} </sub>'.format(get_label('LBL_Data_Accessed_On'), datetime.date(datetime.now()))
 
             # hierarchy type is "Level Filter", or "Specific Item" while "Graph all in Dropdown" is selected
             if hierarchy_type == 'Level Filter' or (hierarchy_type == 'Specific Item' and
                                                     hierarchy_graph_children == ['graph_children']):
                 color = hierarchy_col
-                line_group = df_const[df_name]['VARIABLE_LEVEL']
+                line_group = category
                 legend_title_text = get_label('LBL_' + hierarchy_col, df_name)
             else:
-                color = df_const[df_name]['VARIABLE_LEVEL']
+                color = category
                 line_group = None
                 legend_title_text = get_label('LBL_Variable_Names')
 
             # filter the dataframe down to the partial period selected
             filtered_df['Partial Period'] = filtered_df['Partial Period'].astype(str).transform(
                 lambda j: get_label('LBL_TRUE') if j == 'True' else get_label('LBL_FALSE'))
+            filtered_df['Date of Event'] = \
+                filtered_df['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
             filtered_df.sort_values(by=[color, 'Date of Event'], inplace=True)
             # generate graph
             fig = px.line(
@@ -196,7 +209,7 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                 y='Measure Value',
                 color=color,
                 line_group=line_group,
-                custom_data=[hierarchy_col, df_const[df_name]['VARIABLE_LEVEL']])
+                custom_data=[hierarchy_col, category])
             fig.update_layout(legend_title_text=legend_title_text)
 
             # check what arg_value[3]: mode is selected and sets the corresponding trace
@@ -347,8 +360,8 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
 
 # TODO: currently the queries do not work with OPG011, see below TODO
 def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
-                      hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const,
-                      xaxis_title, yaxis_title, xlegend, ylegend, gridline, legend):
+                      hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const, xaxis_title, yaxis_title,
+                      xlegend, ylegend, gridline, legend):
     """Returns the bubble graph figure."""
     # ------------------------------------------------Arg Values--------------------------------------------------------
     # args_value[0] = x-axis
@@ -362,8 +375,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
     language = session["language"]
     xaxis = None
     yaxis = None
-    filtered_df = dff
-
+    filtered_df = []
     # Check whether we have enough information to attempt getting data for a graph
     if hierarchy_type == 'Level Filter' and None not in [arg_value, hierarchy_level_dropdown, hierarchy_type,
                                                          hierarchy_graph_children, df_name, df_const] \
@@ -372,8 +384,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
 
         color = get_hierarchy_col(hierarchy_type, hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_path,
                                   df_name, df_const)
-
-        if not dff.empty:
+        if len(dff) != 0:
             if arg_value[0] == 'Time':
                 filtered_df = dff.copy().query(
                     "`{0}` == @arg_value[0] or "
@@ -398,8 +409,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 filtered_df[
                     ['Date of Event', 'Measure Type', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]] = \
                 filtered_df[
-                    ['Date of Event', 'Measure Type', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]].astype(
-                    str)
+                    ['Date of Event', 'Measure Type', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]].\
+                                                                                                            astype(str)
                 filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color],
                                                       columns=[df_const[df_name]['VARIABLE_LEVEL'], 'Measure Type'],
                                                       values='Measure Value').reset_index()
@@ -444,8 +455,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                         title = '{}: {} vs {}'.format(hierarchy_path[-1], arg_value[2], arg_value[4])
 
         # df is not empty, create graph
-        if not filtered_df.empty:
-
+        if len(filtered_df) != 0:
             title += '<br><sub>{} {} </sub>'.format(get_label('LBL_Data_Accessed_On'), datetime.date(datetime.now()))
             legend_title_text = get_label(
                 'LBL_' + hierarchy_level_dropdown, df_name) if hierarchy_type == 'Level Filter' else 'Traces'
@@ -586,7 +596,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
 # bar graph layout TODO: VERTICAL TICKS OVERLAPPING WITH THE ANIMATION SLIDER
 def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
                    hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const, xaxis_title, yaxis_title,
-                   xlegend, ylegend, gridline, legend):
+                   xlegend, ylegend, gridline, legend, document_level_dropdown,
+                   document_path, document_type, document_graph_children):
     """Returns the bar graph figure."""
     # ------------------------------------------------Arg Values--------------------------------------------------------
     # arg_value[0] = group by (x axis)
@@ -609,8 +620,16 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         # Specialty filtering
         if df_name != "OPG011":
             filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[2], df_const)
+            category = df_const[df_name]['VARIABLE_LEVEL']
         else:
             filtered_df = dff.copy()
+            if document_type == 'Level Filter':
+                category = document_level_dropdown
+            elif document_type == 'Specific Item' and document_graph_children == ['graph_children']:
+                category = df_const[df_name]['DOCUMENT_LEVELS'][len(document_path)]
+            else:
+                category = df_const[df_name]['DOCUMENT_LEVELS'][len(document_path) - 1] if len(document_path) != 0 \
+                                                                                                    else 'Vairable Name'
 
         hierarchy_col = get_hierarchy_col(hierarchy_type, hierarchy_level_dropdown, hierarchy_graph_children,
                                           hierarchy_path, df_name, df_const)
@@ -678,31 +697,29 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                                                 hierarchy_graph_children == ['graph_children']):
             # Axis and color logic
             if not group_by_item:
-                x = df_const[df_name]['VARIABLE_LEVEL']
+                x = category
                 if hierarchy_type == 'Level Filter':
                     color = hierarchy_level_dropdown
                 else:
                     color = df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)]
             elif hierarchy_type == 'Level Filter':
                 x = hierarchy_level_dropdown
-                color = df_const[df_name]['VARIABLE_LEVEL']
+                color = category
             else:
                 x = df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)]
-                color = df_const[df_name]['VARIABLE_LEVEL']
-
+                color = category
             legend_title_text = get_label('LBL_' + color.replace(' ', '_'), df_name)
         # hierarchy type is specific item while "Graph all in Dropdown" is unselected
         else:
-            color = df_const[df_name]['VARIABLE_LEVEL'] if group_by_item else 'Partial Period'
-            x = 'Date of Event' if group_by_item and not arg_value[4] else df_const[df_name]['VARIABLE_LEVEL']
+            color = category if group_by_item else 'Partial Period'
+            x = 'Date of Event' if group_by_item and not arg_value[4] else category
             legend_title_text = get_label('LBL_Variable_Name', df_name) if group_by_item else get_label(
                 'LBL_Partial_Period', df_name)
             # if group_by_item and not arg_value[4]:
             #     xaxis = {'type': 'date'}
 
         # df is not empty, create graph
-        if not filtered_df.empty:
-
+        if len(filtered_df) != 0:
             # filter the dataframe down to the partial period selected
             filtered_df['Partial Period'] = filtered_df['Partial Period'].astype(str).transform(
                 lambda y: get_label('LBL_TRUE') if y != 'nan' else get_label('LBL_FALSE'))
@@ -735,7 +752,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                 color=color,
                 barmode='group',
                 animation_frame='Date of Event' if arg_value[4] else None,
-                custom_data=[hierarchy_col, df_const[df_name]['VARIABLE_LEVEL'], 'Date of Event'])
+                custom_data=[hierarchy_col, color, 'Date of Event'])
             fig.update_layout(legend_title_text=legend_title_text)
             # set up hover label
             hovertemplate = get_label('LBL_Gen_Hover_Data', df_name)
@@ -754,8 +771,9 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         else:
             fig = px.bar(
                 title=title + get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path,
-                                                       arg_value[2], df_name, df_const))
+                                                       color, df_name, df_const))
     else:
+        # change argvalue2 if we get rid of opg001
         fig = px.bar(
             title=get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, arg_value[2],
                                            df_name, df_const))
@@ -838,7 +856,8 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
 
 def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
                    hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const, xaxis_title, yaxis_title,
-                   xlegend, ylegend, gridline, legend):
+                   xlegend, ylegend, gridline, legend, document_level_dropdown,
+                   document_path, document_type, document_graph_children):
     """Returns the box plot figure."""
     # ------------------------------------------------Arg Values--------------------------------------------------------
     # arg_value[0] = measure type selector
@@ -857,8 +876,16 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         # Specialty filtering
         if df_name != "OPG011":
             filtered_df = customize_menu_filter(dff, df_name, arg_value[0], arg_value[1], df_const)
+            category = df_const[df_name]['VARIABLE_LEVEL']
         else:
             filtered_df = dff.copy()
+            if document_type == 'Level Filter':
+                category = document_level_dropdown
+            elif document_type == 'Specific Item' and document_graph_children == ['graph_children']:
+                category = df_const[df_name]['DOCUMENT_LEVELS'][len(document_path)]
+            else:
+                category = df_const[df_name]['DOCUMENT_LEVELS'][len(document_path) - 1] if len(document_path) != 0 \
+                                                                                                    else 'Vairable Name'
 
         # hierarchy type is "Level Filter", or "Specific Item" while "Graph all in Dropdown" is selected
         if hierarchy_type == 'Level Filter' or (hierarchy_type == 'Specific Item' and
@@ -897,7 +924,7 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                         title = '{}: {} {}'.format(hierarchy_path[-1], arg_value[0], get_label('LBL_Distribution'))
 
         # df is not empty, create graph
-        if not filtered_df.empty:
+        if len(filtered_df) != 0:
             title += '<br><sub>{} {} </sub>'.format(get_label('LBL_Data_Accessed_On'), datetime.date(datetime.now()))
 
             # if hierarchy type is "Level Filter", or "Specific Item" while "Graph all in Dropdown" is selected
@@ -908,12 +935,12 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                     y = hierarchy_level_dropdown
                 else:
                     y = df_const[df_name]['HIERARCHY_LEVELS'][len(hierarchy_path)]
-                filtered_df.sort_values(by=[df_const[df_name]['VARIABLE_LEVEL'], y, x], inplace=True)
+                filtered_df.sort_values(by=[category, y, x], inplace=True)
             # hierarchy type is specific item while "Graph all in Dropdown" is unselected
             else:
                 x = 'Measure Value'
                 y = None
-                filtered_df.sort_values(by=[df_const[df_name]['VARIABLE_LEVEL'], 'Measure Value'])
+                filtered_df.sort_values(by=[category, 'Measure Value'], inplace=True)
 
             # filter the dataframe down to the partial period selected
             filtered_df['Date of Event'] = filtered_df['Date of Event'].transform(
@@ -928,7 +955,7 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                 # check arg_value[2]: orientation assign to corresponding x and y axis
                 x=x if arg_value[2] == 'Horizontal' else y,
                 y=y if arg_value[2] == 'Horizontal' else x,
-                color=df_const[df_name]['VARIABLE_LEVEL'],
+                color=category,
                 points='all' if arg_value[3] else False)
 
             fig.update_layout(legend_title_text=get_label('LBL_Variable_Names'))
@@ -1089,7 +1116,9 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
     cond_style.append({'if': {'row_index': 'odd'}, 'backgroundColor': 'rgb(248, 248, 248)'})
 
     cond_style.append(
-        {'if': {'column_id': 'Link'}, 'cursor': 'pointer', 'color': 'blue', 'text-decoration': 'underline'})
+        {'if': {'column_id': 'Link'}, 'cursor': 'pointer', 'color': 'blue', 'text-decoration': 'underline',
+        'overflow': 'hidden',
+        'maxWidth': 0})
 
     # check arg_value[1]: num of pages is a whole integer if not assign 10
     if arg_value[1] is None or type(arg_value[1]) is not int:
@@ -1146,7 +1175,7 @@ def get_sankey_figure(arg_value, dff, hierarchy_level_dropdown, hierarchy_path, 
     filtered_df = customize_menu_filter(dff, df_name, 'Link', arg_value[0], df_const)
 
     # df is not empty, create empty sankey graph
-    if filtered_df.empty:
+    if len(filtered_df) == 0:
         title += get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, arg_value[0],
                                           df_name, df_const)
         return dcc.Graph(
@@ -1239,10 +1268,28 @@ def get_sankey_figure(arg_value, dff, hierarchy_level_dropdown, hierarchy_path, 
         figure=fig)
 
 
+def get_pivot_table(dff, tile, df_const, df_name):
+
+    dff = dff.dropna(how='all', axis=1)
+
+    return html.Div(children=[
+                PivotTable(
+                        id={'type': 'pivottable', 'index': tile},
+                        data=dff.to_dict("records"),
+                        cols=[],
+                        rows=[],
+                        vals=df_const[df_name]['MEASURE_TYPE_OPTIONS'],
+                        unusedOrientationCutoff=0),
+    ], style={'height': '70%', 'width': '95%', 'overflow-y': 'auto', 'overflow-x': 'auto',
+                   'margin-left': '10px', 'margin-right': '10px'})
+
+
 def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods, period_type,
                    hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options,
                    state_of_display, secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
-                   end_secondary, df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend):
+                   end_secondary, df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend,
+                   document_state_of_display, document_toggle, document_level_dropdown,
+                   document_graph_children, document_options):
     """Update graph internal - can be called from callbacks or programmatically"""
     # Creates a hierarchy trail from the display
     if type(state_of_display) == dict:
@@ -1265,6 +1312,23 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
     # hierarchy specific dropdown selection is last item in list_of_names, otherwise None
     hierarchy_specific_dropdown = list_of_names[-1] if len(list_of_names) > 0 else None
 
+    if type(document_state_of_display) == dict:
+        document_state_of_display = [document_state_of_display]
+
+    list_of_doc_names = []
+
+    if len(document_state_of_display) > 0:
+        for obj in document_state_of_display:
+            list_of_doc_names.append(obj['props']['children'])
+
+    if document_toggle == 'Specific Item' and document_graph_children == ['graph_children']:
+        # If at a leaf node then display it's parents data
+        nid_path = "root"
+        for x in list_of_doc_names:
+            nid_path += ('^||^{}'.format(x))
+        if not document_options:
+            list_of_doc_names.pop()
+
     # If "Last ___ ____" is active and the num_periods is invalid (None), return an empty graph
     if timeframe == 'to-current' and not num_periods:
         filtered_df = pd.DataFrame(columns=df_const[df_name]['COLUMN_NAMES'])
@@ -1273,14 +1337,18 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
         filtered_df = data_manipulator(list_of_names, hierarchy_toggle, hierarchy_level_dropdown,
                                        hierarchy_graph_children, df_name, df_const, secondary_type, end_secondary,
                                        end_year, start_secondary, start_year, timeframe, fiscal_toggle, num_periods,
-                                       period_type, graph_options, graph_type)
+                                       period_type, graph_options, graph_type, list_of_doc_names,
+                                       document_toggle, document_level_dropdown, document_graph_children,
+                                       document_options)
 
     # line and scatter graph creation
     if graph_type == 'Line' or graph_type == 'Scatter':
         return get_line_scatter_figure(graph_options, filtered_df, hierarchy_specific_dropdown,
                                        hierarchy_level_dropdown, list_of_names, hierarchy_toggle,
                                        hierarchy_graph_children, graph_title, df_name, df_const, xtitle, ytitle,
-                                       xlegend, ylegend, gridline, legend)
+                                       xlegend, ylegend, gridline, legend,
+                                       document_level_dropdown, list_of_doc_names, document_toggle,
+                                       document_graph_children)
     # bubble graph creation
     elif graph_type == 'Bubble':
         return get_bubble_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
@@ -1290,12 +1358,20 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
     elif graph_type == 'Bar':
         return get_bar_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
                               list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
-                              df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend)
+                              df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend,
+                              document_level_dropdown, list_of_doc_names, document_toggle, document_graph_children)
     # box plot creation
     elif graph_type == 'Box_Plot':
         return get_box_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
                               list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
-                              df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend)
+                              df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend,
+                              document_level_dropdown, list_of_doc_names, document_toggle, document_graph_children)
+
+    # pivot table creation
+    elif graph_type == 'Pivot_Table':
+        changed_index = dash.callback_context.inputs_list[2]['id']['index']
+        return get_pivot_table(filtered_df, changed_index, df_const, df_name)
+
     # table creation
     elif graph_type == 'Table':
         changed_index = dash.callback_context.inputs_list[2]['id']['index']

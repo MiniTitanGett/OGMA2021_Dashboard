@@ -103,7 +103,6 @@ begin
        -- but since the data doesn't include any values in Sub Qualifier, we are ok
        and trim(isnull(dur.[Variable Name Qualifier], '')) <> ''
        and dur.[Calendar Entry Type] = 'Week'
-       and dur.[Measure Type] = 'Duration'
 
   else
   begin

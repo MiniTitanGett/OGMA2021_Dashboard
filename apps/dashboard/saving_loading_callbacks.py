@@ -219,6 +219,11 @@ for y in range(4):
          State({'type': 'num-periods', 'index': y}, 'value'),
          State({'type': 'period-type', 'index': y}, 'value'),
          State({'type': 'start-year-input', 'index': y}, 'name'),
+         # Seconday hierarchy
+         State({'type': 'document_display_button', 'index': y}, 'children'),
+         State({'type': 'document-toggle', 'index': y}, 'value'),
+         State({'type': 'document_level_dropdown', 'index': y}, 'value'),
+         State({'type': 'document_children_toggle', 'index': y}, 'value'),
          # load layout states
          State({'type': 'select-layout-dropdown', 'index': y}, 'value'),
          State('df-constants-storage', 'data')],
@@ -231,7 +236,8 @@ for y in range(4):
                            parent_secondary_start, parent_secondary_end, parent_x_time_period, parent_period_type,
                            parent_tab, year_start, year_end, hierarchy_toggle, hierarchy_level_dropdown,
                            state_of_display, graph_children_toggle, fiscal_toggle, input_method, secondary_start,
-                           secondary_end, x_time_period, period_type, tab, selected_layout, df_const):
+                           secondary_end, x_time_period, period_type, tab, doc_button_path, doc_toggle, doc_level,
+                           doc_graph_all, selected_layout, df_const):
 
         if link_state == 'fa fa-link':
             fiscal_toggle = parent_fiscal_toggle
@@ -256,6 +262,13 @@ for y in range(4):
         for button in state_of_display:
             nid_path += '^||^{}'.format(button['props']['children'])
 
+        if type(doc_button_path) == dict:
+            doc_button_path = [doc_button_path]
+
+        doc_nid_path = "root"
+        for button in doc_button_path:
+            doc_nid_path += '^||^{}'.format(button['props']['children'])
+
         tile = int(dash.callback_context.inputs_list[0]['id']['index'])
         # Outputs
         update_options_trigger = no_update
@@ -275,6 +288,7 @@ for y in range(4):
         link_output = no_update
         df_const_output = no_update
         graph_options = [None, None, None, None, xmodified, ymodified, gridline, legend]
+        graph_variable = [doc_level, doc_nid_path, doc_toggle, doc_graph_all]
 
         # if save requested or the overwrite was confirmed, check for exceptions and save
         if trigger == 'save' or trigger == 'confirm-overwrite':
@@ -347,8 +361,8 @@ for y in range(4):
                                     'Data Set': df_name,
                                     'Graph All Toggle': graph_children_toggle,
                                     'NID Path': nid_path,
-                                    'Title': graph_title}
-
+                                    'Title': graph_title,
+                                    'Graph Variable': graph_variable}
                 # if input method is 'select-range', add the states of the select range inputs
                 if input_method == 'select-range':
                     elements_to_save['Date Tab'] = tab
@@ -401,8 +415,9 @@ for y in range(4):
             graph_type = session['saved_layouts'][selected_layout]['Graph Type']
             args_list = session['saved_layouts'][selected_layout]['Args List']
             graph_options = session['saved_layouts'][selected_layout]['Graph Options']
+            graph_variable = session['saved_layouts'][selected_layout]['Graph Variable']
             graph_menu = load_graph_menu(graph_type=graph_type, tile=tile, df_name=df_name, args_list=args_list,
-                                         graph_options=graph_options, df_const=df_const)
+                                         graph_options=graph_options, graph_variable=graph_variable, df_const=df_const)
             customize_content = get_customize_content(tile=tile, graph_type=graph_type, graph_menu=graph_menu,
                                                       df_name=df_name)
 
@@ -649,6 +664,14 @@ for y in range(4):
      State({'type': 'start-year-input', 'index': 2}, 'name'),
      State({'type': 'start-year-input', 'index': 3}, 'name'),
      State({'type': 'start-year-input', 'index': 4}, 'name'),
+     # document display path
+     State({'type': 'document_display_button', 'index': ALL}, 'children'),
+     # document toggle
+     State({'type': 'document-toggle', 'index': ALL}, 'value'),
+     # document level val
+     State({'type': 'document_level_dropdown', 'index': ALL}, 'value'),
+     # document graph all
+     State({'type': 'document_children_toggle', 'index': ALL}, 'value'),
      # dashboard layout
      State('div-body', 'layouts'),
      # df_const
@@ -678,8 +701,9 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                                       end_secondary_4,
                                       num_periods_0, num_periods_1, num_periods_2, num_periods_3, num_periods_4,
                                       period_type_0, period_type_1, period_type_2, period_type_3, period_type_4,
-                                      date_tab_0, date_tab_1, date_tab_2, date_tab_3, date_tab_4, layout,
-                                      df_const):
+                                      date_tab_0, date_tab_1, date_tab_2, date_tab_3, date_tab_4,
+                                      doc_button_path, doc_toggle, doc_level, doc_graph_all,
+                                      layout, df_const):
     # ---------------------------------------Variable Declarations------------------------------------------------------
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     # Outputs
@@ -789,12 +813,13 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                         "Timeframe": "all-time",
                         "Title": "This Graph has been deleted"}
 
-                # pop graph_type/args_list/graph_options to compare the dashboard parent data menu to
+                # pop graph_type/args_list/graph_options/graph_variable to compare the dashboard parent data menu to
                 # the saved tile data menu
                 graph_type = tile_data.pop('Graph Type')
                 args_list = tile_data.pop('Args List')
                 graph_options = tile_data.pop('Graph Options')
                 df_name = tile_data['Data Set']
+                graph_variable = tile_data.pop('Graph Variable')
 
                 # check if data is loaded
                 if df_name not in session or (df_const is not None and df_name not in df_const):
@@ -815,7 +840,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 # create tile keys
                 graph_menu = load_graph_menu(graph_type=graph_type, tile=tile_index, df_name=df_name,
                                              args_list=args_list, graph_options=graph_options,
-                                             df_const=df_const)
+                                             graph_variable=graph_variable, df_const=df_const)
                 # TODO: Need to add df name
                 customize_content = get_customize_content(tile=tile_index, graph_type=graph_type, graph_menu=graph_menu,
                                                           df_name=df_name)
@@ -1001,9 +1026,17 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                     for key in session['saved_layouts']:
                         used_titles.append(session['saved_layouts'][key]["Title"])
 
+                    if type(doc_button_path[i]) == dict:
+                        doc_button_path[i] = [doc_button_path[i]]
+
+                    doc_nid_path = "root"
+                    for button in doc_button_path[i]:
+                        doc_nid_path += '^||^{}'.format(button['props']['children'])
+
                     # set up Graph Options and args
                     args_list = arg_list_all[i]
                     graph_options = [x[i] for x in graph_options_all if len(x) >= (i + 1)]
+                    graph_variable = [doc_level[i], doc_nid_path, doc_toggle[i], doc_graph_all[i]]
 
                     if type(button_paths[i]) == dict:
                         button_paths[i] = [button_paths[i]]
@@ -1046,7 +1079,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                     # save tile to file
                     save_layout_state(tile_pointer, {'Graph Type': graph_types[i], 'Args List': args_list,
                                                      'Graph Options': graph_options, **tile_data,
-                                                     'Title': tile_titles[i]})
+                                                     'Title': tile_titles[i], 'Graph Variable': graph_variable})
                     # save_layout_to_file(session['saved_layouts'])
                     save_layout_to_db(tile_pointer, tile_titles[i], tile_titles[i] not in used_titles)
 

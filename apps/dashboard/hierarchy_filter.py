@@ -29,7 +29,8 @@ def generate_dropdown(tile, df_name, nid_path, df_const):
             # df = df.set_index(['H{}'.format(i) for i in range(llen)])
             # option_list = df.loc[tuple(hierarchy_nid_list)]['H{}'.format(llen)].dropna().unique()
             for i in range(llen):
-                level = df_const[df_name]["Categorical_Data"]["H"+str(i)]["labels"].index(hierarchy_nid_list[i]) if df_name == "OPG011" else hierarchy_nid_list[i]
+                level = df_const[df_name]["Categorical_Data"]["H"+str(i)]["labels"].index(hierarchy_nid_list[i]) if \
+                                                                        df_name == "OPG011" else hierarchy_nid_list[i]
                 df = df.filter(df['H{}'.format(i)] == level)
                 df = df.drop('H{}'.format(i))
             option_list = df['H{}'.format(llen)].unique(dropmissing=True)
@@ -77,7 +78,7 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
         for nid in hierarchy_nid_list:
             if nid == "root":
                 continue
-            button = generate_history_button(nid, len(hierarchy_button_path), tile)
+            button = generate_history_button(nid, len(hierarchy_button_path), tile, df_name, df_const)
             hierarchy_button_path.append(button)
         return [
             html.Div(

@@ -11,7 +11,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 
 # Internal Modules
-from apps.dashboard.data import get_label, session, CLR
+from apps.dashboard.data import get_label, session
 
 # ***********************************************HELPER FUNCTIONS****************************************************
 
@@ -30,10 +30,11 @@ def generate_document_dropdown(tile, df_name, nid_path, df_const):
             # df = df.set_index(['H{}'.format(i) for i in range(llen)])
             # option_list = df.loc[tuple(hierarchy_nid_list)]['H{}'.format(llen)].dropna().unique()
             for i in range(llen):
-                level = df_const[df_name]["Categorical_Data"][hierarchy_level[i]]["labels"].index(hierarchy_nid_list[i]) if df_name == "OPG011" else hierarchy_nid_list[i]
+                level = df_const[df_name]["Categorical_Data"][hierarchy_level[i]]["labels"].index(
+                                                hierarchy_nid_list[i]) if df_name == "OPG011" else hierarchy_nid_list[i]
                 df = df.filter(df[hierarchy_level[i]] == level)
                 df = df.drop(hierarchy_level[i])
-            option_list = df[hierarchy_level[llen]].unique(dropmissing=True)
+            option_list = df[hierarchy_level[llen]].unique(dropmissing=True, dropnan=True)
         else:
             option_list = df['Variable Name'].unique()
         options = [{'label': df_const[df_name]["Categorical_Data"][hierarchy_level[llen]]["labels"]
@@ -69,16 +70,17 @@ def generate_document_history_button(name, index, tile, df_name, df_const):
 # ***********************************************LAYOUT***************************************************************
 
 
-def get_document_hierarchy_layout(tile, df_name=None, hierarchy_toggle= "Level Filter", level_value="Variable Name", graph_all_toggle=None,
-                nid_path="root", df_const=None):
+def get_document_hierarchy_layout(tile, df_name=None, hierarchy_toggle="Level Filter", level_value="Variable Name",
+                                  graph_all_toggle=None, nid_path="root", df_const=None):
     """Gets and returns the hierarchy layout."""
     if df_name is not None and df_const is not None:
         hierarchy_nid_list = nid_path.split("^||^")
         hierarchy_button_path = []
+        hierarchy_level = ['Variable Name', 'Variable Name Qualifier']
         for nid in hierarchy_nid_list:
             if nid == "root":
                 continue
-            button = generate_document_history_button(nid, len(hierarchy_button_path), tile)
+            button = generate_document_history_button(nid, len(hierarchy_button_path), tile, df_name, df_const)
             hierarchy_button_path.append(button)
         return [
             # html.Div(
@@ -109,7 +111,7 @@ def get_document_hierarchy_layout(tile, df_name=None, hierarchy_toggle= "Level F
                 dcc.Dropdown(
                     id={'type': 'document_level_dropdown', 'index': tile},
                     options=[{'label': get_label('LBL_' + x.replace(' ', '_'), df_name), 'value': x} for x in
-                             df_const[df_name]['DOCUMENT_LEVELS']] if df_name == "OPG011" else [],
+                                                                        hierarchy_level] if df_name == "OPG011" else [],
                     multi=False,
                     value=level_value,
                     style={'color': 'black', 'textAlign': 'center', 'margin-top': '10px'},

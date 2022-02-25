@@ -776,7 +776,11 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
                                            df_name=df_name,
                                            df_const=df_const,
                                            data_fitting=data_fitting,
-                                           ci=None)
+                                           ci=None,
+                                           level_value='Variable Name',
+                                           nid_path="root",
+                                           hierarchy_toggle='Level Filter',
+                                           graph_all_toggle=None)
     elif selected_graph_type == 'Bar':
         menu = get_bar_graph_menu(tile=tile,
                                   x=BAR_X_AXIS_OPTIONS[0],
@@ -794,7 +798,11 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
                                   xmodified=None,
                                   ymodified=None,
                                   df_name=df_name,
-                                  df_const=df_const)
+                                  df_const=df_const,
+                                  level_value='Variable Name',
+                                  nid_path="root",
+                                  hierarchy_toggle='Level Filter',
+                                  graph_all_toggle=None)
     elif selected_graph_type == 'Bubble':
         menu = get_bubble_graph_menu(tile=tile,
                                      x=None if df_const is None else
@@ -826,7 +834,9 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
                                     xpos=None,
                                     ypos=None,
                                     xmodified=None,
-                                    ymodified=None)
+                                    ymodified=None,
+                                    df_name=df_name,
+                                    df_const=df_const)
 
     elif selected_graph_type == 'Box_Plot':
         menu = get_box_plot_menu(tile=tile,
@@ -845,7 +855,11 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
                                  ypos=None,
                                  xmodified=None,
                                  ymodified=None,
-                                 df_const=df_const)
+                                 df_const=df_const,
+                                 level_value='Variable Name',
+                                 nid_path="root",
+                                 hierarchy_toggle='Level Filter',
+                                 graph_all_toggle=None)
     elif selected_graph_type == 'Sankey':
         menu = get_sankey_menu(tile=tile,
                                graphed_options=None if df_const is None else
@@ -866,7 +880,9 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
                                     xpos=None,
                                     ypos=None,
                                     xmodified=None,
-                                    ymodified=None)
+                                    ymodified=None,
+                                    df_name=df_name,
+                                    df_const=df_const)
 
     else:
         raise PreventUpdate
@@ -1313,7 +1329,6 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                     for button in state_of_display:
                         nid_path += '^||^{}'.format(button['props']['children'])
 
-                    df_const[df_names[tile]] = generate_constants(df_names[tile])
                     data[tile] = get_data_menu(tile, df_names[tile],
                                                prev_selection=prev_selection[tile],
                                                df_const=df_const)

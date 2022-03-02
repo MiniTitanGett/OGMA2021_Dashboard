@@ -268,7 +268,7 @@ select {
 /* Removes awkward default styles on some inputs for iOS */
 input[type="email"],
 input[type="number"] {
-    border-radius: 0;
+    border-radius: 5px;
 }
 input[type="search"],
 input[type="text"],
@@ -665,7 +665,7 @@ there.
     color: #555;
     font-size: 16px;
     margin: 0 0 0 0;
-    padding: 12px;
+    padding: 4px;
     width: 20px;
     position: absolute;
     text-align: center;
@@ -771,7 +771,7 @@ there.
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 
 .toggle-tabs-wrapper .tab--selected {
-    background-color: #e6e6e6 !important;
+    background-color: white !important;
     border-top: 1px solid #d6d6d6 !important;
     border-bottom: 1px solid #d6d6d6 !important;
 }
@@ -1198,6 +1198,8 @@ there.
     margin-right: auto;
     background: #fffafa;
     box-shadow: rgb(20, 20, 20) 0 10px 20px;
+    max-height: 90%;
+    overflow-y: auto;
 }
 
 .popup {

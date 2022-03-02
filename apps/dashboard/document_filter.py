@@ -123,7 +123,8 @@ def get_document_hierarchy_layout(tile, df_name=None, hierarchy_toggle="Level Fi
                 html.Div(
                     children=hierarchy_button_path if hierarchy_button_path else [],
                     id={'type': 'document_display_button', 'index': tile},
-                    style={'display': '', 'overflow': 'scroll', 'height': '100px', 'padding left': '5px'}),
+                    style={'display': '', 'overflow': 'scroll', 'height': '100px', 'padding left': '5px',
+                           'max-width': '260px'}),
                 dcc.Checklist(
                     id={'type': 'document_children_toggle', 'index': tile},
                     options=[{'label': get_label('LBL_Graph_All_In_Dropdown'),

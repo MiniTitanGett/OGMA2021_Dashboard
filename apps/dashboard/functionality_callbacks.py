@@ -233,15 +233,15 @@ for x in range(4):
         else:
             session['tile_edited'][tile] = True
 
-        # added to remove the the data-fitting traces from the graph when the hierarchy toggle is changed or
+        # added to remove the data-fitting traces from the graph when the hierarchy toggle is changed or
         # graph all in dropdown is selected
         if graph_type == "Line" or graph_type == "Scatter":
-            if arg_value[4] != 'no-fit' and (hierarchy_toggle != 'Specific Item' or hierarchy_graph_children != []):
-                arg_value[4] = 'no-fit'
+            if arg_value[3] != 'no-fit' and (hierarchy_toggle != 'Specific Item' or hierarchy_graph_children != []):
+                arg_value[3] = 'no-fit'
                 data = "hide-selected-options"
                 fitting_popup_text = get_label('LBL_Auto_Un_Check_Fitting_Options')
                 fitting_popup_is_open = True
-            elif arg_value[4] != 'no-fit' and hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == []:
+            elif arg_value[3] != 'no-fit' and hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == []:
                 data = "show-selected-options"
                 if prev_fitting_trigger == "hide-selected-options":
                     fitting_popup_text = get_label('LBL_Auto_Select_Fitting_Options')
@@ -938,12 +938,12 @@ for x in range(4):
                     confidence_interval_wrapper = {'display': 'none'};
                 }
                 else{
-                    confidence_interval_wrapper = {'display': 'inline'};
+                    confidence_interval_wrapper = {'display': 'inline-flex'};
                 }
             }
             else if (degree_input == 'curve-fit'){
-                degree_input_wrapper = {'display': 'inline'};
-                confidence_interval_wrapper = {'display': 'inline'};
+                degree_input_wrapper = {'display': 'inline-flex'};
+                confidence_interval_wrapper = {'display': 'inline-flex'};
             }
             else{
                 degree_input_wrapper = dash_clientside.no_update;
@@ -955,7 +955,7 @@ for x in range(4):
         """,
         [Output({'type': 'degree-input-wrapper', 'index': x}, 'style'),
          Output({'type': 'confidence-interval-wrapper', 'index': x}, 'style')],
-        [Input({'type': 'args-value: {}'.replace("{}", str(x)), 'index': 4}, 'value')],
+        [Input({'type': 'args-value: {}'.replace("{}", str(x)), 'index': 3}, 'value')],
         prevent_initial_call=True
     )
 

@@ -116,11 +116,11 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
     # ------------------------------------------------Arg Values--------------------------------------------------------
     # arg_value[0] = xaxis selector
     # arg_value[1] = measure type selector
-    # arg_value[2] = variable names selector
-    # arg_value[3] = mode
-    # arg_value[4] = fit
-    # arg_value[5] = degree
-    # arg_value[6] = confidence interval
+    # arg_value[2] = mode
+    # arg_value[3] = fit
+    # arg_value[4] = degree
+    # arg_value[5] = confidence interval
+    # arg_value[6] = variable names selector
     # ------------------------------------------------------------------------------------------------------------------
 
     language = session["language"]
@@ -132,7 +132,7 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                                                                   hierarchy_graph_children, df_name, df_const]:
         # Specialty filtering
         if df_name != "OPG011":
-            filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[2], df_const)
+            filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[5], df_const)
             category = df_const[df_name]['VARIABLE_LEVEL']
         else:
             filtered_df = dff.copy()
@@ -212,10 +212,10 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                 custom_data=[hierarchy_col, category])
             fig.update_layout(legend_title_text=legend_title_text)
 
-            # check what arg_value[3]: mode is selected and sets the corresponding trace
-            if arg_value[3] == 'Line':
+            # check what arg_value[2]: mode is selected and sets the corresponding trace
+            if arg_value[2] == 'Line':
                 fig.update_traces(mode='lines')
-            elif arg_value[3] == 'Scatter':
+            elif arg_value[2] == 'Scatter':
                 fig.update_traces(mode='markers')
             else:
                 fig.update_traces(mode='lines+markers')
@@ -230,9 +230,9 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
 
             # ------------------------------------------DATA FITTING----------------------------------------------------
             # data fitting options visible when hierarchy toggle is on specific item
-            # arg_value[4]: data fitting radio options
-            if arg_value[4] == 'linear-fit':
-                ci = True if arg_value[6] == ['ci'] else False
+            # arg_value[3]: data fitting radio options
+            if arg_value[3] == 'linear-fit':
+                ci = True if arg_value[5] == ['ci'] else False
                 best_fit_data = linear_regression(filtered_df, 'Date of Event', 'Measure Value', ci)
                 filtered_df["Best Fit"] = best_fit_data["Best Fit"]
                 fig2 = px.line(
@@ -244,8 +244,8 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                 fig2.data[0].name = 'Best fit'
                 fig2.data[0].showlegend = True
                 fig.add_trace(fig2.data[0])
-                # arg_value[6]: confidence interval is toggled
-                if arg_value[6] == ['ci']:
+                # arg_value[5]: confidence interval is toggled
+                if arg_value[5] == ['ci']:
                     filtered_df["Upper Interval"] = best_fit_data["Upper Interval"]
                     filtered_df["Lower Interval"] = best_fit_data["Lower Interval"]
                     fig3 = px.line(
@@ -266,9 +266,9 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                     fig4.data[0].showlegend = True
                     fig4.data[0].name = 'Lower Interval'
                     fig.add_trace(fig4.data[0])
-            if arg_value[4] == 'curve-fit':
-                ci = True if arg_value[6] == ['ci'] else False
-                best_fit_data = polynomial_regression(filtered_df, 'Date of Event', 'Measure Value', arg_value[5], ci)
+            if arg_value[3] == 'curve-fit':
+                ci = True if arg_value[5] == ['ci'] else False
+                best_fit_data = polynomial_regression(filtered_df, 'Date of Event', 'Measure Value', arg_value[4], ci)
                 filtered_df["Best Fit"] = best_fit_data["Best Fit"]
                 fig2 = px.line(
                     data_frame=filtered_df,
@@ -280,7 +280,7 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                 fig2.data[0].name = 'Best Fit'
                 fig.add_trace(fig2.data[0])
 
-                if arg_value[6] == ['ci']:  # ci
+                if arg_value[5] == ['ci']:  # ci
                     filtered_df["Upper Interval"] = best_fit_data["Upper Interval"]
                     filtered_df["Lower Interval"] = best_fit_data["Lower Interval"]
                     fig3 = px.line(
@@ -305,10 +305,10 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
         else:
             fig = px.line(
                 title=title + get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path,
-                                                       arg_value[2], df_name, df_const))
+                                                       arg_value[5], df_name, df_const))
     else:
         fig = px.line(
-            title=get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, arg_value[2],
+            title=get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, arg_value[5],
                                            df_name, df_const))
 
     # set title
@@ -619,7 +619,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                                                                   hierarchy_graph_children, df_name, df_const]:
         # Specialty filtering
         if df_name != "OPG011":
-            filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[2], df_const)
+            filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[3], df_const)
             category = df_const[df_name]['VARIABLE_LEVEL']
         else:
             filtered_df = dff.copy()
@@ -747,8 +747,8 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             fig = px.bar(
                 title=title,
                 data_frame=filtered_df,
-                x=x if arg_value[3] == 'Vertical' else 'Measure Value',
-                y='Measure Value' if arg_value[3] == 'Vertical' else x,
+                x=x if arg_value[2] == 'Vertical' else 'Measure Value',
+                y='Measure Value' if arg_value[2] == 'Vertical' else x,
                 color=color,
                 barmode='group',
                 animation_frame='Date of Event' if arg_value[4] else None,
@@ -759,7 +759,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event', df_name))
             hovertemplate = hovertemplate.replace('%AXIS-A%', '%{customdata[2]}').replace('%AXIS-TITLE-B%',
                                                                                           arg_value[1])
-            if arg_value[3] == 'Vertical':
+            if arg_value[2] == 'Vertical':
                 hovertemplate = hovertemplate.replace('%AXIS-B%', '%{y}')
             else:
                 hovertemplate = hovertemplate.replace('%AXIS-B%', '%{x}')
@@ -775,7 +775,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
     else:
         # change argvalue2 if we get rid of opg001
         fig = px.bar(
-            title=get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, arg_value[2],
+            title=get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, arg_value[3],
                                            df_name, df_const))
 
     # set title
@@ -818,8 +818,8 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
 
     fig.update_layout(
         # x and y axis location change depending on graph arg_value[4] orientation
-        xaxis_title=xaxis if arg_value[3] == 'Vertical' else yaxis,
-        yaxis_title=yaxis if arg_value[3] == 'Vertical' else xaxis,
+        xaxis_title=xaxis if arg_value[2] == 'Vertical' else yaxis,
+        yaxis_title=yaxis if arg_value[2] == 'Vertical' else xaxis,
         showlegend=False if legend else True,
         overwrite=True,
         plot_bgcolor='rgba(0, 0, 0, 0)',
@@ -835,7 +835,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
 
     # set ranges
     if arg_value[4]:
-        if arg_value[3] == 'Vertical':
+        if arg_value[2] == 'Vertical':
             fig.update_yaxes(range=[0, filtered_df['Measure Value'].max()])
         else:
             fig.update_xaxes(range=[0, filtered_df['Measure Value'].max()])
@@ -861,8 +861,8 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
     """Returns the box plot figure."""
     # ------------------------------------------------Arg Values--------------------------------------------------------
     # arg_value[0] = measure type selector
-    # arg_value[1] = variable selector
-    # arg_value[2] = orientation toggle
+    # arg_value[1] = orientation toggle
+    # arg_value[2] = variable selector
     # arg_value[3] = data points toggle
     # ---------------------------------------Variable Declarations------------------------------------------------------
     language = session["language"]
@@ -875,7 +875,7 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                                                                   hierarchy_graph_children, df_name, df_const]:
         # Specialty filtering
         if df_name != "OPG011":
-            filtered_df = customize_menu_filter(dff, df_name, arg_value[0], arg_value[1], df_const)
+            filtered_df = customize_menu_filter(dff, df_name, arg_value[0], arg_value[2], df_const)
             category = df_const[df_name]['VARIABLE_LEVEL']
         else:
             filtered_df = dff.copy()
@@ -952,9 +952,9 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             fig = px.box(
                 title=title,
                 data_frame=filtered_df,
-                # check arg_value[2]: orientation assign to corresponding x and y axis
-                x=x if arg_value[2] == 'Horizontal' else y,
-                y=y if arg_value[2] == 'Horizontal' else x,
+                # check arg_value[1]: orientation assign to corresponding x and y axis
+                x=x if arg_value[1] == 'Horizontal' else y,
+                y=y if arg_value[1] == 'Horizontal' else x,
                 color=category,
                 points='all' if arg_value[3] else False)
 
@@ -963,14 +963,14 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         else:
             fig = px.box(
                 title=title + get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path,
-                                                       arg_value[2], df_name, df_const))
+                                                       arg_value[1], df_name, df_const))
     else:
         fig = px.box(
-            title=get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, arg_value[2],
+            title=get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, arg_value[1],
                                            df_name, df_const))
 
     # set title
-    if arg_value[2] == 'Vertical':
+    if arg_value[1] == 'Vertical':
         if xaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title is not None:
             xaxis = xaxis_title
         else:
@@ -1005,9 +1005,9 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         ))
 
     fig.update_layout(
-        # x and y axis location change depending on graph arg_value[2]: orientation
-        xaxis_title=xaxis if arg_value[2] == 'Horizontal' else yaxis,
-        yaxis_title=yaxis if arg_value[2] == 'Horizontal' else xaxis,
+        # x and y axis location change depending on graph arg_value[1]: orientation
+        xaxis_title=xaxis if arg_value[1] == 'Horizontal' else yaxis,
+        yaxis_title=yaxis if arg_value[1] == 'Horizontal' else xaxis,
         legend_title_text=get_label('LBL_Variable_Names'),
         showlegend=False if legend else True,
         boxgap=0.1,

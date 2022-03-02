@@ -1032,11 +1032,11 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
     """
     # arg_value[0] = xaxis selector
     # arg_value[1] = measure type selector
-    # arg_value[2] = variable names selector
-    # arg_value[3] = mode
-    # arg_value[4] = fit
-    # arg_value[5] = degree
-    # arg_value[6] = confidence interval
+    # arg_value[2] = mode
+    # arg_value[3] = fit
+    # arg_value[4] = degree
+    # arg_value[5] = confidence interval
+    # arg_value[6] = variable names selector/ Graph variable
     # arg_value[7] = grid lines
     # arg_value[8] = legend
 
@@ -1063,7 +1063,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                     html.P(
                         "{}:".format(get_label('LBL_X_Axis')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '50px'}),
+                    style={'display': 'inline-block', 'margin-right': '102px', 'width': '80%', 'max-width': '50px'}),
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
@@ -1088,7 +1088,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                             "{}:".format(get_label('LBL_Y_Axis')),
                             style={'color': CLR['text1'], 'font-size': '13px'})],
                         style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
-                               'margin-right': '5px'}),
+                               'margin-right': '102px'}),
                     html.Div([
                         dcc.Dropdown(
                             id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
@@ -1101,44 +1101,21 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                 html.Div([
                     html.Div([
                         html.P(
-                            "{}:".format(get_label('LBL_Graphed_Variables')),
-                            style={'color': CLR['text1'], 'font-size': '13px'})],
-                        style={'display': 'inline-block', 'width': '60px', 'position': 'relative', 'top': '-3px',
-                               'margin-right': '15px'}),
-                    html.Div([
-                        dcc.Dropdown(
-                            id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
-                            options=[] if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
-                            value=y,
-                            multi=True,
-                            clearable=False,
-                            style={'font-size': '13px'} if df_name != 'OPG011' else {'display': 'None'})],
-                        style={'display': 'inline-block', 'width': '80%',
-                               'max-width': '330px'} if df_name != 'OPG011' else {'display': 'None'}),
-                    html.Div(
-                        get_document_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle,
-                                                      nid_path, df_const=df_const),
-                        style={'display': 'inline-block', 'margin-right': '15px', 'width': '80%', 'max-width': '330px'}
-                        if df_name == 'OPG011' else {'display': 'None'})]),
-                html.Div([
-                    html.Div([
-                        html.P(
                             "{}:".format(get_label('LBL_Display')),
-                            style={'color': CLR['text1'], 'font-size': '13px', 'position': 'relative',
-                                   'top': '-45px'})
+                            style={'color': CLR['text1'], 'font-size': '13px', 'position': 'relative'})
                     ], style={'display': 'inline-block', 'width': '40px', 'position': 'relative', 'top': '-3px',
-                              'margin-right': '15px'}),
+                              'margin-right': '107px'}),
                     html.Div([
                         dcc.RadioItems(
-                            id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
+                            id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
                             options=[{'label': get_label('LBL_Lines'), 'value': 'Line'},
                                      {'label': get_label('LBL_Points'), 'value': 'Scatter'},
                                      {'label': get_label('LBL_Lines_And_Points'), 'value': 'Lines and Points'}],
+                            labelStyle={'display': 'inline-block'},
                             value=mode if mode else 'Lines',
                             style={'font-size': '13px'})],
-                        style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})]),
+                        style={'display': 'inline-block'})]),
                 html.Div([
-
                     html.Div([
                         html.P(
                             "{}:".format(get_label('LBL_Data_Fitting')),
@@ -1153,48 +1130,73 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                         className='fa fa-question-circle-o',
                         id={'type': 'data-fitting-info', 'index': tile},
                         style={'position': 'relative', 'vertical-align': 'top', 'padding-top': '4px'}),
-                ]),
-                html.Div([
+
                     html.Div(
                         id={'type': 'data-fitting-wrapper', 'index': tile},
                         children=[
                             dcc.RadioItems(
-                                id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
+                                id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
                                 options=[{'label': get_label('LBL_No_Fit'), 'value': 'no-fit'},
                                          {'label': get_label('LBL_Linear_Fit'), 'value': 'linear-fit'},
                                          {'label': get_label('LBL_Curve_Fit'), 'value': 'curve-fit'}],
+                                labelStyle={'display': "inline-block"},
                                 value=data_fit if data_fit else 'no-fit',
-                                style={'display': 'inline-block', 'font-size': '13px', 'padding-left': '20px'}),
-
-                            html.Div(
-                                id={'type': 'degree-input-wrapper', 'index': tile},
-                                children=html.Div([
-                                    dcc.Input(
+                                style={'display': 'inline-block', 'font-size': '13px'}),
+                            html.Div([
+                                html.P(["Degree: "], style={'padding-left': '5px', 'display': 'inline-block',
+                                                                                                'font-size': '13px'}),
+                                html.Div(
+                                    children=html.Div([
+                                        dcc.Input(
+                                            id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
+                                            value=degree if degree else 3,
+                                            type='number',
+                                            required=True,
+                                            min=1,
+                                            style={'width': '45px', 'height': '29px', 'margin': '0', 'padding': '0',
+                                                   'font-size': '15px',
+                                                   'text-align': 'center', 'padding-top': '3px', 'border-radius': '5px',
+                                                   'color': '#333', 'max-height': '26px'})
+                                    ], style={'display': 'inline-block', 'top': '-10px', 'padding-left': '5px'}),
+                                )
+                            ], style={'display': 'None'}, id={'type': 'degree-input-wrapper', 'index': tile}),
+                            html.Div([
+                                html.P([get_label('LBL_Confidence_Interval')+": "], style={'padding-left': '3px',
+                                                                    'font-size': '13px', 'display': 'inline-block'}),
+                                html.Div(
+                                    children=dcc.Checklist(
                                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
-                                        value=degree if degree else 3,
-                                        type='number',
-                                        required=True,
-                                        min=1,
-                                        style={'width': '45px', 'height': '29px', 'margin': '0', 'padding': '0',
-                                               'font-size': '15px',
-                                               'text-align': 'center', 'padding-top': '3px', 'border-radius': '5px',
-                                               'color': '#333', 'max-height': '26px'})
-                                ], style={'display': 'inline-block', 'top': '-10px', 'padding-left': '5px'}),
-                                style={'display': 'none'}
-                            ),
-                            html.Div(
-                                id={'type': 'confidence-interval-wrapper', 'index': tile},
-                                children=dcc.Checklist(
-                                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 6},
-                                    options=[{'label': get_label('LBL_Confidence_Interval'), 'value': 'ci'}],
-                                    value=ci if ci else [],
-                                    style={'color': 'black', 'width': '200px', 'display': 'inline-block'}),
-                                style={'display': 'none'}
-                            ),
+                                        options=[{'value': 'ci'}],
+                                        value=ci if ci else [],
+                                        style={'color': 'black', 'display': 'inline-block'}),
+                                    style={'display': 'inline-block'}),
+                            ], style={'display': 'None'}, id={'type': 'confidence-interval-wrapper', 'index': tile}),
                         ],
-                        style={'display': 'inline-block', 'width': '80%',
-                               'max-width': '130px'} if data_fitting else DATA_CONTENT_HIDE),
+                        style={'display': 'inline-block'} if data_fitting else DATA_CONTENT_HIDE),
                 ]),
+                html.Div([
+                    html.Div([
+                        html.P(
+                            "{}:".format(get_label('LBL_Graphed_Variables')),
+                            style={'color': CLR['text1'], 'font-size': '13px', 'padding-top': '2'})],
+                        style={'display': 'inline-block', 'position': 'relative', 'top': '-5px',
+                               'margin-right': '15px'}),
+                    html.Div([
+                        dcc.Dropdown(
+                            id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 6},
+                            options=[] if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
+                            value=y,
+                            multi=True,
+                            clearable=False,
+                            style={'font-size': '13px'} if df_name != 'OPG011' else {'display': 'None'})],
+                        style={'display': 'inline-block', 'width': '80%',
+                               'max-width': '330px'} if df_name != 'OPG011' else {'display': 'None'}),
+                    html.Div(
+                        get_document_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle,
+                                                      nid_path, df_const=df_const),
+                        style={'display': 'inline-flex', 'margin-left': '25px', 'flex-direction': 'column',
+                               'max-width': '330px'}
+                        if df_name == 'OPG011' else {'display': 'None'})]),
                 html.Div(
                     html.Div(
                         children=get_default_graph_options(xaxis=xaxis, yaxis=yaxis, xpos=xpos, ypos=ypos,
@@ -1233,8 +1235,8 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
     """
     # args_value[0] = x-axis
     # args_value[1] = y-axis (measure type)
-    # args_value[2] = graphed variables
-    # args_value[3] = orientation
+    # args_value[2] = orientation
+    # args_value[3] = graphed variables
     # args_value[4] = animate graph
     # args_value[5] = grid lines
     # args_value[6] = legend
@@ -1292,13 +1294,28 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
             html.Div([
                 html.Div([
                     html.P(
-                        "{}:".format(get_label('LBL_Graphed_Variables')),
+                        "{}:".format(get_label('LBL_Graph_Orientation')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
+                    style={'display': 'inline-block', 'position': 'relative', 'top': '-3px',
                            'margin-right': '15px'}),
                 html.Div([
-                    dcc.Dropdown(
+                    dcc.RadioItems(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
+                        options=[{'label': get_label('LBL_' + i), 'value': i} for i in ['Vertical', 'Horizontal']],
+                        labelStyle={'display': 'inline-block'},
+                        value=orientation if orientation else 'Vertical',
+                        style={'font-size': '13px'})],
+                    style={'display': 'inline-block', 'max-width': '350px'})]),
+            html.Div([
+                html.Div([
+                    html.P(
+                        "{}:".format(get_label('LBL_Graphed_Variables')),
+                        style={'color': CLR['text1'], 'font-size': '13px', 'padding-top': '2'})],
+                    style={'display': 'inline-block', 'position': 'relative', 'top': '-5px',
+                           'margin-right': '15px', }),
+                html.Div([
+                    dcc.Dropdown(
+                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
                         options=[] if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
                         value=y,
                         multi=True,
@@ -1309,28 +1326,18 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
                 html.Div(
                     get_document_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle,
                                                   nid_path, df_const=df_const),
-                    style={'display': 'inline-block', 'margin-right': '15px', 'max-width': '330px'}
+                    style={'display': 'inline-flex', 'margin-right': '15px', 'flex-direction': 'column',
+                           'max-width': '330px'}
                     if df_name == 'OPG011' else {'display': 'None'})]),
             html.Div([
-                html.Div([
-                    html.P(
-                        "{}:".format(get_label('LBL_Graph_Orientation')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '70px', 'position': 'relative', 'top': '-3px',
-                           'margin-right': '15px'}),
-                html.Div([
-                    dcc.RadioItems(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
-                        options=[{'label': get_label('LBL_' + i), 'value': i} for i in ['Vertical', 'Horizontal']],
-                        value=orientation if orientation else 'Vertical',
-                        style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
-            dcc.Checklist(
-                id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
-                options=[{'label': get_label('LBL_Animate_Over_Time'),
-                          'value': 'animate'}],
-                value=animate if animate else [],
-                style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
+                html.P([get_label('LBL_Animate_Over_Time') + ": "], style={'padding-left': '5px',
+                                                                    'display': 'inline-block', 'font-size': '13px'}),
+                dcc.Checklist(
+                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
+                    options=[{'value': 'animate'}],
+                    value=animate if animate else [],
+                    style={'color': 'black', 'display': 'inline-block'}),
+            ]),
             html.Div(
                 html.Div(
                     children=get_default_graph_options(xaxis=xaxis, yaxis=yaxis, xpos=xpos, ypos=ypos,
@@ -1528,10 +1535,10 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
         :param nid_path: the path of secondary specific hierarchy
         :return: Menu with options to modify a bar graph.
         """
-    # args_value[0] = graphed variables
-    # args_value[1] = measure type
-    # args_value[2] = points toggle
-    # arg_value[3] = orientation
+    # args_value[0] = measure type
+    # args_value[1] = orientation
+    # args_value[2] = graphed variables
+    # arg_value[3] = points toggle
     # arg_value[4] = grid lines
     # arg_value[5] = legend
 
@@ -1558,8 +1565,8 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                     html.P(
                         "{}:".format(get_label('LBL_Axis_Measure')),
                         style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '70px', 'position': 'relative', 'top': '-3px',
-                           'margin-right': '5px'}),
+                    style={'display': 'inline-block', 'position': 'relative', 'top': '-15px',
+                           'margin-right': '68px'}),
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
@@ -1568,17 +1575,32 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                         value=axis_measure,
                         clearable=False,
                         style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})]),
+                    style={'display': 'inline-block', 'width': '58%', 'max-width': '330px'})]),
+            html.Div([
+                html.Div([
+                    html.P(
+                        "{}:".format(get_label('LBL_Graph_Orientation')),
+                        style={'color': CLR['text1'], 'font-size': '13px'})],
+                    style={'display': 'inline-block', 'position': 'relative', 'top': '-3px',
+                           'margin-right': '15px'}),
+                html.Div([
+                    dcc.RadioItems(
+                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
+                        options=[{'label': get_label('LBL_' + i), 'value': i} for i in ['Vertical', 'Horizontal']],
+                        labelStyle={'display': 'inline-block'},
+                        value=graph_orientation if graph_orientation else 'Vertical',
+                        style={'font-size': '13px', 'margin-left': '25px'})],
+                    style={'display': 'inline-block', 'max-width': '350px'})]),
             html.Div([
                 html.Div([
                     html.P(
                         "{}:".format(get_label('LBL_Graphed_Variables')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '70px', 'position': 'relative', 'top': '-3px',
-                           'margin-right': '5px'}),
+                        style={'color': CLR['text1'], 'font-size': '13px', 'padding-top': '2'})],
+                    style={'display': 'inline-block', 'position': 'relative', 'top': '-5px',
+                           'margin-right': '15px', }),
                 html.Div([
                     dcc.Dropdown(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
+                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
                         options=[] if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
                         value=graphed_variables,
                         multi=True,
@@ -1589,26 +1611,18 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                 html.Div(
                     get_document_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle,
                                                   nid_path, df_const=df_const),
-                    style={'display': 'inline-block', 'margin-right': '15px', 'width': '80%', 'max-width': '330px'}
+                    style={'display': 'inline-flex', 'margin-left': '25px', 'flex-direction': 'column',
+                           'max-width': '330px'}
                     if df_name == 'OPG011' else {'display': 'None'})]),
             html.Div([
-                html.Div([
-                    html.P(
-                        "{}:".format(get_label('LBL_Graph_Orientation')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '70px', 'position': 'relative', 'top': '-3px',
-                           'margin-right': '15px'}),
-                html.Div([
-                    dcc.RadioItems(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
-                        options=[{'label': get_label('LBL_' + i), 'value': i} for i in ['Vertical', 'Horizontal']],
-                        value=graph_orientation,
-                        style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
-            dcc.Checklist(
-                id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
-                options=[{'label': get_label('LBL_Show_Data_Points'), 'value': 'show'}],
-                value=show_data_points),
+                html.P([get_label('LBL_Show_Data_Points') + ": "], style={'display': 'inline-block',
+                                                                          'margin-right': '24px', 'font-size': '15px'}),
+                dcc.Checklist(
+                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
+                    options=[{'value': 'show'}],
+                    value=show_data_points,
+                    style={'color': 'black', 'display': 'inline-block'}),
+            ]),
             html.Div(
                 html.Div(
                     children=get_default_graph_options(xaxis=xaxis, yaxis=yaxis, xpos=xpos, ypos=ypos,
@@ -1659,7 +1673,7 @@ def get_table_graph_menu(tile, number_of_columns, xaxis, yaxis, xpos, ypos, xmod
                         value=number_of_columns,
                         min=10,
                         max=100,
-                        style={'width': '80%', 'max-width': '350px'},
+                        style={'width': '35%', 'max-width': '350px'},
                         debounce=True)],
                     style={'display': 'inline-block'})]),
             html.P(
@@ -1788,18 +1802,24 @@ def get_sankey_menu(tile, graphed_options, df_name, df_const, xaxis, yaxis, xpos
 def get_default_graph_options(xaxis, yaxis, xpos, ypos, xmodified, ymodified, tile, gridline, legend, graph_type):
     return [
         html.Div([
-            dcc.Checklist(
-                id={'type': 'gridline', 'index': tile},
-                options=[{'label': get_label('LBL_Show_Grid_Lines'),
-                          'value': 'gridline'}],
-                value=gridline if gridline else [],
-                style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
-            dcc.Checklist(
-                id={'type': 'legend', 'index': tile},
-                options=[{'label': get_label('LBL_Hide_Legend'),
-                          'value': 'legend'}],
-                value=legend if legend else [],
-                style={'color': 'black', 'width': '100%', 'display': 'inline-block'}),
+            html.Div([
+                html.P([get_label('LBL_Show_Grid_Lines') + ": "], style={'display': 'inline-block'}),
+                dcc.Checklist(
+                    id={'type': 'gridline', 'index': tile},
+                    options=[{'value': 'gridline'}],
+                    value=gridline if gridline else [],
+                    style={'color': 'black', 'margin-left': '33px', 'display': 'inline-block'})
+            ]),
+            html.Div([
+                html.P(
+                    [get_label('LBL_Hide_Legend') + ": "], style={'display': 'inline-block'}
+                ),
+                dcc.Checklist(
+                    id={'type': 'legend', 'index': tile},
+                    options=[{'value': 'legend'}],
+                    value=legend if legend else [],
+                    style={'color': 'black', 'margin-left': '58px', 'display': 'inline-block'})
+            ]),
         ], style={'display': 'None'} if graph_type == 'Sankey' or 'Table' in graph_type else {}),
 
         html.Div([

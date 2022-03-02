@@ -622,11 +622,12 @@ app.clientside_callback(
     """
     function _update_data_fitting(trigger, style){
         if (trigger.includes('show')){
-            if (isEquivalent(style, {'display': 'inline-block', 'width': '80%', 'max-width': '130px'})){
+            if (isEquivalent(style, {'display': 'inline-flex', 'flex-direction': 'row', 'width': '290px'
+                                                                                            , 'flex-wrap': 'wrap'})){
                 style = dash_clientside.no_update;
             }
             else{
-                style = {'display': 'inline-block', 'width': '80%', 'max-width': '130px'};
+                style = {'display': 'inline-flex', 'flex-direction': 'row', 'width': '290px', 'flex-wrap': 'wrap'};
             }
         }
 

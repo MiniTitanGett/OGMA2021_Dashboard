@@ -11,7 +11,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 
 # Internal Modules
-from apps.dashboard.data import get_label, session, CLR
+from apps.dashboard.data import get_label, session
 
 # ***********************************************HELPER FUNCTIONS****************************************************
 
@@ -85,8 +85,7 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
                 children=[
                     html.H6(
                         "{}:".format('Hierarchy'),
-                        style={'color': CLR['text1'], 'margin-top': '20px', 'display': 'inline-block',
-                               'text-align': 'none'}),
+                        className='date-picker-option-title'),
                     html.I(
                         html.Span(
                             get_label("LBL_Hierarchy_Info"),
@@ -154,7 +153,7 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
         return [
             html.H6(
                 "{}:".format('Hierarchy'),
-                style={'color': CLR['text1'], 'margin-top': '20px', 'display': 'inline-block', 'text-align': 'none'}),
+                className='date-picker-option-title'),
             # Hierarchy level filter vs specific node toggle switch
             dcc.Tabs([
                 dcc.Tab(label="{}".format(get_label("LBL_Level_Filter")), value='Level Filter'),

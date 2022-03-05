@@ -968,7 +968,7 @@ for x in range(4):
                 hide_xaxis_measure = {'display': 'none'};
                 }
             else{
-                hide_xaxis_measure = {'display': 'inline-block', 'width': '80%','max-width': '350px'};
+                hide_xaxis_measure = {'display': 'inline-block', 'width': '100%'};
                 }
             return hide_xaxis_measure;
         }

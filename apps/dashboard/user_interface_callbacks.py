@@ -781,7 +781,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
                                            level_value='Variable Name',
                                            nid_path="root",
                                            hierarchy_toggle='Level Filter',
-                                           graph_all_toggle=None)
+                                           graph_all_toggle=None,
+                                           color=None)
     elif selected_graph_type == 'Bar':
         menu = get_bar_graph_menu(tile=tile,
                                   x=BAR_X_AXIS_OPTIONS[0],
@@ -803,7 +804,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
                                   level_value='Variable Name',
                                   nid_path="root",
                                   hierarchy_toggle='Level Filter',
-                                  graph_all_toggle=None)
+                                  graph_all_toggle=None,
+                                  color=None)
     elif selected_graph_type == 'Bubble':
         menu = get_bubble_graph_menu(tile=tile,
                                      x=None if df_const is None else
@@ -827,7 +829,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
                                      xmodified=None,
                                      ymodified=None,
                                      df_name=df_name,
-                                     df_const=df_const)
+                                     df_const=df_const,
+                                     color=None)
     elif selected_graph_type == 'Table':
         menu = get_table_graph_menu(tile=tile, number_of_columns=15,
                                     xaxis=None,
@@ -860,7 +863,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
                                  level_value='Variable Name',
                                  nid_path="root",
                                  hierarchy_toggle='Level Filter',
-                                 graph_all_toggle=None)
+                                 graph_all_toggle=None,
+                                 color=None)
     elif selected_graph_type == 'Sankey':
         menu = get_sankey_menu(tile=tile,
                                graphed_options=None if df_const is None else
@@ -1454,8 +1458,7 @@ for x in range(4):
                 'background-color':'#fffafa',
                 'border-right': '1px solid #c7c7c7',
                 'flex-grow': '1', 
-                'display': 'inline', 
-                'overflow-y': 'auto'};
+                'display': 'inline'};
 
             if (isEquivalent(sidebar_style, DATA_CONTENT_SHOW) || 
                 (isEquivalent(parent_sidebar_style, DATA_CONTENT_SHOW) && link_state == 'fa fa-link')){

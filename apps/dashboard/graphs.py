@@ -202,12 +202,15 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                 filtered_df['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
             filtered_df.sort_values(by=[color, 'Date of Event'], inplace=True)
             # generate graph
+            color_discrete = color_picker(arg_value[7])
+
             fig = px.line(
                 title=title,
                 data_frame=filtered_df,
                 x='Date of Event',
                 y='Measure Value',
                 color=color,
+                color_discrete_sequence=color_discrete,
                 line_group=line_group,
                 custom_data=[hierarchy_col, category])
             fig.update_layout(legend_title_text=legend_title_text)
@@ -467,12 +470,15 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
             filtered_df['Date of Event'] = filtered_df['Date of Event'].astype(str)
 
             if arg_value[0] == 'Time':
+                color_discrete=color_picker(arg_value[6])
+
                 fig = px.scatter(
                     title=title,
                     x=filtered_df['Date of Event'],
                     y=filtered_df[arg_value[2], arg_value[3]],
                     size=filtered_df[arg_value[4], arg_value[5]],
                     color=filtered_df[color],
+                    color_discrete_sequence=color_discrete,
                     custom_data=[filtered_df[color], filtered_df['Date of Event'], filtered_df[arg_value[4],
                                                                                                arg_value[5]]]
                 )
@@ -491,6 +497,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                     '%Z-AXIS%', '%{customdata[2]}')
                 fig.update_traces(hovertemplate=hovertemplate)
             else:
+                color_discrete = color_picker(arg_value[6])
+
                 # generate graph
                 fig = px.scatter(
                     title=title,
@@ -499,6 +507,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                     size=filtered_df[arg_value[4], arg_value[5]],
                     animation_frame=filtered_df['Date of Event'],
                     color=filtered_df[color],
+                    color_discrete_sequence=color_discrete,
                     range_x=[0, filtered_df[arg_value[0], arg_value[1]].max()],
                     range_y=[0, filtered_df[arg_value[2], arg_value[3]].max()],
                     labels={'animation_frame': 'Date of Event'},
@@ -535,7 +544,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
         result = parse('{} ({})', xaxis_title)
         if result is None:
             xaxis = xaxis_title
-        elif any(element in result[0] for element in df_const[df_name]['Variable_Option_Lists']) and \
+        elif any(element in result[0] for element in df_const[df_name]['VARIABLE_OPTION_LISTS']) and \
                 result[1] in df_const[df_name]['MEASURE_TYPE_OPTIONS']:
             xaxis = '{} ({})'.format(arg_value[0], arg_value[1])
     elif arg_value[0] == 'Time' and (xaxis_title == 'Time' or xaxis_title is None):
@@ -544,13 +553,13 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
         xaxis = '{} ({})'.format(arg_value[0], arg_value[1])
 
     if arg_value[0] == 'Time' and (any(element in arg_value[2] for element in
-                                       df_const[df_name]['Variable_Option_Lists']) or yaxis_title is None):
+                                       df_const[df_name]['VARIABLE_OPTION_LISTS']) or yaxis_title is None):
         yaxis = '{}'.format(arg_value[2])
     elif yaxis_title:
         result = parse('{} ({})', yaxis_title)
         if result is None:
             yaxis = yaxis_title
-        elif any(element in result[0] for element in df_const[df_name]['Variable_Option_Lists']) and \
+        elif any(element in result[0] for element in df_const[df_name]['VARIABLE_OPTION_LISTS']) and \
                 result[1] in df_const[df_name]['MEASURE_TYPE_OPTIONS']:
             yaxis = '{} ({})'.format(arg_value[2], arg_value[3])
     else:
@@ -743,6 +752,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
 
             filtered_df.sort_values(by=['Date of Event', hierarchy_col, color], inplace=True)
 
+            color_discrete = color_picker(arg_value[5])
             # generate graph
             fig = px.bar(
                 title=title,
@@ -750,6 +760,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                 x=x if arg_value[2] == 'Vertical' else 'Measure Value',
                 y='Measure Value' if arg_value[2] == 'Vertical' else x,
                 color=color,
+                color_discrete_sequence=color_discrete,
                 barmode='group',
                 animation_frame='Date of Event' if arg_value[4] else None,
                 custom_data=[hierarchy_col, color, 'Date of Event'])
@@ -948,6 +959,7 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             filtered_df['Partial Period'] = filtered_df['Partial Period'].astype(str).transform(
                 lambda j: get_label('LBL_TRUE') if j == 'True' else get_label('LBL_FALSE'))
 
+            color_discrete = color_picker(arg_value[4])
             # generate graph
             fig = px.box(
                 title=title,
@@ -956,6 +968,7 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                 x=x if arg_value[1] == 'Horizontal' else y,
                 y=y if arg_value[1] == 'Horizontal' else x,
                 color=category,
+                color_discrete_sequence=color_discrete,
                 points='all' if arg_value[3] else False)
 
             fig.update_layout(legend_title_text=get_label('LBL_Variable_Names'))
@@ -1385,3 +1398,29 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
     # catch all
     else:
         return None
+
+
+def color_picker(palette):
+    if palette == 'G10':
+        color = ["#3366CC", "#DC3912", "#FF9900", "#109618", "#990099",
+                 "#0099C6","#DD4477", "#66AA00", "#B82E2E", "#316395"]
+    elif palette == 'Bold':
+        color = ["rgb(127, 60, 141)", "rgb(17, 165, 121)", "rgb(57, 105, 172)", "rgb(242, 183, 1)",
+                 "rgb(231, 63, 116)", "rgb(128, 186, 90)", "rgb(230, 131, 16)", "rgb(0, 134, 149)",
+                 "rgb(207, 28, 144)", "rgb(249, 123, 114)", "rgb(165, 170, 153)"]
+    elif palette == 'Vivid':
+        color = ["rgb(229, 134, 6)", "rgb(93, 105, 177)", "rgb(82, 188, 163)", "rgb(153, 201, 69)",
+                 "rgb(204, 97, 176)", "rgb(36, 121, 108)", "rgb(218, 165, 27)", "rgb(47, 138, 196)",
+                 "rgb(118, 78, 159)", "rgb(237, 100, 90)", "rgb(165, 170, 153)"]
+    elif palette == 'Dark24':
+        color = ["#2E91E5", "#E15F99", "#1CA71C", "#FB0D0D", "#DA16FF", "#222A2A", "#B68100", "#750D86",
+                 "#EB663B", "#511CFB", "#00A08B", "#FB00D1", "#FC0080", "#B2828D", "#6C7C32", "#778AAE",
+                 "#862A16", "#A777F1", "#620042", "#1616A7", "#DA60CA", "#6C4516", "#0D2A63", "#AF0038"]
+    elif palette == 'Pastel':
+        color = ["rgb(102, 197, 204)", "rgb(246, 207, 113)", "rgb(248, 156, 116)", "rgb(220, 176, 242)",
+                 "rgb(135, 197, 95)", "rgb(158, 185, 243)", "rgb(254, 136, 177)", "rgb(201, 219, 116)",
+                 "rgb(139, 224, 164)", "rgb(180, 151, 231)", "rgb(179, 179, 179)"]
+    else:
+        #color blind friendly palette
+        color = ["#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7"]
+    return color

@@ -40,6 +40,8 @@ X_AXIS_OPTIONS = ['Time']
 
 BAR_X_AXIS_OPTIONS = ['Specific Item', 'Variable Names']
 
+COLOR_PALETTE = ['G10', 'Bold', 'Vivid', 'Dark24', 'Pastel', 'Color blind friendly']
+
 CLR = {'text1': 'black',
        'text2': '#EED5DD',
        'black': 'black',
@@ -80,7 +82,7 @@ LAYOUT_CONTENT_HIDE = {'display': 'none'}
 
 DATA_CONTENT_SHOW = {'max-width': '300px', 'min-width': '300px', 'background-color': CLR['sidebar-final'],
                      'border-right': '1px solid {}'.format(CLR['lightgray']),
-                     'flex-grow': '1', 'display': 'inline', 'overflow-y': 'auto'}
+                     'flex-grow': '1', 'display': 'inline'}
 DATA_CONTENT_HIDE = {'display': 'none'}
 
 

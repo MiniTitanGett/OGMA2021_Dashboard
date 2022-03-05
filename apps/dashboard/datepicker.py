@@ -12,7 +12,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 
 # Internal Modules
-from apps.dashboard.data import CLR, get_label
+from apps.dashboard.data import get_label
 
 # ********************************************DATE-PICKER LAYOUT**************************************************
 
@@ -25,7 +25,7 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
         children = [
             html.H6(
                 '{}:'.format(get_label("LBL_Calendar_Type")),
-                style={'margin-top': '20px', 'color': CLR['text1']} if df_const[df_name]['FISCAL_AVAILABLE']
+                style={'margin-top': '20px', 'color': 'black'} if df_const[df_name]['FISCAL_AVAILABLE']
                 else {'display': 'None'}),
             dcc.Tabs([
                 dcc.Tab(label="{}".format(get_label("LBL_Gregorian")), value='Gregorian'),
@@ -39,8 +39,7 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                 children=[
                     html.H6(
                         '{}:'.format(get_label("LBL_Timeframe")),
-                        style={'margin-top': '20px', 'color': CLR['text1'], 'display': 'inline-block',
-                               'text-align': 'none'}),
+                        className='date-picker-option-title'),
                     html.I(
                         html.Span(
                             get_label("LBL_Date_Picker_Info"),
@@ -63,7 +62,7 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                      'value': 'select-range'}],
                 value=input_method,
                 className='seperated-radio-buttons',
-                style={'margin-left': '15px', 'color': CLR['text1']}),
+                style={'margin-left': '15px', 'color': 'black'}),
             html.Div([
                 dcc.Input(
                     id={'type': 'num-periods', 'index': tile},
@@ -101,7 +100,7 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
             html.P(
                 "{}: {} - {}".format(get_label('LBL_Available'), df_const[df_name]['MIN_DATE_UNF'],
                                      df_const[df_name]['MAX_DATE_UNF']),
-                style={'margin-top': '10px', 'text-align': 'center', 'font-size': '85%', 'color': CLR['text1']}),
+                className='time-available'),
             html.Div([
                 # placeholders for datepicker inputs to avoid callback errors.
                 # Inputs are initialized to 1 so that they are
@@ -142,7 +141,7 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
         children = [
             html.H6(
                 '{}:'.format(get_label("LBL_Calendar_Type")),
-                style={'margin-top': '20px', 'color': CLR['text1']}),
+                className='date-picker-option-title'),
             dcc.Tabs([
                 dcc.Tab(label="{}".format(get_label("LBL_Gregorian")), value='Gregorian'),
                 dcc.Tab(label="{}".format(get_label("LBL_Fiscal")), value='Fiscal')],
@@ -154,8 +153,7 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                 children=[
                     html.H6(
                         '{}:'.format(get_label("LBL_Timeframe")),
-                        style={'margin-top': '20px', 'color': CLR['text1'], 'display': 'inline-block',
-                               'text-align': 'none'}),
+                        className='date-picker-option-title'),
                     html.I(
                         html.Span(
                             get_label("LBL_Date_Picker_Info"),
@@ -177,7 +175,7 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                      'value': 'select-range'}],
                 value=input_method,
                 className='seperated-radio-buttons',
-                style={'margin-left': '15px', 'color': CLR['text1']}),
+                style={'margin-left': '15px', 'color': 'black'}),
             html.Div([
                 dcc.Input(
                     id={'type': 'num-periods', 'index': tile},
@@ -212,7 +210,7 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
             ], style={'width': '0', 'height': '0', 'position': 'relative', 'bottom': '55px',
                       'left': '125px' if language == 'En' else '150px'}),
             html.P("{}: {} - {}".format(get_label('LBL_Available'), '_', '_'),
-                   style={'margin-top': '15px', 'text-align': 'center', 'font-size': '85%', 'color': CLR['text1']}),
+                   className='time-available'),
             html.Div([
                 # placeholders for datepicker inputs to avoid callback errors. Inputs are initialized to 1 so that they
                 # are only 'None' if an invalid date has been entered.

@@ -19,9 +19,9 @@ import dash_responsive_grid_layout as drgl
 
 # Internal Modules
 from conn import exec_storedproc_results
-from apps.dashboard.data import GRAPH_OPTIONS, CLR, DATA_CONTENT_SHOW, DATA_CONTENT_HIDE, VIEW_CONTENT_SHOW, \
+from apps.dashboard.data import GRAPH_OPTIONS, DATA_CONTENT_SHOW, DATA_CONTENT_HIDE, VIEW_CONTENT_SHOW, \
     BAR_X_AXIS_OPTIONS, CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LAYOUT_CONTENT_HIDE, LAYOUTS, \
-    dataset_to_df, generate_constants
+    dataset_to_df, generate_constants, COLOR_PALETTE
 from apps.dashboard.hierarchy_filter import get_hierarchy_layout
 from apps.dashboard.document_filter import get_document_hierarchy_layout
 from apps.dashboard.datepicker import get_date_picker
@@ -29,7 +29,6 @@ from apps.dashboard.graphs import __update_graph
 
 
 # ********************************************HELPER FUNCTION(S)******************************************************
-
 
 def change_index(doc, index):
     """Change index numbers of all id's within tile or data side-menu."""
@@ -99,7 +98,7 @@ def get_data_set_picker(tile, df_name, confirm_parent, prev_selection=None):
             children=[
                 html.H6(
                     "{}:".format(get_label('LBL_Data_Set')),
-                    style={'color': CLR['text1'], 'margin-top': '25px', 'display': 'inline-block'}),
+                    className='data-set'),
                 html.I(
                     html.Span(
                         get_label("LBL_Data_Set_Info"),
@@ -149,10 +148,7 @@ def get_data_set_picker(tile, df_name, confirm_parent, prev_selection=None):
                                'vertical-align': 'top'} if df_name is not None and df_name in session else
                         DATA_CONTENT_HIDE)],
                     id='dataset-confirmation-symbols'),
-                style={'display': 'inline-block', 'height': '35px', 'margin-left': '20px', 'text-align': 'center',
-                       'position': 'relative', 'vertical-align': 'top', 'background-color': 'white', 'width': '40px',
-                       'border': '1px solid {}'.format(CLR['lightgray']), 'border-radius': '6px',
-                       'cursor': 'pointer'})],
+                className='data-set-load-box')],
             style={'display': 'flex'})
     ]
 
@@ -371,8 +367,7 @@ def get_layout_dashboard():
                     className='boxadd',
                     id='tab-add')],
                 id='tab-menu-header',
-                style={'border-bottom': '1px solid {}'.format(CLR['lightgray']), 'z-index': '99', 'width': '100%',
-                       'background-color': CLR['background1'], 'display': 'flex'}),
+                className='dashboard-header'),
             # parent nav bar
             html.Header([
                 html.Div([
@@ -413,7 +408,7 @@ def get_layout_dashboard():
                     style={'display': 'inline-block', 'float': 'right'}),
                 html.Div([
                     html.P(get_label('LBL_Load_A_Saved_Dashboard'),
-                           style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
+                           className='.prompt-title'),
                     html.Div(
                         children=[
                             dcc.Dropdown(
@@ -428,12 +423,10 @@ def get_layout_dashboard():
                         ], style={'width': '400px'}),
                     html.P(get_label('LBL_Load_Dashboard_Prompt'),
                            id={'type': 'tile-layouts-warning', 'index': 4},
-                           style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'})],
+                           className='prompt-title')],
                     id='load-dashboard-menu',
                     style={'display': 'none'}
-                )], style={'border-bottom': '1px solid {}'.format(CLR['lightgray']),
-                           'z-index': '99', 'width': '100%', 'top': '0',
-                           'background-color': CLR['white']},
+                )], className='dashboard-parent-nav-bar',
                 id='button-save-dashboard-wrapper'),
             html.Div([
                 # tab content
@@ -450,8 +443,7 @@ def get_layout_dashboard():
             ], style={'flex-grow': '1'})
             # To show footer: calc(100vh - 15px)
             # To hide footer: calc(100vh)
-        ], style={'display': 'flex', 'flex-direction': 'column', 'height': 'calc(100vh - 15px)', 'overflow': 'hidden',
-                  'border-bottom': '1px solid {}'.format(CLR['lightgray'])}),
+        ], className='dashboard-layout'),
         # Prompt
         html.Div(
             html.Div([
@@ -785,7 +777,7 @@ def get_layout_dashboard():
                     id={'type': 'df-constants-storage-tile-wrapper', 'index': 2}),
                 id={'type': 'df-constants-storage-tile-wrapper', 'index': 3}),
             id='df-constants-storage-dashboard-wrapper')
-    ], style={'background-color': CLR['lightpink']})
+    ], className='dashboard-layout-color')
 
 # ****************************************************TILE LAYOUT****************************************************
 
@@ -822,8 +814,7 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
                     children=[
                         html.P(
                             "{}:".format(get_label('LBL_Graph_Type')),
-                            style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px',
-                                   'display': 'inline-block', 'text-align': 'none'}),
+                            className='graph-type'),
                         html.I(
                             html.Span(
                                 get_label("LBL_Graph_Type_Info"),
@@ -937,7 +928,7 @@ def get_tile(tile, tile_keys=None, df_name=None):
                     className='customize-content'),
                 html.Div([
                     html.P(get_label('LBL_Load_A_Saved_Graph'),
-                           style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
+                           className='prompt-title'),
                     html.Div(
                         id={'type': 'select-layout-dropdown-div', 'index': tile},
                         children=[
@@ -952,7 +943,7 @@ def get_tile(tile, tile_keys=None, df_name=None):
                         ], style={'width': '400px'}),
                     html.P(get_label('LBL_Load_Graph_Prompt'),
                            id={'type': 'tile-layouts-warning', 'index': tile},
-                           style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px'}),
+                           className='prompt-title'),
                 ], style=LAYOUT_CONTENT_HIDE,
                     id={'type': 'tile-layouts-content', 'index': tile},
                     className='customize-content')
@@ -966,7 +957,7 @@ def get_tile(tile, tile_keys=None, df_name=None):
         ], className='tile-container',
             id={'type': 'tile', 'index': tile}),
         className='fill-container',
-        style={'border': '1px solid {}'.format(CLR['lightgray'])},
+        style={'border': '1px solid #c7c7c7'},
         id="tile-wrapper: " + str(tile))  # added to remove errors on responsive grid layout
 
 
@@ -1003,7 +994,7 @@ def get_tile_layout(num_tiles, tile_keys=None, parent_df=None):
 
 def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridline, legend, df_const, data_fitting, ci,
                                 data_fit, degree, xaxis, yaxis, xpos, ypos, xmodified, ymodified, hierarchy_toggle,
-                                level_value, graph_all_toggle, nid_path):
+                                level_value, graph_all_toggle, nid_path, color):
     """
     :param data_fitting: boolean to determine whether to show data fitting options
     :param ci: show confidence interval or not
@@ -1037,16 +1028,14 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
     # arg_value[4] = degree
     # arg_value[5] = confidence interval
     # arg_value[6] = variable names selector/ Graph variable
-    # arg_value[7] = grid lines
-    # arg_value[8] = legend
+    # arg_value[7] = color
 
     return [
         html.Div(
             children=[
                 html.P(
                     "{}:".format(get_label('LBL_Graph_Options')),
-                    style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px', 'margin-left': '15px',
-                           'display': 'inline-block', 'text-align': 'none'}),
+                    className='graph-type'),
                 html.I(
                     html.Span(
                         get_label("LBL_Graph_Options_Info"),
@@ -1062,7 +1051,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                 html.Div([
                     html.P(
                         "{}:".format(get_label('LBL_X_Axis')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
+                        className='graph-option-title')],
                     style={'display': 'inline-block', 'margin-right': '102px', 'width': '80%', 'max-width': '50px'}),
                 html.Div([
                     dcc.Dropdown(
@@ -1074,19 +1063,19 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                         style={'font-size': '13px', 'display': 'inline-block', 'width': '50px', 'position': 'relative',
                                'top': '-15px',
                                'margin-right': '5px'})
-                ], style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}
+                ], style={'display': 'inline-block', 'max-width': '350px'}
                    if len(X_AXIS_OPTIONS) > 1 else {'display': 'None'}),
                 html.Div([
                     html.P(
                         "{}".format(X_AXIS_OPTIONS[0]),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}
+                        className='graph-option-title')],
+                    style={'display': 'inline-block', 'max-width': '350px'}
                     if len(X_AXIS_OPTIONS) == 1 else {'display': 'None'}),
                 html.Div([
                     html.Div([
                         html.P(
                             "{}:".format(get_label('LBL_Y_Axis')),
-                            style={'color': CLR['text1'], 'font-size': '13px'})],
+                            className='graph-option-title')],
                         style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
                                'margin-right': '102px'}),
                     html.Div([
@@ -1097,12 +1086,12 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                             clearable=False,
                             value=measure_type,
                             style={'font-size': '13px'})],
-                        style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+                        style={'display': 'inline-block', 'width': '58%', 'max-width': '350px'})]),
                 html.Div([
                     html.Div([
                         html.P(
                             "{}:".format(get_label('LBL_Display')),
-                            style={'color': CLR['text1'], 'font-size': '13px', 'position': 'relative'})
+                            className='graph-option-title')
                     ], style={'display': 'inline-block', 'width': '40px', 'position': 'relative', 'top': '-3px',
                               'margin-right': '107px'}),
                     html.Div([
@@ -1119,7 +1108,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                     html.Div([
                         html.P(
                             "{}:".format(get_label('LBL_Data_Fitting')),
-                            style={'color': CLR['text1'], 'font-size': '13px', 'position': 'relative'})
+                            className='graph-option-title')
                     ], style={'display': 'inline-block', 'position': 'relative', 'vertical-align': 'top'}),
                     html.I(
                         html.Span(
@@ -1166,7 +1155,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                                 html.Div(
                                     children=dcc.Checklist(
                                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
-                                        options=[{'value': 'ci'}],
+                                        options=[{'label': 'Yes', 'value': 'ci'}],
                                         value=ci if ci else [],
                                         style={'color': 'black', 'display': 'inline-block'}),
                                     style={'display': 'inline-block'}),
@@ -1178,9 +1167,9 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                     html.Div([
                         html.P(
                             "{}:".format(get_label('LBL_Graphed_Variables')),
-                            style={'color': CLR['text1'], 'font-size': '13px', 'padding-top': '2'})],
+                            className='graph-option-title')],
                         style={'display': 'inline-block', 'position': 'relative', 'top': '-5px',
-                               'margin-right': '15px'}),
+                               'margin-right': '40px'}),
                     html.Div([
                         dcc.Dropdown(
                             id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 6},
@@ -1189,14 +1178,35 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                             multi=True,
                             clearable=False,
                             style={'font-size': '13px'} if df_name != 'OPG011' else {'display': 'None'})],
-                        style={'display': 'inline-block', 'width': '80%',
-                               'max-width': '330px'} if df_name != 'OPG011' else {'display': 'None'}),
+                        style={'display': 'inline-flex', 'flex-direction': 'column',
+                               'max-width': '360px'} if df_name != 'OPG011' else {'display': 'None'}),
                     html.Div(
                         get_document_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle,
                                                       nid_path, df_const=df_const),
-                        style={'display': 'inline-flex', 'margin-left': '25px', 'flex-direction': 'column',
-                               'max-width': '330px'}
+                        style={'display': 'inline-flex', 'flex-direction': 'column', 'max-width': '330px'}
                         if df_name == 'OPG011' else {'display': 'None'})]),
+                html.Div([
+                    html.Div([
+                        html.P(
+                            "{}:".format('Color Palette'),
+                            className='graph-option-title')],
+                        style={'display': 'inline-block', 'position': 'relative', 'top': '-3px'}),
+                    html.I(
+                        html.Span(
+                            html.Img(src="http://127.0.0.1:8080/python/dashboard/assets/color-palette.png"),
+                            className='save-symbols-tooltip'),
+                        className='fa fa-question-circle-o',
+                        id={'type': 'color-palette-info', 'index': tile},
+                        style={'position': 'relative', 'display': 'inline-block'}),
+                    html.Div([
+                        dcc.RadioItems(
+                            id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 7},
+                            options=[{'label': i, 'value': i} for i in COLOR_PALETTE],
+                            labelStyle={'display': 'inline-block'},
+                            value=color if color else 'G10',
+                            style={'font-size': '13px'})],
+                        style={'display': 'inline-flex', 'max-width': '290px', 'margin-left': '40px'})
+                ]),
                 html.Div(
                     html.Div(
                         children=get_default_graph_options(xaxis=xaxis, yaxis=yaxis, xpos=xpos, ypos=ypos,
@@ -1209,7 +1219,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
 
 def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline, legend, df_name, df_const, xaxis,
                        yaxis, xpos, ypos, xmodified, ymodified, level_value, nid_path, hierarchy_toggle,
-                       graph_all_toggle):
+                       graph_all_toggle, color):
     """
     :param tile: Index of the tile the bar graph menu corresponds to.
     :param x: the x-axis value
@@ -1238,16 +1248,14 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
     # args_value[2] = orientation
     # args_value[3] = graphed variables
     # args_value[4] = animate graph
-    # args_value[5] = grid lines
-    # args_value[6] = legend
+    # args_value[5] = color
 
     return [
         html.Div(
             children=[
                 html.P(
                     "{}:".format(get_label('LBL_Graph_Options')),
-                    style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px', 'margin-left': '15px',
-                           'display': 'inline-block', 'text-align': 'none'}),
+                    className='graph-type'),
                 html.I(
                     html.Span(
                         get_label("LBL_Graph_Options_Info"),
@@ -1263,9 +1271,9 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
                 html.Div([
                     html.P(
                         "{}:".format(get_label('LBL_Group_By')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-3px',
-                           'margin-right': '5px'}),
+                        className='graph-option-title')],
+                    style={'display': 'inline-block', 'position': 'relative', 'top': '-15px',
+                           'margin-right': '93px'}),
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
@@ -1274,14 +1282,14 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
                         value=x,
                         clearable=False,
                         style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+                    style={'display': 'inline-block', 'width': '58%', 'max-width': '350px'})]),
             html.Div([
                 html.Div([
                     html.P(
                         "{}:".format(get_label('LBL_Y_Axis')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
+                        className='graph-option-title')],
                     style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
-                           'margin-right': '5px'}),
+                           'margin-right': '102px'}),
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
@@ -1290,14 +1298,14 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
                         value=measure_type,
                         clearable=False,
                         style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+                    style={'display': 'inline-block', 'width': '58%', 'max-width': '350px'})]),
             html.Div([
                 html.Div([
                     html.P(
                         "{}:".format(get_label('LBL_Graph_Orientation')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
+                        className='graph-option-title')],
                     style={'display': 'inline-block', 'position': 'relative', 'top': '-3px',
-                           'margin-right': '15px'}),
+                           'margin-right': '39px'}),
                 html.Div([
                     dcc.RadioItems(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
@@ -1310,9 +1318,9 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
                 html.Div([
                     html.P(
                         "{}:".format(get_label('LBL_Graphed_Variables')),
-                        style={'color': CLR['text1'], 'font-size': '13px', 'padding-top': '2'})],
+                        className='graph-option-title')],
                     style={'display': 'inline-block', 'position': 'relative', 'top': '-5px',
-                           'margin-right': '15px', }),
+                           'margin-right': '40px'}),
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
@@ -1321,22 +1329,43 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
                         multi=True,
                         clearable=False,
                         style={'font-size': '13px'} if df_name != 'OPG011' else {'display': 'None'})],
-                    style={'display': 'inline-block', 'width': '80%',
-                           'max-width': '330px'} if df_name != 'OPG011' else {'display': 'None'}),
+                    style={'display': 'inline-flex', 'flex-direction': 'column',
+                               'max-width': '360px'} if df_name != 'OPG011' else {'display': 'None'}),
                 html.Div(
                     get_document_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle,
                                                   nid_path, df_const=df_const),
-                    style={'display': 'inline-flex', 'margin-right': '15px', 'flex-direction': 'column',
-                           'max-width': '330px'}
+                    style={'display': 'inline-flex', 'flex-direction': 'column', 'max-width': '330px'}
                     if df_name == 'OPG011' else {'display': 'None'})]),
             html.Div([
-                html.P([get_label('LBL_Animate_Over_Time') + ": "], style={'padding-left': '5px',
-                                                                    'display': 'inline-block', 'font-size': '13px'}),
+                html.P([get_label('LBL_Animate_Over_Time') + ": "], style={'padding-right': '14px',
+                                                                    'display': 'inline-block', 'font-size': '15px'}),
                 dcc.Checklist(
                     id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
-                    options=[{'value': 'animate'}],
+                    options=[{'label': 'Yes', 'value': 'animate'}],
                     value=animate if animate else [],
                     style={'color': 'black', 'display': 'inline-block'}),
+            ]),
+            html.Div([
+                html.Div([
+                    html.P(
+                        "{}:".format('Color Palette'),
+                        className='graph-option-title')],
+                    style={'display': 'inline-block', 'position': 'relative', 'top': '-3px'}),
+                html.I(
+                    html.Span(
+                        html.Img(src="http://127.0.0.1:8080/python/dashboard/assets/color-palette.png"),
+                        className='save-symbols-tooltip'),
+                    className='fa fa-question-circle-o',
+                    id={'type': 'color-palette-info', 'index': tile},
+                    style={'position': 'relative', 'display': 'inline-block'}),
+                html.Div([
+                    dcc.RadioItems(
+                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
+                        options=[{'label': i, 'value': i} for i in COLOR_PALETTE],
+                        labelStyle={'display': 'inline-block'},
+                        value=color if color else 'G10',
+                        style={'font-size': '13px'})],
+                    style={'display': 'inline-flex', 'max-width': '290px', 'margin-left': '40px'})
             ]),
             html.Div(
                 html.Div(
@@ -1349,7 +1378,7 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
 
 
 def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, gridline, legend, df_name, df_const,
-                          xaxis, yaxis, xpos, ypos, xmodified, ymodified):
+                          xaxis, yaxis, xpos, ypos, xmodified, ymodified, color):
     """
     :param tile: Index of the tile the bar graph menu corresponds to.
     :param x: the x-axis value
@@ -1376,16 +1405,14 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
     # args_value[3] = y-axis measure
     # args_value[4] = size
     # args_value[5] = size measure
-    # args_value[6] = grid line toggle
-    # args_value[7] = legend toggle
+    # args_value[6] = color
 
     return [
         html.Div(
             children=[
                 html.P(
                     "{}:".format(get_label('LBL_Graph_Options')),
-                    style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px', 'margin-left': '15px',
-                           'display': 'inline-block', 'text-align': 'none'}),
+                    className='graph-type'),
                 html.I(
                     html.Span(
                         get_label("LBL_Graph_Options_Info"),
@@ -1401,9 +1428,9 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                 html.Div([
                     html.P(
                         "{}:".format(get_label('LBL_X_Axis')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
+                        className='graph-option-title')],
                     style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
-                           'margin-right': '5px'}),
+                           'margin-right': '101px'}),
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
@@ -1412,16 +1439,16 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                         value=x,
                         clearable=False,
                         style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+                    style={'display': 'inline-block', 'width': '58%', 'max-width': '350px'})]),
             html.Div(
                 id={'type': 'hide-xaxis-measure', 'index': tile},
                 children=[
                     html.Div([
                         html.P(
                             "{}:".format(get_label('LBL_X_Axis_Measure')),
-                            style={'color': CLR['text1'], 'font-size': '13px'})],
-                        style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
-                               'margin-right': '5px'}),
+                            className='graph-option-title')],
+                        style={'display': 'inline-block', 'position': 'relative', 'top': '-15px',
+                               'margin-right': '56px'}),
                     html.Div([
                         dcc.Dropdown(
                             id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
@@ -1430,15 +1457,15 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                             value=x_measure,
                             clearable=False,
                             style={'font-size': '13px'})],
-                        style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})],
-                style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'}),
+                        style={'display': 'inline-block', 'width': '58%', 'max-width': '350px'})],
+                style={'display': 'inline-block', 'width': '100%'}),
             html.Div([
                 html.Div([
                     html.P(
                         "{}:".format(get_label('LBL_Y_Axis')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
+                        className='graph-option-title')],
                     style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
-                           'margin-right': '5px'}),
+                           'margin-right': '101px'}),
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
@@ -1446,14 +1473,14 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                         value=y,
                         clearable=False,
                         style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+                    style={'display': 'inline-block', 'width': '58%', 'max-width': '350px'})]),
             html.Div([
                 html.Div([
                     html.P(
                         "{}:".format(get_label('LBL_Y_Axis_Measure')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
-                           'margin-right': '5px'}),
+                        className='graph-option-title')],
+                    style={'display': 'inline-block', 'position': 'relative', 'top': '-15px',
+                           'margin-right': '57px'}),
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
@@ -1462,14 +1489,14 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                         value=y_measure,
                         clearable=False,
                         style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+                    style={'display': 'inline-block', 'width': '58%', 'max-width': '350px'})]),
             html.Div([
                 html.Div([
                     html.P(
                         "{}:".format(get_label('LBL_Size')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
+                        className='graph-option-title')],
                     style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
-                           'margin-right': '5px'}),
+                           'margin-right': '101px'}),
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
@@ -1477,14 +1504,14 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                         value=size,
                         clearable=False,
                         style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+                    style={'display': 'inline-block', 'width': '58%', 'max-width': '350px'})]),
             html.Div([
                 html.Div([
                     html.P(
                         "{}:".format(get_label('LBL_Size_Measure')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '-15px',
-                           'margin-right': '5px'}),
+                        className='graph-option-title')],
+                    style={'display': 'inline-block', 'position': 'relative', 'top': '-15px', 'margin-right': '68px'}
+                ),
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
@@ -1493,7 +1520,29 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                         value=size_measure,
                         clearable=False,
                         style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '350px'})]),
+                    style={'display': 'inline-block', 'width': '58%', 'max-width': '350px'})]),
+            html.Div([
+                html.Div([
+                    html.P(
+                        "{}:".format('Color Palette'),
+                        className='graph-option-title')],
+                    style={'display': 'inline-block', 'position': 'relative', 'top': '-3px'}),
+                html.I(
+                    html.Span(
+                        html.Img(src="http://127.0.0.1:8080/python/dashboard/assets/color-palette.png"),
+                        className='save-symbols-tooltip'),
+                    className='fa fa-question-circle-o',
+                    id={'type': 'color-palette-info', 'index': tile},
+                    style={'position': 'relative', 'display': 'inline-block'}),
+                html.Div([
+                    dcc.RadioItems(
+                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 6},
+                        options=[{'label': i, 'value': i} for i in COLOR_PALETTE],
+                        labelStyle={'display': 'inline-block'},
+                        value=color if color else 'G10',
+                        style={'font-size': '13px'})],
+                    style={'display': 'inline-flex', 'max-width': '290px', 'margin-left': '40px'})
+            ]),
             html.Div(
                 html.Div(
                     children=get_default_graph_options(xaxis=xaxis, yaxis=yaxis, xpos=xpos, ypos=ypos,
@@ -1512,7 +1561,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
 
 def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, df_name, show_data_points, gridline,
                       legend, df_const, xaxis, yaxis, xpos, ypos, xmodified, ymodified, level_value, nid_path,
-                      hierarchy_toggle, graph_all_toggle):
+                      hierarchy_toggle, graph_all_toggle, color):
     """
         :param tile: Index of the tile the bar graph menu corresponds to.
         :param axis_measure: the measure for the axis
@@ -1539,16 +1588,14 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
     # args_value[1] = orientation
     # args_value[2] = graphed variables
     # arg_value[3] = points toggle
-    # arg_value[4] = grid lines
-    # arg_value[5] = legend
+    # arg_value[4] = color
 
     return [
         html.Div(
             children=[
                 html.P(
                     "{}:".format(get_label('LBL_Graph_Options')),
-                    style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px', 'margin-left': '15px',
-                           'display': 'inline-block', 'text-align': 'none'}),
+                    className='graph-type'),
                 html.I(
                     html.Span(
                         get_label("LBL_Graph_Options_Info"),
@@ -1564,7 +1611,7 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                 html.Div([
                     html.P(
                         "{}:".format(get_label('LBL_Axis_Measure')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
+                        className='graph-option-title')],
                     style={'display': 'inline-block', 'position': 'relative', 'top': '-15px',
                            'margin-right': '68px'}),
                 html.Div([
@@ -1580,7 +1627,7 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                 html.Div([
                     html.P(
                         "{}:".format(get_label('LBL_Graph_Orientation')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
+                        className='graph-option-title')],
                     style={'display': 'inline-block', 'position': 'relative', 'top': '-3px',
                            'margin-right': '15px'}),
                 html.Div([
@@ -1595,9 +1642,9 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                 html.Div([
                     html.P(
                         "{}:".format(get_label('LBL_Graphed_Variables')),
-                        style={'color': CLR['text1'], 'font-size': '13px', 'padding-top': '2'})],
+                        className='graph-option-title')],
                     style={'display': 'inline-block', 'position': 'relative', 'top': '-5px',
-                           'margin-right': '15px', }),
+                           'margin-right': '40px', }),
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
@@ -1606,12 +1653,12 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                         multi=True,
                         clearable=False,
                         style={'font-size': '13px'} if df_name != 'OPG011' else {'display': 'None'})],
-                    style={'display': 'inline-block', 'width': '80%',
-                           'max-width': '330px'} if df_name != 'OPG011' else {'display': 'None'}),
+                    style={'display': 'inline-flex', 'flex-direction': 'column',
+                               'max-width': '360px'} if df_name != 'OPG011' else {'display': 'None'}),
                 html.Div(
                     get_document_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle,
                                                   nid_path, df_const=df_const),
-                    style={'display': 'inline-flex', 'margin-left': '25px', 'flex-direction': 'column',
+                    style={'display': 'inline-flex', 'flex-direction': 'column',
                            'max-width': '330px'}
                     if df_name == 'OPG011' else {'display': 'None'})]),
             html.Div([
@@ -1619,9 +1666,31 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                                                                           'margin-right': '24px', 'font-size': '15px'}),
                 dcc.Checklist(
                     id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
-                    options=[{'value': 'show'}],
+                    options=[{'label': 'Yes', 'value': 'show'}],
                     value=show_data_points,
                     style={'color': 'black', 'display': 'inline-block'}),
+            ]),
+            html.Div([
+                html.Div([
+                    html.P(
+                        "{}:".format('Color Palette'),
+                        className='graph-option-title')],
+                    style={'display': 'inline-block', 'position': 'relative', 'top': '-3px'}),
+                html.I(
+                    html.Span(
+                        html.Img(src="http://127.0.0.1:8080/python/dashboard/assets/color-palette.png"),
+                        className='save-symbols-tooltip'),
+                    className='fa fa-question-circle-o',
+                    id={'type': 'color-palette-info', 'index': tile},
+                    style={'position': 'relative', 'display': 'inline-block'}),
+                html.Div([
+                    dcc.RadioItems(
+                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
+                        options=[{'label': i, 'value': i} for i in COLOR_PALETTE],
+                        labelStyle={'display': 'inline-block'},
+                        value=color if color else 'G10',
+                        style={'font-size': '13px'})],
+                    style={'display': 'inline-flex', 'max-width': '290px', 'margin-left': '40px'})
             ]),
             html.Div(
                 html.Div(
@@ -1664,7 +1733,7 @@ def get_table_graph_menu(tile, number_of_columns, xaxis, yaxis, xpos, ypos, xmod
                 html.Div([
                     html.P(
                         "{}:".format(get_label('LBL_Num_Of_Rows')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
+                        className='graph-option-title')],
                     style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '10px'}),
                 html.Div([
                     dcc.Input(
@@ -1678,7 +1747,7 @@ def get_table_graph_menu(tile, number_of_columns, xaxis, yaxis, xpos, ypos, xmod
                     style={'display': 'inline-block'})]),
             html.P(
                 "{}:".format(get_label('LBL_How_To_Filter_The_Table')),
-                style={'margin-top': '10px', 'color': CLR['text1'], 'font-size': '15px'}),
+                className='table-instruction'),
             html.Div([
                 dcc.Markdown(
                     '''
@@ -1697,7 +1766,7 @@ def get_table_graph_menu(tile, number_of_columns, xaxis, yaxis, xpos, ypos, xmod
                 style={'margin-left': '15px'}),
             html.P(
                 "{}:".format(get_label('LBL_How_To_Hide_Columns')),
-                style={'margin-top': '10px', 'color': CLR['text1'], 'font-size': '15px'}),
+                className='table-instruction'),
             html.Div([
                 dcc.Markdown(
                     '''
@@ -1751,8 +1820,7 @@ def get_sankey_menu(tile, graphed_options, df_name, df_const, xaxis, yaxis, xpos
             children=[
                 html.P(
                     "{}:".format(get_label('LBL_Graph_Options')),
-                    style={'color': CLR['text1'], 'margin-top': '10px', 'font-size': '15px', 'margin-left': '15px',
-                           'display': 'inline-block', 'text-align': 'none'}),
+                    className='graph-type'),
                 html.I(
                     html.Span(
                         get_label("LBL_Graph_Options_Info"),
@@ -1768,7 +1836,7 @@ def get_sankey_menu(tile, graphed_options, df_name, df_const, xaxis, yaxis, xpos
                 html.Div([
                     html.P(
                         "{}:".format(get_label('LBL_Graphed_Variables')),
-                        style={'color': CLR['text1'], 'font-size': '13px'})],
+                        className='graph-option-title')],
                     style={'display': 'inline-block', 'width': '60px', 'position': 'relative', 'top': '-3px',
                            'margin-right': '15px'}),
                 html.Div([
@@ -1803,22 +1871,27 @@ def get_default_graph_options(xaxis, yaxis, xpos, ypos, xmodified, ymodified, ti
     return [
         html.Div([
             html.Div([
-                html.P([get_label('LBL_Show_Grid_Lines') + ": "], style={'display': 'inline-block'}),
+                html.Div([
+                    html.P(
+                        [get_label('LBL_Show_Grid_Lines') + ": "],
+                        className='graph-option-title')],
+                    style={'display': 'inline-block'}),
                 dcc.Checklist(
                     id={'type': 'gridline', 'index': tile},
-                    options=[{'value': 'gridline'}],
+                    options=[{'label': 'Yes', 'value': 'gridline'}],
                     value=gridline if gridline else [],
-                    style={'color': 'black', 'margin-left': '33px', 'display': 'inline-block'})
+                    style={'color': 'black', 'margin-left': '48px', 'display': 'inline-block'})
             ]),
             html.Div([
-                html.P(
-                    [get_label('LBL_Hide_Legend') + ": "], style={'display': 'inline-block'}
-                ),
+                html.Div([
+                    html.P(
+                    [get_label('LBL_Hide_Legend') + ": "], className='graph-option-title')],
+                style={'display': 'inline-block'}),
                 dcc.Checklist(
                     id={'type': 'legend', 'index': tile},
-                    options=[{'value': 'legend'}],
+                    options=[{'label': 'Yes', 'value': 'legend'}],
                     value=legend if legend else [],
-                    style={'color': 'black', 'margin-left': '58px', 'display': 'inline-block'})
+                    style={'color': 'black', 'margin-left': '70px', 'display': 'inline-block'})
             ]),
         ], style={'display': 'None'} if graph_type == 'Sankey' or 'Table' in graph_type else {}),
 

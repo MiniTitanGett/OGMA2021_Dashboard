@@ -672,6 +672,8 @@ for y in range(4):
      State({'type': 'document_level_dropdown', 'index': ALL}, 'value'),
      # document graph all
      State({'type': 'document_children_toggle', 'index': ALL}, 'value'),
+     # document options
+     State({'type': 'document_specific_dropdown', 'index': ALL}, 'options'),
      # dashboard layout
      State('div-body', 'layouts'),
      # df_const
@@ -702,7 +704,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                                       num_periods_0, num_periods_1, num_periods_2, num_periods_3, num_periods_4,
                                       period_type_0, period_type_1, period_type_2, period_type_3, period_type_4,
                                       date_tab_0, date_tab_1, date_tab_2, date_tab_3, date_tab_4,
-                                      doc_button_path, doc_toggle, doc_level, doc_graph_all,
+                                      doc_button_path, doc_toggle, doc_level, doc_graph_all, doc_options,
                                       layout, df_const):
     # ---------------------------------------Variable Declarations------------------------------------------------------
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
@@ -1036,7 +1038,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                     # set up Graph Options and args
                     args_list = arg_list_all[i]
                     graph_options = [x[i] for x in graph_options_all if len(x) >= (i + 1)]
-                    graph_variable = [doc_level[i], doc_nid_path, doc_toggle[i], doc_graph_all[i]]
+                    graph_variable = [doc_level[i], doc_nid_path, doc_toggle[i], doc_graph_all[i], doc_options[i]]
 
                     if type(button_paths[i]) == dict:
                         button_paths[i] = [button_paths[i]]

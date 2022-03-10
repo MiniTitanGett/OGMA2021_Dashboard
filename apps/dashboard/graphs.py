@@ -111,7 +111,8 @@ def get_hierarchy_col(hierarchy_type, hierarchy_level_dropdown, hierarchy_graph_
 def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
                             hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const,
                             xaxis_title, yaxis_title, xlegend, ylegend, gridline, legend,
-                            document_level_dropdown, document_path, document_type, document_graph_children):
+                            document_level_dropdown, document_path, document_type, document_graph_children,
+                            document_options):
     """Returns the line graph figure."""
     # ------------------------------------------------Arg Values--------------------------------------------------------
     # arg_value[0] = xaxis selector
@@ -132,7 +133,9 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                                                                   hierarchy_graph_children, df_name, df_const]:
         # Specialty filtering
         if df_name != "OPG011":
-            filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[5], df_const)
+            filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[5], df_const,
+                                                document_level_dropdown, document_path, document_type,
+                                                document_graph_children, document_options)
             category = df_const[df_name]['VARIABLE_LEVEL']
         else:
             filtered_df = dff.copy()
@@ -470,7 +473,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
             filtered_df['Date of Event'] = filtered_df['Date of Event'].astype(str)
 
             if arg_value[0] == 'Time':
-                color_discrete=color_picker(arg_value[6])
+                color_discrete = color_picker(arg_value[6])
 
                 fig = px.scatter(
                     title=title,
@@ -606,7 +609,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
 def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
                    hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const, xaxis_title, yaxis_title,
                    xlegend, ylegend, gridline, legend, document_level_dropdown,
-                   document_path, document_type, document_graph_children):
+                   document_path, document_type, document_graph_children, document_options):
     """Returns the bar graph figure."""
     # ------------------------------------------------Arg Values--------------------------------------------------------
     # arg_value[0] = group by (x axis)
@@ -628,7 +631,9 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                                                                   hierarchy_graph_children, df_name, df_const]:
         # Specialty filtering
         if df_name != "OPG011":
-            filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[3], df_const)
+            filtered_df = customize_menu_filter(dff, df_name, arg_value[1], arg_value[3], df_const,
+                                                document_level_dropdown, document_path, document_type,
+                                                document_graph_children, document_options)
             category = df_const[df_name]['VARIABLE_LEVEL']
         else:
             filtered_df = dff.copy()
@@ -828,7 +833,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         ))
 
     fig.update_layout(
-        # x and y axis location change depending on graph arg_value[4] orientation
+        # x and y-axis location change depending on graph arg_value[4] orientation
         xaxis_title=xaxis if arg_value[2] == 'Vertical' else yaxis,
         yaxis_title=yaxis if arg_value[2] == 'Vertical' else xaxis,
         showlegend=False if legend else True,
@@ -867,8 +872,8 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
 
 def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
                    hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const, xaxis_title, yaxis_title,
-                   xlegend, ylegend, gridline, legend, document_level_dropdown,
-                   document_path, document_type, document_graph_children):
+                   xlegend, ylegend, gridline, legend, document_level_dropdown, document_path, document_type,
+                   document_graph_children, document_options):
     """Returns the box plot figure."""
     # ------------------------------------------------Arg Values--------------------------------------------------------
     # arg_value[0] = measure type selector
@@ -886,7 +891,9 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                                                                   hierarchy_graph_children, df_name, df_const]:
         # Specialty filtering
         if df_name != "OPG011":
-            filtered_df = customize_menu_filter(dff, df_name, arg_value[0], arg_value[2], df_const)
+            filtered_df = customize_menu_filter(dff, df_name, arg_value[0], arg_value[2], df_const,
+                                                document_level_dropdown, document_path, document_type,
+                                                document_graph_children, document_options)
             category = df_const[df_name]['VARIABLE_LEVEL']
         else:
             filtered_df = dff.copy()
@@ -964,7 +971,7 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             fig = px.box(
                 title=title,
                 data_frame=filtered_df,
-                # check arg_value[1]: orientation assign to corresponding x and y axis
+                # check arg_value[1]: orientation assign to corresponding x and y-axis
                 x=x if arg_value[1] == 'Horizontal' else y,
                 y=y if arg_value[1] == 'Horizontal' else x,
                 color=category,
@@ -1018,7 +1025,7 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         ))
 
     fig.update_layout(
-        # x and y axis location change depending on graph arg_value[1]: orientation
+        # x and y-axis location change depending on graph arg_value[1]: orientation
         xaxis_title=xaxis if arg_value[1] == 'Horizontal' else yaxis,
         yaxis_title=yaxis if arg_value[1] == 'Horizontal' else xaxis,
         legend_title_text=get_label('LBL_Variable_Names'),
@@ -1175,7 +1182,8 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
 
 
 def get_sankey_figure(arg_value, dff, hierarchy_level_dropdown, hierarchy_path, hierarchy_type, tile_title, df_name,
-                      df_const):
+                      df_const, document_level_dropdown, document_path, document_hierarchy_toggle,
+                      document_graph_children, document_options):
     """Returns the sankey graph figure."""
     # ------------------------------------------------Arg Values--------------------------------------------------------
     # arg_value[0] = variable selector
@@ -1185,7 +1193,9 @@ def get_sankey_figure(arg_value, dff, hierarchy_level_dropdown, hierarchy_path, 
     # ------------------------------------------------------------------------------------------------------------------
 
     # Specialty filtering
-    filtered_df = customize_menu_filter(dff, df_name, 'Link', arg_value[0], df_const)
+    filtered_df = customize_menu_filter(dff, df_name, 'Link', arg_value[0], df_const, document_path,
+                                        document_hierarchy_toggle, document_level_dropdown, document_graph_children,
+                                        document_options)
 
     # df is not empty, create empty sankey graph
     if len(filtered_df) == 0:
@@ -1315,7 +1325,7 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
             list_of_names.append(obj['props']['children'])
 
     if hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == ['graph_children']:
-        # If at a leaf node then display it's parents data
+        # If at a leaf node then display its parents data
         nid_path = "root"
         for x in list_of_names:
             nid_path += ('^||^{}'.format(x))
@@ -1335,7 +1345,7 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
             list_of_doc_names.append(obj['props']['children'])
 
     if document_toggle == 'Specific Item' and document_graph_children == ['graph_children']:
-        # If at a leaf node then display it's parents data
+        # If at a leaf node then display its parents data
         nid_path = "root"
         for x in list_of_doc_names:
             nid_path += ('^||^{}'.format(x))
@@ -1361,7 +1371,7 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
                                        hierarchy_graph_children, graph_title, df_name, df_const, xtitle, ytitle,
                                        xlegend, ylegend, gridline, legend,
                                        document_level_dropdown, list_of_doc_names, document_toggle,
-                                       document_graph_children)
+                                       document_graph_children, document_options)
     # bubble graph creation
     elif graph_type == 'Bubble':
         return get_bubble_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
@@ -1372,13 +1382,15 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
         return get_bar_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
                               list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
                               df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend,
-                              document_level_dropdown, list_of_doc_names, document_toggle, document_graph_children)
+                              document_level_dropdown, list_of_doc_names, document_toggle, document_graph_children,
+                              document_options)
     # box plot creation
     elif graph_type == 'Box_Plot':
         return get_box_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
                               list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
                               df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend,
-                              document_level_dropdown, list_of_doc_names, document_toggle, document_graph_children)
+                              document_level_dropdown, list_of_doc_names, document_toggle, document_graph_children,
+                              document_options)
 
     # pivot table creation
     elif graph_type == 'Pivot_Table':
@@ -1394,7 +1406,8 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
     # sankey creation
     elif graph_type == 'Sankey':
         return get_sankey_figure(graph_options, filtered_df, hierarchy_level_dropdown, list_of_names, hierarchy_toggle,
-                                 graph_title, df_name, df_const)
+                                 graph_title, df_name, df_const, document_level_dropdown, list_of_doc_names,
+                                 document_toggle, document_graph_children, document_options)
     # catch all
     else:
         return None
@@ -1403,7 +1416,7 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
 def color_picker(palette):
     if palette == 'G10':
         color = ["#3366CC", "#DC3912", "#FF9900", "#109618", "#990099",
-                 "#0099C6","#DD4477", "#66AA00", "#B82E2E", "#316395"]
+                 "#0099C6", "#DD4477", "#66AA00", "#B82E2E", "#316395"]
     elif palette == 'Bold':
         color = ["rgb(127, 60, 141)", "rgb(17, 165, 121)", "rgb(57, 105, 172)", "rgb(242, 183, 1)",
                  "rgb(231, 63, 116)", "rgb(128, 186, 90)", "rgb(230, 131, 16)", "rgb(0, 134, 149)",
@@ -1421,6 +1434,6 @@ def color_picker(palette):
                  "rgb(135, 197, 95)", "rgb(158, 185, 243)", "rgb(254, 136, 177)", "rgb(201, 219, 116)",
                  "rgb(139, 224, 164)", "rgb(180, 151, 231)", "rgb(179, 179, 179)"]
     else:
-        #color blind friendly palette
+        # color blind friendly palette
         color = ["#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7"]
     return color

@@ -22,7 +22,7 @@ from statsmodels.sandbox.regression.predstd import wls_prediction_std
 from sklearn.preprocessing import PolynomialFeatures
 
 # Internal Modules
-import config
+# import config
 from conn import get_ref, exec_storedproc_results
 from server import get_hierarchy_parent, get_variable_parent
 
@@ -130,6 +130,7 @@ def dataset_to_df(df_name):
         df_vaex['Variable Value'] = df_vaex['Variable Name'] + " " + df_vaex['Variable Name Qualifier']
 
     if df_name == 'OPG011':
+        # add columns to the dataframe
         df_vaex["OPG Data Set"] = np.ones(len(df), dtype=np.str)
         df_vaex["Hierarchy One Name"] = np.ones(len(df), dtype=np.str)
         df_vaex["Hierarchy One Top"] = np.ones(len(df), dtype=np.str)
@@ -169,7 +170,8 @@ def dataset_to_df(df_name):
         # dff = df[["Variable Value", "Variable Level"]].drop_duplicates()
         dff_vaex = df_vaex[["Variable Value", "Variable Level"]]
         unique_value = dff_vaex["Variable Value"].unique()
-        # init the depth lists
+        # init the depth lists and replace the value where variable value row equal the unique value to
+        # assign the var_level column values
         for x in unique_value:
             depth_dff = dff_vaex[dff_vaex["Variable Value"] == x]
             depth = depth_dff.evaluate("Variable Level")[0]
@@ -271,6 +273,7 @@ def dataset_to_df(df_name):
                 df.loc[df["H{}".format(depth)] == node, "H{}".format(depth - 1)] = parent
         df_vaex = vaex.from_pandas(df)
 
+        # Encode column as ordinal values and mark it as categorical
         df_vaex = df_vaex.ordinal_encode('Variable Value')
         df_vaex = df_vaex.ordinal_encode('Variable Name')
         df_vaex = df_vaex.ordinal_encode('Variable Name Qualifier')
@@ -306,8 +309,8 @@ def generate_constants(df_name):
 
     VARIABLE_LEVEL = 'Variable Value'  # list of variable column names
 
-    COLUMN_NAMES = df.get_column_names()  # vaex
-    MEASURE_TYPE_OPTIONS = df['Measure Type'].unique(dropmissing=True)  # vaex
+    COLUMN_NAMES = df.get_column_names()
+    MEASURE_TYPE_OPTIONS = df['Measure Type'].unique(dropmissing=True)
 
     MEASURE_TYPE_OPTIONS.sort()
 
@@ -369,7 +372,9 @@ def generate_constants(df_name):
 
         options = []
         variable_option_lists = []
+        # _categories is essentially a look-up table for the ordinal values of the category columns
         category = df._categories
+
         df = df.to_pandas_df()
         df['Partial Period'] = df['Partial Period'].transform(lambda x: x == 'Y')
 
@@ -408,6 +413,7 @@ def generate_constants(df_name):
         MAX_DATE_UNF = max_date_unf.strftime('%m/%d/%Y')
     else:
         # New date picker values
+        # filtering view of dataframe with rows that equal year
         GREGORIAN_MIN_YEAR = int(df['Year of Event'].min())
         dff = df.filter(df['Calendar Entry Type'] == 'Year')
         GREGORIAN_YEAR_MAX = int(dff['Year of Event'].max())
@@ -442,7 +448,7 @@ def generate_constants(df_name):
             FISCAL_AVAILABLE = True
 
             FISCAL_MIN_YEAR = int(df['Fiscal Year of Event'].min())
-
+            # filtering view of dataframe with rows that equal fiscal year
             dff = df.filter(df['Calendar Entry Type'] == 'Fiscal Year')
             FISCAL_YEAR_MAX = int(dff['Fiscal Year of Event'].max())
 
@@ -689,7 +695,7 @@ def data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_drop
         filtered_df = session[df_name]
 
         if hierarchy_toggle == 'Level Filter':
-            # If anything is in the drop down
+            # If anything is in the dropdown
             if hierarchy_level_dropdown:
                 # Filter based on hierarchy level
                 filtered_df = filtered_df.filter(filtered_df[hierarchy_level_dropdown].notna())
@@ -1874,27 +1880,71 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
     return time_df
 
 
-def customize_menu_filter(dff, df_name, measure_type, variable_names, df_const):
+def customize_menu_filter(dff, df_name, measure_type, variable_names, df_const, document_path,
+                          document_hierarchy_toggle, document_level_dropdown, document_graph_children,
+                          document_options):
     """Filters data frame based on the customize menu inputs and returns the filtered data frame."""
-    if measure_type == 'Link':
-        filtered_df = dff[dff['Measure Fcn'] == 'Link']
-    else:
-        filtered_df = dff[dff['Measure Type'] == measure_type]
+    if df_name == 'OPG001':
+        if measure_type == 'Link':
+            filtered_df = dff[dff['Measure Fcn'] == 'Link']
+        else:
+            filtered_df = dff[dff['Measure Type'] == measure_type]
 
-    if variable_names is not None:
-        # ensure variable_names is a list of variable values
-        if type(variable_names) is not list:
-            variable_names = [variable_names]
+        if variable_names is not None:
+            # ensure variable_names is a list of variable values
+            if type(variable_names) is not list:
+                variable_names = [variable_names]
 
-        aggregate_df = pd.DataFrame()
+            aggregate_df = pd.DataFrame()
 
-        # for each selection, add the rows defined by the selection
-        for variable_name in variable_names:
-            # Filters based on rows that match the variable name path
-            aggregate_df = pd.concat([aggregate_df, filtered_df[filtered_df[df_const[df_name]
+            # for each selection, add the rows defined by the selection
+            for variable_name in variable_names:
+                # Filters based on rows that match the variable name path
+                aggregate_df = pd.concat([aggregate_df, filtered_df[filtered_df[df_const[df_name]
                                                                                 ['VARIABLE_LEVEL']] == variable_name]])
 
-        filtered_df = aggregate_df
+            filtered_df = aggregate_df
+    else:
+        if document_hierarchy_toggle == 'Level Filter':
+            variable = df_const[df_name][document_level_dropdown]
+        elif document_hierarchy_toggle == 'Specific Item' and document_graph_children == ['graph_children']:
+            variable = [option['label'] for option in document_options]
+        else:
+            variable = document_path[-1] if document_path != [] else None
+
+        if measure_type == 'Link':
+            filtered_df = dff[dff['Measure Fcn'] == 'Link']
+        else:
+            filtered_df = dff[dff['Measure Type'] == measure_type]
+
+        if variable is not None:
+            # ensure variable_names is a list of variable values
+            if type(variable) is not list:
+                variable = [variable]
+
+            aggregate_df = pd.DataFrame()
+
+            # for each selection, add the rows defined by the selection
+            for variable_name in variable:
+                # Filters based on rows that match the variable name path
+                if document_hierarchy_toggle == "Level Filter":
+                    further_filter_df = filtered_df[filtered_df[document_level_dropdown] ==
+                                                             variable_name]
+                else:
+                    if document_hierarchy_toggle == 'Specific Item' and document_graph_children == ['graph_children']:
+                        further_filter_df = filtered_df[
+                            filtered_df[df_const[df_name]['DOCUMENT_LEVELS']
+                            [len(document_path)]] == variable_name]
+                    else:
+                        further_filter_df = filtered_df[filtered_df[df_const[df_name][
+                            'DOCUMENT_LEVELS'][len(document_path) - 1]] == variable_name]
+
+                aggregate_df = pd.concat([aggregate_df, further_filter_df])
+
+            filtered_df = aggregate_df
+        else:
+            filtered_df = filtered_df[0:0]
+
     return filtered_df
 
 

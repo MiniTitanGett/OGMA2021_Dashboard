@@ -511,7 +511,7 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
     graph_options = no_update
     options = []
     link_trigger = no_update
-    type_style = {'margin-left': '15px'}
+    type_style = {}
     message_style = DATA_CONTENT_HIDE
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     changed_value = [p['value'] for p in dash.callback_context.triggered][0]
@@ -692,12 +692,13 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
 
     # prevents update if hierarchy toggle or graph all children is selected when the graph type is not line or
     # scatter
-    if ('"type":"hierarchy-toggle"}.value' in changed_id) and \
-            selected_graph_type != "Line" and selected_graph_type != "Scatter":
-        raise PreventUpdate
-
-    if link_state == 'fa fa-link' and 'graph_children_toggle"}.value' in changed_id and parent_df_name != df_name:
-        raise PreventUpdate
+    #not use anymore
+    # if ('"type":"hierarchy-toggle"}.value' in changed_id) and \
+    #         selected_graph_type != "Line" and selected_graph_type != "Scatter":
+    #     raise PreventUpdate
+    #
+    # if link_state == 'fa fa-link' and 'graph_children_toggle"}.value' in changed_id and parent_df_name != df_name:
+    #     raise PreventUpdate
 
     # Sets the data_fitting boolean to true or false dependant on the link-state of the tile being modified and then the
     # tiles associated data menu
@@ -740,7 +741,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
             raise PreventUpdate
 
     # if the data set is selected but has not been confirmed, use previous data set
-    if 'graph-type-dropdown' in changed_id and link_state == 'fa fa-link' and df_confirm is not None:
+    if link_state == 'fa fa-link' and ('graph-type-dropdown' in changed_id and df_confirm is not None) or \
+       ('graph-menu-trigger' in changed_id and parent_df_name not in df_const):
         df_name = df_confirm
     elif link_state == 'fa fa-link':
         df_name = parent_df_name
@@ -778,10 +780,10 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
                                            df_const=df_const,
                                            data_fitting=data_fitting,
                                            ci=None,
-                                           level_value='Variable Name',
-                                           nid_path="root",
-                                           hierarchy_toggle='Level Filter',
-                                           graph_all_toggle=None,
+                                           secondary_level_value='Variable Name',
+                                           secondary_nid_path="root",
+                                           secondary_hierarchy_toggle='Level Filter',
+                                           secondary_graph_all_toggle=None,
                                            color=None)
     elif selected_graph_type == 'Bar':
         menu = get_bar_graph_menu(tile=tile,
@@ -801,10 +803,10 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
                                   ymodified=None,
                                   df_name=df_name,
                                   df_const=df_const,
-                                  level_value='Variable Name',
-                                  nid_path="root",
-                                  hierarchy_toggle='Level Filter',
-                                  graph_all_toggle=None,
+                                  secondary_level_value='Variable Name',
+                                  secondary_nid_path="root",
+                                  secondary_hierarchy_toggle='Level Filter',
+                                  secondary_graph_all_toggle=None,
                                   color=None)
     elif selected_graph_type == 'Bubble':
         menu = get_bubble_graph_menu(tile=tile,
@@ -860,10 +862,10 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
                                  xmodified=None,
                                  ymodified=None,
                                  df_const=df_const,
-                                 level_value='Variable Name',
-                                 nid_path="root",
-                                 hierarchy_toggle='Level Filter',
-                                 graph_all_toggle=None,
+                                 secondary_level_value='Variable Name',
+                                 secondary_nid_path="root",
+                                 secondary_hierarchy_toggle='Level Filter',
+                                 secondary_graph_all_toggle=None,
                                  color=None)
     elif selected_graph_type == 'Sankey':
         menu = get_sankey_menu(tile=tile,
@@ -876,8 +878,11 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
                                xpos=None,
                                ypos=None,
                                xmodified=None,
-                               ymodified=None)
-
+                               ymodified=None,
+                               secondary_level_value='Variable Name',
+                               secondary_nid_path="root",
+                               secondary_hierarchy_toggle='Level Filter',
+                               secondary_graph_all_toggle=None,)
     elif selected_graph_type == 'Pivot_Table':
         menu = get_pivot_table_menu(tile=tile,
                                     xaxis=None,

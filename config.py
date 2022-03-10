@@ -20,6 +20,9 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 CONNECTION_STRING = os.getenv("CONNECTION_STRING")
 
 # optional (defaulted) env settings ####################################################################################
+css_directory = os.getcwd()
+
+client_css = os.getenv("CLIENT")
 
 BASE_PATHNAME = os.getenv("BASE_PATHNAME")
 

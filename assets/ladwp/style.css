@@ -1,0 +1,70 @@
+/* Tile Body
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+
+.tile-container {
+    background-color: #fffafa;
+}
+
+.tile-highlight {
+    background-color: #e3fffb; /*#FFF6F6*/
+}
+
+/* fa fa tweaks
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+
+.fa-ban .save-symbols-tooltip,
+.fa-floppy-o .save-symbols-tooltip,
+.fa-undo .save-symbols-tooltip,
+.save-overwrite-symbols,
+.save-symbols-tooltip
+{
+    font-family: "Times New Roman", e, sans-serif;
+    background-color: #607c9b;
+}
+
+.fa-check .save-symbols-tooltip,
+.fa-refresh .save-symbols-tooltip,
+.fa-question-circle-o .save-symbols-tooltip {
+    font-family: "Times New Roman", e, sans-serif;
+    background-color: #607c9b;
+}
+
+.fa-ban .save-symbols-tooltip::after,
+.fa-floppy-o .save-symbols-tooltip::after,
+.fa-undo .save-symbols-tooltip::after,
+.save-overwrite-symbols .save-symbols-tooltip::after {
+  border-color: transparent transparent #607c9b transparent;
+}
+.fa-check .save-symbols-tooltip::after,
+.fa-refresh .save-symbols-tooltip::after {
+  border-color: transparent transparent #607c9b transparent;
+}
+
+/* Date Picker
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+
+.date-picker-nav:hover,
+.date-picker-nav:hover {
+    background-color: #a0b7c5;
+}
+
+.date-picker-nav-selected {
+    background-color: #607c9b;
+}
+.date-picker-nav-selected:hover,
+.date-picker-nav-selected:hover {
+    background-color: #607c9b;
+}
+
+/* Tabs
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.dashboard-header{
+    background-color: #003099;
+}
+
+.dashboard-tab,
+.dashboard-tab:focus {
+    border-right: 2px solid #002f76;
+    border-bottom: 2px solid #002f76;
+    background-color: #003099;
+}

@@ -30,6 +30,7 @@ from apps.dashboard.graphs import __update_graph
 
 # ********************************************HELPER FUNCTION(S)******************************************************
 
+
 def change_index(doc, index):
     """Change index numbers of all id's within tile or data side-menu."""
 
@@ -324,7 +325,12 @@ def get_layout_graph(report_name):
                            j.get('Graph Options')[2],  # xlegpos
                            j.get('Graph Options')[3],  # ylegpos
                            j.get('Graph Options')[6],  # gridline
-                           j.get('Graph Options')[7])  # legend
+                           j.get('Graph Options')[7],  # legend
+                           j.get('Graph Variable')[0],
+                           j.get('Graph Variable')[1],
+                           j.get('Graph Variable')[2],
+                           j.get('Graph Variable')[3],
+                           j.get('Graph Variable')[4])
 
     if graph is None:
         raise PreventUpdate
@@ -783,7 +789,7 @@ def get_layout_dashboard():
 
 
 def get_customize_content(tile, graph_type, graph_menu, df_name):
-    """Returns the customize content."""
+    """Returns customize content."""
     graphs = []
     # check if keyword is in df_name
     if df_name is not None:
@@ -831,6 +837,7 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
                         value=graph_type if graph_type is not None else options[0]['value'] if len(options) != 0 else
                         None,  # graph_type,
                         style={'max-width': '405px', 'width': '100%', 'font-size': '13px'}),
+                    style={'margin-left': '15px'},
                 ),
                 html.Div(
                     dcc.Input(
@@ -841,7 +848,7 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
                         debounce=True),),
             ],
             style=DATA_CONTENT_HIDE if df_name is None else
-            {'margin-left': '15px'}),
+            {}),
         html.Div(
             children=graph_menu if df_name else empty_graph_menu(tile),
             id={'type': 'div-graph-options', 'index': tile})]
@@ -849,10 +856,10 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
 
 def get_tile(tile, tile_keys=None, df_name=None):
     """
-    :param tile: Index of the created tile.
+    :param tile: Index of the created tile
     :param tile_keys: Holds information regarding tile values
     :param df_name: Name of the data set being used.
-    :return: New default tile with index values matching the specified tile index.
+    :return: New default tile with index values matching the specified tile index
     """
     return html.Div(
         html.Div([
@@ -964,7 +971,7 @@ def get_tile(tile, tile_keys=None, df_name=None):
 # arrange tiles on the page for 1-4 tiles
 def get_tile_layout(num_tiles, tile_keys=None, parent_df=None):
     """
-    :param num_tiles: Desired number of tiles to display.
+    :param num_tiles: Desired number of tiles to display
     :param tile_keys: key info for building a tile
     :param parent_df: Name of the parent data set being used
     :raise IndexError: If num_tiles < 0 or num_tiles > 4
@@ -993,8 +1000,8 @@ def get_tile_layout(num_tiles, tile_keys=None, parent_df=None):
 
 
 def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridline, legend, df_const, data_fitting, ci,
-                                data_fit, degree, xaxis, yaxis, xpos, ypos, xmodified, ymodified, hierarchy_toggle,
-                                level_value, graph_all_toggle, nid_path, color):
+                                data_fit, degree, xaxis, yaxis, xpos, ypos, xmodified, ymodified, secondary_level_value,
+                                secondary_nid_path, secondary_hierarchy_toggle, secondary_graph_all_toggle, color):
     """
     :param data_fitting: boolean to determine whether to show data fitting options
     :param ci: show confidence interval or not
@@ -1002,8 +1009,8 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
     :param y: the y-axis value
     :param x: the x-axis value
     :param mode: the mode for the graph
-    :param tile: Index of the tile the line graph menu corresponds to.
-    :param df_name: Name of the data set being used.
+    :param tile: Index of the tile the line graph menu corresponds to
+    :param df_name: Name of the data set being used
     :param gridline: Show gridline or not
     :param legend: Show legend or not
     :param df_const: Dataframe constants
@@ -1015,11 +1022,12 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
     :param ypos: the y position of the legend
     :param xmodified: the x title of the xaxis has been modified
     :param ymodified: the y of the yaxis title has been modified
-    :param hierarchy_toggle: second hierarchy filter either specific or level
-    :param level_value: level of secondary hierarchy
-    :param graph_all_toggle: graph all option of hierarchy item
-    :param nid_path: the path of secondary specific hierarchy
-    :return: Menu with options to modify a line graph.
+    :param secondary_hierarchy_toggle: second hierarchy filter either specific or level
+    :param secondary_level_value: level of secondary hierarchy
+    :param secondary_graph_all_toggle: graph all option of hierarchy item
+    :param secondary_nid_path: the path of secondary specific hierarchy
+    :param color: the color palette of the graph
+    :return: Menu with options to modify a line graph
     """
     # arg_value[0] = xaxis selector
     # arg_value[1] = measure type selector
@@ -1181,10 +1189,10 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                         style={'display': 'inline-flex', 'flex-direction': 'column',
                                'max-width': '360px'} if df_name != 'OPG011' else {'display': 'None'}),
                     html.Div(
-                        get_document_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle,
-                                                      nid_path, df_const=df_const),
+                        get_document_hierarchy_layout(tile, df_name, secondary_hierarchy_toggle, secondary_level_value,
+                                                  secondary_graph_all_toggle, secondary_nid_path, df_const=df_const),
                         style={'display': 'inline-flex', 'flex-direction': 'column', 'max-width': '330px'}
-                        if df_name == 'OPG011' else {'display': 'None'})]),
+                        if df_name == 'OPG011' else {'display': 'None'})], style={'margin-bottom': '7.5px'}),
                 html.Div([
                     html.Div([
                         html.P(
@@ -1204,8 +1212,8 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                             options=[{'label': i, 'value': i} for i in COLOR_PALETTE],
                             labelStyle={'display': 'inline-block'},
                             value=color if color else 'G10',
-                            style={'font-size': '13px'})],
-                        style={'display': 'inline-flex', 'max-width': '290px', 'margin-left': '40px'})
+                            style={'font-size': '13px', 'margin-left': '40px'})],
+                        style={'display': 'inline-flex', 'max-width': '290px'})
                 ]),
                 html.Div(
                     html.Div(
@@ -1218,10 +1226,10 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
 
 
 def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline, legend, df_name, df_const, xaxis,
-                       yaxis, xpos, ypos, xmodified, ymodified, level_value, nid_path, hierarchy_toggle,
-                       graph_all_toggle, color):
+                       yaxis, xpos, ypos, xmodified, ymodified, secondary_level_value, secondary_nid_path,
+                       secondary_hierarchy_toggle, secondary_graph_all_toggle, color):
     """
-    :param tile: Index of the tile the bar graph menu corresponds to.
+    :param tile: Index of the tile the bar graph menu corresponds to
     :param x: the x-axis value
     :param y: the y-axis value
     :param measure_type: the measure type value
@@ -1237,11 +1245,12 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
     :param ypos: the y position of the legend
     :param xmodified: the x title of the xaxis has been modified
     :param ymodified: the y of the yaxis title has been modified
-    :param hierarchy_toggle: second hierarchy filter either specific or level
-    :param level_value: level of secondary hierarchy
-    :param graph_all_toggle: graph all option of hierarchy item
-    :param nid_path: the path of secondary specific hierarchy
-    :return: Menu with options to modify a bar graph.
+    :param secondary_hierarchy_toggle: second hierarchy filter either specific or level
+    :param secondary_level_value: level of secondary hierarchy
+    :param secondary_graph_all_toggle: graph all option of hierarchy item
+    :param secondary_nid_path: the path of secondary specific hierarchy
+    :param color: the color palette of the graph
+    :return: Menu with options to modify a bar graph
     """
     # args_value[0] = x-axis
     # args_value[1] = y-axis (measure type)
@@ -1332,13 +1341,13 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
                     style={'display': 'inline-flex', 'flex-direction': 'column',
                                'max-width': '360px'} if df_name != 'OPG011' else {'display': 'None'}),
                 html.Div(
-                    get_document_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle,
-                                                  nid_path, df_const=df_const),
+                    get_document_hierarchy_layout(tile, df_name, secondary_hierarchy_toggle, secondary_level_value,
+                                                  secondary_graph_all_toggle, secondary_nid_path, df_const=df_const),
                     style={'display': 'inline-flex', 'flex-direction': 'column', 'max-width': '330px'}
-                    if df_name == 'OPG011' else {'display': 'None'})]),
+                    if df_name == 'OPG011' else {'display': 'None'})], style={'margin-bottom': '7.5px'}),
             html.Div([
-                html.P([get_label('LBL_Animate_Over_Time') + ": "], style={'padding-right': '14px',
-                                                                    'display': 'inline-block', 'font-size': '15px'}),
+                html.P([get_label('LBL_Animate_Over_Time') + ": "], style={'padding-right': '33px',
+                                                                    'display': 'inline-block', 'font-size': '13px'}),
                 dcc.Checklist(
                     id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
                     options=[{'label': 'Yes', 'value': 'animate'}],
@@ -1364,8 +1373,8 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
                         options=[{'label': i, 'value': i} for i in COLOR_PALETTE],
                         labelStyle={'display': 'inline-block'},
                         value=color if color else 'G10',
-                        style={'font-size': '13px'})],
-                    style={'display': 'inline-flex', 'max-width': '290px', 'margin-left': '40px'})
+                        style={'font-size': '13px', 'margin-left': '40px'})],
+                    style={'display': 'inline-flex', 'max-width': '290px'})
             ]),
             html.Div(
                 html.Div(
@@ -1380,7 +1389,7 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
 def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, gridline, legend, df_name, df_const,
                           xaxis, yaxis, xpos, ypos, xmodified, ymodified, color):
     """
-    :param tile: Index of the tile the bar graph menu corresponds to.
+    :param tile: Index of the tile the bar graph menu corresponds to
     :param x: the x-axis value
     :param x_measure: the x-axis measure
     :param y: the y-axis value
@@ -1389,7 +1398,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
     :param size_measure: the size measure
     :param gridline: Show gridline or not
     :param legend: Show legend or not
-    :param df_name: Name of the data set being used.
+    :param df_name: Name of the data set being used
     :param df_const: Dataframe constants
     :param xaxis: the title of the xaxis
     :param yaxis: the title of the yaxis
@@ -1397,7 +1406,8 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
     :param ypos: the y position of the legend
     :param xmodified: the x title of the xaxis has been modified
     :param ymodified: the y of the yaxis title has been modified
-    :return: Menu with options to modify a bubble graph.
+    :param color: the color palette of the graph
+    :return: Menu with options to modify a bubble graph
     """
     # args_value[0] = x-axis
     # args_value[1] = x-axis measure
@@ -1540,8 +1550,8 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                         options=[{'label': i, 'value': i} for i in COLOR_PALETTE],
                         labelStyle={'display': 'inline-block'},
                         value=color if color else 'G10',
-                        style={'font-size': '13px'})],
-                    style={'display': 'inline-flex', 'max-width': '290px', 'margin-left': '40px'})
+                        style={'font-size': '13px', 'margin-left': '40px'})],
+                    style={'display': 'inline-flex', 'max-width': '290px'})
             ]),
             html.Div(
                 html.Div(
@@ -1552,22 +1562,22 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                 id={'type': 'default-graph-options-wrapper', 'index': tile}),
             html.Div(
                 get_document_hierarchy_layout(tile, df_name, hierarchy_toggle='Level Filter',
-                                              level_value='Variable Name',
-                                              graph_all_toggle=None, nid_path="root", df_const=df_const),
+                                              level_value='Variable Name', graph_all_toggle=None, nid_path="root",
+                                              df_const=df_const),
                 style={'display': 'None'}
                 if df_name == 'OPG011' else {'display': 'None'})
         ], style={'margin-left': '15px'})]
 
 
 def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, df_name, show_data_points, gridline,
-                      legend, df_const, xaxis, yaxis, xpos, ypos, xmodified, ymodified, level_value, nid_path,
-                      hierarchy_toggle, graph_all_toggle, color):
+                      legend, df_const, xaxis, yaxis, xpos, ypos, xmodified, ymodified, secondary_level_value,
+                      secondary_nid_path, secondary_hierarchy_toggle, secondary_graph_all_toggle, color):
     """
-        :param tile: Index of the tile the bar graph menu corresponds to.
+        :param tile: Index of the tile the bar graph menu corresponds to
         :param axis_measure: the measure for the axis
         :param graphed_variables: the variables to be graphed
         :param graph_orientation: the orientation value
-        :param df_name: Name of the data set being used.
+        :param df_name: Name of the data set being used
         :param show_data_points: the animate graph value
         :param gridline: Show gridline or not
         :param legend: Show legend or not
@@ -1578,11 +1588,12 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
         :param ypos: the y position of the legend
         :param xmodified: the x title of the xaxis has been modified
         :param ymodified: the y of the yaxis title has been modified
-        :param hierarchy_toggle: second hierarchy filter either specific or level
-        :param level_value: level of secondary hierarchy
-        :param graph_all_toggle: graph all option of hierarchy item
-        :param nid_path: the path of secondary specific hierarchy
-        :return: Menu with options to modify a bar graph.
+        :param secondary_hierarchy_toggle: second hierarchy filter either specific or level
+        :param secondary_level_value: level of secondary hierarchy
+        :param secondary_graph_all_toggle: graph all option of hierarchy item
+        :param secondary_nid_path: the path of secondary specific hierarchy
+        :param color: the color palette of the graph
+        :return: Menu with options to modify a bar graph
         """
     # args_value[0] = measure type
     # args_value[1] = orientation
@@ -1656,14 +1667,14 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                     style={'display': 'inline-flex', 'flex-direction': 'column',
                                'max-width': '360px'} if df_name != 'OPG011' else {'display': 'None'}),
                 html.Div(
-                    get_document_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle,
-                                                  nid_path, df_const=df_const),
+                    get_document_hierarchy_layout(tile, df_name, secondary_hierarchy_toggle, secondary_level_value,
+                                                  secondary_graph_all_toggle, secondary_nid_path, df_const=df_const),
                     style={'display': 'inline-flex', 'flex-direction': 'column',
                            'max-width': '330px'}
-                    if df_name == 'OPG011' else {'display': 'None'})]),
+                    if df_name == 'OPG011' else {'display': 'None'})], style={'margin-bottom': '7.5px'}),
             html.Div([
                 html.P([get_label('LBL_Show_Data_Points') + ": "], style={'display': 'inline-block',
-                                                                          'margin-right': '24px', 'font-size': '15px'}),
+                                                                          'margin-right': '41px', 'font-size': '13px'}),
                 dcc.Checklist(
                     id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
                     options=[{'label': 'Yes', 'value': 'show'}],
@@ -1689,8 +1700,8 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                         options=[{'label': i, 'value': i} for i in COLOR_PALETTE],
                         labelStyle={'display': 'inline-block'},
                         value=color if color else 'G10',
-                        style={'font-size': '13px'})],
-                    style={'display': 'inline-flex', 'max-width': '290px', 'margin-left': '40px'})
+                        style={'font-size': '13px', 'margin-left': '40px'})],
+                    style={'display': 'inline-flex', 'max-width': '290px'})
             ]),
             html.Div(
                 html.Div(
@@ -1705,16 +1716,16 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
 def get_table_graph_menu(tile, number_of_columns, xaxis, yaxis, xpos, ypos, xmodified, ymodified, df_name, df_const):
     """
     :param number_of_columns: The number of columns to display
-    :param tile: Index of the tile the table instructions corresponds to.
+    :param tile: Index of the tile the table instructions corresponds to
     :param xaxis: the title of the xaxis
     :param yaxis: the title of the yaxis
     :param xpos: the x position of the legend
     :param ypos: the y position of the legend
     :param xmodified: the x title of the xaxis has been modified
     :param ymodified: the y of the yaxis title has been modified
-    :param df_name: Name of the data set being used.
+    :param df_name: Name of the data set being used
     :param df_const: Dataframe constants
-    :return: Text instructions for how user can interact with table.
+    :return: Text instructions for how user can interact with table
     """
     # (args-value: {})[0] = tile index
     language = session["language"]
@@ -1798,7 +1809,8 @@ def get_table_graph_menu(tile, number_of_columns, xaxis, yaxis, xpos, ypos, xmod
         ], style={'font-size': '13px'})]
 
 
-def get_sankey_menu(tile, graphed_options, df_name, df_const, xaxis, yaxis, xpos, ypos, xmodified, ymodified):
+def get_sankey_menu(tile, graphed_options, df_name, df_const, xaxis, yaxis, xpos, ypos, xmodified, ymodified,
+                    secondary_level_value, secondary_nid_path, secondary_hierarchy_toggle, secondary_graph_all_toggle):
     """
     :param tile: Index of the tile the line graph menu corresponds to.
     :param graphed_options: the variable name
@@ -1811,6 +1823,10 @@ def get_sankey_menu(tile, graphed_options, df_name, df_const, xaxis, yaxis, xpos
     :param ypos: the y position of the legend
     :param xmodified: the x title of the xaxis has been modified
     :param ymodified: the y of the yaxis title has been modified
+    :param secondary_hierarchy_toggle: second hierarchy filter either specific or level
+    :param secondary_level_value: level of secondary hierarchy
+    :param secondary_graph_all_toggle: graph all option of hierarchy item
+    :param secondary_nid_path: the path of secondary specific hierarchy
     :return: Menu with options to modify a sankey graph.
     """
     # (args-value: {})[0] = graphed variables
@@ -1837,17 +1853,24 @@ def get_sankey_menu(tile, graphed_options, df_name, df_const, xaxis, yaxis, xpos
                     html.P(
                         "{}:".format(get_label('LBL_Graphed_Variables')),
                         className='graph-option-title')],
-                    style={'display': 'inline-block', 'width': '60px', 'position': 'relative', 'top': '-3px',
-                           'margin-right': '15px'}),
+                    style={'display': 'inline-block', 'position': 'relative', 'top': '-5px',
+                           'margin-right': '40px', }),
                 html.Div([
                     dcc.Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
                         options=[] if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
                         value=graphed_options,
-                        multi=False,
+                        multi=True,
                         clearable=False,
-                        style={'font-size': '13px'})],
-                    style={'display': 'inline-block', 'width': '80%', 'max-width': '330px'})]),
+                        style={'font-size': '13px'} if df_name != 'OPG010' else {'display': 'None'})],
+                    style={'display': 'inline-flex', 'flex-direction': 'column',
+                           'max-width': '360px'} if df_name != 'OPG010' else {'display': 'None'}),
+                html.Div(
+                    get_document_hierarchy_layout(tile, df_name, secondary_hierarchy_toggle, secondary_level_value,
+                                                  secondary_graph_all_toggle, secondary_nid_path, df_const=df_const),
+                    style={'display': 'inline-flex', 'flex-direction': 'column',
+                           'max-width': '330px'}
+                    if df_name == 'OPG010' else {'display': 'None'})], style={'margin-bottom': '90px'}),
             html.Div(
                 html.Div(
                     children=get_default_graph_options(xaxis=xaxis, yaxis=yaxis, xpos=xpos, ypos=ypos,
@@ -1856,12 +1879,6 @@ def get_sankey_menu(tile, graphed_options, df_name, df_const, xaxis, yaxis, xpos
                     style=CUSTOMIZE_CONTENT_HIDE,
                     id={'type': 'default-graph-options', 'index': tile}),
                 id={'type': 'default-graph-options-wrapper', 'index': tile}),
-            html.Div(
-                get_document_hierarchy_layout(tile, df_name, hierarchy_toggle='Level Filter',
-                                              level_value='Variable Name',
-                                              graph_all_toggle=None, nid_path="root", df_const=df_const),
-                style={'display': 'None'}
-                if df_name == 'OPG011' else {'display': 'None'})
 
         ], style={'margin-left': '15px'})]
 
@@ -1920,10 +1937,10 @@ def get_default_graph_options(xaxis, yaxis, xpos, ypos, xmodified, ymodified, ti
                 value=ypos if ypos else None,
                 style={'display': 'None'},
                 debounce=True),
-            # xmodified flags for when x axis label has been modified
+            # xmodified flags for when x-axis label has been modified
             dcc.Store(id={'type': 'x-modified', 'index': tile},
                       data=xmodified if xmodified else None),
-            # ymodified flags for when y axis label has been modified
+            # ymodified flags for when y-axis label has been modified
             dcc.Store(id={'type': 'y-modified', 'index': tile},
                       data=ymodified if ymodified else None),
         ], style={'display': 'None'})]
@@ -1997,10 +2014,10 @@ def empty_graph_menu(tile):
                 value=None,
                 style={'display': 'None'},
                 debounce=True),
-            # xmodified flags for when x axis label has been modified
+            # xmodified flags for when x-axis label has been modified
             dcc.Store(id={'type': 'x-modified', 'index': tile},
                       data=None),
-            # ymodified flags for when y axis label has been modified
+            # ymodified flags for when y-axis label has been modified
             dcc.Store(id={'type': 'y-modified', 'index': tile},
                       data=None),
         ], style={'display': 'None'})]

@@ -18,7 +18,7 @@ from apps.dashboard.data import get_label, session
 
 def generate_document_dropdown(tile, df_name, nid_path, df_const):
     """Helper function to generate and return document type hierarchy drop-down."""
-    if df_name == 'OPG011':
+    if df_name:
         # using a subset of our dataframe, turn it into a multiindex df, and access unique values for option
         hierarchy_level = ['Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier']
         df = session[df_name][['Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier']]
@@ -38,7 +38,7 @@ def generate_document_dropdown(tile, df_name, nid_path, df_const):
         else:
             option_list = df['Variable Name'].unique()
         options = [{'label': df_const[df_name]["Categorical_Data"][hierarchy_level[llen]]["labels"]
-                                                    [i], 'value': i} for i in option_list]
+                                                    [i]if df_name == "OPG011" else i, 'value': i} for i in option_list]
 
         options = sorted(options, key=lambda k: k['label'])
 
@@ -70,8 +70,8 @@ def generate_document_history_button(name, index, tile, df_name, df_const):
 # ***********************************************LAYOUT***************************************************************
 
 
-def get_document_hierarchy_layout(tile, df_name=None, hierarchy_toggle="Level Filter", level_value="Variable Name",
-                                  graph_all_toggle=None, nid_path="root", df_const=None):
+def get_document_hierarchy_layout(tile, df_name=None, hierarchy_toggle='Level Filter', level_value='Variable Name',
+                                          graph_all_toggle=None, nid_path="root", df_const=None):
     """Gets and returns the hierarchy layout."""
     if df_name is not None and df_const is not None:
         hierarchy_nid_list = nid_path.split("^||^")
@@ -111,7 +111,7 @@ def get_document_hierarchy_layout(tile, df_name=None, hierarchy_toggle="Level Fi
                 dcc.Dropdown(
                     id={'type': 'document_level_dropdown', 'index': tile},
                     options=[{'label': get_label('LBL_' + x.replace(' ', '_'), df_name), 'value': x} for x in
-                                                                        hierarchy_level] if df_name == "OPG011" else [],
+                                                                        hierarchy_level],
                     multi=False,
                     value=level_value,
                     style={'color': 'black', 'textAlign': 'center', 'margin-top': '10px'},

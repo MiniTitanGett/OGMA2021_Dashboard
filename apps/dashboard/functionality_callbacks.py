@@ -430,7 +430,7 @@ def _print_choice_to_display_and_modify_doc_dropdown(dropdown_val, _n_clicks_r, 
         elif not state_of_display:
             display_button = generate_document_history_button(dropdown_val, 0, changed_index, df_name, df_const)
             nid_path = get_nid_path(dropdown_value=df_const[df_name]["Categorical_Data"]["Variable Name"]["labels"]
-                                                                                                        [dropdown_val])
+                                                                [dropdown_val] if df_name == 'OPG011' else dropdown_val)
             dropdown = generate_document_dropdown(changed_index, df_name, nid_path, df_const)
         # If something is in the history preserve it and add value to it
         else:
@@ -438,7 +438,7 @@ def _print_choice_to_display_and_modify_doc_dropdown(dropdown_val, _n_clicks_r, 
                 (generate_document_history_button(dropdown_val, len(state_of_display), changed_index, df_name,
                                                                                                             df_const))]
             nid_path = get_nid_path(sod=state_of_display, dropdown_value=df_const[df_name]["Categorical_Data"]
-                                                    [hierarchy_level[len(state_of_display)]]["labels"][dropdown_val])
+              [hierarchy_level[len(state_of_display)]]["labels"][dropdown_val] if df_name == 'OPG011' else dropdown_val)
             dropdown = generate_document_dropdown(changed_index, df_name, nid_path, df_const)
     # If update triggered due to creation of a button do not update anything
     elif all(i == 0 for i in n_clicks_click_history):
@@ -870,7 +870,7 @@ def _update_table(page_current, page_size, sort_by, filter_query, _graph_trigger
             list_of_names.append(obj['props']['children'])
 
     if hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == ['graph_children']:
-        # If at a leaf node then display it's parents data
+        # If at a leaf node then display its parents data
         nid_path = "root"
         for i in list_of_names:
             nid_path += ('^||^{}'.format(i))

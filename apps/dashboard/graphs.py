@@ -318,7 +318,7 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                                            df_name, df_const))
 
     # set title
-    if xaxis_title != 'Date of Event' and xaxis_title is not None:
+    if xaxis_title is not None and xaxis_title != '':
         xaxis = xaxis_title
     else:
         xaxis = 'Date of Event'
@@ -344,8 +344,8 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
 
     # checks for gridline is toggled
     if gridline:
-        fig.update_xaxes(showgrid=True, zeroline=True)
-        fig.update_yaxes(showgrid=True, zeroline=True)
+        fig.update_xaxes(showgrid=True, zeroline=True, gridcolor='Gray')
+        fig.update_yaxes(showgrid=True, zeroline=True, gridcolor='Gray')
     else:
         fig.update_xaxes(showgrid=False, zeroline=False)
         fig.update_yaxes(showgrid=False, zeroline=False)
@@ -486,8 +486,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                                                                                                arg_value[5]]]
                 )
                 fig.update_layout(
-                    legend_title_text='Size: <br> &#9; {}<br> <br>{}'.format(arg_value[4],
-                                                                             legend_title_text))
+                    legend_title_text='Size: <br> &#9; {} ({})<br> <br>{}'.format(arg_value[4], arg_value[5],
+                                                                                  legend_title_text))
                 # set up hover label
                 hovertemplate = get_label('LBL_Bubble_Fixed_Hover_Data', df_name)
                 hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event', df_name)). \
@@ -519,7 +519,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 )
                 fig.update_layout(
                     legend_title_text='Size: <br> &#9; {} ({})<br> <br>{}'.format(arg_value[4], arg_value[5],
-                                                                                  legend_title_text))
+                                                                    legend_title_text), transition={'duration': 4000})
+                fig.layout.updatemenus[0].buttons[0].args[1]["frame"]["duration"] = 2000
                 # set up hover label
                 hovertemplate = get_label('LBL_Bubble_Hover_Data', df_name)
                 hovertemplate = hovertemplate.replace('%AXIS-X-A%', arg_value[0]).replace('%AXIS-X-B%',
@@ -555,10 +556,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
     else:
         xaxis = '{} ({})'.format(arg_value[0], arg_value[1])
 
-    if arg_value[0] == 'Time' and (any(element in arg_value[2] for element in
-                                       df_const[df_name]['VARIABLE_OPTION_LISTS']) or yaxis_title is None):
-        yaxis = '{}'.format(arg_value[2])
-    elif yaxis_title:
+    if yaxis_title:
         result = parse('{} ({})', yaxis_title)
         if result is None:
             yaxis = yaxis_title
@@ -582,11 +580,10 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
         overwrite=True,
         plot_bgcolor='rgba(0, 0, 0, 0)',
         paper_bgcolor='rgba(0, 0, 0, 0)')
-
     # checks for gridline is toggled
     if gridline:
-        fig.update_xaxes(showgrid=True, zeroline=True)
-        fig.update_yaxes(showgrid=True, zeroline=True)
+        fig.update_xaxes(showgrid=True, zeroline=True, gridcolor='Gray')
+        fig.update_yaxes(showgrid=True, zeroline=True, gridcolor='Gray')
     else:
         fig.update_xaxes(showgrid=False, zeroline=False)
         fig.update_yaxes(showgrid=False, zeroline=False)
@@ -775,6 +772,9 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event', df_name))
             hovertemplate = hovertemplate.replace('%AXIS-A%', '%{customdata[2]}').replace('%AXIS-TITLE-B%',
                                                                                           arg_value[1])
+            if arg_value[4]:
+                fig.update_layout(transition={'duration': 2000})
+                fig.layout.updatemenus[0].buttons[0].args[1]["frame"]["duration"] = 1000
             if arg_value[2] == 'Vertical':
                 hovertemplate = hovertemplate.replace('%AXIS-B%', '%{y}')
             else:
@@ -795,35 +795,17 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                                            df_name, df_const))
 
     # set title
-    if arg_value[3] == 'Horizontal':
-        if xaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title == '' and xaxis_title is not \
-                None:
-            yaxis = xaxis_title
-        else:
-            yaxis = arg_value[1]
-
-        if yaxis_title:
-            xaxis = yaxis_title
-        else:
-            xaxis = ''
+    if xaxis_title != '' and xaxis_title is not None:
+        xaxis = xaxis_title
+    # default x-axis label
     else:
-        # when switching back to vertical the label will change with the arg value
-        if xaxis_title in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title is not None:
-            yaxis = arg_value[1]
-        # default axis label
-        elif xaxis_title:
-            xaxis = xaxis_title
-        else:
-            xaxis = ''
+        xaxis = ''
 
-        # when switching back to vertical
-        if yaxis_title == '':
-            xaxis = yaxis_title
-        # default axis label
-        elif yaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and yaxis_title is not None:
-            yaxis = yaxis_title
-        else:
-            yaxis = arg_value[1]
+    if yaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and yaxis_title is not None:
+        yaxis = yaxis_title
+    #default y-axis label
+    else:
+        yaxis = arg_value[1]
 
     # set legend position
     if xlegend and ylegend:
@@ -843,8 +825,8 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
 
     # checks for gridline is toggled
     if gridline:
-        fig.update_xaxes(showgrid=True, zeroline=True)
-        fig.update_yaxes(showgrid=True, zeroline=True)
+        fig.update_xaxes(showgrid=True, zeroline=True, gridcolor='Gray')
+        fig.update_yaxes(showgrid=True, zeroline=True, gridcolor='Gray')
     else:
         fig.update_xaxes(showgrid=False, zeroline=False)
         fig.update_yaxes(showgrid=False, zeroline=False)
@@ -990,32 +972,15 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                                            df_name, df_const))
 
     # set title
-    if arg_value[1] == 'Vertical':
-        if xaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title is not None:
-            xaxis = xaxis_title
-        else:
-            xaxis = arg_value[0]
-
-        if yaxis_title:
-            yaxis = yaxis_title
-        else:
-            yaxis = ''
+    if xaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title is not None:
+        xaxis = xaxis_title
     else:
-        # when switching back to vertical the label will change with the arg value
-        if xaxis_title in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title is not None:
-            xaxis = arg_value[0]
-        elif xaxis_title not in df_const[df_name]['MEASURE_TYPE_OPTIONS'] and xaxis_title is not None:
-            xaxis = xaxis_title
-        else:
-            xaxis = arg_value[0]
+        xaxis = arg_value[0]
 
-        # when switching back to vertical the label will change with the arg value
-        if yaxis_title == '':
-            yaxis = yaxis_title
-        elif yaxis_title:
-            yaxis = yaxis_title
-        else:
-            yaxis = ''
+    if yaxis_title != '':
+        yaxis = yaxis_title
+    else:
+        yaxis = ''
 
     # set legend position
     if xlegend and ylegend:
@@ -1038,8 +1003,8 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
 
     # checks for gridline is toggled
     if gridline:
-        fig.update_xaxes(showgrid=True, zeroline=True)
-        fig.update_yaxes(showgrid=True, zeroline=True)
+        fig.update_xaxes(showgrid=True, zeroline=True, gridcolor='Gray')
+        fig.update_yaxes(showgrid=True, zeroline=True, gridcolor='Gray')
     else:
         fig.update_xaxes(showgrid=False, zeroline=False)
         fig.update_yaxes(showgrid=False, zeroline=False)
@@ -1311,7 +1276,7 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
                    hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options,
                    state_of_display, secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
                    end_secondary, df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend,
-                   document_state_of_display, document_toggle, document_level_dropdown,
+                   document_level_dropdown, document_state_of_display, document_toggle,
                    document_graph_children, document_options):
     """Update graph internal - can be called from callbacks or programmatically"""
     # Creates a hierarchy trail from the display
@@ -1322,6 +1287,8 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
 
     if len(state_of_display) > 0:
         for obj in state_of_display:
+            if obj['props']['children'] == 'root':
+                continue
             list_of_names.append(obj['props']['children'])
 
     if hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == ['graph_children']:
@@ -1342,6 +1309,8 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
 
     if len(document_state_of_display) > 0:
         for obj in document_state_of_display:
+            if obj['props']['children'] == 'root':
+                continue
             list_of_doc_names.append(obj['props']['children'])
 
     if document_toggle == 'Specific Item' and document_graph_children == ['graph_children']:

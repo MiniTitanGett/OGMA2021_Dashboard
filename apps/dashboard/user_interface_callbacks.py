@@ -533,14 +533,6 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
     elif 'OPG011' in df_name_parent:
         df_name_parent = 'OPG011'
 
-    if df_name is not None:
-        if 'OPG001' in df_name:
-            df_name = 'OPG001'
-        elif 'OPG010' in df_name:
-            df_name = 'OPG010'
-        elif 'OPG011' in df_name:
-            df_name = 'OPG011'
-
     # if new tile is created and is on a dataset that is not confirmed use previous data set that has been confirmed
     if '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-link' and df_confirm is not None:
         if 'OPG001' in df_confirm:
@@ -556,12 +548,8 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
 
     # when dataset is swapped to a different dataset get parent graph options
     elif '"type":"tile-link"}.className' in changed_id:
-        if "OPG001" in df_name_parent:
-            graph_options = GRAPH_OPTIONS["OPG001"]
-        elif "OPG010" in df_name_parent:
-            graph_options = GRAPH_OPTIONS["OPG010"]
-        elif "OPG011" in df_name_parent:
-            graph_options = GRAPH_OPTIONS["OPG011"]
+        if "OPG" in df_name_parent:
+            graph_options = GRAPH_OPTIONS[df_name_parent]
         else:
             graph_options = []
         # for i in graph_options:
@@ -572,6 +560,12 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
     elif trigger == 'fa fa-unlink':
         link_trigger = "fa fa-unlink"
         if df_name is not None:
+            if 'OPG001' in df_name:
+                df_name = 'OPG001'
+            elif 'OPG010' in df_name:
+                df_name = 'OPG010'
+            elif 'OPG011' in df_name:
+                df_name = 'OPG011'
             graph_options = GRAPH_OPTIONS[df_name]
             # for i in graph_options:
             #     options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
@@ -690,15 +684,12 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
     if not rebuild_menu or len(dash.callback_context.triggered) == 4:
         return no_update, 1, no_update, no_update, True
 
-    # prevents update if hierarchy toggle or graph all children is selected when the graph type is not line or
-    # scatter
-    #not use anymore
-    # if ('"type":"hierarchy-toggle"}.value' in changed_id) and \
-    #         selected_graph_type != "Line" and selected_graph_type != "Scatter":
-    #     raise PreventUpdate
-    #
-    # if link_state == 'fa fa-link' and 'graph_children_toggle"}.value' in changed_id and parent_df_name != df_name:
-    #     raise PreventUpdate
+    # if link state has changed from linked --> unlinked the data has not changed, prevent update
+    if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink':
+        if selected_graph_type is None:
+            return None, no_update, no_update, no_update, no_update
+        else:
+            raise PreventUpdate
 
     # Sets the data_fitting boolean to true or false dependant on the link-state of the tile being modified and then the
     # tiles associated data menu
@@ -712,33 +703,6 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
             data_fitting = True
         else:
             data_fitting = False
-
-    # if link state has changed from linked --> unlinked the data has not changed, prevent update
-    if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink':
-        if selected_graph_type is None:
-            return None, no_update, no_update, no_update, no_update
-        else:
-            raise PreventUpdate
-
-    # if link state from unlinked --> linked and the data set has not changed, don't update menu, still update graph
-    if ('"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-link') \
-            or ('type":"graph-type-dropdown"}.value' in changed_id and link_state == 'fa fa-link'
-                and selected_graph_type is None):
-        if parent_df_name is None and df_name is None:
-            return None, 1, no_update, no_update, True
-        # df_name is truncated after the OPG### to look up the graph options
-        if 'OPG001' in parent_df_name:
-            df_tile = 'OPG001'
-        elif 'OPG010' in parent_df_name:
-            df_tile = 'OPG010'
-        elif 'OPG011' in parent_df_name:
-            df_tile = 'OPG011'
-        if selected_graph_type not in GRAPH_OPTIONS[df_tile] or selected_graph_type is None:
-            return None, 1, no_update, no_update, True
-        elif selected_graph_type in GRAPH_OPTIONS[df_tile]:
-            return no_update, 1, no_update, no_update, True
-        else:
-            raise PreventUpdate
 
     # if the data set is selected but has not been confirmed, use previous data set
     if link_state == 'fa fa-link' and ('graph-type-dropdown' in changed_id and df_confirm is not None) or \

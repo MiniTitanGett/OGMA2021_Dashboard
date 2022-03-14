@@ -285,17 +285,35 @@ def get_layout_graph(report_name):
     # {'props': {'children': 'Los Angeles Department of Water and Power'}}
     # split on ^||^, ignore 'root', append children
     state_of_display = ''
-    nid_path = "root^||^Los Angeles Department of Water and Power".split('^||^')
-    # j['NID Path'].split('^||^') TODO: Find why this is hardcoded
+    #nid_path = "root^||^Los Angeles Department of Water and Power".split('^||^')
+    nid_path = j['NID Path'].split('^||^')
     nid_path.remove('root')
     for x in nid_path:
         if state_of_display:
             state_of_display += ', '
-        state_of_display += '"{}"'.format(x)  # "'{}'".format(x)
+        state_of_display += '{{"props": {{"children": "{}"}}}}'.format(
+            x)  # "{{'props': {{'children': {}}}}}".format(document_state_of_display)
 
-    if state_of_display:
-        state_of_display = '{{"props": {{"children": {}}}}}'.format(
-            state_of_display)  # "{{'props': {{'children': {}}}}}".format(state_of_display)
+    state_of_display = "[{}]".format(state_of_display)
+
+    #     state_of_display += '"{}"'.format(x)  # "'{}'".format(x)
+    #
+    # if state_of_display:
+    #     state_of_display = '{{"props": {{"children": {}}}}}'.format(
+    #         state_of_display)  # "{{'props': {{'children': {}}}}}".format(state_of_display)
+
+    document_state_of_display = ''
+    doc_nid_path = j.get('Graph Variable')[1].split('^||^')
+    if type(doc_nid_path) != list:
+        doc_nid_path = [doc_nid_path]
+
+    doc_nid_path.remove('root')
+    for x in doc_nid_path:
+        if document_state_of_display:
+            document_state_of_display += ', '
+        document_state_of_display += '{{"props": {{"children": "{}"}}}}'.format(
+            x)  # "{{'props': {{'children': {}}}}}".format(document_state_of_display)
+    document_state_of_display = "[{}]".format(document_state_of_display)
 
     # load data (added for external access)
     session[j['Data Set']] = dataset_to_df(j['Data Set'])
@@ -327,7 +345,7 @@ def get_layout_graph(report_name):
                            j.get('Graph Options')[6],  # gridline
                            j.get('Graph Options')[7],  # legend
                            j.get('Graph Variable')[0],
-                           j.get('Graph Variable')[1],
+                           json.loads(document_state_of_display),
                            j.get('Graph Variable')[2],
                            j.get('Graph Variable')[3],
                            j.get('Graph Variable')[4])

@@ -170,8 +170,6 @@ for x in range(4):
             raise PreventUpdate
 
         # if linked --> unlinked prevent update
-        if link_state == 'fa fa-unlink' and '"type":"tile-link"}.className' in changed_id:
-            raise PreventUpdate
 
         if (xmodified or ymodified) and 'args-value' in changed_id:
             if num_tiles < 2:
@@ -192,7 +190,7 @@ for x in range(4):
                                    state_of_display,
                                    secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
                                    end_secondary, df_const, xaxis, yaxis, xlegend, ylegend, gridline, legend,
-                                   document_state_of_display, document_hierarchy_toggle, document_level_dropdown,
+                                   document_level_dropdown, document_state_of_display, document_hierarchy_toggle,
                                    document_graph_children, document_options)
 
             return graph, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open
@@ -255,7 +253,7 @@ for x in range(4):
                                hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options, state_of_display,
                                secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
                                end_secondary, df_const, xaxis, yaxis, xlegend, ylegend, gridline, legend,
-                               document_state_of_display, document_hierarchy_toggle, document_level_dropdown,
+                               document_level_dropdown, document_state_of_display, document_hierarchy_toggle,
                                document_graph_children, document_options)
 
         if graph is None:

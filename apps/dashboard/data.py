@@ -1884,7 +1884,7 @@ def customize_menu_filter(dff, df_name, measure_type, variable_names, df_const, 
                           document_hierarchy_toggle, document_level_dropdown, document_graph_children,
                           document_options):
     """Filters data frame based on the customize menu inputs and returns the filtered data frame."""
-    if df_name == 'OPG001':
+    if 'OPG001' in df_name:
         if measure_type == 'Link':
             filtered_df = dff[dff['Measure Fcn'] == 'Link']
         else:

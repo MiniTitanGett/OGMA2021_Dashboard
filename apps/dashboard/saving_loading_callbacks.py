@@ -224,6 +224,7 @@ for y in range(4):
          State({'type': 'document-toggle', 'index': y}, 'value'),
          State({'type': 'document_level_dropdown', 'index': y}, 'value'),
          State({'type': 'document_children_toggle', 'index': y}, 'value'),
+         State({'type': 'document_specific_dropdown', 'index': y}, 'options'),
          # load layout states
          State({'type': 'select-layout-dropdown', 'index': y}, 'value'),
          State('df-constants-storage', 'data')],
@@ -237,7 +238,7 @@ for y in range(4):
                            parent_tab, year_start, year_end, hierarchy_toggle, hierarchy_level_dropdown,
                            state_of_display, graph_children_toggle, fiscal_toggle, input_method, secondary_start,
                            secondary_end, x_time_period, period_type, tab, doc_button_path, doc_toggle, doc_level,
-                           doc_graph_all, selected_layout, df_const):
+                           doc_graph_all, doc_option, selected_layout, df_const):
 
         if link_state == 'fa fa-link':
             fiscal_toggle = parent_fiscal_toggle
@@ -267,6 +268,8 @@ for y in range(4):
 
         doc_nid_path = "root"
         for button in doc_button_path:
+            if button == "root":
+                continue
             doc_nid_path += '^||^{}'.format(button['props']['children'])
 
         tile = int(dash.callback_context.inputs_list[0]['id']['index'])
@@ -288,7 +291,7 @@ for y in range(4):
         link_output = no_update
         df_const_output = no_update
         graph_options = [None, None, None, None, xmodified, ymodified, gridline, legend]
-        graph_variable = [doc_level, doc_nid_path, doc_toggle, doc_graph_all]
+        graph_variable = [doc_level, doc_nid_path, doc_toggle, doc_graph_all, doc_option]
 
         # if save requested or the overwrite was confirmed, check for exceptions and save
         if trigger == 'save' or trigger == 'confirm-overwrite':

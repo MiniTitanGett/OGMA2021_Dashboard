@@ -220,11 +220,11 @@ for y in range(4):
          State({'type': 'period-type', 'index': y}, 'value'),
          State({'type': 'start-year-input', 'index': y}, 'name'),
          # Seconday hierarchy
-         State({'type': 'document_display_button', 'index': y}, 'children'),
-         State({'type': 'document-toggle', 'index': y}, 'value'),
-         State({'type': 'document_level_dropdown', 'index': y}, 'value'),
-         State({'type': 'document_children_toggle', 'index': y}, 'value'),
-         State({'type': 'document_specific_dropdown', 'index': y}, 'options'),
+         State({'type': 'secondary_hierarchy_display_button', 'index': y}, 'children'),
+         State({'type': 'secondary_hierarchy-toggle', 'index': y}, 'value'),
+         State({'type': 'secondary_hierarchy_level_dropdown', 'index': y}, 'value'),
+         State({'type': 'secondary_hierarchy_children_toggle', 'index': y}, 'value'),
+         State({'type': 'secondary_hierarchy_specific_dropdown', 'index': y}, 'options'),
          # load layout states
          State({'type': 'select-layout-dropdown', 'index': y}, 'value'),
          State('df-constants-storage', 'data')],
@@ -237,8 +237,8 @@ for y in range(4):
                            parent_secondary_start, parent_secondary_end, parent_x_time_period, parent_period_type,
                            parent_tab, year_start, year_end, hierarchy_toggle, hierarchy_level_dropdown,
                            state_of_display, graph_children_toggle, fiscal_toggle, input_method, secondary_start,
-                           secondary_end, x_time_period, period_type, tab, doc_button_path, doc_toggle, doc_level,
-                           doc_graph_all, doc_option, selected_layout, df_const):
+                           secondary_end, x_time_period, period_type, tab, secondary_button_path, secondary_toggle,
+                           secondary_level, secondary_graph_all, secondary_options, selected_layout, df_const):
 
         if link_state == 'fa fa-link':
             fiscal_toggle = parent_fiscal_toggle
@@ -256,21 +256,21 @@ for y in range(4):
             df_name = parent_df_name
             graph_children_toggle = parent_graph_children_toggle
 
+        # creates a hierarchy trail from the display of hierarchy selection
         if type(state_of_display) == dict:
             state_of_display = [state_of_display]
 
         nid_path = "root"
         for button in state_of_display:
-            nid_path += '^||^{}'.format(button['props']['children'])
+            nid_path += '^||^{}'.format(button['props']['children'])  # formatting to be able to split it up later
 
-        if type(doc_button_path) == dict:
-            doc_button_path = [doc_button_path]
+        # creates a hierarchy trail from the display of hierarchy selection
+        if type(secondary_button_path) == dict:
+            secondary_button_path = [secondary_button_path]
 
-        doc_nid_path = "root"
-        for button in doc_button_path:
-            if button == "root":
-                continue
-            doc_nid_path += '^||^{}'.format(button['props']['children'])
+        secondary_nid_path = "root"
+        for button in secondary_button_path:
+            secondary_nid_path += '^||^{}'.format(button['props']['children'])
 
         tile = int(dash.callback_context.inputs_list[0]['id']['index'])
         # Outputs
@@ -291,9 +291,9 @@ for y in range(4):
         link_output = no_update
         df_const_output = no_update
         graph_options = [None, None, None, None, xmodified, ymodified, gridline, legend]
-        graph_variable = [doc_level, doc_nid_path, doc_toggle, doc_graph_all, doc_option]
+        graph_variable = [secondary_level, secondary_nid_path, secondary_toggle, secondary_graph_all, secondary_options]
 
-        # if save requested or the overwrite was confirmed, check for exceptions and save
+        # if save requested or the over-write was confirmed, check for exceptions and save
         if trigger == 'save' or trigger == 'confirm-overwrite':
             intermediate_pointer = REPORT_POINTER_PREFIX + graph_title.replace(" ", "")
             graph_titles = []
@@ -376,7 +376,7 @@ for y in range(4):
 
                 # calls the save_graph_state function to save the graph to the sessions dictionary
                 save_layout_state(layout_pointer, elements_to_save)
-                # saves the graph title and layout to the file where you are storing all of the saved layouts
+                # saves the graph title and layout to the file where you are storing all the saved layouts
                 # save_layout_to_file(session['saved_layouts'])
                 # saves the graph layout to the database
                 save_layout_to_db(layout_pointer, graph_title, 'save' == trigger)
@@ -396,7 +396,7 @@ for y in range(4):
                 prompt_trigger = dcc.Store(id={'type': 'prompt-trigger', 'index': tile},
                                            data=[['delete', tile], {}, get_label('LBL_Delete_Graph'),
                                                  get_label('LBL_Delete_Graph_Prompt').format(graph_title), False])
-        # If confirm delete button has been pressed
+        # If prompt result confirm delete button has been pressed
         elif trigger == 'confirm-delete':
             intermediate_pointer = REPORT_POINTER_PREFIX + graph_title.replace(" ", "")
             delete_layout(intermediate_pointer)
@@ -668,15 +668,15 @@ for y in range(4):
      State({'type': 'start-year-input', 'index': 3}, 'name'),
      State({'type': 'start-year-input', 'index': 4}, 'name'),
      # document display path
-     State({'type': 'document_display_button', 'index': ALL}, 'children'),
+     State({'type': 'secondary_hierarchy_display_button', 'index': ALL}, 'children'),
      # document toggle
-     State({'type': 'document-toggle', 'index': ALL}, 'value'),
+     State({'type': 'secondary_hierarchy-toggle', 'index': ALL}, 'value'),
      # document level val
-     State({'type': 'document_level_dropdown', 'index': ALL}, 'value'),
+     State({'type': 'secondary_hierarchy_level_dropdown', 'index': ALL}, 'value'),
      # document graph all
-     State({'type': 'document_children_toggle', 'index': ALL}, 'value'),
+     State({'type': 'secondary_hierarchy_children_toggle', 'index': ALL}, 'value'),
      # document options
-     State({'type': 'document_specific_dropdown', 'index': ALL}, 'options'),
+     State({'type': 'secondary_hierarchy_specific_dropdown', 'index': ALL}, 'options'),
      # dashboard layout
      State('div-body', 'layouts'),
      # df_const
@@ -707,8 +707,8 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                                       num_periods_0, num_periods_1, num_periods_2, num_periods_3, num_periods_4,
                                       period_type_0, period_type_1, period_type_2, period_type_3, period_type_4,
                                       date_tab_0, date_tab_1, date_tab_2, date_tab_3, date_tab_4,
-                                      doc_button_path, doc_toggle, doc_level, doc_graph_all, doc_options,
-                                      layout, df_const):
+                                      secondary_button_path, secondary_toggle, secondary_level, secondary_graph_all,
+                                      secondary_options, layout, df_const):
     # ---------------------------------------Variable Declarations------------------------------------------------------
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     # Outputs
@@ -834,7 +834,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                     df_const[df_name] = generate_constants(df_name)
 
                 if link_state == 'fa fa-link':
-                    # if tile was linked but it's data menu has changed and no longer matches parent data, unlink
+                    # if tile was linked but its data menu has changed and no longer matches parent data, unlink
                     if tile_data != session['saved_dashboards'][selected_dashboard]['Parent Data']:
                         link_state = 'fa fa-unlink'
 
@@ -846,7 +846,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 graph_menu = load_graph_menu(graph_type=graph_type, tile=tile_index, df_name=df_name,
                                              args_list=args_list, graph_options=graph_options,
                                              graph_variable=graph_variable, df_const=df_const)
-                # TODO: Need to add df name
+
                 customize_content = get_customize_content(tile=tile_index, graph_type=graph_type, graph_menu=graph_menu,
                                                           df_name=df_name)
                 tile_key = {'Tile Title': tile_title,
@@ -899,7 +899,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
             id={'type': 'df-constants-storage-tile-wrapper', 'index': 3}),
         session['tile_edited'][4] = num_tiles  # set for load warning
     elif prompt_data is not None or 'save-dashboard' in changed_id:
-        # if save requested or the overwrite was confirmed, check for exceptions and save
+        # if save requested or the over-write was confirmed, check for exceptions and save
         if 'save-dashboard' in changed_id or (prompt_data[0] == 'overwrite_dashboard' and prompt_result == 'ok'):
             dashboard_pointer = DASHBOARD_POINTER_PREFIX + dashboard_title.replace(" ", "")
             # regex.sub('[^A-Za-z0-9]+', '', dashboard_title)
@@ -996,6 +996,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                     if type(button_paths[4]) == dict:
                         button_paths[4] = [button_paths[4]]
 
+                    # Creates a hierarchy trail from the display buttons
                     parent_nid_path = "root"
                     for button in button_paths[4]:
                         parent_nid_path += '^||^{}'.format(button['props']['children'])
@@ -1031,21 +1032,23 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                     for key in session['saved_layouts']:
                         used_titles.append(session['saved_layouts'][key]["Title"])
 
-                    if type(doc_button_path[i]) == dict:
-                        doc_button_path[i] = [doc_button_path[i]]
+                    if type(secondary_button_path[i]) == dict:
+                        secondary_button_path[i] = [secondary_button_path[i]]
 
-                    doc_nid_path = "root"
-                    for button in doc_button_path[i]:
-                        doc_nid_path += '^||^{}'.format(button['props']['children'])
+                    # Creates a secondary hierarchy trail from the display buttons
+                    secondary_nid_path = "root"
+                    for button in secondary_button_path[i]:
+                        secondary_nid_path += '^||^{}'.format(button['props']['children'])
 
-                    # set up Graph Options and args
+                    # set up Graph Options, Graph Variable and args
                     args_list = arg_list_all[i]
                     graph_options = [x[i] for x in graph_options_all if len(x) >= (i + 1)]
-                    graph_variable = [doc_level[i], doc_nid_path, doc_toggle[i], doc_graph_all[i], doc_options[i]]
+                    graph_variable = [secondary_level[i], secondary_nid_path, secondary_toggle[i],
+                                      secondary_graph_all[i], secondary_options[i]]
 
                     if type(button_paths[i]) == dict:
                         button_paths[i] = [button_paths[i]]
-
+                    # Creates a hierarchy trail from the display buttons
                     nid_path = "root"
                     for button in button_paths[i]:
                         nid_path += '^||^{}'.format(button['props']['children'])
@@ -1100,7 +1103,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 popup_text = get_label('LBL_Your_Dashboard_Has_Been_Saved').format(dashboard_title)
                 popup_is_open = True
 
-        # if confirm delete, has been pressed
+        # if prompt result confirm delete, has been pressed
         elif prompt_data[0] == 'delete_dashboard' and prompt_result == 'ok':
             intermediate_pointer = DASHBOARD_POINTER_PREFIX + dashboard_title.replace(" ", "")
             delete_dashboard(intermediate_pointer)

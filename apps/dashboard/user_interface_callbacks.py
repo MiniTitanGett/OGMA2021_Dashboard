@@ -98,7 +98,7 @@ def _new_and_delete(_new_clicks, close_id, _dashboard_reset, tile_titles, tile_l
     """
     :param _new_clicks: Detects user clicking 'NEW' button in parent navigation bar and encodes the number of tiles to
     display
-    :return: Layout of tiles for the main body, a new NEW button whose n_clicks data encodes the number of tiles to
+    :return: Layout of tiles for the main body, a NEW button whose n_clicks data encodes the number of tiles to
     display, and updates the tile-closed-trigger div with the index of the deleted tile
     """
     # -------------------------------------------Variable Declarations--------------------------------------------------
@@ -236,7 +236,7 @@ def _change_tab(_tab_clicks, _tab_close_clicks, _tab_add_nclicks,
             new_tab = active_tab - 1
         # remove the tab and its x from the children
         del tab_toggle_children[deleted_tab_index]
-        # remove the tabs data from the storage
+        # remove the tab data from the storage
         del data[deleted_tab_index]
         # shift all tab button indices down one following deleted tab
         for i in tab_toggle_children[deleted_tab_index:]:
@@ -672,12 +672,11 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
                        is_loaded, df_name, parent_df_name, df_const, df_confirm, parent_graph_all,
                        parent_hierarchy_toggle, graph_all, hierarchy_toggle):
     """
-    :param selected_graph_type: Selected graph type, ie. 'bar', 'line', etc.
+    :param selected_graph_type: Selected graph type, i.e. 'bar', 'line', etc.
     :return: Graph menu corresponding to selected graph type
     """
     # -------------------------------------------Variable Declarations--------------------------------------------------
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][-1]
-    df_tile = None
     # ------------------------------------------------------------------------------------------------------------------
 
     # if tab swapped or load triggered, don't reset menus

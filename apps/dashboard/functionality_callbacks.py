@@ -20,7 +20,7 @@ from dash import no_update
 # Internal Modules
 from apps.dashboard.graphs import __update_graph
 from apps.dashboard.hierarchy_filter import generate_history_button, generate_dropdown
-from apps.dashboard.document_filter import generate_document_history_button, generate_document_dropdown
+from apps.dashboard.secondary_hierarchy_filter import generate_secondary_history_button, generate_secondary_dropdown
 from apps.dashboard.app import app
 from apps.dashboard.data import CLR, get_label, GRAPH_OPTIONS, data_manipulator
 from apps.dashboard.datepicker import get_date_box, update_date_columns, get_secondary_data
@@ -76,11 +76,11 @@ for x in range(4):
          Input({'type': 'hierarchy-toggle', 'index': 4}, 'value'),
          Input({'type': 'hierarchy_level_dropdown', 'index': 4}, 'value'),
          Input({'type': 'graph_children_toggle', 'index': 4}, 'value'),
-         # Document Hierarchy
-         Input({'type': 'document_display_button', 'index': x}, 'children'),
-         Input({'type': 'document-toggle', 'index': x}, 'value'),
-         Input({'type': 'document_level_dropdown', 'index': x}, 'value'),
-         Input({'type': 'document_children_toggle', 'index': x}, 'value')],
+         # Secondary Hierarchy
+         Input({'type': 'secondary_hierarchy_display_button', 'index': x}, 'children'),
+         Input({'type': 'secondary_hierarchy-toggle', 'index': x}, 'value'),
+         Input({'type': 'secondary_hierarchy_level_dropdown', 'index': x}, 'value'),
+         Input({'type': 'secondary_hierarchy_children_toggle', 'index': x}, 'value')],
         [State({'type': 'start-year-input', 'index': x}, 'name'),
          State({'type': 'radio-timeframe', 'index': x}, 'value'),
          State({'type': 'fiscal-year-toggle', 'index': x}, 'value'),
@@ -105,7 +105,7 @@ for x in range(4):
          # Hierarchy Options
          State({'type': 'hierarchy_specific_dropdown', 'index': x}, 'options'),
          State({'type': 'hierarchy_specific_dropdown', 'index': 4}, 'options'),
-         State({'type': 'document_specific_dropdown', 'index': x}, 'options'),
+         State({'type': 'secondary_hierarchy_specific_dropdown', 'index': x}, 'options'),
          # Constants
          State('df-constants-storage', 'data'),
          # Float menu result
@@ -127,12 +127,12 @@ for x in range(4):
                       num_periods, period_type, _parent_datepicker_trigger, parent_num_periods,
                       parent_period_type, hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children,
                       state_of_display, parent_state_of_display, parent_hierarchy_toggle,
-                      parent_hierarchy_level_dropdown, parent_hierarchy_graph_children, document_state_of_display,
-                      document_hierarchy_toggle, document_level_dropdown, document_graph_children, secondary_type,
+                      parent_hierarchy_level_dropdown, parent_hierarchy_graph_children, secondary_state_of_display,
+                      secondary_hierarchy_toggle, secondary_level_dropdown, secondary_graph_children, secondary_type,
                       timeframe, fiscal_toggle, start_year, end_year, start_secondary, end_secondary,
                       parent_secondary_type, parent_timeframe, parent_fiscal_toggle, parent_start_year, parent_end_year,
                       parent_start_secondary, parent_end_secondary, graph_display, df_name, parent_df_name,
-                      link_state, hierarchy_options, parent_hierarchy_options, document_options, df_const, df_confirm,
+                      link_state, hierarchy_options, parent_hierarchy_options, secondary_options, df_const, df_confirm,
                       xaxis, yaxis, xlegend, ylegend, xmodified, ymodified, num_tiles, prev_fitting_trigger):
 
         # -------------------------------------------Variable Declarations----------------------------------------------
@@ -190,8 +190,8 @@ for x in range(4):
                                    state_of_display,
                                    secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
                                    end_secondary, df_const, xaxis, yaxis, xlegend, ylegend, gridline, legend,
-                                   document_level_dropdown, document_state_of_display, document_hierarchy_toggle,
-                                   document_graph_children, document_options)
+                                   secondary_level_dropdown, secondary_state_of_display, secondary_hierarchy_toggle,
+                                   secondary_graph_children, secondary_options)
 
             return graph, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open
 
@@ -253,8 +253,8 @@ for x in range(4):
                                hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options, state_of_display,
                                secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
                                end_secondary, df_const, xaxis, yaxis, xlegend, ylegend, gridline, legend,
-                               document_level_dropdown, document_state_of_display, document_hierarchy_toggle,
-                               document_graph_children, document_options)
+                               secondary_level_dropdown, secondary_state_of_display, secondary_hierarchy_toggle,
+                               secondary_graph_children, secondary_options)
 
         if graph is None:
             raise PreventUpdate
@@ -364,27 +364,27 @@ for x in range(5):
 
 
 @app.callback(
-        [Output({'type': 'document_display_button', 'index': MATCH}, 'children'),
-         Output({'type': 'document_specific_dropdown_container', 'index': MATCH}, 'children'),
-         Output({'type': 'document_children_toggle', 'index': MATCH}, 'options')],
-        [Input({'type': 'document_specific_dropdown', 'index': MATCH}, 'value'),
-         Input({'type': 'document_revert', 'index': MATCH}, 'n_clicks'),
-         Input({'type': 'document_to_top', 'index': MATCH}, 'n_clicks'),
-         Input({'type': 'document-button: {}'.replace("{}", str(MATCH)), 'index': ALL}, 'n_clicks')],
-        [State({'type': 'document_display_button', 'index': MATCH}, 'children'),
+        [Output({'type': 'secondary_hierarchy_display_button', 'index': MATCH}, 'children'),
+         Output({'type': 'secondary_hierarchy_specific_dropdown_container', 'index': MATCH}, 'children'),
+         Output({'type': 'secondary_hierarchy_children_toggle', 'index': MATCH}, 'options')],
+        [Input({'type': 'secondary_hierarchy_specific_dropdown', 'index': MATCH}, 'value'),
+         Input({'type': 'secondary_hierarchy_revert', 'index': MATCH}, 'n_clicks'),
+         Input({'type': 'secondary_hierarchy_to_top', 'index': MATCH}, 'n_clicks'),
+         Input({'type': 'secondary_hierarchy-button: {}'.replace("{}", str(MATCH)), 'index': ALL}, 'n_clicks')],
+        [State({'type': 'secondary_hierarchy_display_button', 'index': MATCH}, 'children'),
          State({'type': 'data-set', 'index': MATCH}, 'value'),
          State({'type': 'data-set', 'index': 4}, 'value'),
          State({'type': 'tile-link', 'index': MATCH}, 'className'),
          State('df-constants-storage', 'data')],
         prevent_initial_call=True
     )
-def _print_choice_to_display_and_modify_doc_dropdown(dropdown_val, _n_clicks_r, _n_clicks_tt,
+def _print_choice_to_display_and_modify_secondary_dropdown(dropdown_val, _n_clicks_r, _n_clicks_tt,
                                                      n_clicks_click_history, state_of_display,
                                                      df_name, parent_df_name, link_state, df_const):
     changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
-    hierarchy_level = ['Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier']
     if link_state == "fa fa-link":
         df_name = parent_df_name
+    hierarchy_level = df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
     # if page loaded - prevent update
     if changed_id == '.':
         raise PreventUpdate
@@ -407,7 +407,7 @@ def _print_choice_to_display_and_modify_doc_dropdown(dropdown_val, _n_clicks_r, 
         state_of_display = [state_of_display]
 
     # if 'back' requested
-    if 'document_revert' in changed_id:
+    if 'secondary_hierarchy_revert' in changed_id:
         # if at the end, prevent update
         if len(state_of_display) == 0:
             raise PreventUpdate
@@ -415,29 +415,29 @@ def _print_choice_to_display_and_modify_doc_dropdown(dropdown_val, _n_clicks_r, 
         state_of_display.pop()
         display_button = state_of_display
         nid_path = get_nid_path(sod=state_of_display)
-        dropdown = generate_document_dropdown(changed_index, df_name, nid_path, df_const)
-    elif 'document_to_top' in changed_id or 'data-set' in changed_id:
+        dropdown = generate_secondary_dropdown(changed_index, df_name, nid_path, df_const)
+    elif 'secondary_hierarchy_to_top' in changed_id or 'data-set' in changed_id:
         display_button = []
         nid_path = get_nid_path()
-        dropdown = generate_document_dropdown(changed_index, df_name, nid_path, df_const)
-    elif 'document_specific_dropdown' in changed_id:
+        dropdown = generate_secondary_dropdown(changed_index, df_name, nid_path, df_const)
+    elif 'secondary_hierarchy_specific_dropdown' in changed_id:
         # If dropdown has been remade, do not modify the history
         if dropdown_val is None:
             raise PreventUpdate
         # If nothing in history return value
         elif not state_of_display:
-            display_button = generate_document_history_button(dropdown_val, 0, changed_index, df_name, df_const)
+            display_button = generate_secondary_history_button(dropdown_val, 0, changed_index, df_name, df_const)
             nid_path = get_nid_path(dropdown_value=df_const[df_name]["Categorical_Data"]["Variable Name"]["labels"]
                                                                 [dropdown_val] if df_name == 'OPG011' else dropdown_val)
-            dropdown = generate_document_dropdown(changed_index, df_name, nid_path, df_const)
+            dropdown = generate_secondary_dropdown(changed_index, df_name, nid_path, df_const)
         # If something is in the history preserve it and add value to it
         else:
             display_button = state_of_display + [
-                (generate_document_history_button(dropdown_val, len(state_of_display), changed_index, df_name,
+                (generate_secondary_history_button(dropdown_val, len(state_of_display), changed_index, df_name,
                                                                                                             df_const))]
             nid_path = get_nid_path(sod=state_of_display, dropdown_value=df_const[df_name]["Categorical_Data"]
               [hierarchy_level[len(state_of_display)]]["labels"][dropdown_val] if df_name == 'OPG011' else dropdown_val)
-            dropdown = generate_document_dropdown(changed_index, df_name, nid_path, df_const)
+            dropdown = generate_secondary_dropdown(changed_index, df_name, nid_path, df_const)
     # If update triggered due to creation of a button do not update anything
     elif all(i == 0 for i in n_clicks_click_history):
         raise PreventUpdate
@@ -448,7 +448,7 @@ def _print_choice_to_display_and_modify_doc_dropdown(dropdown_val, _n_clicks_r, 
         history[index]['props']['n_clicks'] = 0
         display_button = history
         nid_path = get_nid_path(sod=history)
-        dropdown = generate_document_dropdown(changed_index, df_name, nid_path, df_const)
+        dropdown = generate_secondary_dropdown(changed_index, df_name, nid_path, df_const)
 
     # check if leaf node, if so say graph all siblings instead of graph all in dropdown
     if 'options=[]' not in str(dropdown):
@@ -488,9 +488,9 @@ app.clientside_callback(
         }
     }
     """,
-    [Output({'type': 'document_level_filter', 'index': MATCH}, 'style'),
-     Output({'type': 'document_specific_filter', 'index': MATCH}, 'style')],
-    [Input({'type': 'document-toggle', 'index': MATCH}, 'value')],
+    [Output({'type': 'secondary_hierarchy_level_filter', 'index': MATCH}, 'style'),
+     Output({'type': 'secondary_hierarchy_specific_filter', 'index': MATCH}, 'style')],
+    [Input({'type': 'secondary_hierarchy-toggle', 'index': MATCH}, 'value')],
     prevent_initial_call=True
 )
 

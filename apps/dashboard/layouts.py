@@ -23,7 +23,7 @@ from apps.dashboard.data import GRAPH_OPTIONS, DATA_CONTENT_SHOW, DATA_CONTENT_H
     BAR_X_AXIS_OPTIONS, CUSTOMIZE_CONTENT_HIDE, X_AXIS_OPTIONS, get_label, LAYOUT_CONTENT_HIDE, LAYOUTS, \
     dataset_to_df, generate_constants, COLOR_PALETTE
 from apps.dashboard.hierarchy_filter import get_hierarchy_layout
-from apps.dashboard.document_filter import get_document_hierarchy_layout
+from apps.dashboard.secondary_hierarchy_filter import get_secondary_hierarchy_layout
 from apps.dashboard.datepicker import get_date_picker
 from apps.dashboard.graphs import __update_graph
 
@@ -283,37 +283,32 @@ def get_layout_graph(report_name):
     """
     # generate state_of_display
     # {'props': {'children': 'Los Angeles Department of Water and Power'}}
-    # split on ^||^, ignore 'root', append children
     state_of_display = ''
-    #nid_path = "root^||^Los Angeles Department of Water and Power".split('^||^')
+    # split on ^||^, ignore 'root', append children
     nid_path = j['NID Path'].split('^||^')
-    nid_path.remove('root')
+
+    nid_path.remove('root')  # remove root from nid path list
+    # create a json array containing dictionarys
     for x in nid_path:
         if state_of_display:
             state_of_display += ', '
         state_of_display += '{{"props": {{"children": "{}"}}}}'.format(
-            x)  # "{{'props': {{'children': {}}}}}".format(document_state_of_display)
+            x)  # "{{'props': {{'children': {}}}}}".format(state_of_display)
 
     state_of_display = "[{}]".format(state_of_display)
 
-    #     state_of_display += '"{}"'.format(x)  # "'{}'".format(x)
-    #
-    # if state_of_display:
-    #     state_of_display = '{{"props": {{"children": {}}}}}'.format(
-    #         state_of_display)  # "{{'props': {{'children': {}}}}}".format(state_of_display)
+    secondary_state_of_display = ''
+    # split on ^||^, ignore 'root', append children
+    secondary_nid_path = j.get('Graph Variable')[1].split('^||^')
 
-    document_state_of_display = ''
-    doc_nid_path = j.get('Graph Variable')[1].split('^||^')
-    if type(doc_nid_path) != list:
-        doc_nid_path = [doc_nid_path]
-
-    doc_nid_path.remove('root')
-    for x in doc_nid_path:
-        if document_state_of_display:
-            document_state_of_display += ', '
-        document_state_of_display += '{{"props": {{"children": "{}"}}}}'.format(
-            x)  # "{{'props': {{'children': {}}}}}".format(document_state_of_display)
-    document_state_of_display = "[{}]".format(document_state_of_display)
+    secondary_nid_path.remove('root')  # remove root from nid path list
+    # create a json array containing dictionarys
+    for x in secondary_nid_path:
+        if secondary_state_of_display:
+            secondary_state_of_display += ', '
+        secondary_state_of_display += '{{"props": {{"children": "{}"}}}}'.format(
+            x)  # "{{'props': {{'children': {}}}}}".format(secondary_state_of_display)
+    secondary_state_of_display = "[{}]".format(secondary_state_of_display)
 
     # load data (added for external access)
     session[j['Data Set']] = dataset_to_df(j['Data Set'])
@@ -344,11 +339,11 @@ def get_layout_graph(report_name):
                            j.get('Graph Options')[3],  # ylegpos
                            j.get('Graph Options')[6],  # gridline
                            j.get('Graph Options')[7],  # legend
-                           j.get('Graph Variable')[0],
-                           json.loads(document_state_of_display),
-                           j.get('Graph Variable')[2],
-                           j.get('Graph Variable')[3],
-                           j.get('Graph Variable')[4])
+                           j.get('Graph Variable')[0],  # secondary_hierarchy_level
+                           json.loads(secondary_state_of_display),  # secondary_hierarchy_nid_path
+                           j.get('Graph Variable')[2],  # secondary_hierarchy_toggle
+                           j.get('Graph Variable')[3],  # secondary_hierarchy_graph_all
+                           j.get('Graph Variable')[4])  # secondary_hierarchy_option
 
     if graph is None:
         raise PreventUpdate
@@ -1207,7 +1202,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                         style={'display': 'inline-flex', 'flex-direction': 'column',
                                'max-width': '360px'} if df_name != 'OPG011' else {'display': 'None'}),
                     html.Div(
-                        get_document_hierarchy_layout(tile, df_name, secondary_hierarchy_toggle, secondary_level_value,
+                        get_secondary_hierarchy_layout(tile, df_name, secondary_hierarchy_toggle, secondary_level_value,
                                                   secondary_graph_all_toggle, secondary_nid_path, df_const=df_const),
                         style={'display': 'inline-flex', 'flex-direction': 'column', 'max-width': '330px'}
                         if df_name == 'OPG011' else {'display': 'None'})], style={'margin-bottom': '7.5px'}),
@@ -1359,7 +1354,7 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
                     style={'display': 'inline-flex', 'flex-direction': 'column',
                                'max-width': '360px'} if df_name != 'OPG011' else {'display': 'None'}),
                 html.Div(
-                    get_document_hierarchy_layout(tile, df_name, secondary_hierarchy_toggle, secondary_level_value,
+                    get_secondary_hierarchy_layout(tile, df_name, secondary_hierarchy_toggle, secondary_level_value,
                                                   secondary_graph_all_toggle, secondary_nid_path, df_const=df_const),
                     style={'display': 'inline-flex', 'flex-direction': 'column', 'max-width': '330px'}
                     if df_name == 'OPG011' else {'display': 'None'})], style={'margin-bottom': '7.5px'}),
@@ -1579,7 +1574,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                     id={'type': 'default-graph-options', 'index': tile}),
                 id={'type': 'default-graph-options-wrapper', 'index': tile}),
             html.Div(
-                get_document_hierarchy_layout(tile, df_name, hierarchy_toggle='Level Filter',
+                get_secondary_hierarchy_layout(tile, df_name, hierarchy_toggle='Level Filter',
                                               level_value='Variable Name', graph_all_toggle=None, nid_path="root",
                                               df_const=df_const),
                 style={'display': 'None'}
@@ -1685,7 +1680,7 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                     style={'display': 'inline-flex', 'flex-direction': 'column',
                                'max-width': '360px'} if df_name != 'OPG011' else {'display': 'None'}),
                 html.Div(
-                    get_document_hierarchy_layout(tile, df_name, secondary_hierarchy_toggle, secondary_level_value,
+                    get_secondary_hierarchy_layout(tile, df_name, secondary_hierarchy_toggle, secondary_level_value,
                                                   secondary_graph_all_toggle, secondary_nid_path, df_const=df_const),
                     style={'display': 'inline-flex', 'flex-direction': 'column',
                            'max-width': '330px'}
@@ -1819,7 +1814,7 @@ def get_table_graph_menu(tile, number_of_columns, xaxis, yaxis, xpos, ypos, xmod
                     id={'type': 'default-graph-options', 'index': tile}),
                 id={'type': 'default-graph-options-wrapper', 'index': tile}),
             html.Div(
-                get_document_hierarchy_layout(tile, df_name, hierarchy_toggle='Level Filter',
+                get_secondary_hierarchy_layout(tile, df_name, hierarchy_toggle='Level Filter',
                                               level_value='Variable Name',
                                               graph_all_toggle=None, nid_path="root", df_const=df_const),
                 style={'display': 'None'}
@@ -1884,7 +1879,7 @@ def get_sankey_menu(tile, graphed_options, df_name, df_const, xaxis, yaxis, xpos
                     style={'display': 'inline-flex', 'flex-direction': 'column',
                            'max-width': '360px'} if df_name != 'OPG010' else {'display': 'None'}),
                 html.Div(
-                    get_document_hierarchy_layout(tile, df_name, secondary_hierarchy_toggle, secondary_level_value,
+                    get_secondary_hierarchy_layout(tile, df_name, secondary_hierarchy_toggle, secondary_level_value,
                                                   secondary_graph_all_toggle, secondary_nid_path, df_const=df_const),
                     style={'display': 'inline-flex', 'flex-direction': 'column',
                            'max-width': '330px'}
@@ -1984,7 +1979,7 @@ def get_pivot_table_menu(tile, xaxis, yaxis, xpos, ypos, xmodified, ymodified, d
                 id={'type': 'default-graph-options', 'index': tile}),
             id={'type': 'default-graph-options-wrapper', 'index': tile}),
         html.Div(
-            get_document_hierarchy_layout(tile, df_name, hierarchy_toggle='Level Filter',
+            get_secondary_hierarchy_layout(tile, df_name, hierarchy_toggle='Level Filter',
                                           level_value='Variable Name',
                                           graph_all_toggle=None, nid_path="root", df_const=df_const),
             style={'display': 'None'}

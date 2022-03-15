@@ -40,7 +40,7 @@ X_AXIS_OPTIONS = ['Time']
 
 BAR_X_AXIS_OPTIONS = ['Specific Item', 'Variable Names']
 
-COLOR_PALETTE = ['G10', 'Bold', 'Vivid', 'Dark24', 'Pastel', 'Color blind friendly']
+COLOR_PALETTE = ['G10', 'Bold', 'Vivid', 'Dark24', 'Pastel', 'Color Blind Friendly']
 
 CLR = {'text1': 'black',
        'text2': '#EED5DD',
@@ -90,7 +90,7 @@ DATA_CONTENT_HIDE = {'display': 'none'}
 
 
 def dataset_to_df(df_name):
-    """Queries for the dataset and returns a formatted pandas data frame."""
+    """Queries for the dataset and returns a formatted pandas, data frame."""
     logging.debug("loading dataset {}...".format(df_name))
     # conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
     # sql_query = pd.read_sql_query(
@@ -302,7 +302,7 @@ def generate_constants(df_name):
     Categorical_Dictionary = None
 
     # secondary hierarchy
-    DOCUMENT_LEVELS = ["Variable Name", "Variable Name Qualifier", "Variable Name Sub Qualifier"]
+    SECONDARY_HIERARCHY_LEVELS = ["Variable Name", "Variable Name Qualifier", "Variable Name Sub Qualifier"]
     Variable_Name = df['Variable Name'].unique()
     Variable_Name_Qualifier = df['Variable Name Qualifier'].unique()
     Variable_Name_Sub_Qualifier = df['Variable Name Sub Qualifier'].unique()
@@ -522,7 +522,7 @@ def generate_constants(df_name):
     storage = {
         'HIERARCHY_LEVELS': HIERARCHY_LEVELS,
         'VARIABLE_LEVEL': VARIABLE_LEVEL,
-        'DOCUMENT_LEVELS': DOCUMENT_LEVELS,
+        'SECONDARY_HIERARCHY_LEVELS': SECONDARY_HIERARCHY_LEVELS,
         'Variable Name': Variable_Name,
         'Variable Name Qualifier': Variable_Name_Qualifier,
         'Variable Name Sub Qualifier': Variable_Name_Sub_Qualifier,
@@ -621,8 +621,8 @@ def get_date_of_quarter(quarter, year):
 def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children, df_name,
                      df_const, secondary_type, end_secondary, end_year, start_secondary, start_year, timeframe,
                      fiscal_toggle, num_periods, period_type, arg_values=None, graph_type=None,
-                     document_state_of_display=None, document_hierarchy_toggle=None, document_level_dropdown=None,
-                     document_graph_children=None, document_options=None):
+                     secondary_state_of_display=None, secondary_hierarchy_toggle=None, secondary_level_dropdown=None,
+                     secondary_graph_children=None, secondary_options=None):
     """Returns the filtered/aggregted data frame for visualization."""
     if df_name != 'OPG011':
         filtered_df = data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
@@ -637,7 +637,7 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
                 (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == ['graph_children'])):
 
             if hierarchy_toggle == 'Level Filter':
-                # If anything is in the drop down
+                # If anything is in the dropdown
                 if hierarchy_level_dropdown:
                     # Take the level and clear the other columns
                     # Ex) H2 picked --> H3, H4, H5 get wiped
@@ -673,9 +673,9 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
                                                           start_secondary, start_year, timeframe, fiscal_toggle,
                                                           num_periods, period_type, df_name, df_const, arg_values,
                                                           graph_type, df, hierarchy_toggle, hierarchy_level_dropdown,
-                                                          hierarchy_graph_children, document_state_of_display,
-                                                          document_hierarchy_toggle, document_level_dropdown,
-                                                          document_graph_children, document_options)
+                                                          hierarchy_graph_children, secondary_state_of_display,
+                                                          secondary_hierarchy_toggle, secondary_level_dropdown,
+                                                          secondary_graph_children, secondary_options)
         else:
             filtered_df = data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year, start_secondary,
                                                start_year, timeframe, fiscal_toggle, num_periods, period_type, df_name,
@@ -1326,8 +1326,8 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
 def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondary, end_year, start_secondary,
                                     start_year, timeframe, fiscal_toggle, num_periods, period_type, df_name, df_const,
                                     arg_values, graph_type, df, hierarchy_toggle, hierarchy_level_dropdown,
-                                    hierarchy_graph_children, document_path, document_hierarchy_toggle,
-                                    document_level_dropdown, document_graph_children, document_options):
+                                    hierarchy_graph_children, secondary_path, secondary_hierarchy_toggle,
+                                    secondary_level_dropdown, secondary_graph_children, secondary_options):
     """
     Returns aggregated data frame dependent on date picker selections, hierarchy selection and graph type selection.
     This aggregator does filter based on measure type to be used for figures that do not require all measure types to
@@ -1335,12 +1335,12 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
     """
     df = df.to_pandas_df()
 
-    if document_hierarchy_toggle == 'Level Filter':
-        variable = df_const[df_name][document_level_dropdown]
-    elif document_hierarchy_toggle == 'Specific Item' and document_graph_children == ['graph_children']:
-        variable = [option['label'] for option in document_options]
+    if secondary_hierarchy_toggle == 'Level Filter':
+        variable = df_const[df_name][secondary_level_dropdown]
+    elif secondary_hierarchy_toggle == 'Specific Item' and secondary_graph_children == ['graph_children']:
+        variable = [option['label'] for option in secondary_options]
     else:
-        variable = document_path[-1] if document_path != [] else None
+        variable = secondary_path[-1] if secondary_path != [] else None
     if graph_type == "Box_Plot":
         measure_type = arg_values[0]
         variable_names = variable
@@ -1430,26 +1430,26 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                 for y in range(len_var):
                     variable_name = variable_names[y]
                     # filters on secondary hierarchy
-                    if document_hierarchy_toggle == "Level Filter":
-                        further_reduced_df = further_filtered_df[further_filtered_df[document_level_dropdown] ==
+                    if secondary_hierarchy_toggle == "Level Filter":
+                        further_reduced_df = further_filtered_df[further_filtered_df[secondary_level_dropdown] ==
                                                                  variable_name]
                     else:
                         if variable_name is None:
-                            further_reduced_df = further_filtered_df[further_filtered_df[document_level_dropdown] ==
+                            further_reduced_df = further_filtered_df[further_filtered_df[secondary_level_dropdown] ==
                                                                      variable_name]
-                        elif document_hierarchy_toggle == 'Specific Item' and document_graph_children == [
+                        elif secondary_hierarchy_toggle == 'Specific Item' and secondary_graph_children == [
                                                                                                     'graph_children']:
                             further_reduced_df = further_filtered_df[
-                                further_filtered_df[df_const[df_name]['DOCUMENT_LEVELS']
-                                [len(document_path)]] == df_const[df_name]
-                                ["Categorical_Data"][df_const[df_name]['DOCUMENT_LEVELS'][len(document_path)]][
-                                    "labels"].index(variable_name)]
+                                further_filtered_df[df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
+                                [len(secondary_path)]] == df_const[df_name]
+                                ["Categorical_Data"][df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
+                                [len(secondary_path)]]["labels"].index(variable_name)]
                         else:
                             further_reduced_df = further_filtered_df[
-                                further_filtered_df[df_const[df_name]['DOCUMENT_LEVELS']
-                                [len(document_path) - 1]] == df_const[df_name]
-                                ["Categorical_Data"][df_const[df_name]['DOCUMENT_LEVELS'][len(document_path) - 1]][
-                                    "labels"].index(variable_name)]
+                                further_filtered_df[df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
+                                [len(secondary_path)-1]] == df_const[df_name]
+                                ["Categorical_Data"][df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
+                                [len(secondary_path)-1]]["labels"].index(variable_name)]
                     for z in range(end_date.year - start_date.year + 1):
                         year = start_date.year + z
                         yearly_data = further_reduced_df[further_reduced_df["Date of Event"].dt.year == year]
@@ -1557,25 +1557,28 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                 for y in range(len_var):
                     variable_name = variable_names[y]
                     # filters on secondary hierarchy
-                    if document_hierarchy_toggle == "Level Filter":
-                        further_reduced_df = further_filtered_df[further_filtered_df[document_level_dropdown] ==
+                    if secondary_hierarchy_toggle == "Level Filter":
+                        further_reduced_df = further_filtered_df[further_filtered_df[secondary_level_dropdown] ==
                                                                  variable_name]
                     else:
                         if variable_name is None:
-                            further_reduced_df = further_filtered_df[further_filtered_df[document_level_dropdown] ==
+                            further_reduced_df = further_filtered_df[further_filtered_df[secondary_level_dropdown] ==
                                                                      variable_name]
-                        elif document_hierarchy_toggle == 'Specific Item' and document_graph_children == [
+                        elif secondary_hierarchy_toggle == 'Specific Item' and secondary_graph_children == [
                                                                                                     'graph_children']:
                             further_reduced_df = further_filtered_df[
-                                further_filtered_df[df_const[df_name]['DOCUMENT_LEVELS']
-                                [len(document_path)]] == df_const[df_name]
-                                ["Categorical_Data"][df_const[df_name]['DOCUMENT_LEVELS'][len(document_path)]][
-                                    "labels"].index(variable_name)]
+                                further_filtered_df[df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
+                                [len(secondary_path)]] == df_const[df_name]
+                                ["Categorical_Data"][df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
+                                [len(secondary_path)]]["labels"].index(variable_name)]
                         else:
                             further_reduced_df = further_filtered_df[further_filtered_df[df_const[df_name][
-                                                        'DOCUMENT_LEVELS'][len(document_path) - 1]] == df_const[df_name]
-                                    ["Categorical_Data"][df_const[df_name]['DOCUMENT_LEVELS'][len(document_path) - 1]][
-                                                                                        "labels"].index(variable_name)]
+                                                    'SECONDARY_HIERARCHY_LEVELS'][len(secondary_path) - 1]] ==
+                                                                     df_const[df_name]
+                                                                     ["Categorical_Data"][df_const[df_name]
+                                                                     ['SECONDARY_HIERARCHY_LEVELS']
+                                                                     [len(secondary_path)-1]]["labels"].index(
+                                                                         variable_name)]
                     for z in range(end_date.year - start_date.year + 1):
                         year = start_date.year + z
                         yearly_data = further_reduced_df[further_reduced_df["Date of Event"].dt.year == year]
@@ -1661,23 +1664,25 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
             for y in range(len_var):
                 variable_name = variable_names[y]
                 # filters on secondary hierarchy
-                if document_hierarchy_toggle == "Level Filter":
-                    further_reduced_df = further_filtered_df[further_filtered_df[document_level_dropdown] ==
+                if secondary_hierarchy_toggle == "Level Filter":
+                    further_reduced_df = further_filtered_df[further_filtered_df[secondary_level_dropdown] ==
                                                                                                         variable_name]
                 else:
                     if variable_name is None:
-                        further_reduced_df = further_filtered_df[further_filtered_df[document_level_dropdown] ==
+                        further_reduced_df = further_filtered_df[further_filtered_df[secondary_level_dropdown] ==
                                                                  variable_name]
-                    elif document_hierarchy_toggle == 'Specific Item' and document_graph_children == ['graph_children']:
+                    elif secondary_hierarchy_toggle == 'Specific Item' and secondary_graph_children == \
+                                                                                                    ['graph_children']:
                         further_reduced_df = further_filtered_df[
-                            further_filtered_df[df_const[df_name]['DOCUMENT_LEVELS']
-                            [len(document_path)]] == df_const[df_name]
-                            ["Categorical_Data"][df_const[df_name]['DOCUMENT_LEVELS'][len(document_path)]][
+                            further_filtered_df[df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
+                            [len(secondary_path)]] == df_const[df_name]
+                            ["Categorical_Data"][df_const[df_name]['SECONDARY_HIERARCHY_LEVELS'][len(secondary_path)]][
                                 "labels"].index(variable_name)]
                     else:
                         further_reduced_df = further_filtered_df[further_filtered_df[df_const[df_name][
-                                    'DOCUMENT_LEVELS'][len(document_path)-1]] == df_const[df_name]["Categorical_Data"]
-                            [df_const[df_name]['DOCUMENT_LEVELS'][len(document_path)-1]]["labels"].index(variable_name)]
+                                    'SECONDARY_HIERARCHY_LEVELS'][len(secondary_path)-1]] == df_const[df_name]
+                        ["Categorical_Data"][df_const[df_name]['SECONDARY_HIERARCHY_LEVELS'][len(secondary_path)-1]]
+                        ["labels"].index(variable_name)]
 
                 for z in range(end_year - start_year + 1):
                     year = start_year + z
@@ -1806,23 +1811,25 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
             for y in range(len_var):
                 variable_name = variable_names[y]
                 # filters on secondary hierarchy
-                if document_hierarchy_toggle == "Level Filter":
-                    further_reduced_df = further_filtered_df[further_filtered_df[document_level_dropdown] ==
+                if secondary_hierarchy_toggle == "Level Filter":
+                    further_reduced_df = further_filtered_df[further_filtered_df[secondary_level_dropdown] ==
                                                                                                         variable_name]
                 else:
                     if variable_name is None:
-                        further_reduced_df = further_filtered_df[further_filtered_df[document_level_dropdown] ==
+                        further_reduced_df = further_filtered_df[further_filtered_df[secondary_level_dropdown] ==
                                                                  variable_name]
-                    elif document_hierarchy_toggle == 'Specific Item' and document_graph_children == ['graph_children']:
+                    elif secondary_hierarchy_toggle == 'Specific Item' and secondary_graph_children == \
+                                                                                                    ['graph_children']:
                         further_reduced_df = further_filtered_df[
-                            further_filtered_df[df_const[df_name]['DOCUMENT_LEVELS']
-                            [len(document_path)]] == df_const[df_name]
-                            ["Categorical_Data"][df_const[df_name]['DOCUMENT_LEVELS'][len(document_path)]][
+                            further_filtered_df[df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
+                            [len(secondary_path)]] == df_const[df_name]
+                            ["Categorical_Data"][df_const[df_name]['SECONDARY_HIERARCHY_LEVELS'][len(secondary_path)]][
                                 "labels"].index(variable_name)]
                     else:
                         further_reduced_df = further_filtered_df[further_filtered_df[df_const[df_name][
-                                    'DOCUMENT_LEVELS'][len(document_path)-1]] == df_const[df_name]["Categorical_Data"]
-                            [df_const[df_name]['DOCUMENT_LEVELS'][len(document_path)-1]]["labels"].index(variable_name)]
+                                    'SECONDARY_HIERARCHY_LEVELS'][len(secondary_path)-1]] == df_const[df_name]
+                        ["Categorical_Data"][df_const[df_name]['SECONDARY_HIERARCHY_LEVELS'][len(secondary_path)-1]]
+                        ["labels"].index(variable_name)]
 
                 unique_secondary = further_reduced_df['Date of Event'].dt.year.unique()
                 len_unique = len(unique_secondary)
@@ -1880,10 +1887,10 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
     return time_df
 
 
-def customize_menu_filter(dff, df_name, measure_type, variable_names, df_const, document_path,
-                          document_hierarchy_toggle, document_level_dropdown, document_graph_children,
-                          document_options):
-    """Filters data frame based on the customize menu inputs and returns the filtered data frame."""
+def customize_menu_filter(dff, df_name, measure_type, variable_names, df_const, secondary_path,
+                          secondary_hierarchy_toggle, secondary_level_dropdown, secondary_graph_children,
+                          secondary_options):
+    """Filters data frame based on customize menu inputs and returns the filtered data frame."""
     if 'OPG001' in df_name:
         if measure_type == 'Link':
             filtered_df = dff[dff['Measure Fcn'] == 'Link']
@@ -1905,12 +1912,12 @@ def customize_menu_filter(dff, df_name, measure_type, variable_names, df_const, 
 
             filtered_df = aggregate_df
     else:
-        if document_hierarchy_toggle == 'Level Filter':
-            variable = df_const[df_name][document_level_dropdown]
-        elif document_hierarchy_toggle == 'Specific Item' and document_graph_children == ['graph_children']:
-            variable = [option['label'] for option in document_options]
+        if secondary_hierarchy_toggle == 'Level Filter':
+            variable = df_const[df_name][secondary_level_dropdown]
+        elif secondary_hierarchy_toggle == 'Specific Item' and secondary_graph_children == ['graph_children']:
+            variable = [option['label'] for option in secondary_options]
         else:
-            variable = document_path[-1] if document_path != [] else None
+            variable = secondary_path[-1] if secondary_path != [] else None
 
         if measure_type == 'Link':
             filtered_df = dff[dff['Measure Fcn'] == 'Link']
@@ -1927,17 +1934,17 @@ def customize_menu_filter(dff, df_name, measure_type, variable_names, df_const, 
             # for each selection, add the rows defined by the selection
             for variable_name in variable:
                 # Filters based on rows that match the variable name path
-                if document_hierarchy_toggle == "Level Filter":
-                    further_filter_df = filtered_df[filtered_df[document_level_dropdown] ==
+                if secondary_hierarchy_toggle == "Level Filter":
+                    further_filter_df = filtered_df[filtered_df[secondary_level_dropdown] ==
                                                              variable_name]
                 else:
-                    if document_hierarchy_toggle == 'Specific Item' and document_graph_children == ['graph_children']:
+                    if secondary_hierarchy_toggle == 'Specific Item' and secondary_graph_children == ['graph_children']:
                         further_filter_df = filtered_df[
-                            filtered_df[df_const[df_name]['DOCUMENT_LEVELS']
-                            [len(document_path)]] == variable_name]
+                            filtered_df[df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
+                            [len(secondary_path)]] == variable_name]
                     else:
                         further_filter_df = filtered_df[filtered_df[df_const[df_name][
-                            'DOCUMENT_LEVELS'][len(document_path) - 1]] == variable_name]
+                            'SECONDARY_HIERARCHY_LEVELS'][len(secondary_path) - 1]] == variable_name]
 
                 aggregate_df = pd.concat([aggregate_df, further_filter_df])
 

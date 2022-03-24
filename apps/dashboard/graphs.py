@@ -112,7 +112,7 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                             hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const,
                             xaxis_title, yaxis_title, xlegend, ylegend, gridline, legend,
                             secondary_level_dropdown, secondary_path, secondary_type, secondary_graph_children,
-                            secondary_options):
+                            secondary_options, tile):
     """Returns the line graph figure."""
     # ------------------------------------------------Arg Values--------------------------------------------------------
     # arg_value[0] = xaxis selector
@@ -215,7 +215,7 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                 color=color,
                 color_discrete_sequence=color_discrete,
                 line_group=line_group,
-                custom_data=[hierarchy_col, category])
+                custom_data=[hierarchy_col, category, filtered_df['Date of Event']])
             fig.update_layout(legend_title_text=legend_title_text)
 
             # check what arg_value[2]: mode is selected and sets the corresponding trace
@@ -351,7 +351,7 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
         fig.update_yaxes(showgrid=False, zeroline=False)
 
     graph = dcc.Graph(
-        id='graph-display',
+        id={'type': 'graph-display', 'index': tile},
         className='fill-container',
         responsive=True,
         config=dict(locale=language.lower(), edits=dict(annotationPosition=False, annotationTail=False,
@@ -367,7 +367,7 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
 # TODO: currently the queries do not work with OPG011, see below TODO
 def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
                       hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const, xaxis_title, yaxis_title,
-                      xlegend, ylegend, gridline, legend):
+                      xlegend, ylegend, gridline, legend, tile):
     """Returns the bubble graph figure."""
     # ------------------------------------------------Arg Values--------------------------------------------------------
     # args_value[0] = x-axis
@@ -400,7 +400,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 filtered_df[['Date of Event', 'Variable Name', 'Partial Period', color]] = \
                     filtered_df[
                         ['Date of Event', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]].astype(str)
-                filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color],
+                filtered_df['Graph Variable'] = filtered_df[df_const[df_name]['VARIABLE_LEVEL']]
+                filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color,'Graph Variable'],
                                                       columns=[df_const[df_name]['VARIABLE_LEVEL'], 'Measure Type'],
                                                       values='Measure Value').reset_index()
             else:
@@ -417,7 +418,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 filtered_df[
                     ['Date of Event', 'Measure Type', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]].\
                                                                                                             astype(str)
-                filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color],
+                filtered_df['Graph Variable']=filtered_df[df_const[df_name]['VARIABLE_LEVEL']]
+                filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color,'Graph Variable'],
                                                       columns=[df_const[df_name]['VARIABLE_LEVEL'], 'Measure Type'],
                                                       values='Measure Value').reset_index()
 
@@ -482,7 +484,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                     size=filtered_df[arg_value[4], arg_value[5]],
                     color=filtered_df[color],
                     color_discrete_sequence=color_discrete,
-                    custom_data=[filtered_df[color], filtered_df['Date of Event'], filtered_df[arg_value[4],
+                    custom_data=[filtered_df[color], filtered_df['Graph Variable'], filtered_df['Date of Event'], filtered_df[arg_value[4],
                                                                                                arg_value[5]]]
                 )
                 fig.update_layout(
@@ -490,14 +492,14 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                                                                                   legend_title_text))
                 # set up hover label
                 hovertemplate = get_label('LBL_Bubble_Fixed_Hover_Data', df_name)
-                hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event', df_name)). \
-                    replace('%AXIS-A%', '%{x}')
+                hovertemplate = hovertemplate.replace('%AXIS-X-A%', get_label('LBL_Date_Of_Event', df_name)). \
+                    replace('%X-AXIS%', '%{customdata[2]}')
                 hovertemplate = hovertemplate.replace('%AXIS-Y-A%', arg_value[2]).replace('%AXIS-Y-B%',
                                                                                           arg_value[3]).replace(
                     '%Y-AXIS%', '%{y}')
                 hovertemplate = hovertemplate.replace('%AXIS-Z-A%', arg_value[4]).replace('%AXIS-Z-B%',
                                                                                           arg_value[5]).replace(
-                    '%Z-AXIS%', '%{customdata[2]}')
+                    '%Z-AXIS%', '%{customdata[3]}')
                 fig.update_traces(hovertemplate=hovertemplate)
             else:
                 color_discrete = color_picker(arg_value[6])
@@ -514,7 +516,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                     range_x=[0, filtered_df[arg_value[0], arg_value[1]].max()],
                     range_y=[0, filtered_df[arg_value[2], arg_value[3]].max()],
                     labels={'animation_frame': 'Date of Event'},
-                    custom_data=[filtered_df[color], filtered_df['Date of Event'], filtered_df[arg_value[4],
+                    custom_data=[filtered_df[color], filtered_df['Graph Variable'], filtered_df['Date of Event'], filtered_df[arg_value[4],
                                                                                                arg_value[5]]]
                 )
                 fig.update_layout(
@@ -523,6 +525,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 fig.layout.updatemenus[0].buttons[0].args[1]["frame"]["duration"] = 1000
                 # set up hover label
                 hovertemplate = get_label('LBL_Bubble_Hover_Data', df_name)
+                hovertemplate = hovertemplate.replace('%Date%', get_label('LBL_Date_Of_Event', df_name)).\
+                    replace('%Date-Value%', '%{customdata[2]}')
                 hovertemplate = hovertemplate.replace('%AXIS-X-A%', arg_value[0]).replace('%AXIS-X-B%',
                                                                                           arg_value[1]).replace(
                     '%X-AXIS%', '%{x}')
@@ -531,7 +535,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                     '%Y-AXIS%', '%{y}')
                 hovertemplate = hovertemplate.replace('%AXIS-Z-A%', arg_value[4]).replace('%AXIS-Z-B%',
                                                                                           arg_value[5]).replace(
-                    '%Z-AXIS%', '%{customdata[2]}')
+                    '%Z-AXIS%', '%{customdata[3]}')
                 fig.update_traces(hovertemplate=hovertemplate)
         # filtered is empty, create default empty graph
         else:
@@ -589,14 +593,15 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
         fig.update_yaxes(showgrid=False, zeroline=False)
 
     graph = dcc.Graph(
-        id='graph-display',
+        id={'type': 'graph-display', 'index': tile},
         className='fill-container',
         responsive=True,
         config=dict(locale=language.lower(), edits=dict(annotationPosition=False, annotationTail=False,
                                                         annotationText=False, colourbarPosition=False,
                                                         ColorbarTitleText=False, legendPosition=True,
                                                         legendText=False, shapePosition=False,
-                                                        titleText=False, axisTitleText=True)),
+                                                        titleText=False, axisTitleText=True),
+                    config=dict(autoScale=False)),
         figure=fig)
 
     return graph
@@ -606,7 +611,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
 def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
                    hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const, xaxis_title, yaxis_title,
                    xlegend, ylegend, gridline, legend, secondary_level_dropdown,
-                   secondary_path, secondary_type, secondary_graph_children, secondary_options):
+                   secondary_path, secondary_type, secondary_graph_children, secondary_options, tile):
     """Returns the bar graph figure."""
     # ------------------------------------------------Arg Values--------------------------------------------------------
     # arg_value[0] = group by (x axis)
@@ -836,8 +841,9 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         else:
             fig.update_xaxes(range=[0, filtered_df['Measure Value'].max()])
 
+    fig = go.Figure(fig)
     graph = dcc.Graph(
-        id='graph-display',
+        id={'type': 'graph-display', 'index': tile},
         className='fill-container',
         responsive=True,
         config=dict(locale=language.lower(), edits=dict(annotationPosition=False, annotationTail=False,
@@ -853,7 +859,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
 def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
                    hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const, xaxis_title, yaxis_title,
                    xlegend, ylegend, gridline, legend, secondary_level_dropdown, secondary_path, secondary_type,
-                   secondary_graph_children, secondary_options):
+                   secondary_graph_children, secondary_options, tile):
     """Returns the box plot figure."""
     # ------------------------------------------------Arg Values--------------------------------------------------------
     # arg_value[0] = measure type selector
@@ -1131,11 +1137,16 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
             sort_mode='multi',
             sort_by=[],
 
-            cell_selectable=False,
+            tooltip={value['id']: {'value': value['name'], 'use_with':'header'} for value in columns_for_dash_table},
+            tooltip_delay=0,
+            tooltip_duration=None,
 
+            cell_selectable=False,
+            row_selectable='multi',
             style_data_conditional=cond_style,
 
             style_header={'backgroundColor': 'rgb(230, 230, 230)', 'fontWeight': 'bold'},
+
 
             style_table={'margin-top': '10px', 'overflow': 'auto'},
         )], style={'height': '90%', 'width': 'auto', 'overflow-y': 'auto', 'overflow-x': 'hidden',
@@ -1146,7 +1157,7 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
 
 def get_sankey_figure(arg_value, dff, hierarchy_level_dropdown, hierarchy_path, hierarchy_type, tile_title, df_name,
                       df_const, secondary_level_dropdown, secondary_path, secondary_hierarchy_toggle,
-                      secondary_graph_children, secondary_options):
+                      secondary_graph_children, secondary_options, tile):
     """Returns the sankey graph figure."""
     # ------------------------------------------------Arg Values--------------------------------------------------------
     # arg_value[0] = variable selector
@@ -1328,6 +1339,7 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
                                        secondary_toggle, secondary_level_dropdown, secondary_graph_children,
                                        secondary_options)
 
+    changed_index = dash.callback_context.inputs_list[2]['id']['index']
     # line and scatter graph creation
     if graph_type == 'Line' or graph_type == 'Scatter':
         return get_line_scatter_figure(graph_options, filtered_df, hierarchy_specific_dropdown,
@@ -1335,46 +1347,47 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
                                        hierarchy_graph_children, graph_title, df_name, df_const, xtitle, ytitle,
                                        xlegend, ylegend, gridline, legend,
                                        secondary_level_dropdown, list_of_secondary_names, secondary_toggle,
-                                       secondary_graph_children, secondary_options)
+                                       secondary_graph_children, secondary_options, changed_index), filtered_df
     # bubble graph creation
     elif graph_type == 'Bubble':
         return get_bubble_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
                                  list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
-                                 df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend)
+                                 df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend, changed_index), \
+               filtered_df
     # bar graph creation
     elif graph_type == 'Bar':
         return get_bar_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
                               list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
                               df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend,
                               secondary_level_dropdown, list_of_secondary_names, secondary_toggle,
-                              secondary_graph_children, secondary_options)
+                              secondary_graph_children, secondary_options, changed_index), filtered_df
     # box plot creation
     elif graph_type == 'Box_Plot':
         return get_box_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
                               list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
                               df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend,
                               secondary_level_dropdown, list_of_secondary_names, secondary_toggle,
-                              secondary_graph_children, secondary_options)
+                              secondary_graph_children, secondary_options, changed_index), filtered_df
+
 
     # pivot table creation
     elif graph_type == 'Pivot_Table':
-        changed_index = dash.callback_context.inputs_list[2]['id']['index']
-        return get_pivot_table(filtered_df, changed_index, df_const, df_name)
+        return get_pivot_table(filtered_df, changed_index, df_const, df_name), filtered_df
 
     # table creation
     elif graph_type == 'Table':
-        changed_index = dash.callback_context.inputs_list[2]['id']['index']
         return get_table_figure(graph_options, filtered_df, changed_index, hierarchy_specific_dropdown,
                                 hierarchy_level_dropdown, list_of_names, hierarchy_toggle, hierarchy_graph_children,
-                                graph_title, df_name)
+                                graph_title, df_name), filtered_df
     # sankey creation
     elif graph_type == 'Sankey':
         return get_sankey_figure(graph_options, filtered_df, hierarchy_level_dropdown, list_of_names, hierarchy_toggle,
                                  graph_title, df_name, df_const, secondary_level_dropdown, list_of_secondary_names,
-                                 secondary_toggle, secondary_graph_children, secondary_options)
+                                 secondary_toggle, secondary_graph_children, secondary_options, changed_index), \
+               filtered_df
     # catch all
     else:
-        return None
+        return None, filtered_df
 
 
 def color_picker(palette):

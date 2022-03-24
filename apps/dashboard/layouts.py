@@ -170,7 +170,8 @@ def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Fi
                                      df_const)),
             html.Div(get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, period_type, df_const))],
             style=DATA_CONTENT_HIDE,
-            id={'type': 'data-menu-controls', 'index': tile})]
+            id={'type': 'data-menu-controls', 'index': tile}),
+        html.Div(id="output")]
 
     dashboard_loading_wrapper = html.Div(
         content,
@@ -695,6 +696,12 @@ def get_layout_dashboard():
             color='dark',
             style={'position': 'absolute', 'right': '47%', 'top': '80%', 'margin-right': '-100px', 'z-index': '1070'},
             duration=4000),
+
+        #stored value for cross filter
+        dcc.Store(id={'type': 'cross_filter_select', 'index': 0}, data=None),
+        dcc.Store(id={'type': 'cross_filter_select', 'index': 1}, data=None),
+        dcc.Store(id={'type': 'cross_filter_select', 'index': 2}, data=None),
+        dcc.Store(id={'type': 'cross_filter_select', 'index': 3}, data=None),
 
         # dashboard-reset-confirmation is used by the prompts to reset the viewport
         dcc.Store(id='dashboard-reset-confirmation'),

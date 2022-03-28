@@ -523,6 +523,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 fig.layout.updatemenus[0].buttons[0].args[1]["frame"]["duration"] = 1000
                 # set up hover label
                 hovertemplate = get_label('LBL_Bubble_Hover_Data', df_name)
+                hovertemplate = hovertemplate.replace('%Date%', get_label('LBL_Date_Of_Event', df_name)). \
+                    replace('%Date-Value%', '%{customdata[1]}')
                 hovertemplate = hovertemplate.replace('%AXIS-X-A%', arg_value[0]).replace('%AXIS-X-B%',
                                                                                           arg_value[1]).replace(
                     '%X-AXIS%', '%{x}')

@@ -13,7 +13,6 @@ from dash.dependencies import Input, Output, State, ALL, MATCH
 from dash.exceptions import PreventUpdate
 import dash_html_components as html
 import dash_core_components as dcc
-import plotly.graph_objects as go
 from re import search
 from flask import session
 from dash import no_update
@@ -185,7 +184,7 @@ for x in range(4):
             if df_confirm is not None:
                 df_tile = df_confirm
 
-            graph, df = __update_graph(df_tile, arg_value, graph_type, tile_title, num_periods,
+            graph = __update_graph(df_tile, arg_value, graph_type, tile_title, num_periods,
                                    period_type, hierarchy_toggle,
                                    hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options,
                                    state_of_display,
@@ -250,7 +249,7 @@ for x in range(4):
             else:
                 data = "hide"
 
-        graph, df = __update_graph(df_name, arg_value, graph_type, tile_title, num_periods, period_type, hierarchy_toggle,
+        graph = __update_graph(df_name, arg_value, graph_type, tile_title, num_periods, period_type, hierarchy_toggle,
                                hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options, state_of_display,
                                secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
                                end_secondary, df_const, xaxis, yaxis, xlegend, ylegend, gridline, legend,
@@ -783,7 +782,6 @@ def split_filter_part(filter_part):
      Input({'type': 'datatable', 'index': MATCH}, "page_size"),
      Input({'type': 'datatable', 'index': MATCH}, 'sort_by'),
      Input({'type': 'datatable', 'index': MATCH}, 'filter_query'),
-     Input({'type': 'datatable', 'index': MATCH}, 'selected_rows'),
      # update graph trigger
      Input({'type': 'update-graph-trigger', 'index': MATCH}, 'data-graph_menu_trigger'),
      # update table trigger
@@ -829,7 +827,7 @@ def split_filter_part(filter_part):
      State('df-constants-storage', 'data'),
      State({'type': 'data-set-parent', 'index': 4}, 'value')]
 )
-def _update_table(page_current, page_size, sort_by, filter_query, selected_rows, _graph_trigger, _table_trigger, link_state,
+def _update_table(page_current, page_size, sort_by, filter_query, _graph_trigger, _table_trigger, link_state,
                   df_name, secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
                   end_secondary, num_periods, period_type, hierarchy_toggle, hierarchy_level_dropdown,
                   state_of_display, hierarchy_graph_children, hierarchy_options, parent_secondary_type,
@@ -888,8 +886,6 @@ def _update_table(page_current, page_size, sort_by, filter_query, selected_rows,
                                period_type)
         if dff.empty:
             return [], 0
-    if selected_rows is not None:
-        df=dff.iloc[selected_rows]
 
     # Reformat date column
     dff['Date of Event'] = dff['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
@@ -999,7 +995,6 @@ def do_stuff(selected_data, link_state):
             point = [p['pointNumber'] for p in selected_data['points']]
             trace = [p['customdata'] for p in selected_data['points']]
 
-
     selected = [{'point': point}, {'trace': trace}]
     filter = selected
 
@@ -1009,10 +1004,9 @@ def do_stuff(selected_data, link_state):
 for x in range(4):
     @app.callback([Output({'type': 'graph-display', 'index': x}, 'figure')],
                   [Input({'type': 'cross_filter_select', 'index': ALL}, 'data')],
-                  [State({'type': 'graph-display', 'index': x}, 'figure'),
-                   State({'type': 'data-set', 'index': 4}, 'value')],
+                  [State({'type': 'graph-display', 'index': x}, 'figure')],
                   prevent_initial_call=True)
-    def cross_filter(selected_data, fig, parent_data):
+    def cross_filter(selected_data, fig):
         changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
 
         # callback context hasnt changed
@@ -1033,20 +1027,15 @@ for x in range(4):
             print(trace)
             # makes the traces opaque to be able to distinguish the points that are selected on te graph
             for index in range(len(fig['data'])):
-                fig['data'][index]['selectedpoints'] = {}
+                fig['data'][index]['selectedpoints'] = []
                 select.append([])
             for count, index in enumerate(trace):
                 select[index].append(selected_data[tile][0]['point'][count])
-                # if selected_data[tile][0]['point'] in index:
+
             # applies the selected points to the correct trace
             for count, index in enumerate(select):
                 if len(index) != 0:
                     fig['data'][count]['selectedpoints'] = index
-            print(select)
-            # df= session[parent_data].copy()
-            # df["Variable Name"]==
-            #df.index[df['BoolCol']].tolist()
-
 
         else:
             for index in range(len(fig['data'])):

@@ -400,8 +400,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 filtered_df[['Date of Event', 'Variable Name', 'Partial Period', color]] = \
                     filtered_df[
                         ['Date of Event', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]].astype(str)
-                filtered_df['Graph Variable'] = filtered_df[df_const[df_name]['VARIABLE_LEVEL']]
-                filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color,'Graph Variable'],
+                filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color],
                                                       columns=[df_const[df_name]['VARIABLE_LEVEL'], 'Measure Type'],
                                                       values='Measure Value').reset_index()
             else:
@@ -418,8 +417,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 filtered_df[
                     ['Date of Event', 'Measure Type', df_const[df_name]['VARIABLE_LEVEL'], 'Partial Period', color]].\
                                                                                                             astype(str)
-                filtered_df['Graph Variable']=filtered_df[df_const[df_name]['VARIABLE_LEVEL']]
-                filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color,'Graph Variable'],
+                filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color],
                                                       columns=[df_const[df_name]['VARIABLE_LEVEL'], 'Measure Type'],
                                                       values='Measure Value').reset_index()
 
@@ -484,7 +482,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                     size=filtered_df[arg_value[4], arg_value[5]],
                     color=filtered_df[color],
                     color_discrete_sequence=color_discrete,
-                    custom_data=[filtered_df[color], filtered_df['Graph Variable'], filtered_df['Date of Event'], filtered_df[arg_value[4],
+                    custom_data=[filtered_df[color], filtered_df['Date of Event'], filtered_df[arg_value[4],
                                                                                                arg_value[5]]]
                 )
                 fig.update_layout(
@@ -493,13 +491,13 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 # set up hover label
                 hovertemplate = get_label('LBL_Bubble_Fixed_Hover_Data', df_name)
                 hovertemplate = hovertemplate.replace('%AXIS-X-A%', get_label('LBL_Date_Of_Event', df_name)). \
-                    replace('%X-AXIS%', '%{customdata[2]}')
+                    replace('%X-AXIS%', '%{customdata[1]}')
                 hovertemplate = hovertemplate.replace('%AXIS-Y-A%', arg_value[2]).replace('%AXIS-Y-B%',
                                                                                           arg_value[3]).replace(
                     '%Y-AXIS%', '%{y}')
                 hovertemplate = hovertemplate.replace('%AXIS-Z-A%', arg_value[4]).replace('%AXIS-Z-B%',
                                                                                           arg_value[5]).replace(
-                    '%Z-AXIS%', '%{customdata[3]}')
+                    '%Z-AXIS%', '%{customdata[2]}')
                 fig.update_traces(hovertemplate=hovertemplate)
             else:
                 color_discrete = color_picker(arg_value[6])
@@ -516,7 +514,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                     range_x=[0, filtered_df[arg_value[0], arg_value[1]].max()],
                     range_y=[0, filtered_df[arg_value[2], arg_value[3]].max()],
                     labels={'animation_frame': 'Date of Event'},
-                    custom_data=[filtered_df[color], filtered_df['Graph Variable'], filtered_df['Date of Event'], filtered_df[arg_value[4],
+                    custom_data=[filtered_df[color], filtered_df['Date of Event'], filtered_df[arg_value[4],
                                                                                                arg_value[5]]]
                 )
                 fig.update_layout(
@@ -526,7 +524,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 # set up hover label
                 hovertemplate = get_label('LBL_Bubble_Hover_Data', df_name)
                 hovertemplate = hovertemplate.replace('%Date%', get_label('LBL_Date_Of_Event', df_name)).\
-                    replace('%Date-Value%', '%{customdata[2]}')
+                    replace('%Date-Value%', '%{customdata[1]}')
                 hovertemplate = hovertemplate.replace('%AXIS-X-A%', arg_value[0]).replace('%AXIS-X-B%',
                                                                                           arg_value[1]).replace(
                     '%X-AXIS%', '%{x}')
@@ -535,7 +533,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                     '%Y-AXIS%', '%{y}')
                 hovertemplate = hovertemplate.replace('%AXIS-Z-A%', arg_value[4]).replace('%AXIS-Z-B%',
                                                                                           arg_value[5]).replace(
-                    '%Z-AXIS%', '%{customdata[3]}')
+                    '%Z-AXIS%', '%{customdata[2]}')
                 fig.update_traces(hovertemplate=hovertemplate)
         # filtered is empty, create default empty graph
         else:
@@ -1347,47 +1345,47 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
                                        hierarchy_graph_children, graph_title, df_name, df_const, xtitle, ytitle,
                                        xlegend, ylegend, gridline, legend,
                                        secondary_level_dropdown, list_of_secondary_names, secondary_toggle,
-                                       secondary_graph_children, secondary_options, changed_index), filtered_df
+                                       secondary_graph_children, secondary_options, changed_index)
+
     # bubble graph creation
     elif graph_type == 'Bubble':
         return get_bubble_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
                                  list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
-                                 df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend, changed_index), \
-               filtered_df
+                                 df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend, changed_index)
     # bar graph creation
     elif graph_type == 'Bar':
         return get_bar_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
                               list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
                               df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend,
                               secondary_level_dropdown, list_of_secondary_names, secondary_toggle,
-                              secondary_graph_children, secondary_options, changed_index), filtered_df
+                              secondary_graph_children, secondary_options, changed_index)
+
     # box plot creation
     elif graph_type == 'Box_Plot':
         return get_box_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
                               list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
                               df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend,
                               secondary_level_dropdown, list_of_secondary_names, secondary_toggle,
-                              secondary_graph_children, secondary_options, changed_index), filtered_df
-
+                              secondary_graph_children, secondary_options, changed_index)
 
     # pivot table creation
     elif graph_type == 'Pivot_Table':
-        return get_pivot_table(filtered_df, changed_index, df_const, df_name), filtered_df
+        return get_pivot_table(filtered_df, changed_index, df_const, df_name)
 
     # table creation
     elif graph_type == 'Table':
         return get_table_figure(graph_options, filtered_df, changed_index, hierarchy_specific_dropdown,
                                 hierarchy_level_dropdown, list_of_names, hierarchy_toggle, hierarchy_graph_children,
-                                graph_title, df_name), filtered_df
+                                graph_title, df_name)
     # sankey creation
     elif graph_type == 'Sankey':
         return get_sankey_figure(graph_options, filtered_df, hierarchy_level_dropdown, list_of_names, hierarchy_toggle,
                                  graph_title, df_name, df_const, secondary_level_dropdown, list_of_secondary_names,
-                                 secondary_toggle, secondary_graph_children, secondary_options, changed_index), \
-               filtered_df
+                                 secondary_toggle, secondary_graph_children, secondary_options, changed_index)
+
     # catch all
     else:
-        return None, filtered_df
+        return None
 
 
 def color_picker(palette):

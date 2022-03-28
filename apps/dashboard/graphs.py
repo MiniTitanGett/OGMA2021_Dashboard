@@ -598,8 +598,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                                                         annotationText=False, colourbarPosition=False,
                                                         ColorbarTitleText=False, legendPosition=True,
                                                         legendText=False, shapePosition=False,
-                                                        titleText=False, axisTitleText=True),
-                    config=dict(autoScale=False)),
+                                                        titleText=False, axisTitleText=True)),
         figure=fig)
 
     return graph
@@ -839,7 +838,6 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         else:
             fig.update_xaxes(range=[0, filtered_df['Measure Value'].max()])
 
-    fig = go.Figure(fig)
     graph = dcc.Graph(
         id={'type': 'graph-display', 'index': tile},
         className='fill-container',
@@ -1135,16 +1133,11 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
             sort_mode='multi',
             sort_by=[],
 
-            tooltip={value['id']: {'value': value['name'], 'use_with':'header'} for value in columns_for_dash_table},
-            tooltip_delay=0,
-            tooltip_duration=None,
-
             cell_selectable=False,
-            row_selectable='multi',
+
             style_data_conditional=cond_style,
 
             style_header={'backgroundColor': 'rgb(230, 230, 230)', 'fontWeight': 'bold'},
-
 
             style_table={'margin-top': '10px', 'overflow': 'auto'},
         )], style={'height': '90%', 'width': 'auto', 'overflow-y': 'auto', 'overflow-x': 'hidden',

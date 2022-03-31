@@ -649,14 +649,14 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
                     df = df[0:0]
                     return df
             else:
+                # Filters out all rows that are more specific than given path length plus one to preserve the children
+                for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - (len(hierarchy_path) + 1)):
+                    df[df_const[df_name]['HIERARCHY_LEVELS']
+                    [len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]] = np.full(len(df), np.nan, np.float64)
                 # Filters out all rows that are less specific than given path length
                 for i in range(len(hierarchy_path)):
                     df = df[df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == df_const[df_name]["Categorical_Data"]
                                                                     ["H" + str(i)]["labels"].index(hierarchy_path[i])]
-                # Filters out all rows that are more specific than given path length plus one to preserve the children
-                for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - (len(hierarchy_path)+1)):
-                    df[df_const[df_name]['HIERARCHY_LEVELS']
-                    [len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]] = np.full(len(df), np.nan, np.float64)
 
         else:
             # Filters out all rows that don't include path member at specific level
@@ -1312,8 +1312,8 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                              True if unique_data['Partial Period'].iloc[0] is True else np.nan])
 
         time_df = pd.DataFrame(row_list,
-                               columns=['Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
-                                        'Variable Value'
+                               columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
+                                        'Variable Value',
                                         'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
                                         'Date of Event', 'Calendar Entry Type', 'Year of Event', 'Quarter',
                                         'Month of Event', 'Week of Event', 'Fiscal Year of Event', 'Fiscal Quarter',

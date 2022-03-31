@@ -97,6 +97,7 @@ def get_secondary_hierarchy_layout(tile, df_name=None, hierarchy_toggle='Level F
                     options=[{'label': get_label('LBL_' + x.replace(' ', '_'), df_name), 'value': x} for x in
                                                                         hierarchy_level],
                     multi=False,
+                    clearable=False,
                     value=level_value,
                     style={'color': 'black', 'textAlign': 'center', 'margin-top': '10px'},
                     placeholder='{}...'.format(get_label('LBL_Select')))],
@@ -122,6 +123,61 @@ def get_secondary_hierarchy_layout(tile, df_name=None, hierarchy_toggle='Level F
                             id={'type': 'secondary_hierarchy_to_top', 'index': tile},
                             n_clicks=0,
                             style={'min-width': '45px', 'display': 'inline-block', 'padding': '0 0 0 0'}),
+                        html.Button(
+                            get_label('LBL_Back'),
+                            id={'type': 'secondary_hierarchy_revert', 'index': tile},
+                            n_clicks=0,
+                            style={'min-width': '45px', 'display': 'inline-block', 'padding': '0 0 0 0'})],
+                        style={'height': '0px', 'display': 'inline-block'}),
+                    html.Div(
+                        children=generate_secondary_dropdown(tile, df_name, nid_path, df_const),
+                        id={'type': 'secondary_hierarchy_specific_dropdown_container', 'index': tile},
+                        style={'color': 'black', 'flex-grow': '1', 'textAlign': 'center', 'display': 'inline-block'})],
+                    style={'display': 'flex'})],
+                id={'type': 'secondary_hierarchy_specific_filter', 'index': tile},
+                style={'display': 'none'} if hierarchy_toggle == 'Level Filter' else {})
+        ]
+    else:
+        return [
+            # Hierarchy level filter vs specific node toggle switch
+            dcc.Tabs([
+                dcc.Tab(label="{}".format(get_label("LBL_Level_Filter")), value='Level Filter'),
+                dcc.Tab(label="{}".format(get_label("LBL_Specific_Item")), value='Specific Item')],
+                id={'type': 'secondary_hierarchy-toggle', 'index': tile},
+                className='toggle-tabs-wrapper',
+                value=hierarchy_toggle,
+                style={'display': 'block'}),
+            # Hierarchy Level Filter Menu
+            html.Div([
+                dcc.Dropdown(
+                    id={'type': 'secondary_hierarchy_level_dropdown', 'index': tile},
+                    options=[],
+                    multi=False,
+                    value=level_value,
+                    style={'color': 'black', 'width': '100%', 'textAlign': 'center', 'margin-top': '10px'},
+                    placeholder='{}...'.format(get_label('LBL_Select')))],
+                id={'type': 'secondary_hierarchy_level_filter', 'index': tile},
+                style={} if hierarchy_toggle == 'Level Filter' else {'display': 'none'}),
+            # Hierarchy Specific Filter Menu
+            html.Div([
+                html.Div(
+                    children=[],
+                    id={'type': 'secondary_hierarchy_display_button', 'index': tile},
+                    style={'display': 'inline-block', 'overflow-x': 'scroll', 'width': '100%', 'whiteSpace': 'nowrap',
+                           'height': '60px'}),
+                dcc.Checklist(
+                    id={'type': 'secondary_hierarchy_children_toggle', 'index': tile},
+                    options=[{'label': get_label('LBL_Graph_All_In_Dropdown'),
+                              'value': 'graph_children'}],
+                    value=graph_all_toggle if graph_all_toggle else [],
+                    style={'color': 'black', 'width': '100%', 'display': 'inline-block', 'text-align': 'center'}),
+                html.Div([
+                    html.Div([
+                        html.Button(
+                            get_label('LBL_Top'),
+                            id={'type': 'secondary_hierarchy_to_top', 'index': tile},
+                            n_clicks=0,
+                            style={'min-width': '45px', 'display': 'inline-block', 'padding': '0  0 0'}),
                         html.Button(
                             get_label('LBL_Back'),
                             id={'type': 'secondary_hierarchy_revert', 'index': tile},

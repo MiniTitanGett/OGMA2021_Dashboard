@@ -614,7 +614,6 @@ there.
     margin-left: 20px;
     margin-right: 20px;
     flex-grow: 1;
-    overflow: auto;
 }
 
 
@@ -1278,7 +1277,7 @@ there.
     margin-right: auto;
     background: #fffafa;
     box-shadow: rgb(20, 20, 20) 0 10px 20px;
-    max-height: 90%;
+    max-height: 80%;
     overflow-y: auto;
 }
 

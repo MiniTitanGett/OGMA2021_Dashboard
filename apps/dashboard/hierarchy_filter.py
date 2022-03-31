@@ -111,6 +111,7 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
                              df_const[df_name]['HIERARCHY_LEVELS']],
                     multi=False,
                     value=level_value,
+                    clearable=False,
                     style={'color': 'black', 'width': '100%', 'textAlign': 'center', 'margin-top': '10px'},
                     placeholder='{}...'.format(get_label('LBL_Select')))],
                 id={'type': 'hierarchy_level_filter', 'index': tile},

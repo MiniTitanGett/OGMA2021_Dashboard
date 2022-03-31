@@ -956,10 +956,11 @@ def get_tile(tile, tile_keys=None, df_name=None):
                                          options=[{'label': session['saved_layouts'][key]['Title'], 'value': key} for
                                                   key in
                                                   session['saved_layouts']],
+                                         optionHeight=30,
                                          style={'width': '400px', 'font-size': '13px'},
                                          clearable=False,
                                          value='',
-                                         placeholder='{}...'.format(get_label('LBL_Select')))
+                                         placeholder='{}...'.format(get_label('LBL_Select'))),
                         ], style={'width': '400px'}),
                     html.P(get_label('LBL_Load_Graph_Prompt'),
                            id={'type': 'tile-layouts-warning', 'index': tile},
@@ -2033,4 +2034,9 @@ def empty_graph_menu(tile):
             # ymodified flags for when y-axis label has been modified
             dcc.Store(id={'type': 'y-modified', 'index': tile},
                       data=None),
+            html.Div(
+                get_secondary_hierarchy_layout(tile, df_name=None, hierarchy_toggle='Level Filter',
+                                               level_value='Variable Name',
+                                               graph_all_toggle=None, nid_path="root", df_const=None)
+            )
         ], style={'display': 'None'})]

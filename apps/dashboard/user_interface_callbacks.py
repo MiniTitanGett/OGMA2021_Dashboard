@@ -132,13 +132,16 @@ def _new_and_delete(_new_clicks, close_id, _dashboard_reset, tile_titles, tile_l
     elif 'button-new' in changed_id:
         if num_tiles == 4:
             raise PreventUpdate
-        if confirm_parent:
-            parent_df = confirm_parent
         num_tiles += 1
         input_tiles.append(None)
-        children = get_tile_layout(num_tiles, tile_keys=input_tiles,
-                                   parent_df=parent_df if (
-                                               df_const is not None and df_const[parent_df] is not None) else None)
+        if parent_df is None and confirm_parent is None:
+            children = get_tile_layout(num_tiles, tile_keys=input_tiles, parent_df=None)
+        else:
+            if confirm_parent:
+                parent_df = confirm_parent
+            children = get_tile_layout(num_tiles, tile_keys=input_tiles,
+                                           parent_df=parent_df if (
+                                                       df_const is not None and df_const[parent_df] is not None) else None)
     # if RESET dashboard requested, set dashboard to default appearance
     elif 'dashboard-reset' in changed_id:
         num_tiles = 1

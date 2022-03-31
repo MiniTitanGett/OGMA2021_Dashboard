@@ -490,8 +490,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                                                                                   legend_title_text))
                 # set up hover label
                 hovertemplate = get_label('LBL_Bubble_Fixed_Hover_Data', df_name)
-                hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event', df_name)). \
-                    replace('%AXIS-A%', '%{x}')
+                hovertemplate = hovertemplate.replace('%AXIS-X-A%', get_label('LBL_Date_Of_Event', df_name)). \
+                    replace('%X-AXIS%', '%{x}')
                 hovertemplate = hovertemplate.replace('%AXIS-Y-A%', arg_value[2]).replace('%AXIS-Y-B%',
                                                                                           arg_value[3]).replace(
                     '%Y-AXIS%', '%{y}')
@@ -501,7 +501,9 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 fig.update_traces(hovertemplate=hovertemplate)
             else:
                 color_discrete = color_picker(arg_value[6])
-
+                x=filtered_df[arg_value[0], arg_value[1]]
+                y=filtered_df[arg_value[2], arg_value[3]]
+                size = filtered_df[arg_value[4], arg_value[5]]
                 # generate graph
                 fig = px.scatter(
                     title=title,
@@ -511,8 +513,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                     animation_frame=filtered_df['Date of Event'],
                     color=filtered_df[color],
                     color_discrete_sequence=color_discrete,
-                    range_x=[0, filtered_df[arg_value[0], arg_value[1]].max()],
-                    range_y=[0, filtered_df[arg_value[2], arg_value[3]].max()],
+                    range_x=[0, filtered_df[arg_value[0], arg_value[1]].max()+100],
+                    range_y=[0, filtered_df[arg_value[2], arg_value[3]].max()+100],
                     labels={'animation_frame': 'Date of Event'},
                     custom_data=[filtered_df[color], filtered_df['Date of Event'], filtered_df[arg_value[4],
                                                                                                arg_value[5]]]
@@ -547,6 +549,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
 
     # set title
     if xaxis_title:
+        if arg_value[0] != 'Time' and xaxis_title == 'Time':
+            xaxis_title = '{} ({})'.format(arg_value[0], arg_value[1])
         result = parse('{} ({})', xaxis_title)
         if result is None:
             xaxis = xaxis_title

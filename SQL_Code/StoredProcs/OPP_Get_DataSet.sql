@@ -61,8 +61,9 @@ begin
            --null [Fiscal Week of Event],
            --null [Julian Day],
            dur.[Activity Event Id],
-           dur.[Measure Value],
-           dur.[Measure Type],
+           dur.[Measure1],
+           dur.[Measure2],
+           dur.[Measure3],
            -- TODO: COMMENTED OUT TO BE ADDED AS A FEATURE LATER
            --           --[Measure Value],
            --           --[Measure Type],
@@ -77,32 +78,81 @@ begin
            --           null as [Measure Value 5],
            --           null as [Measure Type 5],
            dur.[Partial Period]
-      from dbo.OPG001 as dur with (nolock)
-      left outer join dbo.OPG001 as cou with (nolock)
-        on cou.[Measure Type] = 'Count'
-       and cou.[Date of Event] = dur.[Date of Event]
-       and cou.[Calendar Entry Type] = 'Week'
-       and trim(isnull(cou.[Variable Name Qualifier], '')) = trim(isnull(dur.[Variable Name Qualifier], ''))
-       and trim(isnull(cou.[Hierarchy One Leaf], '')) = trim(isnull(dur.[Hierarchy One Leaf], ''))
-       and trim(isnull(cou.[Hierarchy One -1], '')) = trim(isnull(dur.[Hierarchy One -1], ''))
-       and trim(isnull(cou.[Hierarchy One -2], '')) = trim(isnull(dur.[Hierarchy One -2], ''))
-       and trim(isnull(cou.[Hierarchy One -3], '')) = trim(isnull(dur.[Hierarchy One -3], ''))
-       and trim(isnull(cou.[Hierarchy One -4], '')) = trim(isnull(dur.[Hierarchy One -4], ''))
-      left outer join dbo.OPG001 as dol with (nolock)
-        on dol.[Measure Type] = 'Dollar'
-       and dol.[Date of Event] = dur.[Date of Event]
-       and dol.[Calendar Entry Type] = 'Week'
-       and trim(isnull(dol.[Variable Name Qualifier], '')) = trim(isnull(dur.[Variable Name Qualifier], ''))
-       and trim(isnull(dol.[Hierarchy One Leaf], '')) = trim(isnull(dur.[Hierarchy One Leaf], ''))
-       and trim(isnull(dol.[Hierarchy One -1], '')) = trim(isnull(dur.[Hierarchy One -1], ''))
-       and trim(isnull(dol.[Hierarchy One -2], '')) = trim(isnull(dur.[Hierarchy One -2], ''))
-       and trim(isnull(dol.[Hierarchy One -3], '')) = trim(isnull(dur.[Hierarchy One -3], ''))
-       and trim(isnull(dol.[Hierarchy One -4], '')) = trim(isnull(dur.[Hierarchy One -4], ''))
-     where trim(isnull(dur.[Hierarchy One Leaf], '')) <> ''
-       -- we can't prune based on Sub Qualifier because the data is 'blown out',
-       -- but since the data doesn't include any values in Sub Qualifier, we are ok
-       and trim(isnull(dur.[Variable Name Qualifier], '')) <> ''
-       and dur.[Calendar Entry Type] = 'Week'
+      from dbo.OPG011_eventData as dur with (nolock)
+--     select --null [OPG Data Set],
+--            --null [Hierarchy One Name],
+--            --null [Hierarchy One Top],
+--            --null [Hierarchy One -1],
+--            --null [Hierarchy One -2],
+--            --null [Hierarchy One -3],
+--            --null [Hierarchy One -4],
+--            dur.[Hierarchy One Leaf] as [Hierarchy Value],
+--            5 as [Hierarchy Level],
+--            --[Variable Name],
+--            --[Variable Name Qualifier],
+--            --[Variable Name Sub Qualifier],
+--            case
+--              when isnull(dur.[Variable Name Sub Qualifier], '') <> '' then dur.[Variable Name Sub Qualifier]
+--              else dur.[Variable Name Qualifier]
+--            end as [Variable Value],
+--            case
+--              when isnull(dur.[Variable Name Sub Qualifier], '') <> '' then 2
+--              else 1
+--            end as [Variable Level],
+--            dur.[Date of Event],
+--            dur.[Calendar Entry Type],
+--            --null [Year of Event],
+--            --null [Quarter],
+--            --null [Month of Event],
+--            --null [Week of Event],
+--            --null [Fiscal Year of Event],
+--            --null [Fiscal Quarter],
+--            --null [Fiscal Month of Event],
+--            --null [Fiscal Week of Event],
+--            --null [Julian Day],
+--            dur.[Activity Event Id],
+--            dur.[Measure Value],
+--            dur.[Measure Type],
+--            -- TODO: COMMENTED OUT TO BE ADDED AS A FEATURE LATER
+--            --           --[Measure Value],
+--            --           --[Measure Type],
+--            --           dur.[Measure Value] as [Measure Value 1],
+--            --           dur.[Measure Type] as [Measure Type 1],
+--            --           cou.[Measure Value] as [Measure Value 2],
+--            --           cou.[Measure Type] as [Measure Type 2],
+--            --           dol.[Measure Value] as [Measure Value 3],
+--            --           dol.[Measure Type] as [Measure Type 3],
+--            --           null as [Measure Value 4],
+--            --           null as [Measure Type 4],
+--            --           null as [Measure Value 5],
+--            --           null as [Measure Type 5],
+--            dur.[Partial Period]
+--       from dbo.OPG001 as dur with (nolock)
+--       left outer join dbo.OPG001 as cou with (nolock)
+--         on cou.[Measure Type] = 'Count'
+--        and cou.[Date of Event] = dur.[Date of Event]
+--        and cou.[Calendar Entry Type] = 'Week'
+--        and trim(isnull(cou.[Variable Name Qualifier], '')) = trim(isnull(dur.[Variable Name Qualifier], ''))
+--        and trim(isnull(cou.[Hierarchy One Leaf], '')) = trim(isnull(dur.[Hierarchy One Leaf], ''))
+--        and trim(isnull(cou.[Hierarchy One -1], '')) = trim(isnull(dur.[Hierarchy One -1], ''))
+--        and trim(isnull(cou.[Hierarchy One -2], '')) = trim(isnull(dur.[Hierarchy One -2], ''))
+--        and trim(isnull(cou.[Hierarchy One -3], '')) = trim(isnull(dur.[Hierarchy One -3], ''))
+--        and trim(isnull(cou.[Hierarchy One -4], '')) = trim(isnull(dur.[Hierarchy One -4], ''))
+--       left outer join dbo.OPG001 as dol with (nolock)
+--         on dol.[Measure Type] = 'Dollar'
+--        and dol.[Date of Event] = dur.[Date of Event]
+--        and dol.[Calendar Entry Type] = 'Week'
+--        and trim(isnull(dol.[Variable Name Qualifier], '')) = trim(isnull(dur.[Variable Name Qualifier], ''))
+--        and trim(isnull(dol.[Hierarchy One Leaf], '')) = trim(isnull(dur.[Hierarchy One Leaf], ''))
+--        and trim(isnull(dol.[Hierarchy One -1], '')) = trim(isnull(dur.[Hierarchy One -1], ''))
+--        and trim(isnull(dol.[Hierarchy One -2], '')) = trim(isnull(dur.[Hierarchy One -2], ''))
+--        and trim(isnull(dol.[Hierarchy One -3], '')) = trim(isnull(dur.[Hierarchy One -3], ''))
+--        and trim(isnull(dol.[Hierarchy One -4], '')) = trim(isnull(dur.[Hierarchy One -4], ''))
+--      where trim(isnull(dur.[Hierarchy One Leaf], '')) <> ''
+--        -- we can't prune based on Sub Qualifier because the data is 'blown out',
+--        -- but since the data doesn't include any values in Sub Qualifier, we are ok
+--        and trim(isnull(dur.[Variable Name Qualifier], '')) <> ''
+--        and dur.[Calendar Entry Type] = 'Week'
 
   else
   begin

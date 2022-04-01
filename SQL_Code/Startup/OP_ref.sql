@@ -360,6 +360,19 @@ EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG010', @language = 'Fr
 EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG011', @language = 'En', @ref_desc = 'OPG 011 Truncated Time Series Measures'
 EXEC InsertOPRef @ref_table = 'Data_set', @ref_value = 'OPG011', @language = 'Fr', @ref_desc = 'OPG 011 Mesures de séries chronologiques tronquées'
 
+EXEC InsertOPRef @ref_table = 'OPG011_Measuretype', @ref_value = 'Measure1', @language = 'En', @ref_desc = 'Count'
+EXEC InsertOPRef @ref_table = 'OPG011_Measuretype', @ref_value = 'Measure1', @language = 'Fr', @ref_desc = 'Count'
+EXEC InsertOPRef @ref_table = 'OPG011_Measuretype', @ref_value = 'Measure2', @language = 'En', @ref_desc = 'Dollar'
+EXEC InsertOPRef @ref_table = 'OPG011_Measuretype', @ref_value = 'Measure2', @language = 'Fr', @ref_desc = 'Dollar'
+EXEC InsertOPRef @ref_table = 'OPG011_Measuretype', @ref_value = 'Measure3', @language = 'En', @ref_desc = 'Duration'
+EXEC InsertOPRef @ref_table = 'OPG011_Measuretype', @ref_value = 'Measure3', @language = 'Fr', @ref_desc = 'Duration'
+
+EXEC InsertOPRef @ref_table = 'OPG001_Measuretype', @ref_value = 'Measure Type', @language = 'En', @ref_desc = 'Measure Type'
+EXEC InsertOPRef @ref_table = 'OPG001_Measuretype', @ref_value = 'Measure Type', @language = 'Fr', @ref_desc = 'Measure Type'
+
+EXEC InsertOPRef @ref_table = 'OPG010_Measuretype', @ref_value = 'Measure Type', @language = 'En', @ref_desc = 'Measure Type'
+EXEC InsertOPRef @ref_table = 'OPG010_Measuretype', @ref_value = 'Measure Type', @language = 'Fr', @ref_desc = 'Measure Type'
+
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Parameters', @language = 'En', @ref_desc = 'Parameters'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Parameters',@language = 'Fr', @ref_desc = 'Paramètres'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graph', @language = 'En', @ref_desc = 'Graph'

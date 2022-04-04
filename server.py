@@ -237,7 +237,7 @@ def before_request_func():
         session["dataset_list"] = load_dataset_list()  # get_ref("Data_set", session["language"])
 
         #TODO event level datasets will need to load measure_types
-        session["Measure_type_list"] = load_dataset_measuretype(['OPG011','OPG010'])
+        session["Measure_type_list"] = load_dataset_measuretype(['OPG011','OPG010','OPG001'])
 
         # setup session variables
         session['saved_layouts'] = {}

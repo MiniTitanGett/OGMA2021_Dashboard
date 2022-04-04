@@ -331,14 +331,14 @@ for x in range(5):
             # If nothing in history return value
             elif not state_of_display:
                 display_button = generate_history_button(dropdown_val, 0, changed_index, df_name, df_const)
-                nid_path = get_nid_path(dropdown_value=df_const[df_name]["Categorical_Data"]["H"+str(0)]["labels"]
+                nid_path = get_nid_path(dropdown_value=df_const[df_name]["CATEGORICAL_DATA"]["H"+str(0)]["labels"]
                                                     [dropdown_val] if isinstance(dropdown_val, int) else dropdown_val)
                 dropdown = generate_dropdown(changed_index, df_name, nid_path, df_const)
             # If something is in the history preserve it and add value to it
             else:
                 display_button = state_of_display + [
                     (generate_history_button(dropdown_val, len(state_of_display), changed_index, df_name, df_const))]
-                nid_path = get_nid_path(sod=state_of_display, dropdown_value=df_const[df_name]["Categorical_Data"]
+                nid_path = get_nid_path(sod=state_of_display, dropdown_value=df_const[df_name]["CATEGORICAL_DATA"]
                             ["H"+str(len(state_of_display))]["labels"][dropdown_val] if isinstance(dropdown_val, int)
                                                                                                     else dropdown_val)
                 dropdown = generate_dropdown(changed_index, df_name, nid_path, df_const)
@@ -427,7 +427,7 @@ def _print_choice_to_display_and_modify_secondary_dropdown(dropdown_val, _n_clic
         # If nothing in history return value
         elif not state_of_display:
             display_button = generate_secondary_history_button(dropdown_val, 0, changed_index, df_name, df_const)
-            nid_path = get_nid_path(dropdown_value=df_const[df_name]["Categorical_Data"]["Variable Name"]["labels"]
+            nid_path = get_nid_path(dropdown_value=df_const[df_name]["CATEGORICAL_DATA"]["Variable Name"]["labels"]
                                                                 [dropdown_val] if df_name == 'OPG011' else dropdown_val)
             dropdown = generate_secondary_dropdown(changed_index, df_name, nid_path, df_const)
         # If something is in the history preserve it and add value to it
@@ -435,7 +435,7 @@ def _print_choice_to_display_and_modify_secondary_dropdown(dropdown_val, _n_clic
             display_button = state_of_display + [
                 (generate_secondary_history_button(dropdown_val, len(state_of_display), changed_index, df_name,
                                                                                                             df_const))]
-            nid_path = get_nid_path(sod=state_of_display, dropdown_value=df_const[df_name]["Categorical_Data"]
+            nid_path = get_nid_path(sod=state_of_display, dropdown_value=df_const[df_name]["CATEGORICAL_DATA"]
               [hierarchy_level[len(state_of_display)]]["labels"][dropdown_val] if df_name == 'OPG011' else dropdown_val)
             dropdown = generate_secondary_dropdown(changed_index, df_name, nid_path, df_const)
     # If update triggered due to creation of a button do not update anything

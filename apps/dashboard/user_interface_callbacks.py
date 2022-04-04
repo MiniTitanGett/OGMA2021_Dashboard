@@ -1743,7 +1743,7 @@ app.clientside_callback(
                     }
                 case 'Bar':
                     if (argValue[3] == 'Horizontal'){
-                        if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(event.x_axis)){
+                        if(dfConst[df_const[df_name]["MEASURE_TYPE_VALUES"].includes(event.x_axis)){
                             event.x_modified = false;
                             break;
                         }
@@ -1777,7 +1777,7 @@ app.clientside_callback(
                         let num=dfConst[dfName]['Variable_Option_Lists'].length
                         for(let i=0;i<num;i++){
                             if(dfConst[dfName]['Variable_Option_Lists'][i].includes(string[0])){
-                                if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(string[1])){
+                                if(dfConst[df_const[df_name]["MEASURE_TYPE_VALUES"].includes(string[1])){
                                     event.x_modified = false;
                                     break;
                                 }
@@ -1797,7 +1797,7 @@ app.clientside_callback(
                             break;
                         }  
                     }
-                    else if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(event.x_axis)){
+                    else if(df_const[df_name]["MEASURE_TYPE_VALUES"].includes(event.x_axis)){
                         event.x_modified = false;
                         break;
                     }
@@ -1814,7 +1814,7 @@ app.clientside_callback(
             switch(graphType){
                 case 'Line':
                 case 'Scatter':
-                    if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(event.y_axis)){
+                    if(df_const[df_name]["MEASURE_TYPE_VALUES"].includes(event.y_axis)){
                     event.y_modified = false;
                     break;
                     }
@@ -1833,7 +1833,7 @@ app.clientside_callback(
                             break;
                         }  
                     }
-                    else if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(event.y_axis)){
+                    else if(df_const[df_name]["MEASURE_TYPE_VALUES"].includes(event.y_axis)){
                         event.y_modified = false;
                         break;
                     }
@@ -1865,7 +1865,7 @@ app.clientside_callback(
                         let num=dfConst[dfName]['Variable_Option_Lists'].length
                         for(let i=0;i<num;i++){
                             if(dfConst[dfName]['Variable_Option_Lists'][i].includes(string[0])){
-                                if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(string[1])){
+                                if(df_const[df_name]["MEASURE_TYPE_VALUES"].includes(string[1])){
                                     event.y_modified = false;
                                     break;
                                 }
@@ -1876,7 +1876,7 @@ app.clientside_callback(
                     }
                 case 'Box_Plot':
                     if(argValue[2]=='Vertical'){
-                        if(dfConst[dfName]['MEASURE_TYPE_OPTIONS'].includes(event.y_axis)){
+                        if(df_const[df_name]["MEASURE_TYPE_VALUES"].includes(event.y_axis)){
                             event.y_modified = false;
                             break;
                         }

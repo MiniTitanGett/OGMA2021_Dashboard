@@ -269,6 +269,8 @@ EXEC InsertOPRef @ref_table = 'OPG011', @ref_value = 'LBL_Measure_Value',       
 EXEC InsertOPRef @ref_table = 'OPG011', @ref_value = 'LBL_Measure_Type',            @language = 'Fr', @ref_desc = 'Type de Mesure'
 EXEC InsertOPRef @ref_table = 'OPG011', @ref_value = 'LBL_Hierarchy_One_Name',      @language = 'En', @ref_desc = 'Hierarchy One Name'
 EXEC InsertOPRef @ref_table = 'OPG011', @ref_value = 'LBL_Hierarchy_One_Name',      @language = 'Fr', @ref_desc = 'Hiérarchie un Nom'
+EXEC InsertOPRef @ref_table = 'OPG011', @ref_value = 'LBL_Partial_Period', @language = 'En', @ref_desc = 'Partial Period'
+EXEC InsertOPRef @ref_table = 'OPG011', @ref_value = 'LBL_Partial_Period', @language = 'Fr', @ref_desc = 'Période Partielle'
 EXEC InsertOPRef @ref_table = 'OPG011', @ref_value = 'LBL_Gen_Hover_Data',          @language = 'En', @ref_desc = '<b>%{customdata[0]}</b><br><b>%{customdata[1]}</b><br><b>%AXIS-TITLE-A%</b>: %AXIS-A%<br><b>%AXIS-TITLE-B%</b>: %AXIS-B%<extra></extra>'
 EXEC InsertOPRef @ref_table = 'OPG011', @ref_value = 'LBL_Gen_Hover_Data',          @language = 'Fr', @ref_desc = '<b>%{customdata[0]}</b><br><b>%{customdata[1]}</b><br><b>%AXIS-TITLE-A%</b>: %AXIS-A%<br><b>%AXIS-TITLE-B%</b>: %AXIS-B%<extra></extra>'
 EXEC InsertOPRef @ref_table = 'OPG011', @ref_value = 'LBL_Bubble_Hover_Data',       @language = 'En', @ref_desc = '<b>%{customdata[0]}</b><br><b>%Date%</b>: %Date-Value%<br><b>%AXIS-X-A% -  %AXIS-X-B%</b>: %X-AXIS% <br><b>%AXIS-Y-A% -  %AXIS-Y-B%</b>: %Y-AXIS% <br><b>%AXIS-Z-A% -  %AXIS-Z-B%</b>: %Z-AXIS% <extra></extra>'

@@ -30,14 +30,14 @@ def generate_secondary_dropdown(tile, df_name, nid_path, df_const):
             # df = df.set_index(['H{}'.format(i) for i in range(llen)])
             # option_list = df.loc[tuple(hierarchy_nid_list)]['H{}'.format(llen)].dropna().unique()
             for i in range(llen):
-                level = df_const[df_name]["Categorical_Data"][hierarchy_level[i]]["labels"].index(
+                level = df_const[df_name]["CATEGORICAL_DATA"][hierarchy_level[i]]["labels"].index(
                                                 hierarchy_nid_list[i]) if df_name == "OPG011" else hierarchy_nid_list[i]
                 df = df.filter(df[hierarchy_level[i]] == level)
                 df = df.drop(hierarchy_level[i])
             option_list = df[hierarchy_level[llen]].unique(dropmissing=True, dropnan=True)
         else:
             option_list = df['Variable Name'].unique()
-        options = [{'label': df_const[df_name]["Categorical_Data"][hierarchy_level[llen]]["labels"]
+        options = [{'label': df_const[df_name]["CATEGORICAL_DATA"][hierarchy_level[llen]]["labels"]
                                                     [i]if df_name == "OPG011" else i, 'value': i} for i in option_list]
 
         options = sorted(options, key=lambda k: k['label'])
@@ -59,7 +59,7 @@ def generate_secondary_history_button(name, index, tile, df_name, df_const):
     """helper function to generate and return a hierarchy button for the hierarchy path."""
     hierarchy_level = ['Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier']
     return html.Button(
-        df_const[df_name]["Categorical_Data"][hierarchy_level[index]]["labels"]
+        df_const[df_name]["CATEGORICAL_DATA"][hierarchy_level[index]]["labels"]
         [name] if isinstance(name, int) else name,
         id={'type': 'button: {}'.replace("{}", str(tile)), 'index': index},
         n_clicks=0,
@@ -76,7 +76,7 @@ def get_secondary_hierarchy_layout(tile, df_name=None, hierarchy_toggle='Level F
     if df_name is not None and df_const is not None:
         hierarchy_nid_list = nid_path.split("^||^")
         hierarchy_button_path = []
-        hierarchy_level = ['Variable Name', 'Variable Name Qualifier']
+        hierarchy_level = df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
         for nid in hierarchy_nid_list:
             if nid == "root":
                 continue

@@ -29,7 +29,6 @@ from server import get_hierarchy_parent, get_variable_parent
 # ***********************************************ARBITRARY CONSTANTS*************************************************
 
 GRAPH_OPTIONS = {
-    'OPG001': ['Line', 'Bar', 'Scatter', 'Bubble', 'Box_Plot', 'Table', "Pivot_Table"],
     'OPG010': ['Sankey', 'Table'],
     'OPG011': ['Line', 'Bar', 'Scatter', 'Bubble', 'Box_Plot', 'Table', "Pivot_Table"]
 }
@@ -922,11 +921,11 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                 # Builds data based on all measure types, variable names, and selected time frame
                 for x in range(len(measure_types)):
                     measure_type = measure_types[x]
-                    reduced_df = further_filtered_df[further_filtered_df['Measure Type'] == measure_type]
+                    reduced_df = further_filtered_df[measure_type]
                     for y in range(len(variable_names)):
                         variable_name = variable_names[y]
                         # filter on either the variable name or variable value column
-                        if variable_name in df_const[df_name]['Categorical_Data']['Variable Name']['labels']:
+                        if variable_name in df_const[df_name]["CATEGORICAL_DATA"]['Variable Name']['labels']:
                             further_reduced_df = reduced_df[reduced_df['Variable Name'] == df_const[df_name]
                             ["CATEGORICAL_DATA"]['Variable Name']["labels"].index(variable_name)]
                         else:
@@ -1136,7 +1135,7 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                 for y in range(len(variable_names)):
                     variable_name = variable_names[y]
                     # filter on either the variable name or variable value column
-                    if variable_name in df_const[df_name]['Categorical_Data']['Variable Name']['labels']:
+                    if variable_name in df_const[df_name]['CATEGORICAL_DATA']['Variable Name']['labels']:
                         further_reduced_df = further_filtered_df[further_filtered_df['Variable Name'] == df_const[df_name]
                                     ["CATEGORICAL_DATA"]['Variable Name']["labels"].index(variable_name)]
                     else:
@@ -1264,11 +1263,11 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                     further_filtered_df = filtered_df[filtered_df["H" + str(len(hierarchy_path))] == specific_items[p]]
             for x in range(len(measure_types)):
                 measure_type = measure_types[x]
-                reduced_df = further_filtered_df[further_filtered_df['Measure Type'] == measure_type]
+                reduced_df = further_filtered_df[measure_type]
                 for y in range(len(variable_names)):
                     variable_name = variable_names[y]
                     # filter on either the variable name or variable value column
-                    if variable_name in df_const[df_name]['Categorical_Data']['Variable Name']['labels']:
+                    if variable_name in df_const[df_name]['CATEGORICAL_DATA']['Variable Name']['labels']:
                         further_reduced_df = reduced_df[reduced_df['Variable Name'] == df_const[df_name]
                         ["CATEGORICAL_DATA"]['Variable Name']["labels"].index(variable_name)]
                     else:
@@ -1895,70 +1894,50 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
     return time_df
 
 
-def customize_menu_filter(dff, df_name, measure_type, variable_names, df_const, secondary_path,
+def customize_menu_filter(dff, df_name, measure_type, df_const, secondary_path,
                           secondary_hierarchy_toggle, secondary_level_dropdown, secondary_graph_children,
                           secondary_options):
     """Filters data frame based on customize menu inputs and returns the filtered data frame."""
-    if 'OPG001' in df_name:
-        if measure_type == 'Link':
-            filtered_df = dff[dff['Measure Fcn'] == 'Link']
-        else:
-            filtered_df = dff[dff['Measure Type'] == measure_type]
 
-        if variable_names is not None:
-            # ensure variable_names is a list of variable values
-            if type(variable_names) is not list:
-                variable_names = [variable_names]
-
-            aggregate_df = pd.DataFrame()
-
-            # for each selection, add the rows defined by the selection
-            for variable_name in variable_names:
-                # Filters based on rows that match the variable name path
-                aggregate_df = pd.concat([aggregate_df, filtered_df[filtered_df[df_const[df_name]
-                                                                                ['VARIABLE_LEVEL']] == variable_name]])
-
-            filtered_df = aggregate_df
+    if secondary_hierarchy_toggle == 'Level Filter':
+        variable = df_const[df_name][secondary_level_dropdown]
+    elif secondary_hierarchy_toggle == 'Specific Item' and secondary_graph_children == ['graph_children']:
+        variable = [option['label'] for option in secondary_options]
     else:
-        if secondary_hierarchy_toggle == 'Level Filter':
-            variable = df_const[df_name][secondary_level_dropdown]
-        elif secondary_hierarchy_toggle == 'Specific Item' and secondary_graph_children == ['graph_children']:
-            variable = [option['label'] for option in secondary_options]
-        else:
-            variable = secondary_path[-1] if secondary_path != [] else None
+        variable = secondary_path[-1] if secondary_path != [] else None
 
-        if measure_type == 'Link':
-            filtered_df = dff[dff['Measure Fcn'] == 'Link']
-        else:
-            filtered_df = dff[dff['Measure Type'] == measure_type]
+    if measure_type == 'Link':
+        filtered_df = dff[dff['Measure Fcn'] == 'Link']
+    else:
+        filtered_df = dff[dff['Measure Type'] == measure_type]
 
-        if variable is not None:
-            # ensure variable_names is a list of variable values
-            if type(variable) is not list:
-                variable = [variable]
+    if variable is not None:
+        # ensure variable_names is a list of variable values
+        if type(variable) is not list:
+            variable = [variable]
 
-            aggregate_df = pd.DataFrame()
+        aggregate_df = pd.DataFrame()
 
-            # for each selection, add the rows defined by the selection
-            for variable_name in variable:
-                # Filters based on rows that match the variable name path
-                if secondary_hierarchy_toggle == "Level Filter":
-                    further_filter_df = filtered_df[filtered_df[secondary_level_dropdown] ==
-                                                             variable_name]
+        # for each selection, add the rows defined by the selection
+        for variable_name in variable:
+            # Filters based on rows that match the variable name path
+            if secondary_hierarchy_toggle == "Level Filter":
+                further_filter_df = filtered_df[filtered_df[secondary_level_dropdown] ==
+                                                         variable_name]
+            else:
+                if secondary_hierarchy_toggle == 'Specific Item' and secondary_graph_children == ['graph_children']:
+                    further_filter_df = filtered_df[
+                        filtered_df[df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
+                        [len(secondary_path)]] == variable_name]
                 else:
-                    if secondary_hierarchy_toggle == 'Specific Item' and secondary_graph_children == ['graph_children']:
-                        further_filter_df = filtered_df[
-                            filtered_df[df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
-                            [len(secondary_path)]] == variable_name]
-                    else:
-                        further_filter_df = filtered_df[filtered_df[df_const[df_name][
-                            'SECONDARY_HIERARCHY_LEVELS'][len(secondary_path) - 1]] == variable_name]
+                    further_filter_df = filtered_df[filtered_df[df_const[df_name][
+                        'SECONDARY_HIERARCHY_LEVELS'][len(secondary_path) - 1]] == variable_name]
 
-                aggregate_df = pd.concat([aggregate_df, further_filter_df])
+            aggregate_df = pd.concat([aggregate_df, further_filter_df])
 
-            filtered_df = aggregate_df
-        else:
-            filtered_df = filtered_df[0:0]
+        filtered_df = aggregate_df
+    else:
+        filtered_df = filtered_df[0:0]
 
     return filtered_df
 

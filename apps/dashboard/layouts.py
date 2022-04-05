@@ -808,8 +808,6 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
     if df_name is not None:
         if 'OPG010' in df_name:
             graphs = GRAPH_OPTIONS['OPG010']
-        elif 'OPG001' in df_name:
-            graphs = GRAPH_OPTIONS['OPG001']
         elif 'OPG011' in df_name:
             graphs = GRAPH_OPTIONS['OPG011']
     graphs.sort()
@@ -1013,14 +1011,13 @@ def get_tile_layout(num_tiles, tile_keys=None, parent_df=None):
 # ***************************************************GRAPH MENUS*****************************************************
 
 
-def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridline, legend, df_const, data_fitting, ci,
+def get_line_scatter_graph_menu(tile, x, mode, measure_type, df_name, gridline, legend, df_const, data_fitting, ci,
                                 data_fit, degree, xaxis, yaxis, xpos, ypos, xmodified, ymodified, secondary_level_value,
                                 secondary_nid_path, secondary_hierarchy_toggle, secondary_graph_all_toggle, color):
     """
     :param data_fitting: boolean to determine whether to show data fitting options
     :param ci: show confidence interval or not
     :param measure_type: the measure type value
-    :param y: the y-axis value
     :param x: the x-axis value
     :param mode: the mode for the graph
     :param tile: Index of the tile the line graph menu corresponds to
@@ -1049,8 +1046,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
     # arg_value[3] = fit
     # arg_value[4] = degree
     # arg_value[5] = confidence interval
-    # arg_value[6] = variable names selector/ Graph variable
-    # arg_value[7] = color
+    # arg_value[6] = color
 
     return [
         html.Div(
@@ -1180,7 +1176,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                                         options=[{'label': 'Yes', 'value': 'ci'}],
                                         value=ci if ci else [],
                                         style={'color': 'black', 'display': 'inline-block'}),
-                                    style={'display': 'inline-block'}),
+                                    style={'display': 'inline-flex'}),
                             ], style={'display': 'None'}, id={'type': 'confidence-interval-wrapper', 'index': tile}),
                         ],
                         style={'display': 'inline-block'} if data_fitting else DATA_CONTENT_HIDE),
@@ -1192,16 +1188,6 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                             className='graph-option-title')],
                         style={'display': 'inline-block', 'position': 'relative', 'top': '-5px',
                                'margin-right': '40px'}),
-                    html.Div([
-                        dcc.Dropdown(
-                            id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 6},
-                            options=[] if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
-                            value=y,
-                            multi=True,
-                            clearable=False,
-                            style={'font-size': '13px'} if df_name != 'OPG011' else {'display': 'None'})],
-                        style={'display': 'inline-flex', 'flex-direction': 'column',
-                               'max-width': '360px'} if df_name != 'OPG011' else {'display': 'None'}),
                     html.Div(
                         get_secondary_hierarchy_layout(tile, df_name, secondary_hierarchy_toggle, secondary_level_value,
                                                   secondary_graph_all_toggle, secondary_nid_path, df_const=df_const),
@@ -1222,7 +1208,7 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
                         style={'position': 'relative', 'display': 'inline-block'}),
                     html.Div([
                         dcc.RadioItems(
-                            id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 7},
+                            id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 6},
                             options=[{'label': i, 'value': i} for i in COLOR_PALETTE],
                             labelStyle={'display': 'inline-block'},
                             value=color if color else 'G10',
@@ -1239,13 +1225,12 @@ def get_line_scatter_graph_menu(tile, x, y, mode, measure_type, df_name, gridlin
             ], style={'margin-left': '15px'})]), ]
 
 
-def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline, legend, df_name, df_const, xaxis,
+def get_bar_graph_menu(tile, x, measure_type, orientation, animate, gridline, legend, df_name, df_const, xaxis,
                        yaxis, xpos, ypos, xmodified, ymodified, secondary_level_value, secondary_nid_path,
                        secondary_hierarchy_toggle, secondary_graph_all_toggle, color):
     """
     :param tile: Index of the tile the bar graph menu corresponds to
     :param x: the x-axis value
-    :param y: the y-axis value
     :param measure_type: the measure type value
     :param orientation: the orientation value
     :param animate: the animate graph value
@@ -1344,16 +1329,6 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
                         className='graph-option-title')],
                     style={'display': 'inline-block', 'position': 'relative', 'top': '-5px',
                            'margin-right': '40px'}),
-                html.Div([
-                    dcc.Dropdown(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
-                        options=[] if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
-                        value=y,
-                        multi=True,
-                        clearable=False,
-                        style={'font-size': '13px'} if df_name != 'OPG011' else {'display': 'None'})],
-                    style={'display': 'inline-flex', 'flex-direction': 'column',
-                               'max-width': '360px'} if df_name != 'OPG011' else {'display': 'None'}),
                 html.Div(
                     get_secondary_hierarchy_layout(tile, df_name, secondary_hierarchy_toggle, secondary_level_value,
                                                   secondary_graph_all_toggle, secondary_nid_path, df_const=df_const),
@@ -1363,7 +1338,7 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
                 html.P([get_label('LBL_Animate_Over_Time') + ": "], style={'padding-right': '33px',
                                                                     'display': 'inline-block', 'font-size': '13px'}),
                 dcc.Checklist(
-                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
+                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
                     options=[{'label': 'Yes', 'value': 'animate'}],
                     value=animate if animate else [],
                     style={'color': 'black', 'display': 'inline-block'}),
@@ -1383,7 +1358,7 @@ def get_bar_graph_menu(tile, x, y, measure_type, orientation, animate, gridline,
                     style={'position': 'relative', 'display': 'inline-block'}),
                 html.Div([
                     dcc.RadioItems(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
+                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
                         options=[{'label': i, 'value': i} for i in COLOR_PALETTE],
                         labelStyle={'display': 'inline-block'},
                         value=color if color else 'G10',
@@ -1578,18 +1553,16 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                 get_secondary_hierarchy_layout(tile, df_name, hierarchy_toggle='Level Filter',
                                               level_value='Variable Name', graph_all_toggle=None, nid_path="root",
                                               df_const=df_const),
-                style={'display': 'None'}
-                if df_name == 'OPG011' else {'display': 'None'})
+                style={'display': 'None'})
         ], style={'margin-left': '15px'})]
 
 
-def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, df_name, show_data_points, gridline,
+def get_box_plot_menu(tile, axis_measure, graph_orientation, df_name, show_data_points, gridline,
                       legend, df_const, xaxis, yaxis, xpos, ypos, xmodified, ymodified, secondary_level_value,
                       secondary_nid_path, secondary_hierarchy_toggle, secondary_graph_all_toggle, color):
     """
         :param tile: Index of the tile the bar graph menu corresponds to
         :param axis_measure: the measure for the axis
-        :param graphed_variables: the variables to be graphed
         :param graph_orientation: the orientation value
         :param df_name: Name of the data set being used
         :param show_data_points: the animate graph value
@@ -1670,16 +1643,6 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                         className='graph-option-title')],
                     style={'display': 'inline-block', 'position': 'relative', 'top': '-5px',
                            'margin-right': '40px', }),
-                html.Div([
-                    dcc.Dropdown(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
-                        options=[] if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
-                        value=graphed_variables,
-                        multi=True,
-                        clearable=False,
-                        style={'font-size': '13px'} if df_name != 'OPG011' else {'display': 'None'})],
-                    style={'display': 'inline-flex', 'flex-direction': 'column',
-                               'max-width': '360px'} if df_name != 'OPG011' else {'display': 'None'}),
                 html.Div(
                     get_secondary_hierarchy_layout(tile, df_name, secondary_hierarchy_toggle, secondary_level_value,
                                                   secondary_graph_all_toggle, secondary_nid_path, df_const=df_const),
@@ -1690,7 +1653,7 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                 html.P([get_label('LBL_Show_Data_Points') + ": "], style={'display': 'inline-block',
                                                                           'margin-right': '41px', 'font-size': '13px'}),
                 dcc.Checklist(
-                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
+                    id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
                     options=[{'label': 'Yes', 'value': 'show'}],
                     value=show_data_points,
                     style={'color': 'black', 'display': 'inline-block'}),
@@ -1710,7 +1673,7 @@ def get_box_plot_menu(tile, axis_measure, graphed_variables, graph_orientation, 
                     style={'position': 'relative', 'display': 'inline-block'}),
                 html.Div([
                     dcc.RadioItems(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
+                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
                         options=[{'label': i, 'value': i} for i in COLOR_PALETTE],
                         labelStyle={'display': 'inline-block'},
                         value=color if color else 'G10',
@@ -1818,12 +1781,11 @@ def get_table_graph_menu(tile, number_of_columns, xaxis, yaxis, xpos, ypos, xmod
                 get_secondary_hierarchy_layout(tile, df_name, hierarchy_toggle='Level Filter',
                                               level_value='Variable Name',
                                               graph_all_toggle=None, nid_path="root", df_const=df_const),
-                style={'display': 'None'}
-                if df_name == 'OPG011' else {'display': 'None'})
+                style={'display': 'None'})
         ], style={'font-size': '13px'})]
 
 
-def get_sankey_menu(tile, graphed_options, df_name, df_const, xaxis, yaxis, xpos, ypos, xmodified, ymodified,
+def get_sankey_menu(tile, df_name, df_const, xaxis, yaxis, xpos, ypos, xmodified, ymodified,
                     secondary_level_value, secondary_nid_path, secondary_hierarchy_toggle, secondary_graph_all_toggle):
     """
     :param tile: Index of the tile the line graph menu corresponds to.
@@ -1843,7 +1805,6 @@ def get_sankey_menu(tile, graphed_options, df_name, df_const, xaxis, yaxis, xpos
     :param secondary_nid_path: the path of secondary specific hierarchy
     :return: Menu with options to modify a sankey graph.
     """
-    # (args-value: {})[0] = graphed variables
 
     return [
         html.Div(
@@ -1869,16 +1830,6 @@ def get_sankey_menu(tile, graphed_options, df_name, df_const, xaxis, yaxis, xpos
                         className='graph-option-title')],
                     style={'display': 'inline-block', 'position': 'relative', 'top': '-5px',
                            'margin-right': '40px', }),
-                html.Div([
-                    dcc.Dropdown(
-                        id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
-                        options=[] if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
-                        value=graphed_options,
-                        multi=True,
-                        clearable=False,
-                        style={'font-size': '13px'} if df_name != 'OPG010' else {'display': 'None'})],
-                    style={'display': 'inline-flex', 'flex-direction': 'column',
-                           'max-width': '360px'} if df_name != 'OPG010' else {'display': 'None'}),
                 html.Div(
                     get_secondary_hierarchy_layout(tile, df_name, secondary_hierarchy_toggle, secondary_level_value,
                                                   secondary_graph_all_toggle, secondary_nid_path, df_const=df_const),

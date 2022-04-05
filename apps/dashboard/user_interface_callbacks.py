@@ -529,20 +529,16 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
         raise PreventUpdate
 
     # check for keyword in df_name_parent and df_name
-    if 'OPG001' in df_name_parent:
-        df_name_parent = 'OPG001'
-    elif 'OPG010' in df_name_parent:
+    if 'OPG010' in df_name_parent:
         df_name_parent = 'OPG010'
     elif 'OPG011' in df_name_parent:
         df_name_parent = 'OPG011'
 
     # if new tile is created and is on a dataset that is not confirmed use previous data set that has been confirmed
     if '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-link' and df_confirm is not None:
-        if 'OPG001' in df_confirm:
-            df_confirm = 'OPG001'
         if 'OPG010' in df_confirm:
             df_confirm = 'OPG010'
-        if 'OPG011' in df_confirm:
+        elif 'OPG011' in df_confirm:
             df_confirm = 'OPG011'
         graph_options = GRAPH_OPTIONS[df_confirm]
         # for i in graph_options:
@@ -563,9 +559,7 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
     elif trigger == 'fa fa-unlink':
         link_trigger = "fa fa-unlink"
         if df_name is not None:
-            if 'OPG001' in df_name:
-                df_name = 'OPG001'
-            elif 'OPG010' in df_name:
+            if 'OPG010' in df_name:
                 df_name = 'OPG010'
             elif 'OPG011' in df_name:
                 df_name = 'OPG011'
@@ -580,14 +574,8 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
         #     options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
         options = [{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in graph_options]
     else:
-        if "OPG001" in trigger:
-            graph_options = GRAPH_OPTIONS["OPG001"]
-            # if graph_type is not None and graph_type not in graph_options:
-            #     link_trigger = "fa fa-unlink"
-        elif "OPG010" in trigger:
+        if "OPG010" in trigger:
             graph_options = GRAPH_OPTIONS["OPG010"]
-            # if graph_type is not None and graph_type not in graph_options:
-            #     link_trigger = "fa fa-unlink"
         elif "OPG011" in trigger:
             graph_options = GRAPH_OPTIONS["OPG011"]
         else:
@@ -619,12 +607,12 @@ app.clientside_callback(
     """
     function _update_data_fitting(trigger, style){
         if (trigger.includes('show')){
-            if (isEquivalent(style, {'display': 'inline-flex', 'flex-direction': 'row', 'width': '290px'
+            if (isEquivalent(style, {'display': 'inline-flex', 'flex-direction': 'row', 'width': '280px'
                                                                                             , 'flex-wrap': 'wrap'})){
                 style = dash_clientside.no_update;
             }
             else{
-                style = {'display': 'inline-flex', 'flex-direction': 'row', 'width': '290px', 'flex-wrap': 'wrap'};
+                style = {'display': 'inline-flex', 'flex-direction': 'row', 'width': '280px', 'flex-wrap': 'wrap'};
             }
         }
 
@@ -727,8 +715,6 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
     if selected_graph_type == 'Line' or selected_graph_type == 'Scatter':
         menu = get_line_scatter_graph_menu(tile=tile,
                                            x=X_AXIS_OPTIONS[0],
-                                           y=None if df_const is None else
-                                           df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
                                            mode=selected_graph_type,
                                            measure_type=None if df_const is None else
                                            df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
@@ -754,7 +740,6 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
     elif selected_graph_type == 'Bar':
         menu = get_bar_graph_menu(tile=tile,
                                   x=BAR_X_AXIS_OPTIONS[0],
-                                  y=None if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
                                   measure_type=None if df_const is None else
                                   df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
                                   orientation=None,
@@ -814,8 +799,6 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
         menu = get_box_plot_menu(tile=tile,
                                  axis_measure=None if df_const is None else
                                  df_const[df_name]['MEASURE_TYPE_OPTIONS'][0],
-                                 graphed_variables=None if df_const is None else
-                                 df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
                                  graph_orientation='Horizontal',
                                  df_name=df_name,
                                  show_data_points=[],
@@ -835,8 +818,6 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
                                  color=None)
     elif selected_graph_type == 'Sankey':
         menu = get_sankey_menu(tile=tile,
-                               graphed_options=None if df_const is None else
-                               df_const[df_name]['VARIABLE_OPTIONS'][0]['value'],
                                df_name=df_name,
                                df_const=df_const,
                                xaxis=None,
@@ -1085,9 +1066,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                         if links_style[i] == 'fa fa-link':
                             prev_selection[i] = df_name
                             # check if the keywords are in df_name
-                            if 'OPG001' in df_name:
-                                df_tile = 'OPG001'
-                            elif 'OPG010' in df_name:
+                            if 'OPG010' in df_name:
                                 df_tile = 'OPG010'
                             elif 'OPG011' in df_name:
                                 df_tile = 'OPG011'
@@ -1167,9 +1146,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                     if links_style[i] == 'fa fa-link':
                         prev_selection[i] = df_name
                         # check if the keywords are in df_name
-                        if 'OPG001' in df_name:
-                            df_tile = 'OPG001'
-                        elif 'OPG010' in df_name:
+                        if 'OPG010' in df_name:
                             df_tile = 'OPG010'
                         elif 'OPG011' in df_name:
                             df_tile = 'OPG011'
@@ -1219,9 +1196,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                     # trigger update for all tiles that are linked to the active data menu
                     for i in range(len(links_style)):
                         if links_style[i] == 'fa fa-link':
-                            if 'OPG001' in df_name:
-                                df_tile = 'OPG001'
-                            elif 'OPG010' in df_name:
+                            if 'OPG010' in df_name:
                                 df_tile = 'OPG010'
                             elif 'OPG011' in df_name:
                                 df_tile = 'OPG011'

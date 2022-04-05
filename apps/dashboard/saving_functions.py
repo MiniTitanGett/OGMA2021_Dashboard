@@ -96,9 +96,9 @@ def delete_dashboard(dashboard_id):
 def load_graph_menu(graph_type, tile, df_name, args_list, graph_options, graph_variable, df_const):
     """Retuns the graph menu dependent on the graph type."""
     if graph_type == 'Line' or graph_type == 'Scatter':
-        graph_menu = get_line_scatter_graph_menu(tile=tile, x=args_list[0], y=args_list[6], measure_type=args_list[1],
+        graph_menu = get_line_scatter_graph_menu(tile=tile, x=args_list[0], measure_type=args_list[1],
                                                  mode=args_list[2], data_fit=args_list[3], degree=args_list[4],
-                                                 ci=args_list[5], color=args_list[7], gridline=graph_options[6],
+                                                 ci=args_list[5], color=args_list[6], gridline=graph_options[6],
                                                  legend=graph_options[7], xaxis=graph_options[0],
                                                  yaxis=graph_options[1], data_fitting=True, xpos=graph_options[2],
                                                  ypos=graph_options[3], xmodified=graph_options[0],
@@ -108,8 +108,8 @@ def load_graph_menu(graph_type, tile, df_name, args_list, graph_options, graph_v
                                                  secondary_hierarchy_toggle=graph_variable[2],
                                                  secondary_graph_all_toggle=graph_variable[3])
     elif graph_type == 'Bar':
-        graph_menu = get_bar_graph_menu(tile=tile, x=args_list[0], y=args_list[3], measure_type=args_list[1],
-                                        orientation=args_list[2], animate=args_list[4], color=args_list[5],
+        graph_menu = get_bar_graph_menu(tile=tile, x=args_list[0], measure_type=args_list[1],
+                                        orientation=args_list[2], animate=args_list[3], color=args_list[4],
                                         gridline=graph_options[6], legend=graph_options[7], xaxis=graph_options[0],
                                         yaxis=graph_options[1], df_name=df_name, xmodified=graph_options[4],
                                         ymodified=graph_options[5], xpos=graph_options[2], ypos=graph_options[3],
@@ -123,9 +123,9 @@ def load_graph_menu(graph_type, tile, df_name, args_list, graph_options, graph_v
                                           xmodified=graph_options[4], ymodified=graph_options[5], df_name=df_name,
                                           df_const=df_const)
     elif graph_type == 'Box_Plot':
-        graph_menu = get_box_plot_menu(tile=tile, axis_measure=args_list[0], graphed_variables=args_list[2],
-                                       graph_orientation=args_list[1], show_data_points=args_list[3],
-                                       color=args_list[4],
+        graph_menu = get_box_plot_menu(tile=tile, axis_measure=args_list[0],
+                                       graph_orientation=args_list[1], show_data_points=args_list[2],
+                                       color=args_list[3],
                                        gridline=graph_options[6], legend=graph_options[7], xaxis=graph_options[0],
                                        yaxis=graph_options[1], df_name=df_name, df_const=df_const,
                                        xmodified=graph_options[4], ymodified=graph_options[5],
@@ -134,7 +134,7 @@ def load_graph_menu(graph_type, tile, df_name, args_list, graph_options, graph_v
                                        secondary_hierarchy_toggle=graph_variable[2],
                                        secondary_graph_all_toggle=graph_variable[3])
     elif graph_type == 'Sankey':
-        graph_menu = get_sankey_menu(tile=tile, graphed_options=args_list[0], df_name=df_name, df_const=df_const,
+        graph_menu = get_sankey_menu(tile=tile, df_name=df_name, df_const=df_const,
                                      xaxis=graph_options[0], yaxis=graph_options[1], xpos=graph_options[2],
                                      ypos=graph_options[3], xmodified=graph_options[4], ymodified=graph_options[5],
                                      secondary_level_value=graph_variable[0], secondary_nid_path=graph_variable[1],

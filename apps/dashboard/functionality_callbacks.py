@@ -152,9 +152,7 @@ for x in range(4):
         # check if keyword in df_name
         if df_name is not None:
             df_tile = df_name
-            if 'OPG001' in df_name:
-                df_name = 'OPG001'
-            elif 'OPG010' in df_name:
+            if 'OPG010' in df_name:
                 df_name = 'OPG010'
             elif 'OPG011' in df_name:
                 df_name = 'OPG011'
@@ -162,8 +160,8 @@ for x in range(4):
         if '"type":"tile-view"}.className' in changed_id and df_name is None and parent_df_name is None:
             return None, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open
 
-        if len(arg_value) == 0:
-            return None, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open
+        # if len(arg_value) == 0 and graph_type != "Sankey":
+        #     return None, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open
 
         # if unlinked and parent changes, prevent update
         if (link_state == 'fa fa-unlink' and '"index":4' in changed_id) and 'args-value' not in changed_id:
@@ -428,7 +426,7 @@ def _print_choice_to_display_and_modify_secondary_dropdown(dropdown_val, _n_clic
         elif not state_of_display:
             display_button = generate_secondary_history_button(dropdown_val, 0, changed_index, df_name, df_const)
             nid_path = get_nid_path(dropdown_value=df_const[df_name]["CATEGORICAL_DATA"]["Variable Name"]["labels"]
-                                                                [dropdown_val] if df_name == 'OPG011' else dropdown_val)
+                                                                [dropdown_val] if type(dropdown_val) == int else dropdown_val)
             dropdown = generate_secondary_dropdown(changed_index, df_name, nid_path, df_const)
         # If something is in the history preserve it and add value to it
         else:
@@ -436,7 +434,7 @@ def _print_choice_to_display_and_modify_secondary_dropdown(dropdown_val, _n_clic
                 (generate_secondary_history_button(dropdown_val, len(state_of_display), changed_index, df_name,
                                                                                                             df_const))]
             nid_path = get_nid_path(sod=state_of_display, dropdown_value=df_const[df_name]["CATEGORICAL_DATA"]
-              [hierarchy_level[len(state_of_display)]]["labels"][dropdown_val] if df_name == 'OPG011' else dropdown_val)
+              [hierarchy_level[len(state_of_display)]]["labels"][dropdown_val])
             dropdown = generate_secondary_dropdown(changed_index, df_name, nid_path, df_const)
     # If update triggered due to creation of a button do not update anything
     elif all(i == 0 for i in n_clicks_click_history):
@@ -941,7 +939,7 @@ for x in range(4):
             }
             else if (degree_input == 'curve-fit'){
                 degree_input_wrapper = {'display': 'inline-flex'};
-                confidence_interval_wrapper = {'display': 'inline-flex'};
+                confidence_interval_wrapper = {'display': 'inline-flex', 'padding-left':'2px'};
             }
             else{
                 degree_input_wrapper = dash_clientside.no_update;

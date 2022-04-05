@@ -37,8 +37,17 @@ def generate_secondary_dropdown(tile, df_name, nid_path, df_const):
             option_list = df[hierarchy_level[llen]].unique(dropmissing=True, dropnan=True)
         else:
             option_list = df['Variable Name'].unique()
-        options = [{'label': df_const[df_name]["CATEGORICAL_DATA"][hierarchy_level[llen]]["labels"]
-                                                    [i]if df_name == "OPG011" else i, 'value': i} for i in option_list]
+
+        # check if the hierarchy level has none variables and assigns to a option list
+        if df_name == "OPG010":
+            options = [{'label': i, 'value': i} for i in option_list if
+                       len(df_const[df_name][hierarchy_level[llen]]) >= 1 and df_const[df_name][hierarchy_level
+                       [llen]][0] is not None]
+        else:
+            options = [{'label': df_const[df_name]["CATEGORICAL_DATA"][hierarchy_level[llen]]["labels"][i], 'value': i}
+                       for i in option_list if
+                       len(df_const[df_name][hierarchy_level[llen]]) >= 1 and df_const[df_name]["CATEGORICAL_DATA"]
+                       [hierarchy_level[llen]]["labels"][0] is not None]
 
         options = sorted(options, key=lambda k: k['label'])
 
@@ -94,8 +103,14 @@ def get_secondary_hierarchy_layout(tile, df_name=None, hierarchy_toggle='Level F
             html.Div([
                 dcc.Dropdown(
                     id={'type': 'secondary_hierarchy_level_dropdown', 'index': tile},
-                    options=[{'label': get_label('LBL_' + x.replace(' ', '_'), df_name), 'value': x} for x in
-                                                                        hierarchy_level],
+                    # check if the hierarchy level has none variables and assigns to a option list
+                    options=[{'label': get_label('LBL_' + x.replace(' ', '_'), df_name) + " ({0})".format(len(
+                        df_const[df_name][x])), 'value': x} for x in hierarchy_level if (len(
+                        df_const[df_name][x]) >= 1 and df_const[df_name][x][0] is not None)] if df_name == "OPG010" else
+                    [{'label': get_label('LBL_' + x.replace(' ', '_'), df_name) + " ({0})".format(len(
+                        df_const[df_name][x])), 'value': x} for x in hierarchy_level if (len(
+                        df_const[df_name][x]) >= 1 and df_const[df_name]["CATEGORICAL_DATA"][x]["labels"]
+                    [0] is not None)],
                     multi=False,
                     clearable=False,
                     value=level_value,

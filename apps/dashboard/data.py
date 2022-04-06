@@ -30,7 +30,7 @@ from server import get_hierarchy_parent, get_variable_parent
 
 GRAPH_OPTIONS = {
     'OPG010': ['Sankey', 'Table'],
-    'OPG011': ['Line', 'Bar', 'Scatter', 'Bubble', 'Box_Plot', 'Table', "Pivot_Table"]
+    'OPG011': ['Line', 'Bar', 'Scatter', 'Bubble', 'Box_Plot', 'Table']
 }
 for k in GRAPH_OPTIONS.values():
     k.sort()
@@ -921,19 +921,18 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                 # Builds data based on all measure types, variable names, and selected time frame
                 for x in range(len(measure_types)):
                     measure_type = measure_types[x]
-                    reduced_df = further_filtered_df[measure_type]
                     for y in range(len(variable_names)):
                         variable_name = variable_names[y]
                         # filter on either the variable name or variable value column
                         if variable_name in df_const[df_name]["CATEGORICAL_DATA"]['Variable Name']['labels']:
-                            further_reduced_df = reduced_df[reduced_df['Variable Name'] == df_const[df_name]
+                            reduced_df = further_filtered_df[further_filtered_df['Variable Name'] == df_const[df_name]
                             ["CATEGORICAL_DATA"]['Variable Name']["labels"].index(variable_name)]
                         else:
-                            further_reduced_df = reduced_df[reduced_df['Variable Value'] == df_const[df_name]
+                            reduced_df = further_filtered_df[further_filtered_df['Variable Value'] == df_const[df_name]
                             ["CATEGORICAL_DATA"]['Variable Value']["labels"].index(variable_name)]
                         for z in range(end_date.year - start_date.year + 1):
                             year = start_date.year + z
-                            yearly_data = further_reduced_df[further_reduced_df["Date of Event"].dt.year == year]
+                            yearly_data = reduced_df[reduced_df["Date of Event"].dt.year == year]
                             if current_filter == "Year":
                                 unique_dates = yearly_data["Date of Event"].dt.year.unique()
                             elif current_filter == "Month":
@@ -1043,14 +1042,14 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                         variable_name = variable_names[y]
                         # filter on either the variable name or variable value column
                         if variable_name in df_const[df_name]['Categorical_Data']['Variable Name']['labels']:
-                            further_reduced_df = reduced_df[reduced_df['Variable Name'] == df_const[df_name]
+                            reduced_df = further_filtered_df[further_filtered_df['Variable Name'] == df_const[df_name]
                             ["CATEGORICAL_DATA"]['Variable Name']["labels"].index(variable_name)]
                         else:
-                            further_reduced_df = reduced_df[reduced_df['Variable Value'] == df_const[df_name]
+                            reduced_df = further_filtered_df[further_filtered_df['Variable Value'] == df_const[df_name]
                             ["CATEGORICAL_DATA"]['Variable Value']["labels"].index(variable_name)]
                         for z in range(end_date.year - start_date.year + 1):
                             year = start_date.year + z
-                            yearly_data = further_reduced_df[further_reduced_df["Date of Event"].dt.year == year]
+                            yearly_data = reduced_df[reduced_df["Date of Event"].dt.year == year]
                             unique_dates = yearly_data["Date of Event"].dt.isocalendar().week.unique()
                             for w in range(len(unique_dates)):
                                 unique_secondary = unique_dates[w]
@@ -1263,20 +1262,19 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                     further_filtered_df = filtered_df[filtered_df["H" + str(len(hierarchy_path))] == specific_items[p]]
             for x in range(len(measure_types)):
                 measure_type = measure_types[x]
-                reduced_df = further_filtered_df[measure_type]
                 for y in range(len(variable_names)):
                     variable_name = variable_names[y]
                     # filter on either the variable name or variable value column
                     if variable_name in df_const[df_name]['CATEGORICAL_DATA']['Variable Name']['labels']:
-                        further_reduced_df = reduced_df[reduced_df['Variable Name'] == df_const[df_name]
+                        reduced_df = further_filtered_df[further_filtered_df['Variable Name'] == df_const[df_name]
                         ["CATEGORICAL_DATA"]['Variable Name']["labels"].index(variable_name)]
                     else:
-                        further_reduced_df = reduced_df[reduced_df['Variable Value'] == df_const[df_name]
+                        reduced_df = further_filtered_df[further_filtered_df['Variable Value'] == df_const[df_name]
                         ["CATEGORICAL_DATA"]['Variable Value']["labels"].index(variable_name)]
-                    unique_secondary = further_reduced_df['Date of Event'].dt.year.unique()
+                    unique_secondary = reduced_df['Date of Event'].dt.year.unique()
                     for z in range(len(unique_secondary)):
                         secondary = unique_secondary[z]
-                        unique_data = further_reduced_df[further_reduced_df['Date of Event'].dt.year == secondary]
+                        unique_data = reduced_df[reduced_df['Date of Event'].dt.year == secondary]
                         measure_value = unique_data[measure_type].sum()
                         date_of_event = get_last_day_of_year(secondary)
 

@@ -120,6 +120,7 @@ def get_data_set_picker(tile, df_name, confirm_parent, prev_selection=None):
             dcc.Dropdown(
                 id={'type': 'data-set', 'index': tile},
                 options=[{'label': get_label(i, 'Data_Set'), 'value': i} for i in session['dataset_list']],
+                optionHeight=30,
                 value=df_name,
                 clearable=False,
                 style={'flex-grow': '1'}),
@@ -1909,34 +1910,6 @@ def get_default_graph_options(xaxis, yaxis, xpos, ypos, xmodified, ymodified, ti
             dcc.Store(id={'type': 'y-modified', 'index': tile},
                       data=ymodified if ymodified else None),
         ], style={'display': 'None'})]
-
-
-def get_pivot_table_menu(tile, xaxis, yaxis, xpos, ypos, xmodified, ymodified, df_name, df_const):
-    return[
-    html.Div([
-        # id is used by create_graph callback to verify that the table menu is created before it activates
-        dcc.Dropdown(
-            id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
-            options=[{'label': tile, 'value': tile}],
-            value=tile,
-            clearable=False,
-            style={'display': 'none'}),
-        # page_size for table
-        html.Div(
-            html.Div(
-                children=get_default_graph_options(xaxis=xaxis, yaxis=yaxis, xpos=xpos, ypos=ypos,
-                                                   xmodified=xmodified, ymodified=ymodified, tile=tile,
-                                                   gridline=None, legend=None, graph_type='Pivot_Table'),
-                style=CUSTOMIZE_CONTENT_HIDE,
-                id={'type': 'default-graph-options', 'index': tile}),
-            id={'type': 'default-graph-options-wrapper', 'index': tile}),
-        html.Div(
-            get_secondary_hierarchy_layout(tile, df_name, hierarchy_toggle='Level Filter',
-                                          level_value='Variable Name',
-                                          graph_all_toggle=None, nid_path="root", df_const=df_const),
-            style={'display': 'None'}
-            if df_name == 'OPG011' else {'display': 'None'})
-    ], style={'font-size': '13px'})]
 
 
 # empty graph menu

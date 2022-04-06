@@ -24,7 +24,7 @@ from apps.dashboard.data import DATA_CONTENT_HIDE, DATA_CONTENT_SHOW, get_label,
     session, BAR_X_AXIS_OPTIONS, generate_constants, dataset_to_df, GRAPH_OPTIONS, CUSTOMIZE_CONTENT_HIDE, LAYOUTS
 from apps.dashboard.layouts import get_line_scatter_graph_menu, get_bar_graph_menu, get_table_graph_menu, \
     get_tile_layout, change_index, get_box_plot_menu, get_default_tab_content, get_layout_dashboard, get_layout_graph, \
-    get_data_menu, get_sankey_menu, get_dashboard_title_input, get_bubble_graph_menu, get_pivot_table_menu
+    get_data_menu, get_sankey_menu, get_dashboard_title_input, get_bubble_graph_menu
 
 
 # *************************************************MAIN LAYOUT********************************************************
@@ -830,17 +830,6 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
                                secondary_nid_path="root",
                                secondary_hierarchy_toggle='Level Filter',
                                secondary_graph_all_toggle=None,)
-    elif selected_graph_type == 'Pivot_Table':
-        menu = get_pivot_table_menu(tile=tile,
-                                    xaxis=None,
-                                    yaxis=None,
-                                    xpos=None,
-                                    ypos=None,
-                                    xmodified=None,
-                                    ymodified=None,
-                                    df_name=df_name,
-                                    df_const=df_const)
-
     else:
         raise PreventUpdate
 

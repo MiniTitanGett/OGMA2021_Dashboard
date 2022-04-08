@@ -125,7 +125,8 @@ def dataset_to_df(df_name):
 
         session[df_name + "_NodeData"] = node_df_vaex
         df_vaex['Measure Type'] = df_vaex.func.where(df_vaex['Measure Type'] == '', None, df_vaex['Measure Type'])
-        df_vaex['Partial Period'] = df_vaex.func.where(df_vaex['Partial Period'] == '', 'False', df_vaex['Partial Period'])
+        df_vaex['Partial Period'] = df_vaex.func.where(df_vaex['Partial Period'] == '', 'False',
+                                                       df_vaex['Partial Period'])
         # add all variable names without qualifiers to col
         df_vaex['Variable Value'] = df_vaex['Variable Name'] + " " + df_vaex['Variable Name Qualifier']
 
@@ -190,7 +191,6 @@ def dataset_to_df(df_name):
                 # insert parent into table
                 df_vaex[var_levels[depth-1]] = df_vaex.func.where(df_vaex[var_levels[depth]] == node, parent,
                                                                 df_vaex[var_levels[depth-1]])
-
 
         # combine variable hierarchy columns into col for rows with qualifiers
         if df_vaex.data_type(df_vaex['Variable Name Sub Qualifier']) == str:
@@ -300,7 +300,7 @@ def generate_constants(df_name):
     HIERARCHY_LEVELS = ['H{}'.format(i) for i in range(6)]
     df = session[df_name]
     CATEGORICAL_DICTIONARY = None
-    MEASURE_TYPE_VALUES=None
+    MEASURE_TYPE_VALUES = None
 
     # secondary hierarchy
     SECONDARY_HIERARCHY_LEVELS = ["Variable Name", "Variable Name Qualifier", "Variable Name Sub Qualifier"]
@@ -315,10 +315,10 @@ def generate_constants(df_name):
     MEASURE_TYPE_OPTIONS = session["Measure_type_list"][df_name].copy()
 
     if MEASURE_TYPE_OPTIONS[0] == 'Measure Type':
-        MEASURE_TYPE_OPTIONS=df[MEASURE_TYPE_OPTIONS[0]].unique()
+        MEASURE_TYPE_OPTIONS = df[MEASURE_TYPE_OPTIONS[0]].unique()
 
     else:
-        MEASURE_TYPE_VALUES=[get_label(x, df_name + "_Measuretype") for x in MEASURE_TYPE_OPTIONS]
+        MEASURE_TYPE_VALUES = [get_label(x, df_name + "_Measuretype") for x in MEASURE_TYPE_OPTIONS]
     MEASURE_TYPE_OPTIONS.sort()
 
     if df_name == 'OPG011':
@@ -1037,7 +1037,6 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                             filtered_df["H" + str(len(hierarchy_path))] == specific_items[p]]
                 for x in range(len(measure_types)):
                     measure_type = measure_types[x]
-                    reduced_df = further_filtered_df[measure_type]
                     for y in range(len(variable_names)):
                         variable_name = variable_names[y]
                         # filter on either the variable name or variable value column
@@ -1135,10 +1134,12 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                     variable_name = variable_names[y]
                     # filter on either the variable name or variable value column
                     if variable_name in df_const[df_name]['CATEGORICAL_DATA']['Variable Name']['labels']:
-                        further_reduced_df = further_filtered_df[further_filtered_df['Variable Name'] == df_const[df_name]
+                        further_reduced_df = further_filtered_df[further_filtered_df['Variable Name'] ==
+                                                                 df_const[df_name]
                                     ["CATEGORICAL_DATA"]['Variable Name']["labels"].index(variable_name)]
                     else:
-                        further_reduced_df = further_filtered_df[further_filtered_df['Variable Value'] == df_const[df_name]
+                        further_reduced_df = further_filtered_df[further_filtered_df['Variable Value'] ==
+                                                                 df_const[df_name]
                                     ["CATEGORICAL_DATA"]['Variable Value']["labels"].index(variable_name)]
                     for z in range(end_year - start_year + 1):
                         year = start_year + z

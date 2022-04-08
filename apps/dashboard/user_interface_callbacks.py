@@ -1756,7 +1756,7 @@ app.clientside_callback(
                         let num=dfConst[dfName]['Variable_Option_Lists'].length
                         for(let i=0;i<num;i++){
                             if(dfConst[dfName]['Variable_Option_Lists'][i].includes(string[0])){
-                                if(dfConst[dfName['MEASURE_TYPE_VALUES'].includes(string[1])){
+                                if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(string[1])){
                                     event.x_modified = false;
                                     break;
                                 }

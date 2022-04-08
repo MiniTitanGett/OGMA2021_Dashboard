@@ -183,7 +183,8 @@ app.clientside_callback(
      Output('tab-header', 'children'),
      Output('tab-content', 'children'),
      Output('num-tiles-3', 'data-num-tiles'),
-     Output('dashboard-title-wrapper', 'children')],
+     Output('dashboard-title-wrapper', 'children'),
+     Output('tab-swap-flag-wrapper', 'children')],
     [Input({'type': 'dashboard-tab', 'index': ALL}, 'n_clicks'),
      Input({'type': 'dashboard-tab-close', 'index': ALL}, 'n_clicks'),
      Input('tab-add', 'n_clicks')],
@@ -202,7 +203,7 @@ def _change_tab(_tab_clicks, _tab_close_clicks, _tab_add_nclicks,
     # if page loaded (changed_id == '.') or new button is disabled, prevent update
     if changed_id == '.' or new_disabled:
         raise PreventUpdate
-
+    children = []
     # if user requested to add a new tab
     if 'tab-add.n_clicks' in changed_id:
         if len(tab_toggle_children) >= 12:
@@ -219,8 +220,10 @@ def _change_tab(_tab_clicks, _tab_close_clicks, _tab_add_nclicks,
                     className='dashboard-tab-close')],
                 className='dashboard-tab')]
         data.append({'content': get_default_tab_content(), 'title': ''})
-        return data, active_tab, tab_toggle_children, no_update, no_update, no_update
+        return data, active_tab, tab_toggle_children, no_update, no_update, no_update, no_update
 
+    for tile in range(4):
+        children.append(dcc.Store(id={'type': 'tab-swap-flag', 'index': tile}, data=False))
     # if user requested to delete a tab
     if '"type":"dashboard-tab-close"}.n_clicks' in changed_id:
         deleted_tab_index = int(search(r'\d+', changed_id).group())
@@ -237,6 +240,12 @@ def _change_tab(_tab_clicks, _tab_close_clicks, _tab_add_nclicks,
             new_tab = active_tab
         else:
             new_tab = active_tab - 1
+
+        for i in range(4):
+            if i < data[new_tab]['content'][0]['props']['data-num-tiles']:
+                children[i] = dcc.Store(id={'type': 'tab-swap-flag', 'index': i}, data=True)
+            else:
+                children[i] = dcc.Store(id={'type': 'tab-swap-flag', 'index': i}, data=False)
         # remove the tab and its x from the children
         del tab_toggle_children[deleted_tab_index]
         # remove the tab data from the storage
@@ -256,15 +265,19 @@ def _change_tab(_tab_clicks, _tab_close_clicks, _tab_add_nclicks,
         # force a load if required else return new tab that's been shifted
         if deleted_tab_index == active_tab:
             title_wrapper = get_dashboard_title_input(data[new_tab]['title'])
-            return data, new_tab, tab_toggle_children, data[new_tab]['content'], no_update, title_wrapper
-        return data, new_tab, tab_toggle_children, no_update, no_update, no_update
+            return data, new_tab, tab_toggle_children, data[new_tab]['content'], no_update, title_wrapper, children
+        return data, new_tab, tab_toggle_children, no_update, no_update, no_update, children
 
     # else, user requested a tab change
     new_tab = int(search(r'\d+', changed_id).group())
     # if user requested the active tab, prevent update
     if new_tab == active_tab:
         raise PreventUpdate
-
+    for i in range(4):
+        if i < data[new_tab]['content'][0]['props']['data-num-tiles']:
+            children[i] = dcc.Store(id={'type': 'tab-swap-flag', 'index': i}, data=True)
+        else:
+            children[i] = dcc.Store(id={'type': 'tab-swap-flag', 'index': i}, data=False)
     # else, user requested a different tab. Save the current tab content to the appropriate save location and swap tabs
     data[active_tab]['content'] = tab_content
     data[active_tab]['title'] = dashboard_title
@@ -284,7 +297,7 @@ def _change_tab(_tab_clicks, _tab_close_clicks, _tab_add_nclicks,
     num_tiles = data[new_tab]['content'][0]['props']['data-num-tiles']
     # create dashboard title wrapper
     title_wrapper = get_dashboard_title_input(data[new_tab]['title'])
-    return data, new_tab, tab_toggle_children, data[new_tab]['content'], num_tiles, title_wrapper
+    return data, new_tab, tab_toggle_children, data[new_tab]['content'], num_tiles, title_wrapper, children
 
 
 # Update num-tiles.
@@ -525,7 +538,7 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
 
     if '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-unlink' or \
             (changed_value == 'fa fa-link' and df_name is None and df_name_parent is None) or (
-            trigger is None and df_confirm is None):
+            trigger is None and df_confirm is None and df_name is None and df_name_parent is None):
         raise PreventUpdate
 
     # check for keyword in df_name_parent and df_name
@@ -643,7 +656,8 @@ app.clientside_callback(
      Output({'type': 'update-graph-trigger', 'index': MATCH}, 'data-graph_menu_trigger'),
      Output({'type': 'update-graph-trigger', 'index': MATCH}, 'data-graph_menu_table_trigger'),
      Output({'type': 'tile-customize-content', 'index': MATCH}, 'data-loaded'),
-     Output({'type': 'tile-rebuild-menu-flag', 'index': MATCH}, 'data')],
+     Output({'type': 'tile-rebuild-menu-flag', 'index': MATCH}, 'data'),
+     Output({'type': 'tab-swap-flag', 'index': MATCH}, 'data')],
     [Input({'type': 'graph-menu-trigger', 'index': MATCH}, 'data-'),
      Input({'type': 'graph-type-dropdown', 'index': MATCH}, 'value'),
      Input({'type': 'tile-link', 'index': MATCH}, 'className')],
@@ -656,12 +670,13 @@ app.clientside_callback(
      State({'type': 'graph_children_toggle', 'index': 4}, 'value'),
      State({'type': 'hierarchy-toggle', 'index': 4}, 'value'),
      State({'type': 'graph_children_toggle', 'index': MATCH}, 'value'),
-     State({'type': 'hierarchy-toggle', 'index': MATCH}, 'value')],
+     State({'type': 'hierarchy-toggle', 'index': MATCH}, 'value'),
+     State({'type': 'tab-swap-flag', 'index': ALL}, 'data')],
     prevent_initial_call=True
 )
 def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu,
                        is_loaded, df_name, parent_df_name, df_const, df_confirm, parent_graph_all,
-                       parent_hierarchy_toggle, graph_all, hierarchy_toggle):
+                       parent_hierarchy_toggle, graph_all, hierarchy_toggle, swap_flag):
     """
     :param selected_graph_type: Selected graph type, i.e. 'bar', 'line', etc.
     :return: Graph menu corresponding to selected graph type
@@ -669,15 +684,16 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
     # -------------------------------------------Variable Declarations--------------------------------------------------
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][-1]
     # ------------------------------------------------------------------------------------------------------------------
-
+    changed_index = int(search(r'\d+', changed_id).group())
+    swap_flag_output = False
     # if tab swapped or load triggered, don't reset menus
-    if not rebuild_menu or len(dash.callback_context.triggered) == 4:
-        return no_update, 1, no_update, no_update, True
+    if not rebuild_menu or len(dash.callback_context.triggered) == 4 or swap_flag[changed_index] is True:
+        return no_update, 1, no_update, no_update, True, swap_flag_output
 
     # if link state has changed from linked --> unlinked the data has not changed, prevent update
     if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink':
         if selected_graph_type is None:
-            return None, no_update, no_update, no_update, no_update
+            return None, no_update, no_update, no_update, no_update, swap_flag_output
         else:
             raise PreventUpdate
 
@@ -703,11 +719,11 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
 
     # if graph menu trigger has value 'tile closed' then a tile was closed, don't update menu, still update table
     if 'graph-menu-trigger"}.data-' in changed_id and gm_trigger == 'tile closed':
-        return no_update, no_update, 1, no_update, True
+        return no_update, no_update, 1, no_update, True, swap_flag_output
 
     # if this has been loaded from the cancel of a graph menu edit then set to false and prevent update
     if 'graph-type-dropdown"}.value' in changed_id and is_loaded:
-        return no_update, no_update, no_update, False, True
+        return no_update, no_update, no_update, False, True, swap_flag_output
 
     tile = int(dash.callback_context.inputs_list[0]['id']['index'])
 
@@ -838,8 +854,7 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
         update_graph_trigger = 1
     else:
         update_graph_trigger = no_update
-
-    return menu, update_graph_trigger, no_update, no_update, True
+    return menu, update_graph_trigger, no_update, no_update, True, swap_flag_output
 
 
 # ************************************************DATA SIDE-MENU******************************************************
@@ -1707,7 +1722,7 @@ app.clientside_callback(
                     }
                 case 'Bar':
                     if (argValue[3] == 'Horizontal'){
-                        if(dfConst[df_const[df_name]["MEASURE_TYPE_VALUES"].includes(event.x_axis)){
+                        if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(event.x_axis)){
                             event.x_modified = false;
                             break;
                         }
@@ -1741,7 +1756,7 @@ app.clientside_callback(
                         let num=dfConst[dfName]['Variable_Option_Lists'].length
                         for(let i=0;i<num;i++){
                             if(dfConst[dfName]['Variable_Option_Lists'][i].includes(string[0])){
-                                if(dfConst[df_const[df_name]["MEASURE_TYPE_VALUES"].includes(string[1])){
+                                if(dfConst[dfName['MEASURE_TYPE_VALUES'].includes(string[1])){
                                     event.x_modified = false;
                                     break;
                                 }
@@ -1761,7 +1776,7 @@ app.clientside_callback(
                             break;
                         }  
                     }
-                    else if(df_const[df_name]["MEASURE_TYPE_VALUES"].includes(event.x_axis)){
+                    else if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(event.x_axis)){
                         event.x_modified = false;
                         break;
                     }
@@ -1778,7 +1793,7 @@ app.clientside_callback(
             switch(graphType){
                 case 'Line':
                 case 'Scatter':
-                    if(df_const[df_name]["MEASURE_TYPE_VALUES"].includes(event.y_axis)){
+                    if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(event.y_axis)){
                     event.y_modified = false;
                     break;
                     }
@@ -1797,7 +1812,7 @@ app.clientside_callback(
                             break;
                         }  
                     }
-                    else if(df_const[df_name]["MEASURE_TYPE_VALUES"].includes(event.y_axis)){
+                    else if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(event.y_axis)){
                         event.y_modified = false;
                         break;
                     }
@@ -1829,7 +1844,7 @@ app.clientside_callback(
                         let num=dfConst[dfName]['Variable_Option_Lists'].length
                         for(let i=0;i<num;i++){
                             if(dfConst[dfName]['Variable_Option_Lists'][i].includes(string[0])){
-                                if(df_const[df_name]["MEASURE_TYPE_VALUES"].includes(string[1])){
+                                if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(string[1])){
                                     event.y_modified = false;
                                     break;
                                 }
@@ -1840,7 +1855,7 @@ app.clientside_callback(
                     }
                 case 'Box_Plot':
                     if(argValue[2]=='Vertical'){
-                        if(df_const[df_name]["MEASURE_TYPE_VALUES"].includes(event.y_axis)){
+                        if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(event.y_axis)){
                             event.y_modified = false;
                             break;
                         }

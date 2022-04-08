@@ -458,8 +458,15 @@ def get_layout_dashboard():
                     className='flex-container graph-container',
                     id='tab-content-wrapper',
                     **{'data-active-tab': 0},
-                    style={'max-height': 'calc(100vh - 68px)'}
-                )
+                    style={'max-height': 'calc(100vh - 68px)'},),
+
+                            html.Div([
+                                dcc.Store(id={'type': 'tab-swap-flag',  'index': 0}, data=False),
+                                dcc.Store(id={'type': 'tab-swap-flag',  'index': 1}, data=False),
+                                dcc.Store(id={'type': 'tab-swap-flag',  'index': 2}, data=False),
+                                dcc.Store(id={'type': 'tab-swap-flag',  'index': 3}, data=False)],
+                                id='tab-swap-flag-wrapper'),
+
             ], style={'flex-grow': '1'})
             # To show footer: calc(100vh - 15px)
             # To hide footer: calc(100vh)

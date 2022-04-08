@@ -332,7 +332,7 @@ for y in range(4):
                         if 'title' in graph_display['props']['figure']['layout']['xaxis']:
                             graph_options[0] = graph_display['props']['figure']['layout']['xaxis']['title']['text']
                     if 'yaxis' in graph_display['props']['figure']['layout']:
-                        if 'title' in graph_display['props']['figure']['layout']['yaxis']:
+                        if 'text' in graph_display['props']['figure']['layout']['yaxis']['title']:
                             graph_options[1] = graph_display['props']['figure']['layout']['yaxis']['title']['text']
                     if 'legend' in graph_display['props']['figure']['layout']:
                         if 'x' in graph_display['props']['figure']['layout']['legend']:

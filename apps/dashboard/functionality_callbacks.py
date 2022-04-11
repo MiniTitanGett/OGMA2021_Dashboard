@@ -426,7 +426,7 @@ def _print_choice_to_display_and_modify_secondary_dropdown(dropdown_val, _n_clic
         elif not state_of_display:
             display_button = generate_secondary_history_button(dropdown_val, 0, changed_index, df_name, df_const)
             nid_path = get_nid_path(dropdown_value=df_const[df_name]["CATEGORICAL_DATA"]["Variable Name"]["labels"]
-                                                                [dropdown_val] if type(dropdown_val) == int else dropdown_val)
+                                    [dropdown_val] if type(dropdown_val) == int else dropdown_val)
             dropdown = generate_secondary_dropdown(changed_index, df_name, nid_path, df_const)
         # If something is in the history preserve it and add value to it
         else:

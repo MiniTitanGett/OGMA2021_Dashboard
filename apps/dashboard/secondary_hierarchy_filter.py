@@ -54,13 +54,17 @@ def generate_secondary_dropdown(tile, df_name, nid_path, df_const):
         return dcc.Dropdown(
             id={'type': 'secondary_hierarchy_specific_dropdown', 'index': tile},
             options=options,
+            optionHeight=30,
             multi=False,
+            style={'font-size': '13px'},
             placeholder='{}...'.format(get_label('LBL_Select')))
     else:
         return dcc.Dropdown(
             id={'type': 'secondary_hierarchy_specific_dropdown', 'index': tile},
             options=[],
+            optionHeight=30,
             multi=False,
+            style={'font-size': '13px'},
             placeholder='{}...'.format(get_label('LBL_Select')))
 
 
@@ -113,8 +117,9 @@ def get_secondary_hierarchy_layout(tile, df_name=None, hierarchy_toggle='Level F
                     [0] is not None)],
                     multi=False,
                     clearable=False,
+                    optionHeight=30,
                     value=level_value,
-                    style={'color': 'black', 'textAlign': 'center', 'margin-top': '10px'},
+                    style={'color': 'black', 'textAlign': 'center', 'margin-top': '10px', 'font-size': '13px'},
                     placeholder='{}...'.format(get_label('LBL_Select')))],
                 id={'type': 'secondary_hierarchy_level_filter', 'index': tile},
                 style={} if hierarchy_toggle == 'Level Filter' else {'display': 'none'}),
@@ -168,8 +173,10 @@ def get_secondary_hierarchy_layout(tile, df_name=None, hierarchy_toggle='Level F
                     id={'type': 'secondary_hierarchy_level_dropdown', 'index': tile},
                     options=[],
                     multi=False,
+                    optionHeight=30,
                     value=level_value,
-                    style={'color': 'black', 'width': '100%', 'textAlign': 'center', 'margin-top': '10px'},
+                    style={'color': 'black', 'width': '100%', 'textAlign': 'center', 'margin-top': '10px',
+                           'font-size': '13px'},
                     placeholder='{}...'.format(get_label('LBL_Select')))],
                 id={'type': 'secondary_hierarchy_level_filter', 'index': tile},
                 style={} if hierarchy_toggle == 'Level Filter' else {'display': 'none'}),

@@ -152,7 +152,8 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                 # Generate title if there is no user entered title
                 if hierarchy_type == 'Level Filter':
                     # Whole level graph title
-                    title = '{}: {} vs {}'.format(get_label('LBL_' + hierarchy_level_dropdown, df_name), get_label(arg_value[1], df_name+"_Measuretype"),
+                    title = '{}: {} vs {}'.format(get_label('LBL_' + hierarchy_level_dropdown, df_name),
+                                                  get_label(arg_value[1], df_name+"_Measuretype"),
                                                   get_label('LBL_Time'))  # hierarchy_level_dropdown
                 elif len(hierarchy_path) != 0:
                     # Item's children graph title
@@ -160,22 +161,29 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                         title = '{}\'s {}'.format(hierarchy_path[-1], get_label('LBL_Children'))
                     else:
                         title = '{} {}'.format(get_label('LBL_Children_Of'), hierarchy_path[-1])
-                    title = title + ': {} vs {}'.format(get_label(get_label(arg_value[1], df_name+"_Measuretype"), df_name+"_Measuretype"), get_label('LBL_Time'))
+                    title = title + ': {} vs {}'.format(get_label(arg_value[1], df_name+"_Measuretype"),
+                                                        get_label('LBL_Time'))
                 else:
                     # Root's children graph title
-                    title = '{}: {} vs {}'.format(get_label("LBL_Roots_Children"), get_label(arg_value[1], df_name+"_Measuretype"), get_label('LBL_Time'))
+                    title = '{}: {} vs {}'.format(get_label("LBL_Roots_Children"),
+                                                  get_label(arg_value[1], df_name+"_Measuretype"),
+                                                  get_label('LBL_Time'))
         else:
             if tile_title:
                 title = tile_title
             else:
                 # Generate title if there is no user entered title
                 if hierarchy_specific_dropdown:
-                    title = '{}: {} vs {}'.format(hierarchy_specific_dropdown, get_label(arg_value[1], df_name+"_Measuretype"), get_label('LBL_Time'))
+                    title = '{}: {} vs {}'.format(hierarchy_specific_dropdown, get_label(arg_value[1],
+                                                                                         df_name+"_Measuretype"),
+                                                  get_label('LBL_Time'))
                 else:
                     if len(hierarchy_path) == 0:
                         title = ""
                     else:
-                        title = '{}: {} vs {}'.format(hierarchy_path[-1],get_label(arg_value[1], df_name+"_Measuretype"), get_label('LBL_Time'))
+                        title = '{}: {} vs {}'.format(hierarchy_path[-1], get_label(arg_value[1],
+                                                                                    df_name+"_Measuretype"),
+                                                      get_label('LBL_Time'))
 
         # df is not empty, create graph
         if len(filtered_df) != 0:
@@ -224,7 +232,8 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
             hovertemplate = get_label('LBL_Gen_Hover_Data', df_name)
             hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event', df_name)).replace(
                 '%AXIS-A%', '%{x}')
-            hovertemplate = hovertemplate.replace('%AXIS-TITLE-B%', get_label(arg_value[1], df_name+"_Measuretype")).replace('%AXIS-B%', '%{y}')
+            hovertemplate = hovertemplate.replace('%AXIS-TITLE-B%', get_label(arg_value[1],
+                df_name+"_Measuretype")).replace('%AXIS-B%', '%{y}')
             fig.update_traces(hovertemplate=hovertemplate)
             fig = set_partial_periods(fig, filtered_df, 'Line')
 
@@ -279,7 +288,7 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                 fig2.data[0].showlegend = True
                 fig2.data[0].name = 'Best Fit'
                 fig.add_trace(fig2.data[0])
-
+                # arg_value[5]: confidence interval is toggled
                 if arg_value[5] == ['ci']:  # ci
                     filtered_df["Upper Interval"] = best_fit_data["Upper Interval"]
                     filtered_df["Lower Interval"] = best_fit_data["Lower Interval"]
@@ -317,7 +326,7 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
     else:
         xaxis = 'Date of Event'
 
-    if yaxis_title in df_const[df_name]["MEASURE_TYPE_VALUES"] or yaxis_title is None:
+    if yaxis_title in df_const[df_name]["MEASURE_TYPE_VALUES"] or yaxis_title is None or yaxis_title == "":
         yaxis = get_label(arg_value[1], df_name+"_Measuretype")
     else:
         yaxis = yaxis_title
@@ -481,24 +490,19 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                                                                                                arg_value[5]]]
                 )
                 fig.update_layout(
-                    legend_title_text='Size: <br> &#9; {} ({})<br> <br>{}'.format(arg_value[4], get_label(arg_value[5], df_name+"_Measuretype"),
-                                                                                  legend_title_text))
+                    legend_title_text='Size: <br> &#9; {} ({})<br> <br>{}'.format(arg_value[4], get_label(arg_value[5],
+                        df_name+"_Measuretype"), legend_title_text))
                 # set up hover label
                 hovertemplate = get_label('LBL_Bubble_Fixed_Hover_Data', df_name)
                 hovertemplate = hovertemplate.replace('%AXIS-X-A%', get_label('LBL_Date_Of_Event', df_name)). \
                     replace('%X-AXIS%', '%{x}')
                 hovertemplate = hovertemplate.replace('%AXIS-Y-A%', arg_value[2]).replace('%AXIS-Y-B%',
-                                                                                          get_label(arg_value[3], df_name+"_Measuretype")).replace(
-                    '%Y-AXIS%', '%{y}')
+                    get_label(arg_value[3], df_name+"_Measuretype")).replace('%Y-AXIS%', '%{y}')
                 hovertemplate = hovertemplate.replace('%AXIS-Z-A%', arg_value[4]).replace('%AXIS-Z-B%',
-                                                                                          get_label(arg_value[5], df_name+"_Measuretype")).replace(
-                    '%Z-AXIS%', '%{customdata[2]}')
+                    get_label(arg_value[5], df_name+"_Measuretype")).replace('%Z-AXIS%', '%{customdata[2]}')
                 fig.update_traces(hovertemplate=hovertemplate)
             else:
                 color_discrete = color_picker(arg_value[6])
-                x=filtered_df[arg_value[0], arg_value[1]]
-                y=filtered_df[arg_value[2], arg_value[3]]
-                size = filtered_df[arg_value[4], arg_value[5]]
                 # generate graph
                 fig = px.scatter(
                     title=title,
@@ -515,7 +519,9 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                                                                                                arg_value[5]]]
                 )
                 fig.update_layout(
-                    legend_title_text='Size: <br> &#9; {} ({})<br> <br>{}'.format(arg_value[4], get_label(arg_value[5], df_name+"_Measuretype"), legend_title_text))
+                    legend_title_text='Size: <br> &#9; {} ({})<br> <br>{}'.format(arg_value[4],
+                                                        get_label(arg_value[5], df_name+"_Measuretype"),
+                                                                                  legend_title_text))
                 #                                                     legend_title_text), transition={'duration': 4000})
                 # fig.layout.updatemenus[0].buttons[0].args[1]["frame"]["duration"] = 1000
                 # set up hover label
@@ -523,24 +529,21 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 hovertemplate = hovertemplate.replace('%Date%', get_label('LBL_Date_Of_Event', df_name)). \
                     replace('%Date-Value%', '%{customdata[1]}')
                 hovertemplate = hovertemplate.replace('%AXIS-X-A%', arg_value[0]).replace('%AXIS-X-B%',
-                                                                                        get_label(arg_value[1], df_name+"_Measuretype")).replace(
-                    '%X-AXIS%', '%{x}')
+                    get_label(arg_value[1], df_name+"_Measuretype")).replace('%X-AXIS%', '%{x}')
                 hovertemplate = hovertemplate.replace('%AXIS-Y-A%', arg_value[2]).replace('%AXIS-Y-B%',
-                                                                                          get_label(arg_value[3], df_name+"_Measuretype")).replace(
-                    '%Y-AXIS%', '%{y}')
+                    get_label(arg_value[3], df_name+"_Measuretype")).replace('%Y-AXIS%', '%{y}')
                 hovertemplate = hovertemplate.replace('%AXIS-Z-A%', arg_value[4]).replace('%AXIS-Z-B%',
-                                                                                          get_label(arg_value[5], df_name+"_Measuretype")).replace(
-                    '%Z-AXIS%', '%{customdata[2]}')
+                    get_label(arg_value[5], df_name+"_Measuretype")).replace('%Z-AXIS%', '%{customdata[2]}')
                 fig.update_traces(hovertemplate=hovertemplate)
         # filtered is empty, create default empty graph
         else:
             fig = px.scatter(
-                title=title + get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, None,
+                title=title + get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, {None},
                                                        arg_value[2], df_name, df_const))
     else:
         fig = px.scatter(
-            title=get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, None, arg_value[2],
-                                           df_name, df_const))
+            title=get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, {None},
+                                           arg_value[2], df_name, df_const))
 
     # set title
     if xaxis_title:
@@ -649,7 +652,8 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
 
                     if arg_value[0] == 'Variable Names':
                         title = '{}: {} vs {}'.format(get_label('LBL_' + hierarchy_level_dropdown, df_name),
-                                                      get_label(arg_value[1], df_name+"_Measuretype"), get_label('LBL_Variable_Names'))
+                                                      get_label(arg_value[1], df_name+"_Measuretype"),
+                                                      get_label('LBL_Variable_Names'))
                     else:
                         # Whole level graph title
                         title = '{0}: {1} vs {0}'.format(get_label('LBL_' + hierarchy_level_dropdown, df_name),
@@ -661,16 +665,20 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                     else:
                         title = '{} {}'.format(get_label('LBL_Children_Of'), hierarchy_path[-1])
                     if arg_value[0] == 'Variable Names':
-                        title = title + ': {} vs {}'.format(get_label(arg_value[1], df_name+"_Measuretype"), get_label('LBL_Variable_Names'))
+                        title = title + ': {} vs {}'.format(get_label(arg_value[1], df_name+"_Measuretype"),
+                                                            get_label('LBL_Variable_Names'))
                     else:
-                        title = title + ': {} vs {}'.format(get_label(arg_value[1], df_name+"_Measuretype"), hierarchy_path[-1])
+                        title = title + ': {} vs {}'.format(get_label(arg_value[1], df_name+"_Measuretype"),
+                                                            hierarchy_path[-1])
                 else:
                     if arg_value[0] == 'Variable Names':
-                        title = '{}: {} vs {}'.format(get_label("LBL_Roots_Children"), arg_value[1],
+                        title = '{}: {} vs {}'.format(get_label("LBL_Roots_Children"),
+                                                      get_label(arg_value[1], df_name+"_Measuretype"),
                                                       get_label('LBL_Variable_Names'))
                     else:
                         # Root's children graph title
-                        title = '{}: {} vs {}'.format(get_label("LBL_Roots_Children"), arg_value[1],
+                        title = '{}: {} vs {}'.format(get_label("LBL_Roots_Children"),
+                                                      get_label(arg_value[1], df_name+"_Measuretype"),
                                                       get_label('LBL_Root'))
         # hierarchy type is specific item while "Graph all in Dropdown" is unselected
         else:
@@ -680,17 +688,20 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             else:
                 # Generate title if there is no user entered title
                 if arg_value[0] == 'Variable Names':
-                    title = '{}: {} vs {}'.format(hierarchy_specific_dropdown, arg_value[1],
+                    title = '{}: {} vs {}'.format(hierarchy_specific_dropdown,
+                                                  get_label(arg_value[1], df_name+"_Measuretype"),
                                                   get_label('LBL_Variable_Names'))
                 else:
                     if hierarchy_specific_dropdown:
-                        title = '{}: {} vs {}'.format(hierarchy_specific_dropdown, arg_value[1],
+                        title = '{}: {} vs {}'.format(hierarchy_specific_dropdown,
+                                                      get_label(arg_value[1], df_name+"_Measuretype"),
                                                       get_label('LBL_Time'))
                     else:
                         if len(hierarchy_path) == 0:
                             title = ""
                         else:
-                            title = '{}: {} vs {}'.format(hierarchy_path[-1], arg_value[1],
+                            title = '{}: {} vs {}'.format(hierarchy_path[-1],
+                                                          get_label(arg_value[1], df_name+"_Measuretype"),
                                                           get_label('LBL_Time'))
 
         group_by_item = arg_value[0] != 'Variable Names'
@@ -764,7 +775,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             hovertemplate = get_label('LBL_Gen_Hover_Data', df_name)
             hovertemplate = hovertemplate.replace('%AXIS-TITLE-A%', get_label('LBL_Date_Of_Event', df_name))
             hovertemplate = hovertemplate.replace('%AXIS-A%', '%{customdata[2]}').replace('%AXIS-TITLE-B%',
-                                                                                          get_label(arg_value[1], df_name+"_Measuretype"))
+                                                  get_label(arg_value[1], df_name+"_Measuretype"))
             if arg_value[3]:
                 fig.update_layout(transition={'duration': 2000})
                 fig.layout.updatemenus[0].buttons[0].args[1]["frame"]["duration"] = 1000
@@ -788,17 +799,29 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                                            secondary_path, df_name, df_const))
 
     # set title
-    if xaxis_title != '' and xaxis_title is not None:
-        xaxis = xaxis_title
-    # default x-axis label
-    else:
-        xaxis = ''
+    if arg_value[2] == 'Vertical':
+        if xaxis_title != '' and xaxis_title is not None:
+            xaxis = xaxis_title
+        # default x-axis label
+        else:
+            xaxis = ''
 
-    if yaxis_title not in df_const[df_name]["MEASURE_TYPE_VALUES"] and yaxis_title is not None:
-        yaxis = yaxis_title
-    # default y-axis label
+        if yaxis_title not in df_const[df_name]["MEASURE_TYPE_VALUES"] and yaxis_title is not None:
+            yaxis = yaxis_title
+        # default y-axis label
+        else:
+            yaxis = get_label(arg_value[1], df_name + "_Measuretype")
+
     else:
-        yaxis = get_label(arg_value[1], df_name + "_Measuretype")
+        if yaxis_title not in df_const[df_name]["MEASURE_TYPE_VALUES"] and yaxis_title is not None:
+            xaxis = yaxis_title
+        else:
+            xaxis = get_label(arg_value[1], df_name + "_Measuretype")
+
+        if xaxis_title != '' and xaxis_title is not None:
+            yaxis = xaxis_title
+        else:
+            yaxis = ''
 
     # set legend position
     if xlegend and ylegend:
@@ -809,8 +832,8 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
 
     fig.update_layout(
         # x and y-axis location change depending on graph arg_value[4] orientation
-        xaxis_title=xaxis if arg_value[2] == 'Vertical' else yaxis,
-        yaxis_title=yaxis if arg_value[2] == 'Vertical' else xaxis,
+        xaxis_title=xaxis,
+        yaxis_title=yaxis,
         showlegend=False if legend else True,
         overwrite=True,
         plot_bgcolor='rgba(0, 0, 0, 0)',
@@ -883,7 +906,8 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             else:
                 if hierarchy_type == 'Level Filter':
                     # Whole level graph title
-                    title = '{}: {} {}'.format(get_label('LBL_' + hierarchy_level_dropdown, df_name), arg_value[0],
+                    title = '{}: {} {}'.format(get_label('LBL_' + hierarchy_level_dropdown, df_name),
+                                               get_label(arg_value[0], df_name+"_Measuretype"),
                                                get_label('LBL_Distribution'))
                 elif len(hierarchy_path) != 0:
                     # Specific item's children graph title
@@ -891,10 +915,12 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                         title = '{}\'s {}'.format(hierarchy_path[-1], get_label('LBL_Children'))
                     else:
                         title = '{} {}'.format(get_label('LBL_Children_Of'), hierarchy_path[-1])
-                    title = title + ': {} {}'.format(arg_value[0], get_label('LBL_Distribution'))
+                    title = title + ': {} {}'.format(get_label(arg_value[0], df_name+"_Measuretype"),
+                                                     get_label('LBL_Distribution'))
                 else:
                     # Roots children graph title
-                    title = '{}: {} {}'.format(get_label("LBL_Roots_Children"), arg_value[0],
+                    title = '{}: {} {}'.format(get_label("LBL_Roots_Children"),
+                                               get_label(arg_value[0], df_name+"_Measuretype"),
                                                get_label('LBL_Distribution'))
         # hierarchy type is specific item while "Graph all in Dropdown" is unselected
         else:
@@ -903,12 +929,16 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                 title = tile_title
             else:
                 if hierarchy_specific_dropdown:
-                    title = '{}: {} {}'.format(hierarchy_specific_dropdown, arg_value[0], get_label('LBL_Distribution'))
+                    title = '{}: {} {}'.format(hierarchy_specific_dropdown,
+                                               get_label(arg_value[0], df_name+"_Measuretype"),
+                                               get_label('LBL_Distribution'))
                 else:
                     if len(hierarchy_path) == 0:
                         title = ""
                     else:
-                        title = '{}: {} {}'.format(hierarchy_path[-1], arg_value[0], get_label('LBL_Distribution'))
+                        title = '{}: {} {}'.format(hierarchy_path[-1],
+                                                   get_label(arg_value[0], df_name+"_Measuretype"),
+                                                   get_label('LBL_Distribution'))
 
         # df is not empty, create graph
         if len(filtered_df) != 0:
@@ -959,15 +989,27 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                                            secondary_path, df_name, df_const))
 
     # set title
-    if xaxis_title not in df_const[df_name]["MEASURE_TYPE_VALUES"] and xaxis_title is not None:
-        xaxis = xaxis_title
-    else:
-        xaxis = get_label(arg_value[0], df_name+"_Measuretype")
+    # x and y-axis location change depending on graph arg_value[1]: orientation
+    if arg_value[1] == 'Horizontal':
+        if xaxis_title not in df_const[df_name]["MEASURE_TYPE_VALUES"] and xaxis_title is not None:
+            xaxis = xaxis_title
+        else:
+            xaxis = get_label(arg_value[0], df_name + "_Measuretype")
 
-    if yaxis_title != '':
-        yaxis = yaxis_title
+        if yaxis_title != '' and yaxis_title is not None:
+            yaxis = yaxis_title
+        else:
+            yaxis = ''
     else:
-        yaxis = ''
+        if xaxis_title not in df_const[df_name]["MEASURE_TYPE_VALUES"] and xaxis_title is not None:
+            yaxis = xaxis_title
+        else:
+            yaxis = get_label(arg_value[0], df_name + "_Measuretype")
+
+        if yaxis_title != '' and yaxis_title is not None:
+            xaxis = yaxis_title
+        else:
+            xaxis = ''
 
     # set legend position
     if xlegend and ylegend:
@@ -977,9 +1019,8 @@ def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
         ))
 
     fig.update_layout(
-        # x and y-axis location change depending on graph arg_value[1]: orientation
-        xaxis_title=xaxis if arg_value[1] == 'Horizontal' else yaxis,
-        yaxis_title=yaxis if arg_value[1] == 'Horizontal' else xaxis,
+        xaxis_title=xaxis,
+        yaxis_title=yaxis,
         legend_title_text=get_label('LBL_Variable_Names'),
         showlegend=False if legend else True,
         boxgap=0.1,
@@ -1133,7 +1174,7 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
     return table
 
 
-def get_sankey_figure(arg_value, dff, hierarchy_level_dropdown, hierarchy_path, hierarchy_type, tile_title, df_name,
+def get_sankey_figure(dff, hierarchy_level_dropdown, hierarchy_path, hierarchy_type, tile_title, df_name,
                       df_const, secondary_level_dropdown, secondary_path, secondary_type,
                       secondary_graph_children, secondary_options):
     """Returns the sankey graph figure."""
@@ -1358,7 +1399,7 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
                                 graph_title, df_name)
     # sankey creation
     elif graph_type == 'Sankey':
-        return get_sankey_figure(graph_options, filtered_df, hierarchy_level_dropdown, list_of_names, hierarchy_toggle,
+        return get_sankey_figure(filtered_df, hierarchy_level_dropdown, list_of_names, hierarchy_toggle,
                                  graph_title, df_name, df_const, secondary_level_dropdown, list_of_secondary_names,
                                  secondary_toggle, secondary_graph_children, secondary_options)
     # catch all

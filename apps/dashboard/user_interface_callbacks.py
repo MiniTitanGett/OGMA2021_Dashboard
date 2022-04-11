@@ -139,9 +139,8 @@ def _new_and_delete(_new_clicks, close_id, _dashboard_reset, tile_titles, tile_l
         else:
             if confirm_parent:
                 parent_df = confirm_parent
-            children = get_tile_layout(num_tiles, tile_keys=input_tiles,
-                                           parent_df=parent_df if (
-                                                       df_const is not None and df_const[parent_df] is not None) else None)
+            children = get_tile_layout(num_tiles, tile_keys=input_tiles, parent_df=parent_df if (df_const is not None
+                                                                        and df_const[parent_df] is not None) else None)
     # if RESET dashboard requested, set dashboard to default appearance
     elif 'dashboard-reset' in changed_id:
         num_tiles = 1
@@ -1702,27 +1701,37 @@ app.clientside_callback(
 
 # The above function set on the graph_display sets a prop as an event to the javascript object which will set the
 # axis_titles
-app.clientside_callback(
-    """
-    function _update_axes_titles(event, dfConst, graphType, dfName, dfNameParent, linkState,argValue){
-        if(linkState == 'fa fa-link'){
-                dfName=dfNameParent;
-            }
-        if(event.x_axis != ""){
-            switch(graphType){
-                case 'Line':
-                case 'Scatter':
-                    if(event.x_axis != 'Date of Event'){
-                        event.x_modified = true;
-                        break;
-                    }
-                    else{
-                        event.x_modified = false;
-                        break;
-                    }
-                case 'Bar':
-                    if (argValue[3] == 'Horizontal'){
-                        if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(event.x_axis)){
+for x in range(4):
+    app.clientside_callback(
+        """
+        function _update_axes_titles(event, dfConst, graphType, dfName, dfNameParent, linkState,argValue){
+            if(linkState == 'fa fa-link'){
+                    dfName=dfNameParent;
+                }
+            if(event.x_axis != ""){
+                switch(graphType){
+                    case 'Line':
+                    case 'Scatter':
+                        if(event.x_axis != 'Date of Event'){
+                            event.x_modified = true;
+                            break;
+                        }
+                        else{
+                            event.x_modified = false;
+                            break;
+                        }
+                    case 'Bar':
+                        if (argValue[2] == 'Horizontal'){
+                            if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(event.x_axis)){
+                                event.x_modified = false;
+                                break;
+                            }
+                            else{
+                                event.x_modified = true;
+                                break;
+                            }
+                        }
+                        else if (event.x_axis == ""){
                             event.x_modified = false;
                             break;
                         }
@@ -1730,168 +1739,152 @@ app.clientside_callback(
                             event.x_modified = true;
                             break;
                         }
-                    }
-                    else if (event.x_axis == ""){
-                        event.x_modified = false;
-                        break;
-                    }
-                    else{
-                        event.x_modified = true;
-                        break;
-                    }
-                case 'Bubble':
-                    string= event.x_axis.split(" (")
-                    if(string.length==1){
-                        if(argValue[0]=='Time' && event.x_axis == 'Time'){
-                            event.x_modified = false;
-                            break;
+                    case 'Bubble':
+                        string= event.x_axis.split(" (")
+                        if(string.length==1){
+                            if(argValue[0]=='Time' && event.x_axis == 'Time'){
+                                event.x_modified = false;
+                                break;
+                            }
+                            else{ 
+                                event.x_modified = true;
+                                break;
+                            }
                         }
-                        else{ 
-                            event.x_modified = true;
-                            break;
-                        }
-                    }
-                    else{
-                        string[1]=string[1].replace(')','')
-                        let num=dfConst[dfName]['Variable_Option_Lists'].length
-                        for(let i=0;i<num;i++){
-                            if(dfConst[dfName]['Variable_Option_Lists'][i].includes(string[0])){
+                        else{
+                            string[1]=string[1].replace(')','')
+                            if(dfConst[dfName]['VARIABLE_OPTION_LISTS'].includes(string[0])){
                                 if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(string[1])){
                                     event.x_modified = false;
                                     break;
                                 }
                             }
                             event.x_modified = true;
+                            break;
                         }
-                        break;
-                    }
-                case 'Box_Plot':
-                    if(argValue[2]=='Vertical'){
-                        if (event.x_axis == ""){
+                    case 'Box_Plot':
+                        if(argValue[1]=='Vertical'){
+                            if (event.x_axis == ""){
+                                event.x_modified = false;
+                                break;
+                            }
+                            else{
+                                event.x_modified = true;
+                                break;
+                            }  
+                        }
+                        else if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(event.x_axis)){
                             event.x_modified = false;
                             break;
                         }
                         else{
                             event.x_modified = true;
                             break;
-                        }  
-                    }
-                    else if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(event.x_axis)){
+                        }
+                    default:
                         event.x_modified = false;
                         break;
-                    }
-                    else{
-                        event.x_modified = true;
-                        break;
-                    }
-                default:
-                    event.x_modified = false;
-                    break;
+                }
             }
-        }
-        if(event.y_axis != ""){
-            switch(graphType){
-                case 'Line':
-                case 'Scatter':
-                    if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(event.y_axis)){
-                    event.y_modified = false;
-                    break;
-                    }
-                    else{
-                        event.y_modified = true;
+            if(event.y_axis != ""){
+                switch(graphType){
+                    case 'Line':
+                    case 'Scatter':
+                        if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(event.y_axis)){
+                        event.y_modified = false;
                         break;
-                    }
-                case 'Bar':
-                    if (argValue[3] == 'Horizontal'){
-                        if (event.y_axis == ""){
-                            event.y_modified = false;
-                            break;
                         }
                         else{
                             event.y_modified = true;
                             break;
-                        }  
-                    }
-                    else if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(event.y_axis)){
-                        event.y_modified = false;
-                        break;
-                    }
-                    else{
-                       event.y_modified = true;
-                       break;
-                    }
-                case 'Bubble':
-                    string= event.y_axis.split(" (")
-                    if(string.length==1){
-                        if(argValue[0]=='Time'){
-                            let num=dfConst[dfName]['Variable_Option_Lists'].length
-                            for(let i=0;i<num;i++){
-                                if(dfConst[dfName]['Variable_Option_Lists'][i].includes(string[0])){
+                        }
+                    case 'Bar':
+                        if (argValue[2] == 'Horizontal'){
+                            if (event.y_axis == ""){
+                                event.y_modified = false;
+                                break;
+                            }
+                            else{
+                                event.y_modified = true;
+                                break;
+                            }  
+                        }
+                        else if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(event.y_axis)){
+                            event.y_modified = false;
+                            break;
+                        }
+                        else{
+                           event.y_modified = true;
+                           break;
+                        }
+                    case 'Bubble':
+                        string= event.y_axis.split(" (")
+                        if(string.length==1){
+                            if(argValue[0]=='Time'){
+                                if(dfConst[dfName]['VARIABLE_OPTION_LISTS'].includes(string[0])){
                                     event.y_modified = false;
                                     break;
                                 }
-                                event.y_modified = true;
+                                else{
+                                    event.y_modified = true;
+                                }
+                                break;
                             }
-                            break;
+                            else{ 
+                                event.y_modified = true;
+                                break;
+                            }
                         }
-                        else{ 
-                            event.y_modified = true;
-                            break;
-                        }
-                    }
-                    else{
-                        string[1]=string[1].replace(')','')
-                        let num=dfConst[dfName]['Variable_Option_Lists'].length
-                        for(let i=0;i<num;i++){
-                            if(dfConst[dfName]['Variable_Option_Lists'][i].includes(string[0])){
+                        else{
+                            string[1]=string[1].replace(')','')
+                            if(dfConst[dfName]['VARIABLE_OPTION_LISTS'].includes(string[0])){
                                 if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(string[1])){
                                     event.y_modified = false;
                                     break;
                                 }
                             }
-                        event.y_modified = true;
+                            event.y_modified = true;
+                            break;
                         }
-                        break;
-                    }
-                case 'Box_Plot':
-                    if(argValue[2]=='Vertical'){
-                        if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(event.y_axis)){
+                    case 'Box_Plot':
+                        if(argValue[1]=='Vertical'){
+                            if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(event.y_axis)){
+                                event.y_modified = false;
+                                break;
+                            }
+                            else{
+                                event.y_modified = true;
+                                break;
+                            }
+                        }
+                        else if (event.y_axis == ""){
                             event.y_modified = false;
                             break;
                         }
                         else{
                             event.y_modified = true;
                             break;
-                        }
-                    }
-                    else if (event.y_axis == ""){
+                        }  
+                    default:
                         event.y_modified = false;
                         break;
-                    }
-                    else{
-                        event.y_modified = true;
-                        break;
-                    }  
-                default:
-                    event.y_modified = false;
-                    break;
+                }
             }
+            return [event.x_axis, event.y_axis, event.x_legend, event.y_legend, event.x_modified, event.y_modified];
         }
-        return [event.x_axis, event.y_axis, event.x_legend, event.y_legend, event.x_modified, event.y_modified];
-    }
-    """,
-    [Output({"type": "xaxis-title", "index": MATCH}, 'value'),
-     Output({"type": "yaxis-title", "index": MATCH}, 'value'),
-     Output({'type': 'x-pos-legend', 'index': MATCH}, 'value'),
-     Output({'type': 'y-pos-legend', 'index': MATCH}, 'value'),
-     Output({'type': 'x-modified', 'index': MATCH}, 'data'),
-     Output({'type': 'y-modified', 'index': MATCH}, 'data')],
-    Input({'type': 'javascript', 'index': MATCH}, 'event'),
-    [State('df-constants-storage', 'data'),
-     State({'type': 'graph-type-dropdown', 'index': MATCH}, 'value'),
-     State({'type': 'data-set', 'index': MATCH}, 'value'),
-     State({'type': 'data-set', 'index': 4}, 'value'),
-     State({'type': 'tile-link', 'index': MATCH}, 'className'),
-     State({'type': 'args-value: {}'.replace("{}", str(0)), 'index': ALL}, 'value')],
-    prevent_initial_call=True
-)
+        """,
+        [Output({"type": "xaxis-title", "index": x}, 'value'),
+         Output({"type": "yaxis-title", "index": x}, 'value'),
+         Output({'type': 'x-pos-legend', 'index': x}, 'value'),
+         Output({'type': 'y-pos-legend', 'index': x}, 'value'),
+         Output({'type': 'x-modified', 'index': x}, 'data'),
+         Output({'type': 'y-modified', 'index': x}, 'data')],
+        Input({'type': 'javascript', 'index': x}, 'event'),
+        [State('df-constants-storage', 'data'),
+         State({'type': 'graph-type-dropdown', 'index': x}, 'value'),
+         State({'type': 'data-set', 'index': x}, 'value'),
+         State({'type': 'data-set', 'index': 4}, 'value'),
+         State({'type': 'tile-link', 'index': x}, 'className'),
+         State({'type': 'args-value: {}'.replace("{}", str(x)), 'index': ALL}, 'value')],
+        prevent_initial_call=True
+    )

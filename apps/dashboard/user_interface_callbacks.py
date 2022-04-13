@@ -655,8 +655,8 @@ app.clientside_callback(
      Output({'type': 'update-graph-trigger', 'index': MATCH}, 'data-graph_menu_trigger'),
      Output({'type': 'update-graph-trigger', 'index': MATCH}, 'data-graph_menu_table_trigger'),
      Output({'type': 'tile-customize-content', 'index': MATCH}, 'data-loaded'),
-     Output({'type': 'tile-rebuild-menu-flag', 'index': MATCH}, 'data'),
-     Output({'type': 'tab-swap-flag', 'index': MATCH}, 'data')],
+     Output({'type': 'tile-rebuild-menu-flag', 'index': MATCH}, 'data')],
+     # Output({'type': 'tab-swap-flag', 'index': MATCH}, 'data')],
     [Input({'type': 'graph-menu-trigger', 'index': MATCH}, 'data-'),
      Input({'type': 'graph-type-dropdown', 'index': MATCH}, 'value'),
      Input({'type': 'tile-link', 'index': MATCH}, 'className')],
@@ -687,12 +687,12 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
     swap_flag_output = False
     # if tab swapped or load triggered, don't reset menus
     if not rebuild_menu or len(dash.callback_context.triggered) == 4 or swap_flag[changed_index] is True:
-        return no_update, 1, no_update, no_update, True, swap_flag_output
+        return no_update, 1, no_update, no_update, True
 
     # if link state has changed from linked --> unlinked the data has not changed, prevent update
     if '"type":"tile-link"}.className' in changed_id and link_state == 'fa fa-unlink':
         if selected_graph_type is None:
-            return None, no_update, no_update, no_update, no_update, swap_flag_output
+            return None, no_update, no_update, no_update, no_update
         else:
             raise PreventUpdate
 
@@ -718,11 +718,11 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
 
     # if graph menu trigger has value 'tile closed' then a tile was closed, don't update menu, still update table
     if 'graph-menu-trigger"}.data-' in changed_id and gm_trigger == 'tile closed':
-        return no_update, no_update, 1, no_update, True, swap_flag_output
+        return no_update, no_update, 1, no_update, True
 
     # if this has been loaded from the cancel of a graph menu edit then set to false and prevent update
     if 'graph-type-dropdown"}.value' in changed_id and is_loaded:
-        return no_update, no_update, no_update, False, True, swap_flag_output
+        return no_update, no_update, no_update, False, True
 
     tile = int(dash.callback_context.inputs_list[0]['id']['index'])
 
@@ -853,7 +853,7 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
         update_graph_trigger = 1
     else:
         update_graph_trigger = no_update
-    return menu, update_graph_trigger, no_update, no_update, True, swap_flag_output
+    return menu, update_graph_trigger, no_update, no_update, True
 
 
 # ************************************************DATA SIDE-MENU******************************************************
@@ -906,7 +906,8 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
      Output({'type': 'update-date-picker-trigger', 'index': 1}, 'data-boolean'),
      Output({'type': 'update-date-picker-trigger', 'index': 2}, 'data-boolean'),
      Output({'type': 'update-date-picker-trigger', 'index': 3}, 'data-boolean'),
-     Output({'type': 'update-date-picker-trigger', 'index': 4}, 'data-boolean')],
+     Output({'type': 'update-date-picker-trigger', 'index': 4}, 'data-boolean'),
+     Output('data-set-result-wrapper', 'children')],
     [Input('tile-closed-trigger', 'data-'),
      Input({'type': 'tile-link', 'index': ALL}, 'className'),
      Input({'type': 'tile-data', 'index': ALL}, 'n_clicks'),
@@ -988,6 +989,10 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
     # unknown why but this has to be done this way instead of using ALL since ALL was changing the order in seemingly
     # random ways
     prev_selection = [prev_selection_0, prev_selection_1, prev_selection_2, prev_selection_3, prev_selection_4]
+    # flag for the dataset selector result menu
+    data_set_flag=[]
+    for i in range(4):
+        data_set_flag.append(dcc.Store(id={'type': 'data-set-result', 'index': i}, data= False))
     df_tile = None
     # ------------------------------------------------------------------------------------------------------------------
     # if changed id == '.' due to NEW being requested, preserve data menu display.
@@ -1259,6 +1264,8 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                                 # unlink the graph then load new dataset in parent data menu
                                 else:
                                     options_triggers[i] = 'fa fa-unlink'
+                                    data_set_flag[i] = dcc.Store(id={'type': 'data-set-result', 'index': i},
+                                                                 data= True)
             # duo options
             else:
                 if prompt_result == 'ok':
@@ -1360,7 +1367,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
             options_triggers[0], options_triggers[1], options_triggers[2], options_triggers[3], prompt_trigger,
             df_name_confirm,
             date_picker_triggers[0], date_picker_triggers[1], date_picker_triggers[2], date_picker_triggers[3],
-            date_picker_triggers[4])
+            date_picker_triggers[4], data_set_flag)
 
 
 app.clientside_callback(
@@ -1724,12 +1731,12 @@ for x in range(4):
                         if (argValue[2] == 'Horizontal'){
                             if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(event.x_axis)){
                                 event.x_modified = false;
-                                break;
                             }
                             else{
                                 event.x_modified = true;
-                                break;
                             }
+                            temp=event.x_axis;
+                            break;
                         }
                         else if (event.x_axis == ""){
                             event.x_modified = false;
@@ -1766,12 +1773,12 @@ for x in range(4):
                         if(argValue[1]=='Vertical'){
                             if (event.x_axis == ""){
                                 event.x_modified = false;
-                                break;
                             }
                             else{
                                 event.x_modified = true;
-                                break;
-                            }  
+                            }
+                            temp=event.x_axis;
+                            break;  
                         }
                         else if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(event.x_axis)){
                             event.x_modified = false;
@@ -1802,12 +1809,13 @@ for x in range(4):
                         if (argValue[2] == 'Horizontal'){
                             if (event.y_axis == ""){
                                 event.y_modified = false;
-                                break;
                             }
                             else{
                                 event.y_modified = true;
-                                break;
-                            }  
+                            }
+                            event.x_axis = event.y_axis;
+                            event.y_axis = temp;
+                            break;
                         }
                         else if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(event.y_axis)){
                             event.y_modified = false;
@@ -1850,12 +1858,13 @@ for x in range(4):
                         if(argValue[1]=='Vertical'){
                             if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(event.y_axis)){
                                 event.y_modified = false;
-                                break;
                             }
                             else{
                                 event.y_modified = true;
-                                break;
                             }
+                            event.x_axis = event.y_axis;
+                            event.y_axis = temp;
+                            break;
                         }
                         else if (event.y_axis == ""){
                             event.y_modified = false;

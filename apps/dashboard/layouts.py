@@ -704,6 +704,13 @@ def get_layout_dashboard():
             style={'position': 'absolute', 'right': '47%', 'top': '80%', 'margin-right': '-100px', 'z-index': '1070'},
             duration=4000),
 
+        html.Div([
+            dcc.Store(id={'type': 'data-set-result', 'index': 0}, data=False),
+            dcc.Store(id={'type': 'data-set-result', 'index': 1}, data=False),
+            dcc.Store(id={'type': 'data-set-result', 'index': 2}, data=False),
+            dcc.Store(id={'type': 'data-set-result', 'index': 3}, data=False)],
+            id='data-set-result-wrapper'),
+
         # dashboard-reset-confirmation is used by the prompts to reset the viewport
         dcc.Store(id='dashboard-reset-confirmation'),
         # javascript visdcc object for running the javascript required to handle plotly_relayout events

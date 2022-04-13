@@ -765,6 +765,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                 data_frame=filtered_df,
                 x=x if arg_value[2] == 'Vertical' else 'Measure Value',
                 y='Measure Value' if arg_value[2] == 'Vertical' else x,
+                orientation='v' if arg_value[2] =='Vertical' else 'h',
                 color=color,
                 color_discrete_sequence=color_discrete,
                 barmode='group',
@@ -793,7 +794,6 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                 title=title + get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path,
                                                        secondary_type, secondary_path, df_name, df_const))
     else:
-        # change argvalue2 if we get rid of opg001
         fig = px.bar(
             title=get_empty_graph_subtitle(hierarchy_type, hierarchy_level_dropdown, hierarchy_path, secondary_type,
                                            secondary_path, df_name, df_const))
@@ -1168,7 +1168,9 @@ def get_table_figure(arg_value, dff, tile, hierarchy_specific_dropdown, hierarch
             style_header={'backgroundColor': 'rgb(230, 230, 230)', 'fontWeight': 'bold'},
 
             style_table={'margin-top': '10px', 'overflow': 'auto'},
-        )], style={'height': '90%', 'width': 'auto', 'overflow-y': 'auto', 'overflow-x': 'hidden',
+        ),
+        dcc.Store(id={'type': 'tile-df-name', 'index': tile}, data=df_name)],
+        style={'height': '90%', 'width': 'auto', 'overflow-y': 'auto', 'overflow-x': 'hidden',
                    'margin-left': '10px', 'margin-right': '10px'})
 
     return table
@@ -1282,22 +1284,6 @@ def get_sankey_figure(dff, hierarchy_level_dropdown, hierarchy_path, hierarchy_t
         responsive=True,
         config=dict(locale=language.lower()),
         figure=fig)
-
-
-def get_pivot_table(dff, tile, df_const, df_name):
-
-    dff = dff.dropna(how='all', axis=1)
-
-    return html.Div(children=[
-                PivotTable(
-                        id={'type': 'pivottable', 'index': tile},
-                        data=dff.to_dict("records"),
-                        cols=[],
-                        rows=[],
-                        vals=df_const[df_name]['MEASURE_TYPE_OPTIONS'],
-                        unusedOrientationCutoff=0),
-    ], style={'height': '70%', 'width': '95%', 'overflow-y': 'auto', 'overflow-x': 'auto',
-                   'margin-left': '10px', 'margin-right': '10px'})
 
 
 def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods, period_type,

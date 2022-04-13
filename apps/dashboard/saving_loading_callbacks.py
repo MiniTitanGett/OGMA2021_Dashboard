@@ -341,13 +341,13 @@ for y in range(4):
                             graph_options[3] = graph_display['props']['figure']['layout']['legend']['y']
 
                 if graph_type == 'Bar':
-                    if args_list[3] == 'Horizontal':
+                    if args_list[2] == 'Horizontal':
                         temp_variable = graph_options[1]
                         graph_options[1] = graph_options[0]
                         graph_options[0] = temp_variable
 
                 if graph_type == 'Box_Plot':
-                    if args_list[2] == 'Vertical':
+                    if args_list[1] == 'Vertical':
                         temp_variable = graph_options[1]
                         graph_options[1] = graph_options[0]
                         graph_options[0] = temp_variable
@@ -1024,7 +1024,6 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                     dashboard_saves['Parent Data'] = parent_data
 
                 for i in range(len(links)):
-
                     tile_pointer = REPORT_POINTER_PREFIX + tile_titles[i].replace(" ", "")
                     # regex.sub('[^A-Za-z0-9]+', '', tile_titles[i])
                     used_titles = []

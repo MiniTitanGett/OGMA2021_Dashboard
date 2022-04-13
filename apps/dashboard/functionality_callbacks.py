@@ -48,7 +48,9 @@ for x in range(4):
          Output({'type': 'axes-popup', 'index': x}, 'is_open'),
          Output({'type': 'data-fitting-trigger', 'index': x}, 'value'),
          Output({'type': 'fitting-popup', 'index': x}, 'children'),
-         Output({'type': 'fitting-popup', 'index': x}, 'is_open')],
+         Output({'type': 'fitting-popup', 'index': x}, 'is_open'),
+         Output({'type': 'tab-swap-flag', 'index': x}, 'data'),
+         Output({'type': 'data-set-result', 'index': x}, 'data')],
         # Graph menu update graph trigger
         [Input({'type': 'update-graph-trigger', 'index': x}, 'data-graph_menu_trigger'),
          # Customize menu inputs
@@ -120,7 +122,10 @@ for x in range(4):
          State({'type': 'x-modified', 'index': x}, 'data'),
          State({'type': 'y-modified', 'index': x}, 'data'),
          State('num-tiles', 'data-num-tiles'),
-         State({'type': 'data-fitting-trigger', 'index': x}, 'value')],
+         State({'type': 'data-fitting-trigger', 'index': x}, 'value'),
+         State({'type': 'tab-swap-flag', 'index': x}, 'data'),
+         #data set result flag
+         State({'type': 'data-set-result', 'index': x}, 'data')],
         prevent_initial_call=True
     )
     def _update_graph(_df_trigger, arg_value, gridline, legend, graph_type, tile_title, _datepicker_trigger,
@@ -133,7 +138,8 @@ for x in range(4):
                       parent_secondary_type, parent_timeframe, parent_fiscal_toggle, parent_start_year, parent_end_year,
                       parent_start_secondary, parent_end_secondary, graph_display, df_name, parent_df_name,
                       link_state, hierarchy_options, parent_hierarchy_options, secondary_options, df_const, df_confirm,
-                      xaxis, yaxis, xlegend, ylegend, xmodified, ymodified, num_tiles, prev_fitting_trigger):
+                      xaxis, yaxis, xlegend, ylegend, xmodified, ymodified, num_tiles, prev_fitting_trigger, swap_flag,
+                      data_set_flag):
 
         # -------------------------------------------Variable Declarations----------------------------------------------
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
@@ -144,11 +150,16 @@ for x in range(4):
         data = no_update
         fitting_popup_text = no_update
         fitting_popup_is_open = no_update
+        swap_flag_output = False
+        data_set_flag_output = False
         # --------------------------------------------------------------------------------------------------------------
         # if new/delete while the graph already exists, prevent update
         if changed_id == '.' and graph_display:
             raise PreventUpdate
 
+        if swap_flag is True:
+            return graph_display, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open, \
+                   swap_flag_output, data_set_flag_output
         # check if keyword in df_name
         if df_name is not None:
             df_tile = df_name
@@ -158,27 +169,28 @@ for x in range(4):
                 df_name = 'OPG011'
 
         if '"type":"tile-view"}.className' in changed_id and df_name is None and parent_df_name is None:
-            return None, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open
+            return None, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open, swap_flag_output, \
+                   data_set_flag_output
 
         if len(arg_value) == 0 and graph_type != "Sankey":
-            return None, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open
+            return None, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open, swap_flag_output, \
+                   data_set_flag_output
 
         # if unlinked and parent changes, prevent update
         if (link_state == 'fa fa-unlink' and '"index":4' in changed_id) and 'args-value' not in changed_id:
             raise PreventUpdate
 
-        # if linked --> unlinked prevent update
-
+        # flag for warning user of a modified graph axes
         if (xmodified or ymodified) and 'args-value' in changed_id:
             if num_tiles < 2:
                 popup_text = get_label('LBL_Axes_Graph_Labels_Modified')
             else:
                 popup_text = get_label('LBL_Axes_Graphs_Labels_Modified')
             popup_is_open = True
-        # if linked and graph-type is in both data sets update graph
-        if link_state == 'fa fa-link' and (df_name is not None
-                                           and graph_type in GRAPH_OPTIONS[df_name] and df_name != parent_df_name) or \
-                (df_name is None and df_confirm is not None and parent_df_name != df_confirm):
+
+        # if tile un-linked and graph-type is in both data sets update graph
+        if link_state == 'fa fa-link' and data_set_flag is True and (df_name is not None
+                                           and graph_type in GRAPH_OPTIONS[df_name] and df_name != parent_df_name):
             if df_confirm is not None:
                 df_tile = df_confirm
 
@@ -191,7 +203,8 @@ for x in range(4):
                                    secondary_level_dropdown, secondary_state_of_display, secondary_hierarchy_toggle,
                                    secondary_graph_children, secondary_options)
 
-            return graph, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open
+            return graph, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open, swap_flag_output,\
+                   data_set_flag_output
 
         # account for tile being linked or not
         if link_state == 'fa fa-link':
@@ -257,7 +270,8 @@ for x in range(4):
         if graph is None:
             raise PreventUpdate
 
-        return graph, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open
+        return graph, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open, swap_flag_output, \
+               data_set_flag_output
 
 # *******************************************************HIERARCHY***************************************************
 
@@ -823,7 +837,8 @@ def split_filter_part(filter_part):
      # Parent Data set
      State({'type': 'data-set', 'index': 4}, 'value'),
      State('df-constants-storage', 'data'),
-     State({'type': 'data-set-parent', 'index': 4}, 'value')]
+     State({'type': 'data-set-parent', 'index': 4}, 'value'),
+     State({'type': 'tile-df-name', 'index': MATCH}, 'data')]
 )
 def _update_table(page_current, page_size, sort_by, filter_query, _graph_trigger, _table_trigger, link_state,
                   df_name, secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
@@ -832,8 +847,10 @@ def _update_table(page_current, page_size, sort_by, filter_query, _graph_trigger
                   parent_timeframe, parent_fiscal_toggle, parent_start_year, parent_end_year,
                   parent_start_secondary, parent_end_secondary, parent_num_periods, parent_period_type,
                   parent_hierarchy_toggle, parent_hierarchy_level_dropdown, parent_state_of_display,
-                  parent_hierarchy_graph_children, parent_hierarchy_options, parent_df_name, df_const, df_confirm):
-    if link_state == 'fa fa-link' and df_name is None:
+                  parent_hierarchy_graph_children, parent_hierarchy_options, parent_df_name, df_const, df_confirm,
+                  table_df):
+
+    if table_df == parent_df_name and link_state == 'fa fa-link':
         secondary_type = parent_secondary_type
         timeframe = parent_timeframe
         fiscal_toggle = parent_fiscal_toggle

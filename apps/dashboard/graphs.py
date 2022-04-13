@@ -769,7 +769,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                 color=color,
                 color_discrete_sequence=color_discrete,
                 barmode='group',
-                animation_frame='Date of Event' if arg_value[4] else None,
+                animation_frame='Date of Event' if arg_value[3] else None,
                 custom_data=[hierarchy_col, color, 'Date of Event'])
             fig.update_layout(legend_title_text=legend_title_text)
             # set up hover label

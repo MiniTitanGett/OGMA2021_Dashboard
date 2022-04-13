@@ -464,8 +464,8 @@ for y in range(4):
                 storage_type='memory',
                 data=df_const)
             for x in range(tile):
-                df_const = html.Div(
-                    df_const,
+                df_const_output = html.Div(
+                    df_const_output,
                     id={'type': 'df-constants-storage-tile-wrapper', 'index': x}
                 )
 

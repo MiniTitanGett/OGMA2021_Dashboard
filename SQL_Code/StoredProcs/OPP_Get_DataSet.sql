@@ -36,21 +36,20 @@ begin
            --null [Hierarchy One -2],
            --null [Hierarchy One -3],
            --null [Hierarchy One -4],
-           dur.[Hierarchy One Leaf] as [Hierarchy Value],
+           dur.[HierarchyLeaf] as [Hierarchy Value],
            5 as [Hierarchy Level],
            --[Variable Name],
            --[Variable Name Qualifier],
            --[Variable Name Sub Qualifier],
            case
-             when isnull(dur.[Variable Name Sub Qualifier], '') <> '' then dur.[Variable Name Sub Qualifier]
-             else dur.[Variable Name Qualifier]
+             when isnull(dur.[DocumentTypeSubQualifier], '') <> '' then dur.[DocumentTypeSubQualifier]
+             else dur.[DocumentTypeQualifier]
            end as [Variable Value],
            case
-             when isnull(dur.[Variable Name Sub Qualifier], '') <> '' then 2
+             when isnull(dur.[DocumentTypeSubQualifier], '') <> '' then 2
              else 1
            end as [Variable Level],
-           dur.[Date of Event],
-           dur.[Calendar Entry Type],
+           dur.[EventDate] as [Date of Event],
            --null [Year of Event],
            --null [Quarter],
            --null [Month of Event],
@@ -60,7 +59,7 @@ begin
            --null [Fiscal Month of Event],
            --null [Fiscal Week of Event],
            --null [Julian Day],
-           dur.[Activity Event Id],
+           dur.[ActivityId] as [Activity Event Id],
            dur.[Measure1],
            dur.[Measure2],
            dur.[Measure3],
@@ -77,7 +76,7 @@ begin
            --           null as [Measure Type 4],
            --           null as [Measure Value 5],
            --           null as [Measure Type 5],
-           dur.[Partial Period]
+           dur.[PartialPeriod] as [Partial Period]
       from dbo.OPG011_eventData as dur with (nolock)
 --     select --null [OPG Data Set],
 --            --null [Hierarchy One Name],

@@ -243,8 +243,6 @@ def dataset_to_df(df_name):
                                                             df_vaex['Variable Name Qualifier'])
     df_vaex['Variable Name Sub Qualifier'] = df_vaex.func.where(df_vaex['Variable Name Sub Qualifier'] == '', None,
                                                                 df_vaex['Variable Name Sub Qualifier'])
-    df_vaex['Calendar Entry Type'] = df_vaex.func.where(df_vaex['Calendar Entry Type'] == '', None,
-                                                        df_vaex['Calendar Entry Type'])
 
     df_vaex['Variable Value'] = df_vaex.func.where(df_vaex['Variable Value'] == '', None, df_vaex['Variable Value'])
 
@@ -339,16 +337,16 @@ def generate_constants(df_name):
         GREGORIAN_MONTH_FRINGE_MIN = int(min_date_unf.month)
         GREGORIAN_MONTH_FRINGE_MAX = int(max_date_unf.month)
 
-        if len(df[df['Calendar Entry Type'] == 'Week']) > 0:
-            GREGORIAN_WEEK_AVAILABLE = True  # not currently used
-            GREGORIAN_WEEK_MAX_YEAR = int(max_date_unf.year)
-            GREGORIAN_WEEK_FRINGE_MIN = int(min_date_unf.strftime("%W")) + 1
-            GREGORIAN_WEEK_FRINGE_MAX = int(max_date_unf.strftime("%W")) + 1
-        else:
-            GREGORIAN_WEEK_AVAILABLE = False  # not currently used, so set fake values
-            GREGORIAN_WEEK_MAX_YEAR = 52
-            GREGORIAN_WEEK_FRINGE_MIN = 1
-            GREGORIAN_WEEK_FRINGE_MAX = 52
+        # if len(df[df['Calendar Entry Type'] == 'Week']) > 0:
+        #     GREGORIAN_WEEK_AVAILABLE = True  # not currently used
+        #     GREGORIAN_WEEK_MAX_YEAR = int(max_date_unf.year)
+        #     GREGORIAN_WEEK_FRINGE_MIN = int(min_date_unf.strftime("%W")) + 1
+        #     GREGORIAN_WEEK_FRINGE_MAX = int(max_date_unf.strftime("%W")) + 1
+        # else:
+        GREGORIAN_WEEK_AVAILABLE = False  # not currently used, so set fake values
+        GREGORIAN_WEEK_MAX_YEAR = 52
+        GREGORIAN_WEEK_FRINGE_MIN = 1
+        GREGORIAN_WEEK_FRINGE_MAX = 52
 
         # TODO: Calc and set values based off of client org system setting
         FISCAL_AVAILABLE = False

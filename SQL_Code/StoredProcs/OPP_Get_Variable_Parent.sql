@@ -22,10 +22,10 @@ begin
   set @p_parent = null
 
   if (@pr_child_level = 2)
-    set @p_parent = (select top 1 [Variable Name Qualifier] from dbo.OPG011_eventData with (nolock) where [Variable Name Sub Qualifier] = @pr_child)
+    set @p_parent = (select top 1 [DocumentTypeQualifier] from dbo.OPG011_eventData with (nolock) where [DocumentTypeSubQualifier] = @pr_child)
 
   else if (@pr_child_level = 1)
-    set @p_parent = (select top 1 [Variable Name] from dbo.OPG011_eventData with (nolock) where [Variable Name Qualifier] = @pr_child)
+    set @p_parent = (select top 1 [DocumentType] from dbo.OPG011_eventData with (nolock) where [DocumentTypeQualifier] = @pr_child)
   
   set @p_result_status = 'OK'
 end

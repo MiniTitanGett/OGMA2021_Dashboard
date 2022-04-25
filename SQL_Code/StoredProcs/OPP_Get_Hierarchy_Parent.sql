@@ -23,22 +23,33 @@ begin
 
   set @p_result_status = 'NoOK'
 
-  set @p_parent = null
+  set @p_parent = @pr_child
 
-  if (@pr_child_level = 5)
-    set @p_parent = (select top 1 [Hierarchy One -4] from dbo.OPG001 with (nolock) where [Hierarchy One Leaf] = @pr_child)
+  while ((@p_parent is not null) and (@p_parent = @pr_child))
+  begin
 
-  else if (@pr_child_level = 4)
-    set @p_parent = (select top 1 [Hierarchy One -3] from dbo.OPG001 with (nolock) where [Hierarchy One -4] = @pr_child)
+    if (@pr_child_level = 5)
+      set @p_parent = (select top 1 [Hierarchy One -4] from dbo.OPG001 with (nolock) where [Hierarchy One Leaf] = @pr_child)
 
-  else if (@pr_child_level = 3)
-    set @p_parent = (select top 1 [Hierarchy One -2] from dbo.OPG001 with (nolock) where [Hierarchy One -3] = @pr_child)
+    else if (@pr_child_level = 4)
+      set @p_parent = (select top 1 [Hierarchy One -3] from dbo.OPG001 with (nolock) where [Hierarchy One -4] = @pr_child)
 
-  else if (@pr_child_level = 2)
-    set @p_parent = (select top 1 [Hierarchy One -1] from dbo.OPG001 with (nolock) where [Hierarchy One -2] = @pr_child)
+    else if (@pr_child_level = 3)
+      set @p_parent = (select top 1 [Hierarchy One -2] from dbo.OPG001 with (nolock) where [Hierarchy One -3] = @pr_child)
 
-  else if (@pr_child_level = 1)
-    set @p_parent = (select top 1 [Hierarchy One Top] from dbo.OPG001 with (nolock) where [Hierarchy One -1] = @pr_child)
+    else if (@pr_child_level = 2)
+      set @p_parent = (select top 1 [Hierarchy One -1] from dbo.OPG001 with (nolock) where [Hierarchy One -2] = @pr_child)
+
+    else if (@pr_child_level = 1)
+      set @p_parent = (select top 1 [Hierarchy One Top] from dbo.OPG001 with (nolock) where [Hierarchy One -1] = @pr_child)
+
+    if (@p_parent = @pr_child)
+      set @pr_child_level = @pr_child_level - 1
+
+    if (@pr_child_level = 0)
+      set @p_parent = null
+
+  end
   
   set @p_result_status = 'OK'
 end

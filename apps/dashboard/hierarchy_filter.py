@@ -29,7 +29,7 @@ def generate_dropdown(tile, df_name, nid_path, df_const):
             # df = df.set_index(['H{}'.format(i) for i in range(llen)])
             # option_list = df.loc[tuple(hierarchy_nid_list)]['H{}'.format(llen)].dropna().unique()
             for i in range(llen):
-                level = df_const[df_name]["CATEGORICAL_DATA"]["H"+str(i)]["labels"].index(hierarchy_nid_list[i]) if \
+                level = df_const[df_name]["H"+str(i)][hierarchy_nid_list[i]] if \
                                                                         df_name == "OPG011" else hierarchy_nid_list[i]
                 df = df.filter(df['H{}'.format(i)] == level)
                 df = df.drop('H{}'.format(i))
@@ -37,8 +37,7 @@ def generate_dropdown(tile, df_name, nid_path, df_const):
         else:
             option_list = df['H0'].unique()
         if df_name == "OPG011":
-            options = [{'label': df_const[df_name]["CATEGORICAL_DATA"]["H"+str(llen)]["labels"]
-                                                    [i], 'value': i} for i in option_list]
+            options = [{'label': i, 'value': i} for i in option_list]
         else:
             options = [{'label': i, 'value': i} for i in option_list]
         options = sorted(options, key=lambda k: k['label'])

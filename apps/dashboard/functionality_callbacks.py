@@ -11,7 +11,7 @@ import math
 import dash
 from dash.dependencies import Input, Output, State, ALL, MATCH
 from dash.exceptions import PreventUpdate
-import dash_html_components as html
+from dash_html_components import Div, Button, P, Header
 import dash_core_components as dcc
 from re import search
 from flask import session
@@ -343,16 +343,13 @@ for x in range(5):
             # If nothing in history return value
             elif not state_of_display:
                 display_button = generate_history_button(dropdown_val, 0, changed_index, df_name, df_const)
-                nid_path = get_nid_path(dropdown_value=df_const[df_name]["CATEGORICAL_DATA"]["H"+str(0)]["labels"]
-                                                    [dropdown_val] if isinstance(dropdown_val, int) else dropdown_val)
+                nid_path = get_nid_path(dropdown_value=dropdown_val)
                 dropdown = generate_dropdown(changed_index, df_name, nid_path, df_const)
             # If something is in the history preserve it and add value to it
             else:
                 display_button = state_of_display + [
                     (generate_history_button(dropdown_val, len(state_of_display), changed_index, df_name, df_const))]
-                nid_path = get_nid_path(sod=state_of_display, dropdown_value=df_const[df_name]["CATEGORICAL_DATA"]
-                            ["H"+str(len(state_of_display))]["labels"][dropdown_val] if isinstance(dropdown_val, int)
-                                                                                                    else dropdown_val)
+                nid_path = get_nid_path(sod=state_of_display, dropdown_value=dropdown_val)
                 dropdown = generate_dropdown(changed_index, df_name, nid_path, df_const)
         # If update triggered due to creation of a button do not update anything
         elif all(i == 0 for i in n_clicks_click_history):
@@ -439,16 +436,14 @@ def _print_choice_to_display_and_modify_secondary_dropdown(dropdown_val, _n_clic
         # If nothing in history return value
         elif not state_of_display:
             display_button = generate_secondary_history_button(dropdown_val, 0, changed_index, df_name, df_const)
-            nid_path = get_nid_path(dropdown_value=df_const[df_name]["CATEGORICAL_DATA"]["Variable Name"]["labels"]
-                                    [dropdown_val] if type(dropdown_val) == int else dropdown_val)
+            nid_path = get_nid_path(dropdown_value=dropdown_val)
             dropdown = generate_secondary_dropdown(changed_index, df_name, nid_path, df_const)
         # If something is in the history preserve it and add value to it
         else:
             display_button = state_of_display + [
                 (generate_secondary_history_button(dropdown_val, len(state_of_display), changed_index, df_name,
                                                                                                             df_const))]
-            nid_path = get_nid_path(sod=state_of_display, dropdown_value=df_const[df_name]["CATEGORICAL_DATA"]
-              [hierarchy_level[len(state_of_display)]]["labels"][dropdown_val])
+            nid_path = get_nid_path(sod=state_of_display, dropdown_value=dropdown_val)
             dropdown = generate_secondary_dropdown(changed_index, df_name, nid_path, df_const)
     # If update triggered due to creation of a button do not update anything
     elif all(i == 0 for i in n_clicks_click_history):
@@ -552,11 +547,11 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
     # if "All-Time" or 'Past ___ ___' radio selected, return only hidden id placeholders
     if input_method == 'all-time' or input_method == 'to-current':
         children = [
-            html.Div([
-                html.Button(id={'type': 'date-picker-year-button', 'index': tile}),
-                html.Button(id={'type': 'date-picker-quarter-button', 'index': tile}),
-                html.Button(id={'type': 'date-picker-month-button', 'index': tile}),
-                html.Button(id={'type': 'date-picker-week-button', 'index': tile}),
+            Div([
+                Button(id={'type': 'date-picker-year-button', 'index': tile}),
+                Button(id={'type': 'date-picker-quarter-button', 'index': tile}),
+                Button(id={'type': 'date-picker-month-button', 'index': tile}),
+                Button(id={'type': 'date-picker-week-button', 'index': tile}),
                 dcc.Input(id={'type': 'start-year-input', 'index': tile},
                           value=1),
                 dcc.Input(id={'type': 'end-year-input', 'index': tile},
@@ -585,7 +580,7 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
             else:
                 min_year = df_const[df_name]['FISCAL_MIN_YEAR']
                 max_year = df_const[df_name]['FISCAL_YEAR_MAX']
-            left_column = html.Div([
+            left_column = Div([
                 get_date_box(index={'type': 'start-year-input', 'index': tile},
                              value=min_year,
                              minimum=min_year,
@@ -595,7 +590,7 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                     id={'type': 'start-secondary-input', 'index': tile},
                     value=1,
                     style={'display': 'none'})])
-            right_column = html.Div([
+            right_column = Div([
                 get_date_box(index={'type': 'end-year-input', 'index': tile},
                              value=max_year + 1,
                              minimum=min_year + 1,
@@ -682,7 +677,7 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                 if 'fiscal-year-toggle' in changed_id:
                     selected_min_year = min_year
                     selected_max_year = max_year + 1
-                left_column = html.Div([
+                left_column = Div([
                     get_date_box(index={'type': 'start-year-input', 'index': tile},
                                  value=selected_min_year,
                                  minimum=min_year,
@@ -692,7 +687,7 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                         id={'type': 'start-secondary-input', 'index': tile},
                         value=1,
                         style={'display': 'none'})])
-                right_column = html.Div([
+                right_column = Div([
                     get_date_box(index={'type': 'end-year-input', 'index': tile},
                                  value=selected_max_year,
                                  minimum=selected_min_year + 1,
@@ -705,27 +700,27 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
         # do not move the arrow upwards unless secondary selection input boxes exist
         bottom = '0' if not fringe_min else '17px'
         children = [
-            html.Header([
-                html.Button(get_label("LBL_Year"), className=year_classname,
+            Header([
+                Button(get_label("LBL_Year"), className=year_classname,
                             id={'type': 'date-picker-year-button', 'index': tile},
                             disabled=year_disabled),
-                html.Button(get_label("LBL_Quarter"), className=quarter_classname,
+                Button(get_label("LBL_Quarter"), className=quarter_classname,
                             id={'type': 'date-picker-quarter-button', 'index': tile},
                             disabled=quarter_disabled),
-                html.Button(get_label("LBL_Month"), className=month_classname,
+                Button(get_label("LBL_Month"), className=month_classname,
                             id={'type': 'date-picker-month-button', 'index': tile},
                             disabled=month_disabled),
-                html.Button(get_label("LBL_Week"), className=week_classname,
+                Button(get_label("LBL_Week"), className=week_classname,
                             id={'type': 'date-picker-week-button', 'index': tile},
                             disabled=week_disabled)
             ], style={'display': 'inline-block', 'width': '100%'}),
-            html.Div([
-                html.Div(style={'width': '40%', 'display': 'inline-block'},
+            Div([
+                Div(style={'width': '40%', 'display': 'inline-block'},
                          children=left_column),
-                html.P(className='fa fa-arrow-right',
+                P(className='fa fa-arrow-right',
                        style={'color': CLR['text1'], 'width': '20%', 'display': 'inline-block',
                               'text-align': 'center', 'position': 'relative', 'bottom': bottom}),
-                html.Div(style={'width': '40%', 'display': 'inline-block'},
+                Div(style={'width': '40%', 'display': 'inline-block'},
                          children=right_column)
             ], style={'width': '100%', 'height': '100%', 'margin-top': '8px'})]
 

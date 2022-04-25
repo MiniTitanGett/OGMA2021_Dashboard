@@ -12,8 +12,9 @@ from datetime import datetime, timedelta, date
 import numpy as np
 import pandas as pd
 import logging
-
-import vaex
+from pandas import DataFrame
+from vaex import from_pandas
+from numpy import nan, isnan, datetime64, ones, float64, full
 # import pyodbc
 from dateutil.relativedelta import relativedelta
 from flask import session
@@ -90,7 +91,7 @@ DATA_CONTENT_HIDE = {'display': 'none'}
 
 def dataset_to_df(df_name):
     """Queries for the dataset and returns a formatted pandas, data frame."""
-    logging.debug("loading dataset {}...".format(df_name))
+    # logging.debug("loading dataset {}...".format(df_name))
     # conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
     # sql_query = pd.read_sql_query(
     #     '''
@@ -104,9 +105,9 @@ def dataset_to_df(df_name):
     select @p_result_status as result_status
     """.format(session["sessionID"], session["language"], df_name)
     df = exec_storedproc_results(query)
-    logging.debug("done converting query to pandas")
-    df_vaex = vaex.from_pandas(df)
-    df_vaex.variables['nan'] = np.nan
+    # logging.debug("done converting query to pandas")
+    df_vaex = from_pandas(df)
+    df_vaex.variables['nan'] = nan
     logging.debug("done converting pandas to vaex")
 
     if df_name == 'OPG010':
@@ -117,9 +118,8 @@ def dataset_to_df(df_name):
         """.format(session["sessionID"], session["language"], df_name)
 
         node_df = exec_storedproc_results(query)
-        node_df_vaex = vaex.from_pandas(node_df)
+        node_df_vaex = from_pandas(node_df)
 
-        # node_df[['x_coord', 'y_coord']] = node_df[['x_coord', 'y_coord']].apply(pd.to_numeric)
         node_df_vaex['x_coord'] = node_df_vaex['x_coord'].astype('float64')
         node_df_vaex['y_coord'] = node_df_vaex['y_coord'].astype('float64')
 
@@ -132,17 +132,17 @@ def dataset_to_df(df_name):
 
     if df_name == 'OPG011':
         # add columns to the dataframe
-        df_vaex["OPG Data Set"] = np.ones(len(df), dtype=np.str)
-        df_vaex["Hierarchy One Name"] = np.ones(len(df), dtype=np.str)
-        df_vaex["Hierarchy One Top"] = np.ones(len(df), dtype=np.str)
-        df_vaex["Hierarchy One -1"] = np.ones(len(df), dtype=np.str)
-        df_vaex["Hierarchy One -2"] = np.ones(len(df), dtype=np.str)
-        df_vaex["Hierarchy One -3"] = np.ones(len(df), dtype=np.str)
-        df_vaex["Hierarchy One -4"] = np.ones(len(df), dtype=np.str)
-        df_vaex["Hierarchy One Leaf"] = np.ones(len(df), dtype=np.str)
-        df_vaex["Variable Name"] = np.ones(len(df), dtype=np.str)
-        df_vaex["Variable Name Qualifier"] = np.ones(len(df), dtype=np.str)
-        df_vaex["Variable Name Sub Qualifier"] = np.ones(len(df), dtype=np.str)
+        df_vaex["OPG Data Set"] = ones(len(df), dtype=np.str)
+        df_vaex["Hierarchy One Name"] = ones(len(df), dtype=np.str)
+        df_vaex["Hierarchy One Top"] = ones(len(df), dtype=np.str)
+        df_vaex["Hierarchy One -1"] = ones(len(df), dtype=np.str)
+        df_vaex["Hierarchy One -2"] = ones(len(df), dtype=np.str)
+        df_vaex["Hierarchy One -3"] = ones(len(df), dtype=np.str)
+        df_vaex["Hierarchy One -4"] = ones(len(df), dtype=np.str)
+        df_vaex["Hierarchy One Leaf"] = ones(len(df), dtype=np.str)
+        df_vaex["Variable Name"] = ones(len(df), dtype=np.str)
+        df_vaex["Variable Name Qualifier"] = ones(len(df), dtype=np.str)
+        df_vaex["Variable Name Sub Qualifier"] = ones(len(df), dtype=np.str)
 
         df_vaex['OPG Data Set'] = df_vaex.func.where(df_vaex['OPG Data Set'] == "1", '', df_vaex['OPG Data Set'])
         df_vaex["Hierarchy One Name"] = df_vaex.func.where(df_vaex["Hierarchy One Name"] == '1', None,
@@ -201,18 +201,18 @@ def dataset_to_df(df_name):
 
     else:
 
-        df_vaex['Week of Event'] = df_vaex.func.where(df_vaex['Week of Event'] == "", np.nan, df_vaex['Week of Event'])
-        df_vaex['Activity Event Id'] = df_vaex.func.where(df_vaex['Activity Event Id'] == "", np.nan,
+        df_vaex['Week of Event'] = df_vaex.func.where(df_vaex['Week of Event'] == "", nan, df_vaex['Week of Event'])
+        df_vaex['Activity Event Id'] = df_vaex.func.where(df_vaex['Activity Event Id'] == "", nan,
                                                           df_vaex['Activity Event Id'])
-        df_vaex['Fiscal Year of Event'] = df_vaex.func.where(df_vaex['Fiscal Year of Event'] == "", np.nan,
+        df_vaex['Fiscal Year of Event'] = df_vaex.func.where(df_vaex['Fiscal Year of Event'] == "", nan,
                                                              df_vaex['Fiscal Year of Event'])
-        df_vaex['Fiscal Quarter'] = df_vaex.func.where(df_vaex['Fiscal Quarter'] == "", np.nan,
+        df_vaex['Fiscal Quarter'] = df_vaex.func.where(df_vaex['Fiscal Quarter'] == "", nan,
                                                        df_vaex['Fiscal Quarter'])
-        df_vaex['Fiscal Month of Event'] = df_vaex.func.where(df_vaex['Fiscal Month of Event'] == "", np.nan,
+        df_vaex['Fiscal Month of Event'] = df_vaex.func.where(df_vaex['Fiscal Month of Event'] == "", nan,
                                                               df_vaex['Fiscal Month of Event'])
-        df_vaex['Fiscal Week of Event'] = df_vaex.func.where(df_vaex['Fiscal Week of Event'] == "", np.nan,
+        df_vaex['Fiscal Week of Event'] = df_vaex.func.where(df_vaex['Fiscal Week of Event'] == "", nan,
                                                              df_vaex['Fiscal Week of Event'])
-        df_vaex['Julian Day'] = df_vaex.func.where(df_vaex['Julian Day'] == "", np.nan, df_vaex['Julian Day'])
+        df_vaex['Julian Day'] = df_vaex.func.where(df_vaex['Julian Day'] == "", nan, df_vaex['Julian Day'])
         df_vaex['Week of Event'] = df_vaex['Week of Event'].astype('float64')
         df_vaex['Activity Event Id'] = df_vaex['Activity Event Id'].astype('float64')
         df_vaex['Fiscal Year of Event'] = df_vaex['Fiscal Year of Event'].astype('float64')
@@ -260,28 +260,28 @@ def dataset_to_df(df_name):
             df.loc[df["Hierarchy Value"] == x, "H{}".format(depth)] = x
 
         # begin reverse breadth first traversal, filling hierarchy along the way
-        depth = 6
+        depth = 5
         for nodes_at_depth in reversed(list_of_depths):
-            depth = depth - 1
             for node in nodes_at_depth:
                 parent = get_hierarchy_parent(node, depth)
                 if parent not in list_of_depths[depth - 1]:
                     list_of_depths[depth - 1].append(parent)
                 # insert parent into table
                 df.loc[df["H{}".format(depth)] == node, "H{}".format(depth - 1)] = parent
-        df_vaex = vaex.from_pandas(df)
+            depth = depth - 1
+        df_vaex = from_pandas(df)
 
         # Encode column as ordinal values and mark it as categorical
-        df_vaex = df_vaex.ordinal_encode('Variable Value')
-        df_vaex = df_vaex.ordinal_encode('Variable Name')
-        df_vaex = df_vaex.ordinal_encode('Variable Name Qualifier')
-        df_vaex = df_vaex.ordinal_encode('Variable Name Sub Qualifier')
-        df_vaex = df_vaex.ordinal_encode('H0')
-        df_vaex = df_vaex.ordinal_encode('H1')
-        df_vaex = df_vaex.ordinal_encode('H2')
-        df_vaex = df_vaex.ordinal_encode('H3')
-        df_vaex = df_vaex.ordinal_encode('H4')
-        df_vaex = df_vaex.ordinal_encode('H5')
+        # df_vaex = df_vaex.ordinal_encode('Variable Value')
+        # df_vaex = df_vaex.ordinal_encode('Variable Name')
+        # df_vaex = df_vaex.ordinal_encode('Variable Name Qualifier')
+        # df_vaex = df_vaex.ordinal_encode('Variable Name Sub Qualifier')
+        # df_vaex = df_vaex.ordinal_encode('H0')
+        # df_vaex = df_vaex.ordinal_encode('H1')
+        # df_vaex = df_vaex.ordinal_encode('H2')
+        # df_vaex = df_vaex.ordinal_encode('H3')
+        # df_vaex = df_vaex.ordinal_encode('H4')
+        # df_vaex = df_vaex.ordinal_encode('H5')
 
     # If we are dealing with links in the future we must format them as follows and edit the table drawer
     # if 'Link' in df.columns:
@@ -295,9 +295,8 @@ def dataset_to_df(df_name):
 
 def generate_constants(df_name):
     """Generates the constants required to be stored for the given dataset."""
-    HIERARCHY_LEVELS = ['H{}'.format(i) for i in range(6)]
+    HIERARCHY_LEVELS = ['H{}'.format(i) for i in range(5)]
     df = session[df_name]
-    CATEGORICAL_DICTIONARY = None
     MEASURE_TYPE_VALUES = None
 
     # secondary hierarchy
@@ -337,16 +336,10 @@ def generate_constants(df_name):
         GREGORIAN_MONTH_FRINGE_MIN = int(min_date_unf.month)
         GREGORIAN_MONTH_FRINGE_MAX = int(max_date_unf.month)
 
-        # if len(df[df['Calendar Entry Type'] == 'Week']) > 0:
-        #     GREGORIAN_WEEK_AVAILABLE = True  # not currently used
-        #     GREGORIAN_WEEK_MAX_YEAR = int(max_date_unf.year)
-        #     GREGORIAN_WEEK_FRINGE_MIN = int(min_date_unf.strftime("%W")) + 1
-        #     GREGORIAN_WEEK_FRINGE_MAX = int(max_date_unf.strftime("%W")) + 1
-        # else:
-        GREGORIAN_WEEK_AVAILABLE = False  # not currently used, so set fake values
-        GREGORIAN_WEEK_MAX_YEAR = 52
-        GREGORIAN_WEEK_FRINGE_MIN = 1
-        GREGORIAN_WEEK_FRINGE_MAX = 52
+        GREGORIAN_WEEK_AVAILABLE = True  # not currently used
+        GREGORIAN_WEEK_MAX_YEAR = int(max_date_unf.year)
+        GREGORIAN_WEEK_FRINGE_MIN = int(min_date_unf.strftime("%W")) + 1
+        GREGORIAN_WEEK_FRINGE_MAX = int(max_date_unf.strftime("%W")) + 1
 
         # TODO: Calc and set values based off of client org system setting
         FISCAL_AVAILABLE = False
@@ -377,8 +370,6 @@ def generate_constants(df_name):
 
         options = []
         variable_option_lists = []
-        # _categories is essentially a look-up table for the ordinal values of the category columns
-        category = df._categories
 
         df = df.to_pandas_df()
         df['Partial Period'] = df['Partial Period'].transform(lambda x: x == 'Y')
@@ -388,20 +379,20 @@ def generate_constants(df_name):
                           '').astype(str).agg(' '.join, axis=1).unique().tolist() + \
                       df[['Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier']].fillna(
                           '').astype(str).agg(' '.join, axis=1).unique().tolist()
-        modified_var = []
+        modified_var = unique_vars
         # drops nans and duplicates from the list
-        for cleaned_list in unique_vars:
-            variable = cleaned_list.split()
-            if len(variable) == 1:
-                modified_var.append(category["Variable Name"]["labels"][int(variable[0])])
-            elif len(variable) == 2:
-                modified_var.append(category["Variable Name"]["labels"][int(variable[0])] + " " +
-                                category["Variable Name Qualifier"]["labels"][int(variable[1])])
-            else:
-                modified_var.append(category["Variable Name"]["labels"][int(variable[0])] + " " +
-                                category["Variable Name Qualifier"]["labels"][int(variable[1])] + " " +
-                                " " if category["Variable Name Sub Qualifier"]["labels"][int(variable[2])] == np.nan
-                                else category["Variable Name Sub Qualifier"]["labels"][int(variable[2])])
+        # for cleaned_list in unique_vars:
+        #     variable = cleaned_list.split()
+        #     if len(variable) == 1:
+        #         modified_var.append(category["Variable Name"]["labels"][int(variable[0])])
+        #     elif len(variable) == 2:
+        #         modified_var.append(category["Variable Name"]["labels"][int(variable[0])] + " " +
+        #                         category["Variable Name Qualifier"]["labels"][int(variable[1])])
+        #     else:
+        #         modified_var.append(category["Variable Name"]["labels"][int(variable[0])] + " " +
+        #                         category["Variable Name Qualifier"]["labels"][int(variable[1])] + " " +
+        #                         " " if category["Variable Name Sub Qualifier"]["labels"][int(variable[2])] == nan
+        #                         else category["Variable Name Sub Qualifier"]["labels"][int(variable[2])])
 
         cleaned_list = list(dict.fromkeys([x.strip() for x in modified_var if str(x) != 'nan']))
         cleaned_list.sort()
@@ -411,7 +402,7 @@ def generate_constants(df_name):
             options.append(
                 {'label': "  " * unique_var.count("|") + str(unique_var).replace('|', ', '), 'value': unique_var})
 
-        CATEGORICAL_DICTIONARY = category
+        # CATEGORICAL_DICTIONARY = category
         VARIABLE_OPTIONS = options
         VARIABLE_OPTION_LISTS = variable_option_lists
         MIN_DATE_UNF = min_date_unf.strftime('%m/%d/%Y')
@@ -561,14 +552,18 @@ def generate_constants(df_name):
         'MAX_DATE_UNF': MAX_DATE_UNF,
         'VARIABLE_OPTIONS': VARIABLE_OPTIONS,
         'VARIABLE_OPTION_LISTS': VARIABLE_OPTION_LISTS,
-        "CATEGORICAL_DATA": CATEGORICAL_DICTIONARY,
         "MEASURE_TYPE_VALUES": MEASURE_TYPE_VALUES
     }
     return storage
 
 
 # ****************************************************DATE FUNCTIONS**************************************************
-
+def last_calender_week(year):
+    try:
+        date.fromisocalendar(year, 53, 1)
+        return 53
+    except ValueError:
+        return 52
 
 def get_last_day_of_month(day):
     """Given a date returns the last day of the month."""
@@ -584,7 +579,7 @@ def get_week_number(day):
 
 def get_last_day_of_week(year, week_number):
     """Given a year and week number determines the last date of the week."""
-    first_day_of_week = datetime.strptime(f'{year}-W{int(week_number) - 1}-1', "%Y-W%W-%w").date()
+    first_day_of_week = datetime.strptime(f'{year}-W{int(week_number)-1}-1', "%Y-W%W-%w").date()
     last_day_of_week = first_day_of_week + timedelta(days=6.9)
     return last_day_of_week
 
@@ -596,12 +591,12 @@ def get_last_day_of_year(year):
 
 def get_month(day):
     """Given a date returns the month."""
-    return day.astype('datetime64[M]').astype(int) % 12 + 1
+    return day.astype('datetime64[M]').astype(int) % 12
 
 
 def get_months(days):
     """Given a date returns the month."""
-    return days.month % 12 + 1
+    return days.month % 12
 
 
 def get_quarter(day):
@@ -649,7 +644,7 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
                     # Ex) H2 picked --> H3, H4, H5 get wiped
                     for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - (int(hierarchy_level_dropdown[1]) + 1)):
                         df[df_const[df_name]['HIERARCHY_LEVELS'][len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]] \
-                           = np.full(len(df), np.nan, np.float64)
+                           = full(len(df), nan, float64)
                 else:
                     # Returns empty data frame with column names
                     df = df[0:0]
@@ -658,20 +653,18 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
                 # Filters out all rows that are more specific than given path length plus one to preserve the children
                 for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - (len(hierarchy_path) + 1)):
                     df[df_const[df_name]['HIERARCHY_LEVELS']
-                    [len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]] = np.full(len(df), np.nan, np.float64)
+                    [len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]] = full(len(df), nan, float64)
                 # Filters out all rows that are less specific than given path length
                 for i in range(len(hierarchy_path)):
-                    df = df[df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == df_const[df_name]["CATEGORICAL_DATA"]
-                                                                    ["H" + str(i)]["labels"].index(hierarchy_path[i])]
+                    df = df[df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i]]
 
         else:
             # Filters out all rows that don't include path member at specific level
             for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - (len(hierarchy_path))):
                 df[df_const[df_name]['HIERARCHY_LEVELS']
-                [len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]] = np.full(len(df), np.nan, np.float64)
+                [len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]] = full(len(df), nan, float64)
             for i in range(len(hierarchy_path)):
-                df = df[df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == df_const[df_name]
-                                                ["CATEGORICAL_DATA"]["H" + str(i)]["labels"].index(hierarchy_path[i])]
+                df = df[df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i]]
             # Filters out all rows that are more specific than given path
 
         if graph_type == "Line" or graph_type == "Scatter" or graph_type == "Bar" or graph_type == "Box_Plot":
@@ -947,17 +940,17 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                                     unique_data = yearly_data[yearly_data["Date of Event"].dt.year == unique_secondary]
                                     date_of_event = get_last_day_of_year(year)
                                     year_of_event = year
-                                    quarter = np.nan
-                                    month_of_event = np.nan
-                                    week_of_event = np.nan
+                                    quarter = nan
+                                    month_of_event = nan
+                                    week_of_event = nan
                                 elif current_filter == 'Quarter':
                                     unique_secondary = unique_dates[w]
                                     unique_data = yearly_data[yearly_data["Quarter"] == unique_secondary]
                                     date_of_event = get_date_of_quarter(unique_secondary, year)
                                     year_of_event = year
                                     quarter = unique_secondary
-                                    month_of_event = np.nan
-                                    week_of_event = np.nan
+                                    month_of_event = nan
+                                    week_of_event = nan
                                 else:
                                     unique_secondary = unique_dates[w]
                                     unique_data = yearly_data[yearly_data["Date of Event"].dt.month == unique_secondary]
@@ -965,7 +958,7 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                                     year_of_event = year
                                     quarter = get_quarter(unique_dates[w])
                                     month_of_event = unique_secondary
-                                    week_of_event = np.nan
+                                    week_of_event = nan
 
                                 if hierarchy_toggle == "Level Filter" or (
                                         (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == [
@@ -976,25 +969,25 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                                     h3 = unique_data['H3'].values[0]
                                     h4 = unique_data['H4'].values[0]
                                     h5 = unique_data['H5'].values[0]
-                                    h0 = h0 if np.isnan(h0) else df_const[df_name]["CATEGORICAL_DATA"]["H0"]["labels"][
+                                    h0 = h0 if isnan(h0) else df_const[df_name]["CATEGORICAL_DATA"]["H0"]["labels"][
                                         h0]
-                                    h1 = h1 if np.isnan(h1) else df_const[df_name]["CATEGORICAL_DATA"]["H1"]["labels"][
+                                    h1 = h1 if isnan(h1) else df_const[df_name]["CATEGORICAL_DATA"]["H1"]["labels"][
                                         h1]
-                                    h2 = h2 if np.isnan(h2) else df_const[df_name]["CATEGORICAL_DATA"]["H2"]["labels"][
+                                    h2 = h2 if isnan(h2) else df_const[df_name]["CATEGORICAL_DATA"]["H2"]["labels"][
                                         h2]
-                                    h3 = h3 if np.isnan(h3) else df_const[df_name]["CATEGORICAL_DATA"]["H3"]["labels"][
+                                    h3 = h3 if isnan(h3) else df_const[df_name]["CATEGORICAL_DATA"]["H3"]["labels"][
                                         h3]
-                                    h4 = h4 if np.isnan(h4) else df_const[df_name]["CATEGORICAL_DATA"]["H4"]["labels"][
+                                    h4 = h4 if isnan(h4) else df_const[df_name]["CATEGORICAL_DATA"]["H4"]["labels"][
                                         h4]
-                                    h5 = h5 if np.isnan(h5) else df_const[df_name]["CATEGORICAL_DATA"]["H5"]["labels"][
+                                    h5 = h5 if isnan(h5) else df_const[df_name]["CATEGORICAL_DATA"]["H5"]["labels"][
                                         h5]
                                 else:
-                                    h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else np.nan
-                                    h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else np.nan
-                                    h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else np.nan
-                                    h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else np.nan
-                                    h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else np.nan
-                                    h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else np.nan
+                                    h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else nan
+                                    h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else nan
+                                    h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else nan
+                                    h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else nan
+                                    h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else nan
+                                    h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else nan
 
                                 measure_value = unique_data[measure_type].sum()
 
@@ -1008,11 +1001,11 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                                      ["labels"][unique_data['Variable Name Qualifier'].iloc[0]],
                                      df_const[df_name]["CATEGORICAL_DATA"]["Variable Name Sub Qualifier"]["labels"]
                                      [unique_data['Variable Name Sub Qualifier'].iloc[0]], date_of_event,
-                                     current_filter, year_of_event, quarter, month_of_event, week_of_event, np.nan,
-                                     np.nan, np.nan, np.nan, np.nan, np.nan, measure_value, measure_type,
-                                     True if unique_data['Partial Period'].iloc[0] is True else np.nan])
+                                     current_filter, year_of_event, quarter, month_of_event, week_of_event, nan,
+                                     nan, nan, nan, nan, nan, measure_value, measure_type,
+                                     True if unique_data['Partial Period'].iloc[0] is True else nan])
 
-            time_df = pd.DataFrame(row_list,
+            time_df = DataFrame(row_list,
                                    columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
                                             'Variable Value',
                                             'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
@@ -1069,25 +1062,25 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                                     h3 = unique_data['H3'].values[0]
                                     h4 = unique_data['H4'].values[0]
                                     h5 = unique_data['H5'].values[0]
-                                    h0 = h0 if np.isnan(h0) else df_const[df_name]["CATEGORICAL_DATA"]["H0"]["labels"][
+                                    h0 = h0 if isnan(h0) else df_const[df_name]["CATEGORICAL_DATA"]["H0"]["labels"][
                                         h0]
-                                    h1 = h1 if np.isnan(h1) else df_const[df_name]["CATEGORICAL_DATA"]["H1"]["labels"][
+                                    h1 = h1 if isnan(h1) else df_const[df_name]["CATEGORICAL_DATA"]["H1"]["labels"][
                                         h1]
-                                    h2 = h2 if np.isnan(h2) else df_const[df_name]["CATEGORICAL_DATA"]["H2"]["labels"][
+                                    h2 = h2 if isnan(h2) else df_const[df_name]["CATEGORICAL_DATA"]["H2"]["labels"][
                                         h2]
-                                    h3 = h3 if np.isnan(h3) else df_const[df_name]["CATEGORICAL_DATA"]["H3"]["labels"][
+                                    h3 = h3 if isnan(h3) else df_const[df_name]["CATEGORICAL_DATA"]["H3"]["labels"][
                                         h3]
-                                    h4 = h4 if np.isnan(h4) else df_const[df_name]["CATEGORICAL_DATA"]["H4"]["labels"][
+                                    h4 = h4 if isnan(h4) else df_const[df_name]["CATEGORICAL_DATA"]["H4"]["labels"][
                                         h4]
-                                    h5 = h5 if np.isnan(h5) else df_const[df_name]["CATEGORICAL_DATA"]["H5"]["labels"][
+                                    h5 = h5 if isnan(h5) else df_const[df_name]["CATEGORICAL_DATA"]["H5"]["labels"][
                                         h5]
                                 else:
-                                    h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else np.nan
-                                    h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else np.nan
-                                    h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else np.nan
-                                    h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else np.nan
-                                    h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else np.nan
-                                    h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else np.nan
+                                    h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else nan
+                                    h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else nan
+                                    h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else nan
+                                    h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else nan
+                                    h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else nan
+                                    h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else nan
 
                                 row_list.append(
                                     [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
@@ -1100,10 +1093,10 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                                      df_const[df_name]["CATEGORICAL_DATA"]["Variable Name Sub Qualifier"]["labels"]
                                      [unique_data['Variable Name Sub Qualifier'].iloc[0]], date_of_event,
                                      current_filter, year_of_event, quarter, month_of_event, week_of_event,
-                                     np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, measure_value, measure_type,
-                                     True if unique_data['Partial Period'].iloc[0] is True else np.nan])
+                                     nan, nan, nan, nan, nan, nan, measure_value, measure_type,
+                                     True if unique_data['Partial Period'].iloc[0] is True else nan])
 
-            time_df = pd.DataFrame(row_list,
+            time_df = DataFrame(row_list,
                                    columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
                                             'Variable Value',
                                             'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
@@ -1113,8 +1106,8 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                                             'Activity Event Id', 'Measure Value', 'Measure Type', 'Partial Period'])
 
         # Filter all dates inside range (inclusive)
-        time_df = time_df[time_df['Date of Event'] >= np.datetime64(start_date.date())]
-        time_df = time_df[time_df['Date of Event'] <= np.datetime64(end_date.date())]
+        time_df = time_df[time_df['Date of Event'] >= datetime64(start_date.date())]
+        time_df = time_df[time_df['Date of Event'] <= datetime64(end_date.date())]
 
     # If not in year tab, filter using secondary selections
     elif not secondary_type == 'Year':
@@ -1158,8 +1151,8 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                                 quarter = secondary
                                 unique_data = yearly_data[yearly_data["Quarter"] == secondary]
                                 date_of_event = get_date_of_quarter(secondary, year)
-                                month = np.nan
-                                week = np.nan
+                                month = nan
+                                week = nan
                             elif secondary_type == "Week":
                                 secondary = unique_dates[w]
                                 unique_data = yearly_data[
@@ -1174,7 +1167,7 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                                 unique_data = yearly_data[yearly_data["Date of Event"].dt.month == secondary]
                                 date_of_event = get_last_day_of_month(date(year, int(secondary), 1))
                                 month = secondary
-                                week = np.nan
+                                week = nan
 
                             measure_value = unique_data[measure_type].sum()
 
@@ -1187,19 +1180,19 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                                 h3 = unique_data['H3'].values[0]
                                 h4 = unique_data['H4'].values[0]
                                 h5 = unique_data['H5'].values[0]
-                                h0 = h0 if np.isnan(h0) else df_const[df_name]["CATEGORICAL_DATA"]["H0"]["labels"][h0]
-                                h1 = h1 if np.isnan(h1) else df_const[df_name]["CATEGORICAL_DATA"]["H1"]["labels"][h1]
-                                h2 = h2 if np.isnan(h2) else df_const[df_name]["CATEGORICAL_DATA"]["H2"]["labels"][h2]
-                                h3 = h3 if np.isnan(h3) else df_const[df_name]["CATEGORICAL_DATA"]["H3"]["labels"][h3]
-                                h4 = h4 if np.isnan(h4) else df_const[df_name]["CATEGORICAL_DATA"]["H4"]["labels"][h4]
-                                h5 = h5 if np.isnan(h5) else df_const[df_name]["CATEGORICAL_DATA"]["H5"]["labels"][h5]
+                                h0 = h0 if isnan(h0) else df_const[df_name]["CATEGORICAL_DATA"]["H0"]["labels"][h0]
+                                h1 = h1 if isnan(h1) else df_const[df_name]["CATEGORICAL_DATA"]["H1"]["labels"][h1]
+                                h2 = h2 if isnan(h2) else df_const[df_name]["CATEGORICAL_DATA"]["H2"]["labels"][h2]
+                                h3 = h3 if isnan(h3) else df_const[df_name]["CATEGORICAL_DATA"]["H3"]["labels"][h3]
+                                h4 = h4 if isnan(h4) else df_const[df_name]["CATEGORICAL_DATA"]["H4"]["labels"][h4]
+                                h5 = h5 if isnan(h5) else df_const[df_name]["CATEGORICAL_DATA"]["H5"]["labels"][h5]
                             else:
-                                h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else np.nan
-                                h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else np.nan
-                                h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else np.nan
-                                h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else np.nan
-                                h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else np.nan
-                                h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else np.nan
+                                h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else nan
+                                h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else nan
+                                h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else nan
+                                h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else nan
+                                h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else nan
+                                h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else nan
 
                             row_list.append(
                                 [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
@@ -1211,11 +1204,11 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                                  ["labels"][unique_data['Variable Name Qualifier'].iloc[0]],
                                  df_const[df_name]["CATEGORICAL_DATA"]["Variable Name Sub Qualifier"]["labels"]
                                  [unique_data['Variable Name Sub Qualifier'].iloc[0]], date_of_event, secondary_type,
-                                 year, quarter, month, week, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan,
+                                 year, quarter, month, week, nan, nan, nan, nan, nan, nan,
                                  measure_value, measure_type,
-                                 True if unique_data['Partial Period'].iloc[0] is True else np.nan])
+                                 True if unique_data['Partial Period'].iloc[0] is True else nan])
 
-        time_df = pd.DataFrame(row_list,
+        time_df = DataFrame(row_list,
                                columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
                                         'Variable Value',
                                         'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
@@ -1286,20 +1279,20 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                             h3 = unique_data['H3'].values[0]
                             h4 = unique_data['H4'].values[0]
                             h5 = unique_data['H5'].values[0]
-                            h0 = h0 if np.isnan(h0) else df_const[df_name]["CATEGORICAL_DATA"]["H0"]["labels"][h0]
-                            h1 = h1 if np.isnan(h1) else df_const[df_name]["CATEGORICAL_DATA"]["H1"]["labels"][h1]
-                            h2 = h2 if np.isnan(h2) else df_const[df_name]["CATEGORICAL_DATA"]["H2"]["labels"][h2]
-                            h3 = h3 if np.isnan(h3) else df_const[df_name]["CATEGORICAL_DATA"]["H3"]["labels"][h3]
-                            h4 = h4 if np.isnan(h4) else df_const[df_name]["CATEGORICAL_DATA"]["H4"]["labels"][h4]
-                            h5 = h5 if np.isnan(h5) else df_const[df_name]["CATEGORICAL_DATA"]["H5"]["labels"][h5]
+                            h0 = h0 if isnan(h0) else df_const[df_name]["CATEGORICAL_DATA"]["H0"]["labels"][h0]
+                            h1 = h1 if isnan(h1) else df_const[df_name]["CATEGORICAL_DATA"]["H1"]["labels"][h1]
+                            h2 = h2 if isnan(h2) else df_const[df_name]["CATEGORICAL_DATA"]["H2"]["labels"][h2]
+                            h3 = h3 if isnan(h3) else df_const[df_name]["CATEGORICAL_DATA"]["H3"]["labels"][h3]
+                            h4 = h4 if isnan(h4) else df_const[df_name]["CATEGORICAL_DATA"]["H4"]["labels"][h4]
+                            h5 = h5 if isnan(h5) else df_const[df_name]["CATEGORICAL_DATA"]["H5"]["labels"][h5]
 
                         else:
-                            h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else np.nan
-                            h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else np.nan
-                            h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else np.nan
-                            h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else np.nan
-                            h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else np.nan
-                            h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else np.nan
+                            h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else nan
+                            h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else nan
+                            h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else nan
+                            h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else nan
+                            h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else nan
+                            h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else nan
 
                         row_list.append(
                             [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
@@ -1311,11 +1304,11 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                              ["labels"][unique_data['Variable Name Qualifier'].iloc[0]],
                              df_const[df_name]["CATEGORICAL_DATA"]["Variable Name Sub Qualifier"]["labels"]
                              [unique_data['Variable Name Sub Qualifier'].iloc[0]], date_of_event, "Year",
-                             secondary, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan,
+                             secondary, nan, nan, nan, nan, nan, nan, nan, nan, nan,
                              measure_value, measure_type,
-                             True if unique_data['Partial Period'].iloc[0] is True else np.nan])
+                             True if unique_data['Partial Period'].iloc[0] is True else nan])
 
-        time_df = pd.DataFrame(row_list,
+        time_df = DataFrame(row_list,
                                columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
                                         'Variable Value',
                                         'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
@@ -1341,7 +1334,7 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
 
     if secondary_hierarchy_toggle == 'Level Filter':
         variable = df_const[df_name][secondary_level_dropdown]
-        if len(variable) == 1 and df_const[df_name]["CATEGORICAL_DATA"][secondary_level_dropdown]["labels"][0] is None:
+        if len(variable) == 1 and variable is None:
             return df[0:0]
     elif secondary_hierarchy_toggle == 'Specific Item' and secondary_graph_children == ['graph_children']:
         variable = [option['label'] for option in secondary_options]
@@ -1422,14 +1415,12 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
             # Builds data based on hierarchy, variable names, and selected time frame
             len_item = len(specific_items)
             for p in range(len_item):
-                if isinstance(specific_items[0], str):
-                    further_filtered_df = df
+
+                if hierarchy_toggle == "Level Filter":
+                    further_filtered_df = df[df[hierarchy_level_dropdown] == specific_items[p]]
                 else:
-                    if hierarchy_toggle == "Level Filter":
-                        further_filtered_df = df[df[hierarchy_level_dropdown] == specific_items[p]]
-                    else:
-                        further_filtered_df = df[
-                            df["H" + str(len(hierarchy_path))] == specific_items[p]]
+                    further_filtered_df = df[
+                        df["H" + str(len(hierarchy_path))] == specific_items[p]]
                 len_var = len(variable_names)
                 for y in range(len_var):
                     variable_name = variable_names[y]
@@ -1445,15 +1436,11 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                                                                                                     'graph_children']:
                             further_reduced_df = further_filtered_df[
                                 further_filtered_df[df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
-                                [len(secondary_path)]] == df_const[df_name]
-                                ["CATEGORICAL_DATA"][df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
-                                [len(secondary_path)]]["labels"].index(variable_name)]
+                                [len(secondary_path)]] == variable_name]
                         else:
                             further_reduced_df = further_filtered_df[
                                 further_filtered_df[df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
-                                [len(secondary_path)-1]] == df_const[df_name]
-                                ["CATEGORICAL_DATA"][df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
-                                [len(secondary_path)-1]]["labels"].index(variable_name)]
+                                [len(secondary_path)-1]] == variable_name]
                     for z in range(end_date.year - start_date.year + 1):
                         year = start_date.year + z
                         yearly_data = further_reduced_df[further_reduced_df["Date of Event"].dt.year == year]
@@ -1474,17 +1461,17 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                                 unique_data = yearly_data[yearly_data["Date of Event"].dt.year == unique_secondary]
                                 date_of_event = get_last_day_of_year(year)
                                 year_of_event = year
-                                quarter = np.nan
-                                month_of_event = np.nan
-                                week_of_event = np.nan
+                                quarter = nan
+                                month_of_event = nan
+                                week_of_event = nan
                             elif current_filter == 'Quarter':
                                 unique_secondary = unique_dates[w]
                                 unique_data = yearly_data[yearly_data["Quarter"] == unique_secondary]
                                 date_of_event = get_date_of_quarter(unique_secondary, year)
                                 year_of_event = year
                                 quarter = unique_secondary
-                                month_of_event = np.nan
-                                week_of_event = np.nan
+                                month_of_event = nan
+                                week_of_event = nan
                             else:
                                 unique_secondary = unique_dates[w]
                                 unique_data = yearly_data[yearly_data["Date of Event"].dt.month == unique_secondary]
@@ -1492,7 +1479,7 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                                 year_of_event = year
                                 quarter = get_quarter(unique_dates[w])
                                 month_of_event = unique_secondary
-                                week_of_event = np.nan
+                                week_of_event = nan
 
                             if hierarchy_toggle == "Level Filter" or (
                                     (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == [
@@ -1503,39 +1490,29 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                                 h3 = unique_data['H3'].values[0]
                                 h4 = unique_data['H4'].values[0]
                                 h5 = unique_data['H5'].values[0]
-                                h0 = h0 if np.isnan(h0) else df_const[df_name]["CATEGORICAL_DATA"]["H0"]["labels"][h0]
-                                h1 = h1 if np.isnan(h1) else df_const[df_name]["CATEGORICAL_DATA"]["H1"]["labels"][h1]
-                                h2 = h2 if np.isnan(h2) else df_const[df_name]["CATEGORICAL_DATA"]["H2"]["labels"][h2]
-                                h3 = h3 if np.isnan(h3) else df_const[df_name]["CATEGORICAL_DATA"]["H3"]["labels"][h3]
-                                h4 = h4 if np.isnan(h4) else df_const[df_name]["CATEGORICAL_DATA"]["H4"]["labels"][h4]
-                                h5 = h5 if np.isnan(h5) else df_const[df_name]["CATEGORICAL_DATA"]["H5"]["labels"][h5]
 
                             else:
-                                h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else np.nan
-                                h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else np.nan
-                                h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else np.nan
-                                h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else np.nan
-                                h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else np.nan
-                                h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else np.nan
+                                h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else nan
+                                h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else nan
+                                h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else nan
+                                h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else nan
+                                h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else nan
+                                h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else nan
 
                             measure_value = unique_data[measure_type].sum()
 
                             row_list.append(
                                 [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
                                  h0, h1, h2, h3, h4, h5,
-                                 df_const[df_name]["CATEGORICAL_DATA"]["Variable Value"]["labels"]
-                                 [unique_data['Variable Value'].iloc[0]],
-                                 df_const[df_name]["CATEGORICAL_DATA"]["Variable Name"]
-                                 ["labels"][unique_data['Variable Name'].iloc[0]],
-                                 df_const[df_name]["CATEGORICAL_DATA"]["Variable Name Qualifier"]
-                                 ["labels"][unique_data['Variable Name Qualifier'].iloc[0]],
-                                 df_const[df_name]["CATEGORICAL_DATA"]["Variable Name Sub Qualifier"]["labels"]
-                                 [unique_data['Variable Name Sub Qualifier'].iloc[0]], date_of_event, current_filter,
-                                 year_of_event, quarter, month_of_event, week_of_event, np.nan, np.nan, np.nan,
-                                 np.nan, np.nan, np.nan, measure_value, measure_type,
-                                 True if unique_data['Partial Period'].iloc[0] is True else np.nan])
+                                 unique_data['Variable Value'].iloc[0],
+                                 unique_data['Variable Name'].iloc[0],
+                                 unique_data['Variable Name Qualifier'].iloc[0],
+                                 unique_data['Variable Name Sub Qualifier'].iloc[0], date_of_event, current_filter,
+                                 year_of_event, quarter, month_of_event, week_of_event, nan, nan, nan,
+                                 nan, nan, nan, measure_value, measure_type,
+                                 True if unique_data['Partial Period'].iloc[0] is True else nan])
 
-            time_df = pd.DataFrame(row_list,
+            time_df = DataFrame(row_list,
                                    columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
                                             'Variable Value',
                                             'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
@@ -1549,14 +1526,12 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
             # Builds data based on all measure types, variable names, and selected time frame
             len_item = len(specific_items)
             for p in range(len_item):
-                if isinstance(specific_items[0], str):
-                    further_filtered_df = df
+
+                if hierarchy_toggle == "Level Filter":
+                    further_filtered_df = df[df[hierarchy_level_dropdown] == specific_items[p]]
                 else:
-                    if hierarchy_toggle == "Level Filter":
-                        further_filtered_df = df[df[hierarchy_level_dropdown] == specific_items[p]]
-                    else:
-                        further_filtered_df = df[
-                            df["H" + str(len(hierarchy_path))] == specific_items[p]]
+                    further_filtered_df = df[
+                        df["H" + str(len(hierarchy_path))] == specific_items[p]]
                 len_var = len(variable_names)
                 for y in range(len_var):
                     variable_name = variable_names[y]
@@ -1572,74 +1547,62 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                                                                                                     'graph_children']:
                             further_reduced_df = further_filtered_df[
                                 further_filtered_df[df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
-                                [len(secondary_path)]] == df_const[df_name]
-                                ["CATEGORICAL_DATA"][df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
-                                [len(secondary_path)]]["labels"].index(variable_name)]
+                                [len(secondary_path)]] == variable_name]
                         else:
                             further_reduced_df = further_filtered_df[further_filtered_df[df_const[df_name][
                                                     'SECONDARY_HIERARCHY_LEVELS'][len(secondary_path) - 1]] ==
-                                                                     df_const[df_name]
-                                                                     ["CATEGORICAL_DATA"][df_const[df_name]
-                                                                     ['SECONDARY_HIERARCHY_LEVELS']
-                                                                     [len(secondary_path)-1]]["labels"].index(
-                                                                         variable_name)]
+                                                                     variable_name]
                     for z in range(end_date.year - start_date.year + 1):
                         year = start_date.year + z
+                        num_weeks = last_calender_week(year)
                         yearly_data = further_reduced_df[further_reduced_df["Date of Event"].dt.year == year]
                         unique_dates = yearly_data["Date of Event"].dt.isocalendar().week.unique()
                         len_date = len(unique_dates)
                         for w in range(len_date):
                             unique_secondary = unique_dates[w]
-                            unique_data = yearly_data[
-                                yearly_data["Date of Event"].dt.isocalendar().week == unique_secondary]
-                            date_of_event = get_last_day_of_week(year, unique_secondary)
-                            year_of_event = year
-                            quarter = get_quarter(unique_dates[w])
-                            month_of_event = get_month(unique_dates[w])
-                            week_of_event = unique_secondary
+                            if (num_weeks == 52 and unique_secondary != 53) or num_weeks == 53:
+                                unique_data = yearly_data[
+                                    yearly_data["Date of Event"].dt.isocalendar().week == unique_secondary]
+                                date_of_event = get_last_day_of_week(year, unique_secondary)
+                                year_of_event = year
+                                quarter = nan
+                                month_of_event = date_of_event.month
+                                week_of_event = unique_secondary
 
-                            measure_value = unique_data[measure_type].sum()
+                                measure_value = unique_data[measure_type].sum()
+                                if measure_value == 24:
+                                    print("here")
 
-                            if hierarchy_toggle == "Level Filter" or (
-                                    (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == [
-                                        'graph_children'])):
-                                h0 = unique_data['H0'].values[0]
-                                h1 = unique_data['H1'].values[0]
-                                h2 = unique_data['H2'].values[0]
-                                h3 = unique_data['H3'].values[0]
-                                h4 = unique_data['H4'].values[0]
-                                h5 = unique_data['H5'].values[0]
-                                h0 = h0 if np.isnan(h0) else df_const[df_name]["CATEGORICAL_DATA"]["H0"]["labels"][h0]
-                                h1 = h1 if np.isnan(h1) else df_const[df_name]["CATEGORICAL_DATA"]["H1"]["labels"][h1]
-                                h2 = h2 if np.isnan(h2) else df_const[df_name]["CATEGORICAL_DATA"]["H2"]["labels"][h2]
-                                h3 = h3 if np.isnan(h3) else df_const[df_name]["CATEGORICAL_DATA"]["H3"]["labels"][h3]
-                                h4 = h4 if np.isnan(h4) else df_const[df_name]["CATEGORICAL_DATA"]["H4"]["labels"][h4]
-                                h5 = h5 if np.isnan(h5) else df_const[df_name]["CATEGORICAL_DATA"]["H5"]["labels"][h5]
+                                if hierarchy_toggle == "Level Filter" or (
+                                        (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == [
+                                            'graph_children'])):
+                                    h0 = unique_data['H0'].values[0]
+                                    h1 = unique_data['H1'].values[0]
+                                    h2 = unique_data['H2'].values[0]
+                                    h3 = unique_data['H3'].values[0]
+                                    h4 = unique_data['H4'].values[0]
+                                    h5 = unique_data['H5'].values[0]
 
-                            else:
-                                h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else np.nan
-                                h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else np.nan
-                                h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else np.nan
-                                h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else np.nan
-                                h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else np.nan
-                                h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else np.nan
+                                else:
+                                    h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else nan
+                                    h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else nan
+                                    h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else nan
+                                    h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else nan
+                                    h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else nan
+                                    h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else nan
 
-                            row_list.append(
+                                row_list.append(
                                 [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
                                  h0, h1, h2, h3, h4, h5,
-                                 df_const[df_name]["CATEGORICAL_DATA"]["Variable Value"]["labels"]
-                                 [unique_data['Variable Value'].iloc[0]],
-                                 df_const[df_name]["CATEGORICAL_DATA"]["Variable Name"]
-                                 ["labels"][unique_data['Variable Name'].iloc[0]],
-                                 df_const[df_name]["CATEGORICAL_DATA"]["Variable Name Qualifier"]
-                                 ["labels"][unique_data['Variable Name Qualifier'].iloc[0]],
-                                 df_const[df_name]["CATEGORICAL_DATA"]["Variable Name Sub Qualifier"]["labels"]
-                                 [unique_data['Variable Name Sub Qualifier'].iloc[0]], date_of_event, current_filter,
-                                 year_of_event, quarter, month_of_event, week_of_event, np.nan, np.nan, np.nan, np.nan,
-                                 np.nan, np.nan, measure_value, measure_type,
-                                 True if unique_data['Partial Period'].iloc[0] is True else np.nan])
+                                 unique_data['Variable Value'].iloc[0],
+                                 unique_data['Variable Name'].iloc[0],
+                                 unique_data['Variable Name Qualifier'].iloc[0],
+                                 unique_data['Variable Name Sub Qualifier'].iloc[0], date_of_event, current_filter,
+                                 year_of_event, quarter, month_of_event, week_of_event, nan, nan, nan, nan,
+                                 nan, nan, measure_value, measure_type,
+                                 True if unique_data['Partial Period'].iloc[0] is True else nan])
 
-        time_df = pd.DataFrame(row_list,
+        time_df = DataFrame(row_list,
                                    columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
                                             'Variable Value',
                                             'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
@@ -1648,21 +1611,19 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                                             'Fiscal Month of Event', 'Fiscal Week of Event', 'Julian Day',
                                             'Activity Event Id', 'Measure Value', 'Measure Type', 'Partial Period'])
 
-        time_df = time_df[time_df['Date of Event'] >= np.datetime64(start_date.date())]
-        time_df = time_df[time_df['Date of Event'] <= np.datetime64(end_date.date())]
+        time_df = time_df[time_df['Date of Event'] >= datetime64(start_date.date())]
+        time_df = time_df[time_df['Date of Event'] <= datetime64(end_date.date())]
 
     # If not in year tab, filter using secondary selections
     elif not secondary_type == 'Year':
         len_item = len(specific_items)
-        for p in range(len_item):
 
-            if isinstance(specific_items[0], str):
-                further_filtered_df = df
+        for p in range(len_item):
+            copy_df = df.copy()
+            if hierarchy_toggle == "Level Filter":
+                further_filtered_df = copy_df[copy_df[hierarchy_level_dropdown] == specific_items[p]]
             else:
-                if hierarchy_toggle == "Level Filter":
-                    further_filtered_df = df[df[hierarchy_level_dropdown] == specific_items[p]]
-                else:
-                    further_filtered_df = df[df["H" + str(len(hierarchy_path))] == specific_items[p]]
+                further_filtered_df = copy_df[copy_df["H" + str(len(hierarchy_path))] == specific_items[p]]
 
             len_var = len(variable_names)
             for y in range(len_var):
@@ -1679,14 +1640,10 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                                                                                                     ['graph_children']:
                         further_reduced_df = further_filtered_df[
                             further_filtered_df[df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
-                            [len(secondary_path)]] == df_const[df_name]
-                            ["CATEGORICAL_DATA"][df_const[df_name]['SECONDARY_HIERARCHY_LEVELS'][len(secondary_path)]][
-                                "labels"].index(variable_name)]
+                            [len(secondary_path)]] == variable_name]
                     else:
                         further_reduced_df = further_filtered_df[further_filtered_df[df_const[df_name][
-                                    'SECONDARY_HIERARCHY_LEVELS'][len(secondary_path)-1]] == df_const[df_name]
-                        ["CATEGORICAL_DATA"][df_const[df_name]['SECONDARY_HIERARCHY_LEVELS'][len(secondary_path)-1]]
-                        ["labels"].index(variable_name)]
+                                    'SECONDARY_HIERARCHY_LEVELS'][len(secondary_path)-1]] == variable_name]
 
                 for z in range(end_year - start_year + 1):
                     year = start_year + z
@@ -1709,8 +1666,8 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                             quarter = secondary
                             unique_data = yearly_data[yearly_data["Quarter"] == secondary]
                             date_of_event = get_date_of_quarter(secondary, year)
-                            month = np.nan
-                            week = np.nan
+                            month = nan
+                            week = nan
                         elif secondary_type == "Week":
                             secondary = unique_dates[w]
                             unique_data = yearly_data[
@@ -1725,7 +1682,7 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                             unique_data = yearly_data[yearly_data["Date of Event"].dt.month == secondary]
                             date_of_event = get_last_day_of_month(date(year, int(secondary), 1))
                             month = secondary
-                            week = np.nan
+                            week = nan
 
                         measure_value = unique_data[measure_type].sum()
 
@@ -1738,36 +1695,26 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                             h3 = unique_data['H3'].values[0]
                             h4 = unique_data['H4'].values[0]
                             h5 = unique_data['H5'].values[0]
-                            h0 = h0 if np.isnan(h0) else df_const[df_name]["CATEGORICAL_DATA"]["H0"]["labels"][h0]
-                            h1 = h1 if np.isnan(h1) else df_const[df_name]["CATEGORICAL_DATA"]["H1"]["labels"][h1]
-                            h2 = h2 if np.isnan(h2) else df_const[df_name]["CATEGORICAL_DATA"]["H2"]["labels"][h2]
-                            h3 = h3 if np.isnan(h3) else df_const[df_name]["CATEGORICAL_DATA"]["H3"]["labels"][h3]
-                            h4 = h4 if np.isnan(h4) else df_const[df_name]["CATEGORICAL_DATA"]["H4"]["labels"][h4]
-                            h5 = h5 if np.isnan(h5) else df_const[df_name]["CATEGORICAL_DATA"]["H5"]["labels"][h5]
+
                         else:
-                            h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else np.nan
-                            h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else np.nan
-                            h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else np.nan
-                            h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else np.nan
-                            h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else np.nan
-                            h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else np.nan
+                            h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else nan
+                            h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else nan
+                            h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else nan
+                            h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else nan
+                            h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else nan
+                            h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else nan
 
                         row_list.append(
                                 [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
                                  h0, h1, h2, h3, h4, h5,
-                                 df_const[df_name]["CATEGORICAL_DATA"]["Variable Value"]
-                                 ["labels"][unique_data['Variable Value'].iloc[0]],
-                                 df_const[df_name]["CATEGORICAL_DATA"]["Variable Name"]
-                                 ["labels"][unique_data['Variable Name'].iloc[0]],
-                                 df_const[df_name]["CATEGORICAL_DATA"]["Variable Name Qualifier"]
-                                 ["labels"][unique_data['Variable Name Qualifier'].iloc[0]],
-                                 df_const[df_name]["CATEGORICAL_DATA"]["Variable Name Sub Qualifier"]["labels"]
-                                 [unique_data['Variable Name Sub Qualifier'].iloc[0]], date_of_event, secondary_type,
-                                 year, quarter, month, week, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan,
+                                 unique_data['Variable Value'].iloc[0], unique_data['Variable Name'].iloc[0],
+                                 unique_data['Variable Name Qualifier'].iloc[0],
+                                 unique_data['Variable Name Sub Qualifier'].iloc[0], date_of_event, secondary_type,
+                                 year, quarter, month, week, nan, nan, nan, nan, nan, nan,
                                  measure_value, measure_type,
-                                 True if unique_data['Partial Period'].iloc[0] is True else np.nan])
+                                 True if unique_data['Partial Period'].iloc[0] is True else nan])
 
-        time_df = pd.DataFrame(row_list,
+        time_df = DataFrame(row_list,
                                columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
                                         'Variable Value',
                                         'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
@@ -1804,13 +1751,11 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
     else:
         len_item = len(specific_items)
         for p in range(len_item):
-            if isinstance(specific_items[0], str):
-                further_filtered_df = df
+
+            if hierarchy_toggle == "Level Filter":
+                further_filtered_df = df[df[hierarchy_level_dropdown] == specific_items[p]]
             else:
-                if hierarchy_toggle == "Level Filter":
-                    further_filtered_df = df[df[hierarchy_level_dropdown] == specific_items[p]]
-                else:
-                    further_filtered_df = df[df["H" + str(len(hierarchy_path))] == specific_items[p]]
+                further_filtered_df = df[df["H" + str(len(hierarchy_path))] == specific_items[p]]
             len_var = len(variable_names)
             for y in range(len_var):
                 variable_name = variable_names[y]
@@ -1826,14 +1771,10 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                                                                                                     ['graph_children']:
                         further_reduced_df = further_filtered_df[
                             further_filtered_df[df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
-                            [len(secondary_path)]] == df_const[df_name]
-                            ["CATEGORICAL_DATA"][df_const[df_name]['SECONDARY_HIERARCHY_LEVELS'][len(secondary_path)]][
-                                "labels"].index(variable_name)]
+                            [len(secondary_path)]] == variable_name]
                     else:
                         further_reduced_df = further_filtered_df[further_filtered_df[df_const[df_name][
-                                    'SECONDARY_HIERARCHY_LEVELS'][len(secondary_path)-1]] == df_const[df_name]
-                        ["CATEGORICAL_DATA"][df_const[df_name]['SECONDARY_HIERARCHY_LEVELS'][len(secondary_path)-1]]
-                        ["labels"].index(variable_name)]
+                                    'SECONDARY_HIERARCHY_LEVELS'][len(secondary_path)-1]] == variable_name]
 
                 unique_secondary = further_reduced_df['Date of Event'].dt.year.unique()
                 len_unique = len(unique_secondary)
@@ -1851,35 +1792,25 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                         h3 = unique_data['H3'].values[0]
                         h4 = unique_data['H4'].values[0]
                         h5 = unique_data['H5'].values[0]
-                        h0 = h0 if np.isnan(h0) else df_const[df_name]["CATEGORICAL_DATA"]["H0"]["labels"][h0]
-                        h1 = h1 if np.isnan(h1) else df_const[df_name]["CATEGORICAL_DATA"]["H1"]["labels"][h1]
-                        h2 = h2 if np.isnan(h2) else df_const[df_name]["CATEGORICAL_DATA"]["H2"]["labels"][h2]
-                        h3 = h3 if np.isnan(h3) else df_const[df_name]["CATEGORICAL_DATA"]["H3"]["labels"][h3]
-                        h4 = h4 if np.isnan(h4) else df_const[df_name]["CATEGORICAL_DATA"]["H4"]["labels"][h4]
-                        h5 = h5 if np.isnan(h5) else df_const[df_name]["CATEGORICAL_DATA"]["H5"]["labels"][h5]
                     else:
-                        h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else np.nan
-                        h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else np.nan
-                        h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else np.nan
-                        h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else np.nan
-                        h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else np.nan
-                        h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else np.nan
+                        h0 = hierarchy_path[0] if len(hierarchy_path) >= 1 else nan
+                        h1 = hierarchy_path[1] if len(hierarchy_path) >= 2 else nan
+                        h2 = hierarchy_path[2] if len(hierarchy_path) >= 3 else nan
+                        h3 = hierarchy_path[3] if len(hierarchy_path) >= 4 else nan
+                        h4 = hierarchy_path[4] if len(hierarchy_path) >= 5 else nan
+                        h5 = hierarchy_path[5] if len(hierarchy_path) >= 6 else nan
 
                     row_list.append(
                         [unique_data['OPG Data Set'].iloc[0], unique_data['Hierarchy One Name'].iloc[0],
                          h0, h1, h2, h3, h4, h5,
-                         df_const[df_name]["CATEGORICAL_DATA"]["Variable Value"]["labels"]
-                         [unique_data['Variable Value'].iloc[0]],
-                         df_const[df_name]["CATEGORICAL_DATA"]["Variable Name"]
-                         ["labels"][unique_data['Variable Name'].iloc[0]],
-                         df_const[df_name]["CATEGORICAL_DATA"]["Variable Name Qualifier"]
-                         ["labels"][unique_data['Variable Name Qualifier'].iloc[0]],
-                         df_const[df_name]["CATEGORICAL_DATA"]["Variable Name Sub Qualifier"]["labels"]
-                         [unique_data['Variable Name Sub Qualifier'].iloc[0]], date_of_event, "Year", secondary,
-                         np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, measure_value,
-                         measure_type, True if unique_data['Partial Period'].iloc[0] is True else np.nan])
+                         unique_data['Variable Value'].iloc[0],
+                         unique_data['Variable Name'].iloc[0],
+                         unique_data['Variable Name Qualifier'].iloc[0],
+                         unique_data['Variable Name Sub Qualifier'].iloc[0], date_of_event, "Year", secondary,
+                         nan, nan, nan, nan, nan, nan, nan, nan, nan, measure_value,
+                         measure_type, True if unique_data['Partial Period'].iloc[0] is True else nan])
 
-        time_df = pd.DataFrame(row_list,
+        time_df = DataFrame(row_list,
                                columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
                                         'Variable Value',
                                         'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
@@ -1913,7 +1844,7 @@ def customize_menu_filter(dff, df_name, measure_type, df_const, secondary_path,
         if type(variable) is not list:
             variable = [variable]
 
-        aggregate_df = pd.DataFrame()
+        aggregate_df = DataFrame()
 
         # for each selection, add the rows defined by the selection
         for variable_name in variable:
@@ -2040,7 +1971,7 @@ def linear_regression(df, x, y, ci):
     Creates statistical model from ordinary lease squares method and uses the model return the prediction of a
     linear best fit.
     """
-    df_best_fit = pd.DataFrame()
+    df_best_fit = DataFrame()
     df_best_fit['timestamp'] = pd.to_datetime(df[x])
     df_best_fit['serialtime'] = [(d - datetime(1970, 1, 1)).days for d in df_best_fit['timestamp']]
     x_axis = sm.add_constant(df_best_fit['serialtime'])
@@ -2058,7 +1989,7 @@ def polynomial_regression(df, x, y, degree, ci):
     Creates statistical model from ordinary lease squares method and uses the model return the prediction of a
     polynomial best fit.
     """
-    df_best_fit = pd.DataFrame()
+    df_best_fit = DataFrame()
     df_best_fit['timestamp'] = pd.to_datetime(df[x])
     df_best_fit['serialtime'] = [(d - datetime(1970, 1, 1)).days for d in df_best_fit['timestamp']]
     polynomial_features = PolynomialFeatures(degree=degree)

@@ -30,8 +30,7 @@ def generate_secondary_dropdown(tile, df_name, nid_path, df_const):
             # df = df.set_index(['H{}'.format(i) for i in range(llen)])
             # option_list = df.loc[tuple(hierarchy_nid_list)]['H{}'.format(llen)].dropna().unique()
             for i in range(llen):
-                level = df_const[df_name]["CATEGORICAL_DATA"][hierarchy_level[i]]["labels"].index(
-                                                hierarchy_nid_list[i]) if df_name == "OPG011" else hierarchy_nid_list[i]
+                level = hierarchy_nid_list[i]
                 df = df.filter(df[hierarchy_level[i]] == level)
                 df = df.drop(hierarchy_level[i])
             option_list = df[hierarchy_level[llen]].unique(dropmissing=True, dropnan=True)
@@ -42,12 +41,12 @@ def generate_secondary_dropdown(tile, df_name, nid_path, df_const):
         if df_name == "OPG010":
             options = [{'label': i, 'value': i} for i in option_list if
                        len(df_const[df_name][hierarchy_level[llen]]) >= 1 and df_const[df_name][hierarchy_level
-                       [llen]][0] is not None]
+                       [llen]][0] != ""]
         else:
-            options = [{'label': df_const[df_name]["CATEGORICAL_DATA"][hierarchy_level[llen]]["labels"][i], 'value': i}
+            options = [{'label': i, 'value': i}
                        for i in option_list if
-                       len(df_const[df_name][hierarchy_level[llen]]) >= 1 and df_const[df_name]["CATEGORICAL_DATA"]
-                       [hierarchy_level[llen]]["labels"][0] is not None]
+                       len(df_const[df_name][hierarchy_level[llen]]) >= 1 and df_const[df_name]
+                       [hierarchy_level[llen]] != ""]
 
         options = sorted(options, key=lambda k: k['label'])
 
@@ -72,8 +71,7 @@ def generate_secondary_history_button(name, index, tile, df_name, df_const):
     """helper function to generate and return a hierarchy button for the hierarchy path."""
     hierarchy_level = ['Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier']
     return html.Button(
-        df_const[df_name]["CATEGORICAL_DATA"][hierarchy_level[index]]["labels"]
-        [name] if isinstance(name, int) else name,
+        name,
         id={'type': 'button: {}'.replace("{}", str(tile)), 'index': index},
         n_clicks=0,
         style={'background': 'none', 'border': 'none', 'padding': '5px', 'color': '#006699',
@@ -109,12 +107,8 @@ def get_secondary_hierarchy_layout(tile, df_name=None, hierarchy_toggle='Level F
                     id={'type': 'secondary_hierarchy_level_dropdown', 'index': tile},
                     # check if the hierarchy level has none variables and assigns to a option list
                     options=[{'label': get_label('LBL_' + x.replace(' ', '_'), df_name) + " ({0})".format(len(
-                        df_const[df_name][x])), 'value': x} for x in hierarchy_level if (len(
-                        df_const[df_name][x]) >= 1 and df_const[df_name][x][0] is not None)] if df_name == "OPG010" else
-                    [{'label': get_label('LBL_' + x.replace(' ', '_'), df_name) + " ({0})".format(len(
-                        df_const[df_name][x])), 'value': x} for x in hierarchy_level if (len(
-                        df_const[df_name][x]) >= 1 and df_const[df_name]["CATEGORICAL_DATA"][x]["labels"]
-                    [0] is not None)],
+                        df_const[df_name][x])), 'value': x} for x in hierarchy_level if len(
+                        df_const[df_name][x]) >= 1 and df_const[df_name][x][0] is not None ],
                     multi=False,
                     clearable=False,
                     optionHeight=30,

@@ -16,6 +16,7 @@ import dash_html_components as html
 from dash import no_update
 from dash.dependencies import Input, Output, State, ALL, MATCH, ClientsideFunction
 from dash.exceptions import PreventUpdate
+from dash_core_components import Store
 from flask import url_for
 
 # Internal Modules
@@ -222,7 +223,7 @@ def _change_tab(_tab_clicks, _tab_close_clicks, _tab_add_nclicks,
         return data, active_tab, tab_toggle_children, no_update, no_update, no_update, no_update
 
     for tile in range(4):
-        children.append(dcc.Store(id={'type': 'tab-swap-flag', 'index': tile}, data=False))
+        children.append(Store(id={'type': 'tab-swap-flag', 'index': tile}, data=False))
     # if user requested to delete a tab
     if '"type":"dashboard-tab-close"}.n_clicks' in changed_id:
         deleted_tab_index = int(search(r'\d+', changed_id).group())
@@ -242,9 +243,9 @@ def _change_tab(_tab_clicks, _tab_close_clicks, _tab_add_nclicks,
 
         for i in range(4):
             if i < data[new_tab]['content'][0]['props']['data-num-tiles']:
-                children[i] = dcc.Store(id={'type': 'tab-swap-flag', 'index': i}, data=True)
+                children[i] = Store(id={'type': 'tab-swap-flag', 'index': i}, data=True)
             else:
-                children[i] = dcc.Store(id={'type': 'tab-swap-flag', 'index': i}, data=False)
+                children[i] = Store(id={'type': 'tab-swap-flag', 'index': i}, data=False)
         # remove the tab and its x from the children
         del tab_toggle_children[deleted_tab_index]
         # remove the tab data from the storage
@@ -274,9 +275,9 @@ def _change_tab(_tab_clicks, _tab_close_clicks, _tab_add_nclicks,
         raise PreventUpdate
     for i in range(4):
         if i < data[new_tab]['content'][0]['props']['data-num-tiles']:
-            children[i] = dcc.Store(id={'type': 'tab-swap-flag', 'index': i}, data=True)
+            children[i] = Store(id={'type': 'tab-swap-flag', 'index': i}, data=True)
         else:
-            children[i] = dcc.Store(id={'type': 'tab-swap-flag', 'index': i}, data=False)
+            children[i] = Store(id={'type': 'tab-swap-flag', 'index': i}, data=False)
     # else, user requested a different tab. Save the current tab content to the appropriate save location and swap tabs
     data[active_tab]['content'] = tab_content
     data[active_tab]['title'] = dashboard_title
@@ -387,13 +388,13 @@ for x in range(4):
         if 'tile-customize' in changed_id:
             # [[mode/prompt_trigger, tile, stored_menu_for_cancel], menu_style/show_hide, menu_title,
             # show_hide_load_warning, isTrip]
-            float_menu_trigger = dcc.Store(id={'type': 'float-menu-trigger', 'index': tile},
+            float_menu_trigger = Store(id={'type': 'float-menu-trigger', 'index': tile},
                                            data=[['customize', tile, customize_menu], {}, get_label('LBL_Edit_Graph'),
                                                  session['tile_edited'][tile]])
             customize_className = 'tile-nav tile-nav--customize tile-nav--selected'
             layouts_className = 'tile-nav tile-nav--layout'
         elif 'tile-layouts' in changed_id:
-            float_menu_trigger = dcc.Store(id={'type': 'float-menu-trigger', 'index': tile},
+            float_menu_trigger = Store(id={'type': 'float-menu-trigger', 'index': tile},
                                            data=[['layouts', tile], {}, get_label('LBL_Load_Graph'),
                                                  session['tile_edited'][tile]])
             customize_className = 'tile-nav tile-nav--customize'
@@ -992,7 +993,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
     # flag for the dataset selector result menu
     data_set_flag=[]
     for i in range(4):
-        data_set_flag.append(dcc.Store(id={'type': 'data-set-result', 'index': i}, data= False))
+        data_set_flag.append(Store(id={'type': 'data-set-result', 'index': i}, data= False))
     df_tile = None
     # ------------------------------------------------------------------------------------------------------------------
     # if changed id == '.' due to NEW being requested, preserve data menu display.
@@ -1088,7 +1089,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                     options_triggers[changed_index] = df_name
             # send out a prompt
             elif changed_index == 4:  # prompt with trip prompt
-                prompt_trigger = dcc.Store(
+                prompt_trigger = Store(
                     id={'type': 'prompt-trigger', 'index': 5},
                     data=[['loaded_dataset_swap', changed_index], {}, get_label('LBL_Load_Dataset'),
                           get_label('LBL_Load_Dataset_Prompt'), True])
@@ -1098,7 +1099,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                         refresh_button[i] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
                                              'position': 'relative', 'vertical-align': 'top'}
             else:  # prompt with only two options
-                prompt_trigger = dcc.Store(
+                prompt_trigger = Store(
                     id={'type': 'prompt-trigger', 'index': 5},
                     data=[['loaded_dataset_swap', changed_index], {}, get_label('LBL_Load_Dataset'),
                           get_label('LBL_Load_Dataset_Duo_Prompt'), False])
@@ -1126,12 +1127,12 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
             if df_names[changed_index] not in session and prev_selection[changed_index] is not None:
                 df_name_confirm = None
             if changed_index == 4:  # prompt with trip prompt
-                prompt_trigger = dcc.Store(
+                prompt_trigger = Store(
                     id={'type': 'prompt-trigger', 'index': 5},
                     data=[['load_dataset', changed_index], {}, get_label('LBL_Load_Dataset'),
                           get_label('LBL_Load_Dataset_Prompt'), True])
             else:  # prompt with only two options
-                prompt_trigger = dcc.Store(
+                prompt_trigger = Store(
                     id={'type': 'prompt-trigger', 'index': 5},
                     data=[['load_dataset', changed_index], {}, get_label('LBL_Load_Dataset'),
                           get_label('LBL_Load_Dataset_Duo_Prompt'), False])
@@ -1264,7 +1265,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                                 # unlink the graph then load new dataset in parent data menu
                                 else:
                                     options_triggers[i] = 'fa fa-unlink'
-                                    data_set_flag[i] = dcc.Store(id={'type': 'data-set-result', 'index': i},
+                                    data_set_flag[i] = Store(id={'type': 'data-set-result', 'index': i},
                                                                  data= True)
             # duo options
             else:

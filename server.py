@@ -115,12 +115,15 @@ def get_hierarchy_parent(child_org, child_level):
     query = """\
         declare @p_parent_org varchar(64)
         declare @p_result_status varchar(255)
+        declare @p_child_value int
         exec dbo.OPP_Get_Hierarchy_Parent {}, \"{}\", \"{}\", {},
-        @p_parent_org output, @p_result_status output
-        select @p_parent_org as parent_org, @p_result_status as result_status
+        @p_parent_org output, @p_result_status output, @p_child_value output
+        select @p_parent_org as parent_org, @p_result_status as result_status, @p_child_value as child_level
         """.format(session["sessionID"], session["language"], child_org, child_level)
 
-    return exec_storedproc(query)[0]
+    results = exec_storedproc(query)
+
+    return results[0], results[2]
 
 
 def get_variable_parent(child_org, child_level):
@@ -169,12 +172,14 @@ def load_dataset_list():
     df = get_ref("Data_set", session["language"])
     return df["ref_value"].tolist()
 
+
 def load_dataset_measuretype(datasets):
     measureType_list={}
     for x in datasets:
         df = get_ref(x+"_Measuretype", session["language"])
         measureType_list[x] = df["ref_value"].tolist()
     return measureType_list
+
 
 # WebModuleCreate?
 @server.before_first_request

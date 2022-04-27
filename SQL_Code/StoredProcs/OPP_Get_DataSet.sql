@@ -29,18 +29,18 @@ begin
     select * from dbo.OPG001C
 
   else if (@pr_dataset_name = 'OPG011')
-    select --null [OPG Data Set],
-           --null [Hierarchy One Name],
-           --null [Hierarchy One Top],
-           --null [Hierarchy One -1],
-           --null [Hierarchy One -2],
-           --null [Hierarchy One -3],
-           --null [Hierarchy One -4],
+    select null [OPG Data Set],
+           null [Hierarchy One Name],
+           '' [Hierarchy One Top],
+           '' [Hierarchy One -1],
+           '' [Hierarchy One -2],
+           '' [Hierarchy One -3],
+           '' [Hierarchy One -4],
            dur.[HierarchyLeaf] as [Hierarchy Value],
            5 as [Hierarchy Level],
-           --[Variable Name],
-           --[Variable Name Qualifier],
-           --[Variable Name Sub Qualifier],
+           '' as [Variable Name],
+           '' as [Variable Name Qualifier],
+           '' as [Variable Name Sub Qualifier],
            case
              when isnull(dur.[DocumentTypeSubQualifier], '') <> '' then dur.[DocumentTypeSubQualifier]
              else dur.[DocumentTypeQualifier]

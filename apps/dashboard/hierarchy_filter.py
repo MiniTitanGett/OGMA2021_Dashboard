@@ -20,22 +20,20 @@ def generate_dropdown(tile, df_name, nid_path, df_const):
     """Helper function to generate and return hierarchy drop-down."""
     if df_name:
         # using a subset of our dataframe, turn it into a multiindex df, and access unique values for option
-        df = session[df_name][['H0', 'H1', 'H2', 'H3', 'H4', 'H5']]
+        df = session[df_name][['H0', 'H1', 'H2', 'H3', 'H4']]
         hierarchy_nid_list = list(nid_path.split("^||^"))[1:]
         llen = len(hierarchy_nid_list)
-        if llen == 6:
+        if llen == 5:
             option_list = []
         elif llen != 0:
             # df = df.set_index(['H{}'.format(i) for i in range(llen)])
             # option_list = df.loc[tuple(hierarchy_nid_list)]['H{}'.format(llen)].dropna().unique()
             for i in range(llen):
-                level = df_const[df_name]["H"+str(i)][hierarchy_nid_list[i]] if \
-                                                                        df_name == "OPG011" else hierarchy_nid_list[i]
-                df = df.filter(df['H{}'.format(i)] == level)
+                df = df.filter(df['H{}'.format(i)] == hierarchy_nid_list[i])
                 df = df.drop('H{}'.format(i))
             option_list = df['H{}'.format(llen)].unique(dropmissing=True)
         else:
-            option_list = df['H0'].unique()
+            option_list = df['H0'].unique(dropmissing=True)
         if df_name == "OPG011":
             options = [{'label': i, 'value': i} for i in option_list]
         else:

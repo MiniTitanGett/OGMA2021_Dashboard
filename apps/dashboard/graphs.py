@@ -521,9 +521,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 fig.update_layout(
                     legend_title_text='Size: <br> &#9; {} ({})<br> <br>{}'.format(arg_value[4],
                                                         get_label(arg_value[5], df_name+"_Measuretype"),
-                                                                                  legend_title_text))
-                #                                                     legend_title_text), transition={'duration': 4000})
-                # fig.layout.updatemenus[0].buttons[0].args[1]["frame"]["duration"] = 1000
+                                                        legend_title_text), transition={'duration': 4000})
+                fig.layout.updatemenus[0].buttons[0].args[1]["frame"]["duration"] = 1000
                 # set up hover label
                 hovertemplate = get_label('LBL_Bubble_Hover_Data', df_name)
                 hovertemplate = hovertemplate.replace('%Date%', get_label('LBL_Date_Of_Event', df_name)). \
@@ -730,8 +729,8 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             x = 'Date of Event' if group_by_item and not arg_value[3] else category
             legend_title_text = get_label('LBL_Variable_Name', df_name) if group_by_item else get_label(
                 'LBL_Partial_Period', df_name)
-            # if group_by_item and not arg_value[4]:
-            #     xaxis = {'type': 'date'}
+            if group_by_item and not arg_value[4]:
+                xaxis = {'type': 'date'}
 
         # df is not empty, create graph
         if len(filtered_df) != 0:
@@ -742,19 +741,18 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                 filtered_df['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
 
             # checks if arg_value[4]: animation is toggled
-            if arg_value[3]:
-                # TODO: Remove in production when there is a full dataset
-                if hierarchy_type == 'Level Filter' or (hierarchy_type == 'Specific Item' and
-                                                        hierarchy_graph_children == ['graph_children']):
-                    for i in filtered_df['Date of Event'].unique():
-                        for j in filtered_df[hierarchy_col].unique():
-                            for k in filtered_df[color].unique():
-                                if filtered_df.query(
-                                        "`Date of Event` == @i and `{}` == @j and `{}` == @k".format(x,
-                                                                                                     color)).empty:
-                                    filtered_df = filtered_df.append(
-                                        {'Date of Event': i, hierarchy_col: j, color: k, 'Measure Value': 0},
-                                        ignore_index=True)
+            # if arg_value[3] and (hierarchy_type == 'Level Filter' or (hierarchy_type == 'Specific Item' and
+            #                                             hierarchy_graph_children == ['graph_children'])):
+            #     # TODO: Remove in production when there is a full dataset
+            #     for i in filtered_df['Date of Event'].unique():
+            #         for j in filtered_df[hierarchy_col].unique():
+            #             for k in filtered_df[color].unique():
+            #                 if filtered_df.query(
+            #                         "`Date of Event` == @i and `{}` == @j and `{}` == @k".format(x,
+            #                                                                                      color)).empty:
+            #                     filtered_df = filtered_df.append(
+            #                         {'Date of Event': i, hierarchy_col: j, color: k, 'Measure Value': 0},
+            #                         ignore_index=True)
 
             filtered_df.sort_values(by=['Date of Event', hierarchy_col, color], inplace=True)
 
@@ -1371,12 +1369,6 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
                               df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend,
                               secondary_level_dropdown, list_of_secondary_names, secondary_toggle,
                               secondary_graph_children, secondary_options)
-
-    # pivot table creation
-    elif graph_type == 'Pivot_Table':
-        changed_index = dash.callback_context.inputs_list[2]['id']['index']
-        return get_pivot_table(filtered_df, changed_index, df_const, df_name)
-
     # table creation
     elif graph_type == 'Table':
         changed_index = dash.callback_context.inputs_list[2]['id']['index']

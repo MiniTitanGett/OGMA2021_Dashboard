@@ -54,6 +54,7 @@ def generate_secondary_dropdown(tile, df_name, nid_path, df_const):
             id={'type': 'secondary_hierarchy_specific_dropdown', 'index': tile},
             options=options,
             optionHeight=30,
+            clearable=False,
             multi=False,
             style={'font-size': '13px'},
             placeholder='{}...'.format(get_label('LBL_Select')))
@@ -62,6 +63,7 @@ def generate_secondary_dropdown(tile, df_name, nid_path, df_const):
             id={'type': 'secondary_hierarchy_specific_dropdown', 'index': tile},
             options=[],
             optionHeight=30,
+            clearable=False,
             multi=False,
             style={'font-size': '13px'},
             placeholder='{}...'.format(get_label('LBL_Select')))

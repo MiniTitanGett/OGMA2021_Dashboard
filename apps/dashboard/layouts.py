@@ -326,7 +326,7 @@ def get_layout_graph(report_name):
                            j['Hierarchy Toggle'],
                            j['Level Value'],
                            j['Graph All Toggle'],  # [],  # hierarchy_graph_children,
-                           {},  # hierarchy_options - just pass a non-None value
+                           True,  # hierarchy_options - just pass a non-None value
                            json.loads(state_of_display),  # state_of_display,
                            j.get('Date Tab'),  # None,  # secondary_type,
                            j['Timeframe'],

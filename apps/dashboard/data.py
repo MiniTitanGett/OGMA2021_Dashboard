@@ -204,20 +204,6 @@ def dataset_to_df(df_name):
         df_vaex.rename('Hierarchy One -4', 'H4')
         df_vaex.rename('Hierarchy One Leaf', 'H5')
 
-    df_vaex['OPG Data Set'] = df_vaex.func.where(df_vaex['OPG Data Set'] == '', None, df_vaex['OPG Data Set'])
-    df_vaex['H0'] = df_vaex.func.where(df_vaex['H0'] == '', None, df_vaex['H0'])
-    df_vaex['H1'] = df_vaex.func.where(df_vaex['H1'] == '', None, df_vaex['H1'])
-    df_vaex['H2'] = df_vaex.func.where(df_vaex['H2'] == '', None, df_vaex['H2'])
-    df_vaex['H3'] = df_vaex.func.where(df_vaex['H3'] == '', None, df_vaex['H3'])
-    df_vaex['H4'] = df_vaex.func.where(df_vaex['H4'] == '', None, df_vaex['H4'])
-    df_vaex['Variable Name'] = df_vaex.func.where(df_vaex['Variable Name'] == '', None, df_vaex['Variable Name'])
-    df_vaex['Variable Name Qualifier'] = df_vaex.func.where(df_vaex['Variable Name Qualifier'] == '', None,
-                                                            df_vaex['Variable Name Qualifier'])
-    df_vaex['Variable Name Sub Qualifier'] = df_vaex.func.where(df_vaex['Variable Name Sub Qualifier'] == '', None,
-                                                                df_vaex['Variable Name Sub Qualifier'])
-
-    df_vaex['Variable Value'] = df_vaex.func.where(df_vaex['Variable Value'] == '', None, df_vaex['Variable Value'])
-
     # if OPG011 we need to construct the tree by asking for the parents of unique values
     if df_name == "OPG011":
 
@@ -249,9 +235,24 @@ def dataset_to_df(df_name):
         df_vaex = from_pandas(df)
         df_vaex.drop(columns=['Hierarchy Level', 'Variable Level', 'H5'], inplace='True')
         df_vaex.rename('Hierarchy Value', 'H5')
-        df_vaex = df_vaex[['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5', 'Variable Name',
-        'Variable Name Qualifier', 'Variable Name Sub Qualifier', 'Variable Value', 'Date of Event',
-        'Activity Event Id', 'Measure1', 'Measure2', 'Measure3', 'Partial Period']]
+        # df_vaex = df_vaex[['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5', 'Variable Name',
+        # 'Variable Name Qualifier', 'Variable Name Sub Qualifier', 'Variable Value', 'Date of Event',
+        # 'Activity Event Id', 'Measure1', 'Measure2', 'Measure3', 'Partial Period']]
+
+    df_vaex['OPG Data Set'] = df_vaex.func.where(df_vaex['OPG Data Set'] == '', None, df_vaex['OPG Data Set'])
+    df_vaex['H0'] = df_vaex.func.where(df_vaex['H0'] == '', None, df_vaex['H0'])
+    df_vaex['H1'] = df_vaex.func.where(df_vaex['H1'] == '', None, df_vaex['H1'])
+    df_vaex['H2'] = df_vaex.func.where(df_vaex['H2'] == '', None, df_vaex['H2'])
+    df_vaex['H3'] = df_vaex.func.where(df_vaex['H3'] == '', None, df_vaex['H3'])
+    df_vaex['H4'] = df_vaex.func.where(df_vaex['H4'] == '', None, df_vaex['H4'])
+    df_vaex['H5'] = df_vaex.func.where(df_vaex['H5'] == '', None, df_vaex['H5'])
+    df_vaex['Variable Name'] = df_vaex.func.where(df_vaex['Variable Name'] == '', None, df_vaex['Variable Name'])
+    df_vaex['Variable Name Qualifier'] = df_vaex.func.where(df_vaex['Variable Name Qualifier'] == '', None,
+                                                            df_vaex['Variable Name Qualifier'])
+    df_vaex['Variable Name Sub Qualifier'] = df_vaex.func.where(df_vaex['Variable Name Sub Qualifier'] == '', None,
+                                                                df_vaex['Variable Name Sub Qualifier'])
+
+    df_vaex['Variable Value'] = df_vaex.func.where(df_vaex['Variable Value'] == '', None, df_vaex['Variable Value'])
 
     # If we are dealing with links in the future we must format them as follows and edit the table drawer
     # if 'Link' in df.columns:
@@ -341,12 +342,11 @@ def generate_constants(df_name):
         variable_option_lists = []
 
         df = df.to_pandas_df()
-        df['Partial Period'] = df['Partial Period'].transform(lambda x: x == 'Y')
-        df['variable_name'] = df['Variable Name']
+        # df['Partial Period'] = df['Partial Period'].transform(lambda x: x == 'Y')
         df['variable_name_qualifier'] = df['Variable Name'] + ' ' + df['Variable Name Qualifier']
         df['variable_name_sub_qualifier'] = df['Variable Name'] + ' ' + df['Variable Name Qualifier'] + ' ' + \
                                             df['Variable Name Sub Qualifier']
-        unique_vars = df['variable_name'].unique().tolist() + df['variable_name_qualifier'].unique().tolist() + df[
+        unique_vars = df['Variable Name'].unique().tolist() + df['variable_name_qualifier'].unique().tolist() + df[
             'variable_name_sub_qualifier'].unique().tolist()
 
         cleaned_list = list(dict.fromkeys([x.strip() for x in unique_vars if str(x) != 'nan']))
@@ -451,7 +451,7 @@ def generate_constants(df_name):
         #                                                df['Partial Period'])
         # df['Partial Period'] = df.func.where(df['Partial Period'] == 'T', 'True',
         #                                      df['Partial Period'])
-        df['Partial Period'] = df['Partial Period'].astype('bool')
+        # df['Partial Period'] = df['Partial Period'].astype('bool')
 
         # Sets the Date of Event in the df to be in the correct format for Plotly
         # df['Date of Event'] = df['Date of Event'].transform(
@@ -603,24 +603,18 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
                 else:
                     # Returns empty data frame with column names
                     df = df[0:0]
-                    return df
             else:
-                # Filters out all rows that are more specific than given path length plus one to preserve the children
-                for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - (len(hierarchy_path) + 1)):
-                    df[df_const[df_name]['HIERARCHY_LEVELS']
-                    [len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]] = full(len(df), nan, float64)
                 # Filters out all rows that are less specific than given path length
                 for i in range(len(hierarchy_path)):
                     df = df[df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i]]
 
         else:
-            # Filters out all rows that are more specific than given path
-            for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - (len(hierarchy_path))):
-                df[df_const[df_name]['HIERARCHY_LEVELS']
-                [len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]] = full(len(df), nan, float64)
             # Filters out all rows that don't include path member at specific level
-            for i in range(len(hierarchy_path)):
-                df = df[df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i]]
+            if not hierarchy_path:
+                df = df[0:0]
+            else:
+                for i in range(len(hierarchy_path)):
+                    df = df[df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i]]
 
         if graph_type == "Line" or graph_type == "Scatter" or graph_type == "Bar" or graph_type == "Box_Plot":
             filtered_df = data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondary, end_year,
@@ -647,7 +641,6 @@ def data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_drop
     if hierarchy_toggle == 'Level Filter' or (
             (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == ['graph_children'])):
         filtered_df = session[df_name]
-        df= filtered_df.to_pandas_df()
         if hierarchy_toggle == 'Level Filter':
             # If anything is in the dropdown
             if hierarchy_level_dropdown:
@@ -790,6 +783,10 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
     This aggregator does not filter based on measure type.
     """
     filtered_df = filtered_df.to_pandas_df()
+
+    if filtered_df.empty:
+        return filtered_df
+
     measure_types = session["Measure_type_list"][df_name].copy()
     variable_names = df_const[df_name]['VARIABLE_OPTION_LISTS']
 
@@ -1231,15 +1228,19 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
     """
     df = df.to_pandas_df()
 
+    if df.empty:
+        return df
+
     if secondary_hierarchy_toggle == 'Level Filter':
         variable = df_const[df_name][secondary_level_dropdown]
-        if len(variable) == 1 and variable is None:
-            return df[0:0]
     elif secondary_hierarchy_toggle == 'Specific Item' and secondary_graph_children == ['graph_children']:
         variable = [option['label'] for option in secondary_options]
     else:
-        variable = secondary_path[-1] if secondary_path != [] else None
-    if graph_type == "Box_Plot":
+        variable = [secondary_path[-1] if secondary_path != [] else None]
+
+    if variable[0] is None:
+        return df[0:0]
+    elif graph_type == "Box_Plot":
         measure_type = arg_values[0]
         variable_names = variable
     else:
@@ -1257,10 +1258,6 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
             specific_items = ['specific item']
         else:
             specific_items = []
-
-    # ensure variable_names is a list of variable values
-    if type(variable_names) is not list:
-        variable_names = [variable_names]
 
     row_list = []
 
@@ -1467,8 +1464,6 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                                 week_of_event = unique_secondary
 
                                 measure_value = unique_data[measure_type].sum()
-                                if measure_value == 24:
-                                    print("here")
 
                                 if hierarchy_toggle == "Level Filter" or (
                                         (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == [
@@ -1499,22 +1494,21 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                                  nan, nan, measure_value, measure_type,
                                  True if unique_data['Partial Period'].iloc[0] is True else nan])
 
-        time_df = DataFrame(row_list,
-                                   columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
-                                            'Variable Value',
-                                            'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
-                                            'Date of Event', 'Calendar Entry Type', 'Year of Event', 'Quarter',
-                                            'Month of Event', 'Week of Event', 'Fiscal Year of Event', 'Fiscal Quarter',
-                                            'Fiscal Month of Event', 'Fiscal Week of Event', 'Julian Day',
-                                            'Activity Event Id', 'Measure Value', 'Measure Type', 'Partial Period'])
+            time_df = DataFrame(row_list,
+                                       columns=['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5',
+                                                'Variable Value',
+                                                'Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier',
+                                                'Date of Event', 'Calendar Entry Type', 'Year of Event', 'Quarter',
+                                                'Month of Event', 'Week of Event', 'Fiscal Year of Event', 'Fiscal Quarter',
+                                                'Fiscal Month of Event', 'Fiscal Week of Event', 'Julian Day',
+                                                'Activity Event Id', 'Measure Value', 'Measure Type', 'Partial Period'])
 
-        time_df = time_df[time_df['Date of Event'] >= datetime64(start_date.date())]
-        time_df = time_df[time_df['Date of Event'] <= datetime64(end_date.date())]
+            time_df = time_df[time_df['Date of Event'] >= datetime64(start_date.date())]
+            time_df = time_df[time_df['Date of Event'] <= datetime64(end_date.date())]
 
     # If not in year tab, filter using secondary selections
     elif not secondary_type == 'Year':
         len_item = len(specific_items)
-
         for p in range(len_item):
             if specific_items[0] == 'specific item':
                 further_filtered_df = df
@@ -1647,11 +1641,13 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
     else:
         len_item = len(specific_items)
         for p in range(len_item):
-
-            if hierarchy_toggle == "Level Filter":
-                further_filtered_df = df[df[hierarchy_level_dropdown] == specific_items[p]]
+            if specific_items[0] == 'specific item':
+                further_filtered_df = df
             else:
-                further_filtered_df = df[df["H" + str(len(hierarchy_path))] == specific_items[p]]
+                if hierarchy_toggle == "Level Filter":
+                    further_filtered_df = df[df[hierarchy_level_dropdown] == specific_items[p]]
+                else:
+                    further_filtered_df = df[df["H" + str(len(hierarchy_path))] == specific_items[p]]
             len_var = len(variable_names)
             for y in range(len_var):
                 variable_name = variable_names[y]

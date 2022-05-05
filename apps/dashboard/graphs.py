@@ -9,7 +9,6 @@ Contains functions to generate graphs.
 # External Packages
 from _datetime import datetime
 
-from dash_pivottable import PivotTable
 from flask import session
 from parse import parse
 import plotly.express as px
@@ -609,7 +608,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
 def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
                    hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const, xaxis_title, yaxis_title,
                    xlegend, ylegend, gridline, legend, secondary_level_dropdown,
-                   secondary_path, secondary_type, secondary_graph_children, secondary_options):
+                   secondary_path, secondary_type, secondary_graph_children):
     """Returns the bar graph figure."""
     # ------------------------------------------------Arg Values--------------------------------------------------------
     # arg_value[0] = group by (x axis)
@@ -729,8 +728,8 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
             x = 'Date of Event' if group_by_item and not arg_value[3] else category
             legend_title_text = get_label('LBL_Variable_Name', df_name) if group_by_item else get_label(
                 'LBL_Partial_Period', df_name)
-            if group_by_item and not arg_value[4]:
-                xaxis = {'type': 'date'}
+            # if group_by_item and not arg_value[4]:
+            #     xaxis = {'type': 'date'}
 
         # df is not empty, create graph
         if len(filtered_df) != 0:
@@ -763,7 +762,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                 data_frame=filtered_df,
                 x=x if arg_value[2] == 'Vertical' else 'Measure Value',
                 y='Measure Value' if arg_value[2] == 'Vertical' else x,
-                orientation='v' if arg_value[2] =='Vertical' else 'h',
+                orientation='v' if arg_value[2] == 'Vertical' else 'h',
                 color=color,
                 color_discrete_sequence=color_discrete,
                 barmode='group',
@@ -869,7 +868,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
 def get_box_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
                    hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const, xaxis_title, yaxis_title,
                    xlegend, ylegend, gridline, legend, secondary_level_dropdown, secondary_path, secondary_type,
-                   secondary_graph_children, secondary_options):
+                   secondary_graph_children):
     """Returns the box plot figure."""
     # ------------------------------------------------Arg Values--------------------------------------------------------
     # arg_value[0] = measure type selector
@@ -1361,14 +1360,14 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
                               list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
                               df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend,
                               secondary_level_dropdown, list_of_secondary_names, secondary_toggle,
-                              secondary_graph_children, secondary_options)
+                              secondary_graph_children)
     # box plot creation
     elif graph_type == 'Box_Plot':
         return get_box_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,
                               list_of_names, hierarchy_toggle, hierarchy_graph_children, graph_title, df_name,
                               df_const, xtitle, ytitle, xlegend, ylegend, gridline, legend,
                               secondary_level_dropdown, list_of_secondary_names, secondary_toggle,
-                              secondary_graph_children, secondary_options)
+                              secondary_graph_children)
     # table creation
     elif graph_type == 'Table':
         changed_index = dash.callback_context.inputs_list[2]['id']['index']

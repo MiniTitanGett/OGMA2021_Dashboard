@@ -124,7 +124,7 @@ for x in range(4):
          State('num-tiles', 'data-num-tiles'),
          State({'type': 'data-fitting-trigger', 'index': x}, 'value'),
          State({'type': 'tab-swap-flag', 'index': x}, 'data'),
-         #data set result flag
+         # data set result flag
          State({'type': 'data-set-result', 'index': x}, 'data')],
         prevent_initial_call=True
     )
@@ -393,7 +393,6 @@ def _print_choice_to_display_and_modify_secondary_dropdown(dropdown_val, _n_clic
     changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
     if link_state == "fa fa-link":
         df_name = parent_df_name
-    hierarchy_level = df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
     # if page loaded - prevent update
     if changed_id == '.':
         raise PreventUpdate

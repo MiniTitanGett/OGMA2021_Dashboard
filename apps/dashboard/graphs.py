@@ -385,6 +385,9 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
     xaxis = None
     yaxis = None
     filtered_df = []
+    arg_value[1] = get_label(arg_value[1], df_name + "_Measuretype")
+    arg_value[3] = get_label(arg_value[3], df_name + "_Measuretype")
+    arg_value[5] = get_label(arg_value[5], df_name + "_Measuretype")
     # Check whether we have enough information to attempt getting data for a graph
     if hierarchy_type == 'Level Filter' and None not in [arg_value, hierarchy_level_dropdown, hierarchy_type,
                                                          hierarchy_graph_children, df_name, df_const] \
@@ -489,16 +492,16 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                                                                                                arg_value[5]]]
                 )
                 fig.update_layout(
-                    legend_title_text='Size: <br> &#9; {} ({})<br> <br>{}'.format(arg_value[4], get_label(arg_value[5],
-                        df_name+"_Measuretype"), legend_title_text))
+                    legend_title_text='Size: <br> &#9; {} ({})<br> <br>{}'.format(arg_value[4], arg_value[5],
+                                                                                  legend_title_text))
                 # set up hover label
                 hovertemplate = get_label('LBL_Bubble_Fixed_Hover_Data', df_name)
                 hovertemplate = hovertemplate.replace('%AXIS-X-A%', get_label('LBL_Date_Of_Event', df_name)). \
                     replace('%X-AXIS%', '%{x}')
                 hovertemplate = hovertemplate.replace('%AXIS-Y-A%', arg_value[2]).replace('%AXIS-Y-B%',
-                    get_label(arg_value[3], df_name+"_Measuretype")).replace('%Y-AXIS%', '%{y}')
+                    arg_value[3]).replace('%Y-AXIS%', '%{y}')
                 hovertemplate = hovertemplate.replace('%AXIS-Z-A%', arg_value[4]).replace('%AXIS-Z-B%',
-                    get_label(arg_value[5], df_name+"_Measuretype")).replace('%Z-AXIS%', '%{customdata[2]}')
+                    arg_value[5]).replace('%Z-AXIS%', '%{customdata[2]}')
                 fig.update_traces(hovertemplate=hovertemplate)
             else:
                 color_discrete = color_picker(arg_value[6])
@@ -518,8 +521,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                                                                                                arg_value[5]]]
                 )
                 fig.update_layout(
-                    legend_title_text='Size: <br> &#9; {} ({})<br> <br>{}'.format(arg_value[4],
-                                                        get_label(arg_value[5], df_name+"_Measuretype"),
+                    legend_title_text='Size: <br> &#9; {} ({})<br> <br>{}'.format(arg_value[4],arg_value[5],
                                                         legend_title_text), transition={'duration': 4000})
                 fig.layout.updatemenus[0].buttons[0].args[1]["frame"]["duration"] = 1000
                 # set up hover label
@@ -527,11 +529,11 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 hovertemplate = hovertemplate.replace('%Date%', get_label('LBL_Date_Of_Event', df_name)). \
                     replace('%Date-Value%', '%{customdata[1]}')
                 hovertemplate = hovertemplate.replace('%AXIS-X-A%', arg_value[0]).replace('%AXIS-X-B%',
-                    get_label(arg_value[1], df_name+"_Measuretype")).replace('%X-AXIS%', '%{x}')
+                   arg_value[1]).replace('%X-AXIS%', '%{x}')
                 hovertemplate = hovertemplate.replace('%AXIS-Y-A%', arg_value[2]).replace('%AXIS-Y-B%',
-                    get_label(arg_value[3], df_name+"_Measuretype")).replace('%Y-AXIS%', '%{y}')
+                    arg_value[3]).replace('%Y-AXIS%', '%{y}')
                 hovertemplate = hovertemplate.replace('%AXIS-Z-A%', arg_value[4]).replace('%AXIS-Z-B%',
-                    get_label(arg_value[5], df_name+"_Measuretype")).replace('%Z-AXIS%', '%{customdata[2]}')
+                    arg_value[5]).replace('%Z-AXIS%', '%{customdata[2]}')
                 fig.update_traces(hovertemplate=hovertemplate)
         # filtered is empty, create default empty graph
         else:
@@ -546,17 +548,17 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
     # set title
     if xaxis_title:
         if arg_value[0] != 'Time' and xaxis_title == 'Time':
-            xaxis_title = '{} ({})'.format(arg_value[0], get_label(arg_value[1], df_name+"_Measuretype"))
+            xaxis_title = '{} ({})'.format(arg_value[0], arg_value[1])
         result = parse('{} ({})', xaxis_title)
         if result is None:
             xaxis = xaxis_title
         elif any(element in result[0] for element in df_const[df_name]['VARIABLE_OPTION_LISTS']) and \
                 result[1] in df_const[df_name]["MEASURE_TYPE_VALUES"]:
-            xaxis = '{} ({})'.format(arg_value[0], get_label(arg_value[1], df_name+"_Measuretype"))
+            xaxis = '{} ({})'.format(arg_value[0], arg_value[1])
     elif arg_value[0] == 'Time' and (xaxis_title == 'Time' or xaxis_title is None):
         xaxis = '{}'.format(arg_value[0])
     else:
-        xaxis = '{} ({})'.format(arg_value[0], get_label(arg_value[1], df_name+"_Measuretype"))
+        xaxis = '{} ({})'.format(arg_value[0], arg_value[1])
 
     if yaxis_title:
         result = parse('{} ({})', yaxis_title)
@@ -564,9 +566,9 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
             yaxis = yaxis_title
         elif any(element in result[0] for element in df_const[df_name]['VARIABLE_OPTION_LISTS']) and \
                 result[1] in df_const[df_name]["MEASURE_TYPE_VALUES"]:
-            yaxis = '{} ({})'.format(arg_value[2], get_label(arg_value[3], df_name+"_Measuretype"))
+            yaxis = '{} ({})'.format(arg_value[2], arg_value[3])
     else:
-        yaxis = '{} ({})'.format(arg_value[2], get_label(arg_value[3], df_name+"_Measuretype"))
+        yaxis = '{} ({})'.format(arg_value[2], arg_value[3])
 
     # set legend position
     if xlegend and ylegend:

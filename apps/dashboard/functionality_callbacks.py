@@ -434,14 +434,13 @@ def _print_choice_to_display_and_modify_secondary_dropdown(dropdown_val, _n_clic
             raise PreventUpdate
         # If nothing in history return value
         elif not state_of_display:
-            display_button = generate_secondary_history_button(dropdown_val, 0, changed_index, df_name, df_const)
+            display_button = generate_secondary_history_button(dropdown_val, 0, changed_index)
             nid_path = get_nid_path(dropdown_value=dropdown_val)
             dropdown = generate_secondary_dropdown(changed_index, df_name, nid_path, df_const)
         # If something is in the history preserve it and add value to it
         else:
             display_button = state_of_display + [
-                (generate_secondary_history_button(dropdown_val, len(state_of_display), changed_index, df_name,
-                                                                                                            df_const))]
+                (generate_secondary_history_button(dropdown_val, len(state_of_display), changed_index))]
             nid_path = get_nid_path(sod=state_of_display, dropdown_value=dropdown_val)
             dropdown = generate_secondary_dropdown(changed_index, df_name, nid_path, df_const)
     # If update triggered due to creation of a button do not update anything

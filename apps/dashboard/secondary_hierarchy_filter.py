@@ -69,9 +69,8 @@ def generate_secondary_dropdown(tile, df_name, nid_path, df_const):
             placeholder='{}...'.format(get_label('LBL_Select')))
 
 
-def generate_secondary_history_button(name, index, tile, df_name, df_const):
+def generate_secondary_history_button(name, index, tile):
     """helper function to generate and return a hierarchy button for the hierarchy path."""
-    hierarchy_level = ['Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier']
     return html.Button(
         name,
         id={'type': 'button: {}'.replace("{}", str(tile)), 'index': index},
@@ -93,7 +92,7 @@ def get_secondary_hierarchy_layout(tile, df_name=None, hierarchy_toggle='Level F
         for nid in hierarchy_nid_list:
             if nid == "root":
                 continue
-            button = generate_secondary_history_button(nid, len(hierarchy_button_path), tile, df_name, df_const)
+            button = generate_secondary_history_button(nid, len(hierarchy_button_path), tile)
             hierarchy_button_path.append(button)
         return [
             dcc.Tabs([

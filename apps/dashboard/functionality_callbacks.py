@@ -831,7 +831,8 @@ def split_filter_part(filter_part):
      State({'type': 'data-set', 'index': 4}, 'value'),
      State('df-constants-storage', 'data'),
      State({'type': 'data-set-parent', 'index': 4}, 'value'),
-     State({'type': 'tile-df-name', 'index': MATCH}, 'data')]
+     State({'type': 'tile-df-name', 'index': MATCH}, 'data'),
+     State({'type': 'graph-type-dropdown', 'index': MATCH}, 'value')]
 )
 def _update_table(page_current, page_size, sort_by, filter_query, _graph_trigger, _table_trigger, link_state,
                   df_name, secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
@@ -841,7 +842,10 @@ def _update_table(page_current, page_size, sort_by, filter_query, _graph_trigger
                   parent_start_secondary, parent_end_secondary, parent_num_periods, parent_period_type,
                   parent_hierarchy_toggle, parent_hierarchy_level_dropdown, parent_state_of_display,
                   parent_hierarchy_graph_children, parent_hierarchy_options, parent_df_name, df_const, df_confirm,
-                  table_df):
+                  table_df, graph_type):
+
+    if graph_type != 'Table':
+        raise PreventUpdate
 
     if table_df == parent_df_name and link_state == 'fa fa-link':
         secondary_type = parent_secondary_type

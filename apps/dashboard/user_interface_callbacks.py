@@ -657,7 +657,6 @@ app.clientside_callback(
      Output({'type': 'update-graph-trigger', 'index': MATCH}, 'data-graph_menu_table_trigger'),
      Output({'type': 'tile-customize-content', 'index': MATCH}, 'data-loaded'),
      Output({'type': 'tile-rebuild-menu-flag', 'index': MATCH}, 'data')],
-     # Output({'type': 'tab-swap-flag', 'index': MATCH}, 'data')],
     [Input({'type': 'graph-menu-trigger', 'index': MATCH}, 'data-'),
      Input({'type': 'graph-type-dropdown', 'index': MATCH}, 'value'),
      Input({'type': 'tile-link', 'index': MATCH}, 'className')],

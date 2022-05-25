@@ -107,6 +107,19 @@ def load_saved_dashboards_from_db():
     for i, row in results.iterrows():
         session['saved_dashboards'][row["ref_value"]] = json.loads(row["clob_text"].replace(')', ""))
 
+def get_hierarchy(child_org):
+    """
+    requests the parent of the child_org from the database and returns the parent
+    """
+    query = """\
+        declare @p_result_status varchar(255)
+        exec dbo.OPP_Get_Hierarchy {}, \"{}\", {}, @p_result_status output
+        select @p_result_status as result_status
+        """.format(session["sessionID"], session["language"], child_org)
+
+    results = exec_storedproc_results(query)
+
+    return results['result'].tolist()
 
 def get_hierarchy_parent(child_org, child_level):
     """
@@ -174,7 +187,7 @@ def load_dataset_list():
 
 
 def load_dataset_measuretype(datasets):
-    measureType_list={}
+    measureType_list = {}
     for x in datasets:
         df = get_ref(x+"_Measuretype", session["language"])
         measureType_list[x] = df["ref_value"].tolist()
@@ -241,8 +254,8 @@ def before_request_func():
         # load the available datasets
         session["dataset_list"] = load_dataset_list()  # get_ref("Data_set", session["language"])
 
-        #TODO event level datasets will need to load measure_types
-        session["Measure_type_list"] = load_dataset_measuretype(['OPG011','OPG010'])
+        # TODO event level datasets will need to load measure_types
+        session["Measure_type_list"] = load_dataset_measuretype(['OPG011', 'OPG010'])
 
         # setup session variables
         session['saved_layouts'] = {}

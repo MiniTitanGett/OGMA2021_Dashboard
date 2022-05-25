@@ -31,24 +31,33 @@ begin
   else if (@pr_dataset_name = 'OPG011')
     select null [OPG Data Set],
            null [Hierarchy One Name],
-           '' [Hierarchy One Top],
-           '' [Hierarchy One -1],
-           '' [Hierarchy One -2],
-           '' [Hierarchy One -3],
-           '' [Hierarchy One -4],
-           dur.[HierarchyLeaf] as [Hierarchy Value],
-           5 as [Hierarchy Level],
-           '' as [Variable Name],
-           '' as [Variable Name Qualifier],
-           '' as [Variable Name Sub Qualifier],
+           dur.[Hierarchy1] as [H0],
            case
-             when isnull(dur.[DocumentTypeSubQualifier], '') <> '' then dur.[DocumentTypeSubQualifier]
-             else dur.[DocumentTypeQualifier]
-           end as [Variable Value],
+            when dur.[Hierarchy1] = dur.[Hierarchy2] then '' else dur.[Hierarchy2]
+           end as [H1],
            case
-             when isnull(dur.[DocumentTypeSubQualifier], '') <> '' then 2
-             else 1
-           end as [Variable Level],
+            when dur.[Hierarchy2] = dur.[Hierarchy3] then '' else dur.[Hierarchy3]
+           end as [H2],
+           case
+            when dur.[Hierarchy3] = dur.[Hierarchy4] then '' else dur.[Hierarchy4]
+           end as [H3],
+           case
+            when dur.[Hierarchy4] = dur.[Hierarchy5] then '' else dur.[Hierarchy5]
+           end as [H4],
+           dur.[HierarchyLeaf] as [H5],
+           -- dur.[HierarchyLeaf] as [Hierarchy Value],
+           -- 5 as [Hierarchy Level],
+           dur.[DocumentType] as [Variable Name],
+           dur.[DocumentTypeQualifier] as [Variable Name Qualifier],
+           dur.[DocumentTypeSubQualifier] as [Variable Name Sub Qualifier],
+--            case
+--              when isnull(dur.[DocumentTypeSubQualifier], '') <> '' then dur.[DocumentTypeSubQualifier]
+--              else dur.[DocumentTypeQualifier]
+--            end as [Variable Value],
+--            case
+--              when isnull(dur.[DocumentTypeSubQualifier], '') <> '' then 2
+--              else 1
+--            end as [Variable Level],
            dur.[EventDate] as [Date of Event],
            --null [Year of Event],
            --null [Quarter],
@@ -63,19 +72,6 @@ begin
            dur.[Measure1],
            dur.[Measure2],
            dur.[Measure3],
-           -- TODO: COMMENTED OUT TO BE ADDED AS A FEATURE LATER
-           --           --[Measure Value],
-           --           --[Measure Type],
-           --           dur.[Measure Value] as [Measure Value 1],
-           --           dur.[Measure Type] as [Measure Type 1],
-           --           cou.[Measure Value] as [Measure Value 2],
-           --           cou.[Measure Type] as [Measure Type 2],
-           --           dol.[Measure Value] as [Measure Value 3],
-           --           dol.[Measure Type] as [Measure Type 3],
-           --           null as [Measure Value 4],
-           --           null as [Measure Type 4],
-           --           null as [Measure Value 5],
-           --           null as [Measure Type 5],
            dur.[PartialPeriod] as [Partial Period]
       from dbo.OPG011_eventData as dur with (nolock)
 --     select --null [OPG Data Set],

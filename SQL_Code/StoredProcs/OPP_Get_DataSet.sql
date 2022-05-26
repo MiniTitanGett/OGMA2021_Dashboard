@@ -73,7 +73,7 @@ begin
            dur.[Measure2],
            dur.[Measure3],
            dur.[PartialPeriod] as [Partial Period]
-      from dbo.OPG011_eventData as dur with (nolock)
+      from dbo.OPG011_eventData as dur with (nolock) where [EventDate] >= '2016-01-01'
 --     select --null [OPG Data Set],
 --            --null [Hierarchy One Name],
 --            --null [Hierarchy One Top],

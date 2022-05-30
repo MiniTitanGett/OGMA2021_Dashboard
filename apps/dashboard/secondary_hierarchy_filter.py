@@ -109,7 +109,7 @@ def get_secondary_hierarchy_layout(tile, df_name=None, hierarchy_toggle='Level F
                     # check if the hierarchy level has none variables and assigns to a option list
                     options=[{'label': get_label('LBL_' + x.replace(' ', '_'), df_name) + " ({0})".format(len(
                         df_const[df_name][x])), 'value': x} for x in hierarchy_level if len(
-                        df_const[df_name][x]) >= 1 and df_const[df_name][x][0] is not None ],
+                        df_const[df_name][x]) >= 1 and df_const[df_name][x][0] is not None],
                     multi=False,
                     clearable=False,
                     optionHeight=30,

@@ -110,8 +110,7 @@ def get_hierarchy_col(hierarchy_type, hierarchy_level_dropdown, hierarchy_graph_
 def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
                             hierarchy_type, hierarchy_graph_children, tile_title, df_name, df_const,
                             xaxis_title, yaxis_title, xlegend, ylegend, gridline, legend,
-                            secondary_level_dropdown, secondary_path, secondary_type, secondary_graph_children,
-                            secondary_options):
+                            secondary_level_dropdown, secondary_path, secondary_type, secondary_graph_children):
     """Returns the line graph figure."""
     # ------------------------------------------------Arg Values--------------------------------------------------------
     # arg_value[0] = xaxis selector
@@ -521,7 +520,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                                                                                                arg_value[5]]]
                 )
                 fig.update_layout(
-                    legend_title_text='Size: <br> &#9; {} ({})<br> <br>{}'.format(arg_value[4],arg_value[5],
+                    legend_title_text='Size: <br> &#9; {} ({})<br> <br>{}'.format(arg_value[4], arg_value[5],
                                                         legend_title_text), transition={'duration': 4000})
                 fig.layout.updatemenus[0].buttons[0].args[1]["frame"]["duration"] = 1000
                 # set up hover label
@@ -1350,7 +1349,7 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
                                        hierarchy_graph_children, graph_title, df_name, df_const, xtitle, ytitle,
                                        xlegend, ylegend, gridline, legend,
                                        secondary_level_dropdown, list_of_secondary_names, secondary_toggle,
-                                       secondary_graph_children, secondary_options)
+                                       secondary_graph_children)
     # bubble graph creation
     elif graph_type == 'Bubble':
         return get_bubble_figure(graph_options, filtered_df, hierarchy_specific_dropdown, hierarchy_level_dropdown,

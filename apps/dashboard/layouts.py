@@ -1752,7 +1752,7 @@ def get_table_graph_menu(tile, number_of_columns, xaxis, yaxis, xpos, ypos, xmod
                     P(
                         "{}:".format(get_label('LBL_Num_Of_Rows')),
                         className='graph-option-title')],
-                    style={'display': 'inline-block', 'width': '50px', 'position': 'relative', 'top': '10px'}),
+                    style={'display': 'inline-block', 'width': '75px', 'top': '10px'}),
                 Div([
                     dcc.Input(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
@@ -1762,7 +1762,7 @@ def get_table_graph_menu(tile, number_of_columns, xaxis, yaxis, xpos, ypos, xmod
                         max=100,
                         style={'width': '35%', 'max-width': '350px'},
                         debounce=True)],
-                    style={'display': 'inline-block'})]),
+                    style={'display': 'inline-block', 'padding': '10px'})]),
             P(
                 "{}:".format(get_label('LBL_How_To_Filter_The_Table')),
                 className='table-instruction'),

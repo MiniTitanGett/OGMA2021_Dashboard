@@ -684,7 +684,6 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][-1]
     # ------------------------------------------------------------------------------------------------------------------
     changed_index = int(search(r'\d+', changed_id).group())
-    swap_flag_output = False
     # if tab swapped or load triggered, don't reset menus
     if not rebuild_menu or len(dash.callback_context.triggered) == 4 or swap_flag[changed_index] is True:
         return no_update, 1, no_update, no_update, True
@@ -990,9 +989,9 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
     # random ways
     prev_selection = [prev_selection_0, prev_selection_1, prev_selection_2, prev_selection_3, prev_selection_4]
     # flag for the dataset selector result menu
-    data_set_flag=[]
+    data_set_flag = []
     for i in range(4):
-        data_set_flag.append(Store(id={'type': 'data-set-result', 'index': i}, data= False))
+        data_set_flag.append(Store(id={'type': 'data-set-result', 'index': i}, data=False))
     df_tile = None
     # ------------------------------------------------------------------------------------------------------------------
     # if changed id == '.' due to NEW being requested, preserve data menu display.
@@ -1265,7 +1264,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                                 else:
                                     options_triggers[i] = 'fa fa-unlink'
                                     data_set_flag[i] = Store(id={'type': 'data-set-result', 'index': i},
-                                                                 data= True)
+                                                                 data=True)
             # duo options
             else:
                 if prompt_result == 'ok':

@@ -26,8 +26,6 @@ def generate_dropdown(tile, df_name, nid_path):
         if llen == 5:
             option_list = []
         elif llen != 0:
-            # df = df.set_index(['H{}'.format(i) for i in range(llen)])
-            # option_list = df.loc[tuple(hierarchy_nid_list)]['H{}'.format(llen)].dropna().unique()
             for i in range(llen):
                 df = df.filter(df['H{}'.format(i)] == hierarchy_nid_list[i])
                 df = df.drop('H{}'.format(i))

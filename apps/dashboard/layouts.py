@@ -818,6 +818,7 @@ def get_layout_dashboard():
 # ****************************************************TILE LAYOUT****************************************************
 
 
+# create a new edit menu when a new tile is added
 def get_customize_content(tile, graph_type, graph_menu, df_name):
     """Returns customize content."""
     graphs = []
@@ -828,8 +829,6 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
         elif 'OPG011' in df_name:
             graphs = GRAPH_OPTIONS['OPG011']
     graphs.sort()
-    # for i in graphs:
-    #     options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
     options = [{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in graphs]
 
     return [
@@ -883,6 +882,7 @@ def get_customize_content(tile, graph_type, graph_menu, df_name):
             id={'type': 'div-graph-options', 'index': tile})]
 
 
+# adds a tile to the dashboard
 def get_tile(tile, tile_keys=None, df_name=None):
     """
     :param tile: Index of the created tile

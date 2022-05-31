@@ -91,20 +91,12 @@ DATA_CONTENT_HIDE = {'display': 'none'}
 
 def dataset_to_df(df_name):
     """Queries for the dataset and returns a formatted pandas, data frame."""
-    # logging.debug("loading dataset {}...".format(df_name))
-    # conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
-    # sql_query = pd.read_sql_query(
-    #     '''
-    # SELECT * FROM [OPEN_Dev_Dashboard].[dbo].[{}]
-    # '''.format(df_name.split('.')[0]), conn)
-    # df = pd.DataFrame(sql_query)
     query = """\
     declare @p_result_status varchar(255)
     exec dbo.OPP_Get_DataSet {}, \'{}\', \'{}\', @p_result_status output
     select @p_result_status as result_status
     """.format(session["sessionID"], session["language"], df_name)
     df = exec_storedproc_results(query)
-    # logging.debug("done converting query to pandas")
     df_vaex = from_pandas(df)
     df_vaex.variables['nan'] = nan
     logging.debug("done converting pandas to vaex")
@@ -166,13 +158,6 @@ def dataset_to_df(df_name):
         else:
             df_vaex['Variable Value'] = df_vaex['Variable Name'] + " " + df_vaex['Variable Name Qualifier']
 
-            # Can be redone to exclude hierarchy one name and to include more levels
-            # df_vaex.rename('Hierarchy One Top', 'H0')
-            # df_vaex.rename('Hierarchy One -1', 'H1')
-            # df_vaex.rename('Hierarchy One -2', 'H2')
-            # df_vaex.rename('Hierarchy One -3', 'H3')
-            # df_vaex.rename('Hierarchy One -4', 'H4')
-
     else:
 
         df_vaex['Week of Event'] = df_vaex.func.where(df_vaex['Week of Event'] == "", nan, df_vaex['Week of Event'])
@@ -204,44 +189,6 @@ def dataset_to_df(df_name):
         df_vaex.rename('Hierarchy One -3', 'H3')
         df_vaex.rename('Hierarchy One -4', 'H4')
         df_vaex.rename('Hierarchy One Leaf', 'H5')
-
-    # if OPG011 we need to construct the tree by asking for the parents of unique values
-    # if df_name == "OPG011":
-
-        # df = df_vaex.to_pandas_df()
-        # list_of_depths = [[], [], [], [], []]
-        # dff = df[["Hierarchy Value", "Hierarchy Level"]].drop_duplicates()
-        #
-        # # init the depth lists
-        # for x in dff["Hierarchy Value"]:
-        #     depth = int(dff.loc[dff["Hierarchy Value"] == x]["Hierarchy Level"].iloc[0])
-        #     H0, H1, H2, H3, H4 = get_hierarchy_parent(x, depth)
-        #     # if parent not in list_of_depths[child_level_value-1]:
-        #     #     list_of_depths[child_level_value-1].append(parent)
-        #     df.loc[df["Hierarchy Value"] == x, "H0"] = H0
-        #     df.loc[df["Hierarchy Value"] == x, "H1"] = H1
-        #     df.loc[df["Hierarchy Value"] == x, "H2"] = H2
-        #     df.loc[df["Hierarchy Value"] == x, "H3"] = H3
-        #     df.loc[df["Hierarchy Value"] == x, "H4"] = H4
-
-        # # begin reverse breadth first traversal, filling hierarchy along the way
-        # depth = 5
-        # for nodes_at_depth in reversed(list_of_depths):
-        #     depth = depth - 1
-        #     if depth == 0:
-        #         break
-        #     for node in nodes_at_depth:
-        #         parent, child_level = get_hierarchy_parent(node, depth)
-        #         if parent not in list_of_depths[child_level-1]:
-        #             list_of_depths[child_level-1].append(parent)
-        #         # insert parent into table
-        #         df.loc[df["H{}".format(child_level)] == node, "H{}".format(child_level-1)] = parent
-        # df_vaex = from_pandas(df)
-        # df_vaex.drop(columns=['Hierarchy Level', 'Variable Level'], inplace='True')
-        # df_vaex.rename('Hierarchy Value', 'H5')
-        # df_vaex = df_vaex[['OPG Data Set', 'Hierarchy One Name', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5', 'Variable Name',
-        # 'Variable Name Qualifier', 'Variable Name Sub Qualifier', 'Variable Value', 'Date of Event',
-        # 'Activity Event Id', 'Measure1', 'Measure2', 'Measure3', 'Partial Period']]
 
     df_vaex['OPG Data Set'] = df_vaex.func.where(df_vaex['OPG Data Set'] == '', None, df_vaex['OPG Data Set'])
     df_vaex['H0'] = df_vaex.func.where(df_vaex['H0'] == '', None, df_vaex['H0'])
@@ -328,19 +275,6 @@ def generate_constants(df_name):
         FISCAL_WEEK_MAX_YEAR = None
         FISCAL_WEEK_FRINGE_MIN = None
         FISCAL_WEEK_FRINGE_MAX = None
-
-        # replaces all Y in Partial Period with True & False
-        # df['Partial Period'] = df['Partial Period'].transform(lambda x: x == 'Y')
-        #
-        # df['Partial Period'] = df.func.where(df['Partial Period'] == 'F', 'False',
-        #                                      df['Partial Period'])
-        # df['Partial Period'] = df.func.where(df['Partial Period'] == 'T', 'True',
-        #                                      df['Partial Period'])
-        # df['Partial Period'] = df['Partial Period'].astype('bool')
-
-        # Sets the Date of Event in the df to be in the correct format for Plotly
-        # df['Date of Event'] = df['Date of Event'].transform(
-        #     lambda x: pd.to_datetime(x, format='%Y%m%d', errors='ignore'))
 
         options = []
         variable_option_lists = []
@@ -2139,25 +2073,6 @@ def customize_menu_filter(dff, df_name, measure_type, df_const, secondary_path,
     return filtered_df
 
 
-# def create_categories(dff, hierarchy_columns=None):
-#     """Uses pandas categories to shrink the data and returns the reduced data frame."""
-#     if hierarchy_columns is None:
-#         hierarchy_columns = []
-#     for i in hierarchy_columns:
-#         dff[i] = pd.Categorical(dff[i])
-#
-#     return dff
-#
-#
-# # TODO: No usages
-# def get_table_columns(dff):
-#     df = dff.drop(
-#         # ['OPG 001 Time Series Measures', 'Calendar Entry Type', 'Year of Event',
-#         ['OPG Data Set', 'Calendar Entry Type', 'Year of Event', 'Month of Event'], axis=1)
-#     df = df.dropna(how='all', axis=1)
-#     return df.columns
-
-
 # *********************************************LANGUAGE DATA***********************************************************
 
 def get_label(label, table=None):
@@ -2185,53 +2100,6 @@ def get_label(label, table=None):
 
     return row["ref_desc"].iloc[0]
 
-
-# loads labels from language data from database
-# conn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
-# sql_query = pd.read_sql_query('''exec dbo.reftable''',conn)
-# LANGUAGE_DF = session["labels"]  # pd.DataFrame(sql_query)
-# LANGUAGE_DF = pd.read_csv('apps/OPG001/test_data/Language Data JG.csv')
-
-# Apparently will be passed in via the server
-# 'En' = English
-# 'Fr' = French
-# LANGUAGE = session["language"]
-
-# *********************************************DATAFRAME OPERATIONS***************************************************
-
-# DATA_SETS = ['OPG001_2016-17_Week_v3.xlsx']  # 'OPG001_2016-17_Week_v2.xlsx'
-# DATA_SETS = ['Graphics 1 example dataset V4', 'Other DF Test (V1)', 'OPG010 example V1 JG']
-# DATA_SETS = ['OPG010 SanKey Series.csv']  # 'OPG010 Pruned',
-# DATA_SETS = ['OPG001_2016-17_Week_v3.xlsx', 'OPG010 Pruned 2.xlsx']
-# GOOD!!! DATA_SETS = ['OPG010 Pruned 2.xlsx']
-# DATA_SETS = ['OPG010 Pruned.csv']
-# DATA_SETS = ['OPG010 Missing Node Test.xlsx']
-
-# DATA_SETS = ['OPG001 Graph Data.xlsx', 'OPG010 Sankey Data.xlsx']
-# DATA_SETS = ['OPG010 Sankey Data.xlsx']
-# DATA_SETS = ['OPG001_2016-17_Week_v3.xlsx']
-# DATA_SETS = ['OPG001_2016-17_Week_v3.csv']
-
-# from dotenv import load_dotenv, find_dotenv
-# import os
-# import json
-
-# # load data sets from environment variables if .env created or load default data sets
-# # example of environment variable: DATA_SETS = '["OPG001_2016-17_Week_v3.csv", "OPG010 Sankey Data.xlsx"]'
-# if load_dotenv(find_dotenv()):
-#     load_dotenv()
-#     DATA_SETS = json.loads(os.environ['DATA_SETS'])
-# else:
-#     print("The .env file. was not found, loading default data sets")
-#     DATA_SETS = ['OPG001_2016-17_Week_v3.csv', 'OPG010 Sankey Data.xlsx']
-# DATA_SETS = config.DATA_SETS
-
-# DATA_SETS = config.DATA_SETS
-
-# cnxn = pyodbc.connect(config.CONNECTION_STRING, autocommit=True)
-# sql_query = pd.read_sql_query('''exec dbo.OPP_retrieve_datasets''', cnxn)
-# DATA_SETS = pd.DataFrame(sql_query)['ref_value'].tolist()
-# cnxn.close()
 
 # ********************************************DATA FITTING OPERATIONS**************************************************
 

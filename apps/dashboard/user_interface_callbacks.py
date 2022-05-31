@@ -72,7 +72,7 @@ app.clientside_callback(
 )
 
 
-# NEW and DELETE button functionality.
+# NEW and DELETE button functionality for tile.
 @app.callback(
     # change the firing order to fire the tile close first to solve a bug
     # causing the tile close trigger to never fire in the data menu
@@ -146,10 +146,9 @@ def _new_and_delete(_new_clicks, close_id, _dashboard_reset, tile_titles, tile_l
     elif 'dashboard-reset' in changed_id:
         num_tiles = 1
         children = get_tile_layout(num_tiles, [], parent_df=None)
-    # else, a tab change was made, prevent update
     else:
         raise PreventUpdate
-    # disable the NEW button
+    # disable the NEW button until new tile is created/deleted/reset
     new_button = html.Button(
         className='parent-nav', n_clicks=0, children=get_label('LBL_Add_Tile'), id='button-new', disabled=True)
     return deleted_tile, children, LAYOUTS[num_tiles - 1], new_button, num_tiles
@@ -273,6 +272,7 @@ def _change_tab(_tab_clicks, _tab_close_clicks, _tab_add_nclicks,
     # if user requested the active tab, prevent update
     if new_tab == active_tab:
         raise PreventUpdate
+    # flags to prevent the dashboard from resetting the graph menus
     for i in range(4):
         if i < data[new_tab]['content'][0]['props']['data-num-tiles']:
             children[i] = Store(id={'type': 'tab-swap-flag', 'index': i}, data=True)
@@ -385,6 +385,7 @@ for x in range(4):
             raise PreventUpdate
 
         # switch statement
+        # edit menu prompt
         if 'tile-customize' in changed_id:
             # [[mode/prompt_trigger, tile, stored_menu_for_cancel], menu_style/show_hide, menu_title,
             # show_hide_load_warning, isTrip]
@@ -393,6 +394,7 @@ for x in range(4):
                                                  session['tile_edited'][tile]])
             customize_className = 'tile-nav tile-nav--customize tile-nav--selected'
             layouts_className = 'tile-nav tile-nav--layout'
+        # load tile graph prompt
         elif 'tile-layouts' in changed_id:
             float_menu_trigger = Store(id={'type': 'float-menu-trigger', 'index': tile},
                                            data=[['layouts', tile], {}, get_label('LBL_Load_Graph'),
@@ -533,9 +535,11 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
     changed_value = [p['value'] for p in dash.callback_context.triggered][0]
     # ------------------------------------------------------------------------------------------------------------------
 
+    # if page loaded (changed_id == '.') or new button is disabled, prevent update
     if changed_id == '.' or link_states is []:
         raise PreventUpdate
 
+    # prevent graph menu to update, if tile has no dataset chosen
     if '"type":"tile-link"}.className' in changed_id and changed_value == 'fa fa-unlink' or \
             (changed_value == 'fa fa-link' and df_name is None and df_name_parent is None) or (
             trigger is None and df_confirm is None and df_name is None and df_name_parent is None):
@@ -554,8 +558,6 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
         elif 'OPG011' in df_confirm:
             df_confirm = 'OPG011'
         graph_options = GRAPH_OPTIONS[df_confirm]
-        # for i in graph_options:
-        #    options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
         options = [{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in graph_options]
 
     # when dataset is swapped to a different dataset get parent graph options
@@ -564,8 +566,6 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
             graph_options = GRAPH_OPTIONS[df_name_parent]
         else:
             graph_options = []
-        # for i in graph_options:
-        #     options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
         options = [{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in graph_options]
 
     # set customize menu of the unlinked tile
@@ -577,14 +577,10 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
             elif 'OPG011' in df_name:
                 df_name = 'OPG011'
             graph_options = GRAPH_OPTIONS[df_name]
-            # for i in graph_options:
-            #     options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
             options = [{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in graph_options]
     # set customize menu back to parent dataset
     elif trigger == 'fa fa-link':
         graph_options = GRAPH_OPTIONS[df_name_parent]
-        # for i in graph_options:
-        #     options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
         options = [{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in graph_options]
     else:
         if "OPG010" in trigger:
@@ -593,8 +589,6 @@ def _update_graph_type_options(trigger, link_states, df_name, df_name_parent, gr
             graph_options = GRAPH_OPTIONS["OPG011"]
         else:
             graph_options = []
-        # for i in graph_options:
-        #     options.append({'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i})
         options = [{'label': get_label('LBL_' + i.replace(' ', '_')), 'value': i} for i in graph_options]
 
     # loads in a default graph when dataset is first chosen
@@ -702,11 +696,10 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
             data_fitting = True
         else:
             data_fitting = False
+    elif hierarchy_toggle == 'Specific Item' and graph_all == []:
+        data_fitting = True
     else:
-        if hierarchy_toggle == 'Specific Item' and graph_all == []:
-            data_fitting = True
-        else:
-            data_fitting = False
+        data_fitting = False
 
     # if the data set is selected but has not been confirmed, use previous data set
     if link_state == 'fa fa-link' and ('graph-type-dropdown' in changed_id and df_confirm is not None) or \
@@ -847,11 +840,13 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
     else:
         raise PreventUpdate
 
-    if '"type":"tile-link"}.className' in changed_id or 'graph-menu-trigger"}.data-' in changed_id \
-            or '"type":"graph-type-dropdown"}.value' in changed_id:
-        update_graph_trigger = 1
-    else:
-        update_graph_trigger = no_update
+    update_graph_trigger = no_update
+    # not being triggered anymore on the input
+    # if '"type":"tile-link"}.className' in changed_id or 'graph-menu-trigger"}.data-' in changed_id \
+    #         or '"type":"graph-type-dropdown"}.value' in changed_id:
+    #     update_graph_trigger = 1
+    # else:
+    #     update_graph_trigger = no_update
     return menu, update_graph_trigger, no_update, no_update, True
 
 

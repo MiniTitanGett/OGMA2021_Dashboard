@@ -27,8 +27,6 @@ def generate_secondary_dropdown(tile, df_name, nid_path, df_const):
         if llen == 3:
             option_list = []
         elif llen != 0:
-            # df = df.set_index(['H{}'.format(i) for i in range(llen)])
-            # option_list = df.loc[tuple(hierarchy_nid_list)]['H{}'.format(llen)].dropna().unique()
             for i in range(llen):
                 level = hierarchy_nid_list[i]
                 df = df.filter(df[hierarchy_level[i]] == level)
@@ -41,12 +39,12 @@ def generate_secondary_dropdown(tile, df_name, nid_path, df_const):
         if df_name == "OPG010":
             options = [{'label': i, 'value': i} for i in option_list if
                        len(df_const[df_name][hierarchy_level[llen]]) >= 1 and df_const[df_name][hierarchy_level
-                       [llen]][0] != ""]
+                       [llen]][0] is not None]
         else:
             options = [{'label': i, 'value': i}
                        for i in option_list if
                        len(df_const[df_name][hierarchy_level[llen]]) >= 1 and df_const[df_name]
-                       [hierarchy_level[llen]] != ""]
+                       [hierarchy_level[llen]] is not None]
 
         options = sorted(options, key=lambda k: k['label'])
 

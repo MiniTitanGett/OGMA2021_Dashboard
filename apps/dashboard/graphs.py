@@ -1380,11 +1380,12 @@ def __update_graph(df_name, graph_options, graph_type, graph_title, num_periods,
         return get_sankey_figure(filtered_df, hierarchy_level_dropdown, list_of_names, hierarchy_toggle,
                                  graph_title, df_name, df_const, secondary_level_dropdown, list_of_secondary_names,
                                  secondary_toggle, secondary_graph_children, secondary_options)
-    # catch all
+    # If no graph_type is given
     else:
         return None
 
 
+# different colour palette colour hex codes
 def color_picker(palette):
     if palette == 'G10':
         color = ["#3366CC", "#DC3912", "#FF9900", "#109618", "#990099",

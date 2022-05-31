@@ -157,21 +157,17 @@ for x in range(4):
         if changed_id == '.' and graph_display:
             raise PreventUpdate
 
+        # if swapping between dashboards dont rebuild graph
         if swap_flag is True:
             return graph_display, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open, \
                    swap_flag_output, data_set_flag_output
-        # check if keyword in df_name
-        if df_name is not None:
-            df_tile = df_name
-            if 'OPG010' in df_name:
-                df_name = 'OPG010'
-            elif 'OPG011' in df_name:
-                df_name = 'OPG011'
 
+        # check to see if df_name and parent_df_name has not been selected, build empty graph
         if '"type":"tile-view"}.className' in changed_id and df_name is None and parent_df_name is None:
             return None, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open, swap_flag_output, \
                    data_set_flag_output
 
+        # edit menu was not build properly, build empty graph
         if len(arg_value) == 0 and graph_type != "Sankey":
             return None, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open, swap_flag_output, \
                    data_set_flag_output
@@ -187,6 +183,14 @@ for x in range(4):
             else:
                 popup_text = get_label('LBL_Axes_Graphs_Labels_Modified')
             popup_is_open = True
+
+        # check if keyword in df_name
+        if df_name is not None:
+            df_tile = df_name
+            if 'OPG010' in df_name:
+                df_name = 'OPG010'
+            elif 'OPG011' in df_name:
+                df_name = 'OPG011'
 
         # if tile un-linked and graph-type is in both data sets update graph
         if link_state == 'fa fa-link' and data_set_flag is True and (df_name is not None
@@ -206,7 +210,7 @@ for x in range(4):
             return graph, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open, swap_flag_output,\
                    data_set_flag_output
 
-        # account for tile being linked or not
+        # checks tile is linked or not
         if link_state == 'fa fa-link':
             secondary_type = parent_secondary_type
             timeframe = parent_timeframe
@@ -242,8 +246,8 @@ for x in range(4):
         else:
             session['tile_edited'][tile] = True
 
-        # added to remove the data-fitting traces from the graph when the hierarchy toggle is changed or
-        # graph all in dropdown is selected
+        '''added to remove the data-fitting traces from the graph when the hierarchy toggle is changed or
+           graph all in dropdown is selected'''
         if graph_type == "Line" or graph_type == "Scatter":
             if arg_value[3] != 'no-fit' and (hierarchy_toggle != 'Specific Item' or hierarchy_graph_children != []):
                 arg_value[3] = 'no-fit'
@@ -286,13 +290,12 @@ for x in range(5):
          Input({'type': 'hierarchy_to_top', 'index': x}, 'n_clicks'),
          Input({'type': 'button: {}'.replace("{}", str(x)), 'index': ALL}, 'n_clicks')],
         [State({'type': 'hierarchy_display_button', 'index': x}, 'children'),
-         State({'type': 'data-set', 'index': x}, 'value'),
-         State('df-constants-storage', 'data')],
+         State({'type': 'data-set', 'index': x}, 'value')],
         prevent_initial_call=True
     )
     def _print_choice_to_display_and_modify_dropdown(dropdown_val, _n_clicks_r, _n_clicks_tt,
                                                      n_clicks_click_history, state_of_display,
-                                                     df_name, df_const):
+                                                     df_name):
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
         # if page loaded - prevent update
         if changed_id == '.':
@@ -331,26 +334,26 @@ for x in range(5):
             state_of_display.pop()
             display_button = state_of_display
             nid_path = get_nid_path(sod=state_of_display)
-            dropdown = generate_dropdown(changed_index, df_name, nid_path, df_const)
+            dropdown = generate_dropdown(changed_index, df_name, nid_path)
         elif 'hierarchy_to_top' in changed_id or 'data-set' in changed_id:
             display_button = []
             nid_path = get_nid_path()
-            dropdown = generate_dropdown(changed_index, df_name, nid_path, df_const)
+            dropdown = generate_dropdown(changed_index, df_name, nid_path)
         elif 'hierarchy_specific_dropdown' in changed_id:
             # If dropdown has been remade, do not modify the history
             if dropdown_val is None:
                 raise PreventUpdate
             # If nothing in history return value
             elif not state_of_display:
-                display_button = generate_history_button(dropdown_val, 0, changed_index, df_name, df_const)
+                display_button = generate_history_button(dropdown_val, 0, changed_index)
                 nid_path = get_nid_path(dropdown_value=dropdown_val)
-                dropdown = generate_dropdown(changed_index, df_name, nid_path, df_const)
+                dropdown = generate_dropdown(changed_index, df_name, nid_path)
             # If something is in the history preserve it and add value to it
             else:
                 display_button = state_of_display + [
-                    (generate_history_button(dropdown_val, len(state_of_display), changed_index, df_name, df_const))]
+                    (generate_history_button(dropdown_val, len(state_of_display), changed_index))]
                 nid_path = get_nid_path(sod=state_of_display, dropdown_value=dropdown_val)
-                dropdown = generate_dropdown(changed_index, df_name, nid_path, df_const)
+                dropdown = generate_dropdown(changed_index, df_name, nid_path)
         # If update triggered due to creation of a button do not update anything
         elif all(i == 0 for i in n_clicks_click_history):
             raise PreventUpdate
@@ -361,7 +364,7 @@ for x in range(5):
             history[index]['props']['n_clicks'] = 0
             display_button = history
             nid_path = get_nid_path(sod=history)
-            dropdown = generate_dropdown(changed_index, df_name, nid_path, df_const)
+            dropdown = generate_dropdown(changed_index, df_name, nid_path)
 
         # check if leaf node, if so say graph all siblings instead of graph all in dropdown
         if 'options=[]' not in str(dropdown):
@@ -464,7 +467,7 @@ def _print_choice_to_display_and_modify_secondary_dropdown(dropdown_val, _n_clic
     return display_button, dropdown, options
 
 
-# swaps between displaying the SPECIFIC and LEVEL hierarchy menus
+# primary hierarchy toggle, swaps between displaying the SPECIFIC and LEVEL hierarchy menus
 app.clientside_callback(
     """
     function(hierarchy_toggle){
@@ -482,6 +485,7 @@ app.clientside_callback(
     prevent_initial_call=True
 )
 
+# secondary hierarchy filter toggle, swaps between displaying the SPECIFIC and LEVEL hierarchy menus
 app.clientside_callback(
     """
     function(hierarchy_toggle){
@@ -725,7 +729,7 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
     return children, True
 
 
-# enable past __ ___ selections
+# enable last __ ___ radio buttion selections
 app.clientside_callback(
     """
     function(selected_timeframe){
@@ -755,6 +759,7 @@ operators = [[' ge ', '>='],
              [' datestartswith ']]
 
 
+# datatable filtering function
 def split_filter_part(filter_part):
     """Returns column name, operator and filter_value or None given a filter part."""
     for operator_type in operators:
@@ -969,6 +974,7 @@ for x in range(4):
         prevent_initial_call=True
     )
 
+# updates the edit menu for bubble graphs
 for x in range(4):
     app.clientside_callback(
         """

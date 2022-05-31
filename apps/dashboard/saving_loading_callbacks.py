@@ -77,6 +77,7 @@ def _update_tile_loading_dropdown_options(_tile_saving_trigger, _dashboard_savin
 
 
 # Manage tile saves trigger. Formatted in two chained callbacks to mix ALL and y values.
+# handles results from float menu prompts
 @app.callback(
     Output('tile-save-trigger-wrapper', 'children'),
     [Input({'type': 'save-button', 'index': ALL}, 'n_clicks'),
@@ -109,7 +110,7 @@ def _manage_tile_save_and_load_trigger(save_clicks, delete_clicks, _link_clicks,
         else:
             changed_index = int(search(r'\d+', changed_id).group())
 
-        # Blank prevent updates
+        # Blank buttons not clicked, prevent updates
         if '"type":"save-button"}.n_clicks' in changed_id and save_clicks[changed_index] == 0:
             raise PreventUpdate
         if '"type":"delete-button"}.n_clicks' in changed_id and delete_clicks[changed_index] == 0:
@@ -264,7 +265,7 @@ for y in range(4):
         for button in state_of_display:
             nid_path += '^||^{}'.format(button['props']['children'])  # formatting to be able to split it up later
 
-        # creates a hierarchy trail from the display of hierarchy selection
+        # creates a hierarchy trail from the display of secondary hierarchy selection
         if type(secondary_button_path) == dict:
             secondary_button_path = [secondary_button_path]
 
@@ -275,7 +276,6 @@ for y in range(4):
         tile = int(dash.callback_context.inputs_list[0]['id']['index'])
         # Outputs
         update_options_trigger = no_update
-        # [[mode/prompt_trigger, tile], prompt_style/show_hide, prompt_title, prompt_body, isTrip]
         prompt_trigger = no_update
         popup_text = no_update
         popup_is_open = no_update
@@ -346,7 +346,7 @@ for y in range(4):
                         graph_options[1] = graph_options[0]
                         graph_options[0] = temp_variable
 
-                if graph_type == 'Box_Plot':
+                elif graph_type == 'Box_Plot':
                     if args_list[1] == 'Vertical':
                         temp_variable = graph_options[1]
                         graph_options[1] = graph_options[0]
@@ -711,18 +711,15 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                                       secondary_options, layout, df_const):
     # ---------------------------------------Variable Declarations------------------------------------------------------
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-    # Outputs
+    # loading Outputs
     options = no_update
     update_graph_options_trigger = no_update
     tile_title_returns = [no_update] * 4
     auto_named_titles = [no_update] * 4
-    # [[mode/prompt_trigger, tile], prompt_style/show_hide, prompt_title, prompt_body]
     prompt_trigger = no_update
-    # [[mode/prompt_trigger, tile, stored_menu_for_cancel], menu_style/show_hide, menu_title, show_hide_load_warning]
     float_menu_trigger = no_update
     popup_text = no_update
     popup_is_open = no_update
-    # Loading Outputs
     dashboard_title_output = no_update
     tile_content_children = no_update
     dms = [{'Content': no_update, 'Tab': no_update, 'Start Year': no_update, 'End Year': no_update,

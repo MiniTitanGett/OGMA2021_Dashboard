@@ -553,64 +553,71 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
                     df = df[df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i]]
 
         if graph_type == "Line" or graph_type == "Scatter" or graph_type == "Bar" or graph_type == "Box_Plot":
+            if graph_type == "Box_Plot":
+                measure_type = arg_values[0]
+            else:
+                measure_type = arg_values[1]
             if hierarchy_toggle == 'Level Filter':
                 if 'simplified' + hierarchy_toggle + hierarchy_level_dropdown + secondary_hierarchy_toggle +\
-                secondary_level_dropdown + timeframe in session and timeframe == 'all-time':
+                secondary_level_dropdown + timeframe + measure_type in session and timeframe == 'all-time':
                     return session['simplified' + hierarchy_toggle + hierarchy_level_dropdown +
-                                   secondary_hierarchy_toggle + secondary_level_dropdown + timeframe]
+                                   secondary_hierarchy_toggle + secondary_level_dropdown + timeframe + measure_type]
 
                 elif secondary_type == 'Year' and timeframe == 'select-range' and 'simplified' + hierarchy_toggle + \
                         hierarchy_level_dropdown + secondary_hierarchy_toggle + secondary_level_dropdown + \
-                        timeframe + secondary_type + str(start_year) + str(end_year) in session:
+                        timeframe + secondary_type + str(start_year) + str(end_year) + measure_type in session:
                     return session['simplified' + hierarchy_toggle + hierarchy_level_dropdown +
                                    secondary_hierarchy_toggle + secondary_level_dropdown + timeframe + secondary_type +
-                                   str(start_year) + str(end_year)]
+                                   str(start_year) + str(end_year) + measure_type]
 
                 elif timeframe == 'select-range' and secondary_type != 'Year' and secondary_type is not None and \
                             'simplified' + hierarchy_toggle + hierarchy_level_dropdown + secondary_hierarchy_toggle + \
                             secondary_level_dropdown + timeframe + secondary_type + str(start_year) + str(end_year) + \
-                            str(start_secondary) + str(end_secondary) in session:
+                            str(start_secondary) + str(end_secondary) + measure_type in session:
                     return session['simplified' + hierarchy_toggle + hierarchy_level_dropdown +
                                    secondary_hierarchy_toggle + secondary_level_dropdown + timeframe + secondary_type +
-                                   str(start_year) + str(end_year) +  str(start_secondary) + str(end_secondary)]
+                                   str(start_year) + str(end_year) + str(start_secondary) + str(end_secondary) +
+                                   measure_type]
 
                 elif 'simplified' + hierarchy_toggle + hierarchy_level_dropdown + secondary_hierarchy_toggle + \
-                        secondary_level_dropdown + timeframe + str(num_periods) + period_type in session:
+                        secondary_level_dropdown + timeframe + str(num_periods) + period_type + measure_type in session:
                     return session['simplified' + hierarchy_toggle + hierarchy_level_dropdown +
                                    secondary_hierarchy_toggle + secondary_level_dropdown + timeframe +
-                                   str(num_periods) + period_type]
+                                   str(num_periods) + period_type + measure_type]
             elif hierarchy_toggle == 'Specific Item' and secondary_hierarchy_toggle == 'Level Filter':
                 if timeframe == 'all-time' and 'simplified' + hierarchy_toggle + str(hierarchy_path) + \
                                    str(hierarchy_graph_children) + secondary_hierarchy_toggle + \
-                                   secondary_level_dropdown + timeframe in session:
+                                   secondary_level_dropdown + timeframe + measure_type in session:
                     return session['simplified' + hierarchy_toggle + str(hierarchy_path) +
                                    str(hierarchy_graph_children) + secondary_hierarchy_toggle +
-                                   secondary_level_dropdown + timeframe]
+                                   secondary_level_dropdown + timeframe + measure_type]
 
                 elif timeframe == 'select-range' and secondary_type != 'Year' and secondary_type is not None and \
                     'simplified' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) + \
-                            secondary_hierarchy_toggle + secondary_level_dropdown + timeframe + secondary_type + \
-                            str(start_year) + str(end_year) + str(start_secondary) + str(end_secondary) in session:
+                    secondary_hierarchy_toggle + secondary_level_dropdown + timeframe + secondary_type + \
+                    str(start_year) + str(end_year) + str(start_secondary) + str(end_secondary) + measure_type\
+                        in session:
                     return session['simplified' + hierarchy_toggle + str(hierarchy_path) +
                                    str(hierarchy_graph_children) + secondary_hierarchy_toggle +
                                    secondary_level_dropdown + timeframe + secondary_type + str(start_year) +
-                                   str(end_year) + str(start_secondary) + str(end_secondary)]
+                                   str(end_year) + str(start_secondary) + str(end_secondary) + measure_type]
 
                 elif secondary_type == 'Year' and timeframe == 'select-range' and 'simplified' + hierarchy_toggle + \
                     str(hierarchy_path) + str(hierarchy_graph_children) + secondary_hierarchy_toggle + \
                         secondary_level_dropdown + timeframe + secondary_type + str(start_year) + \
-                        str(end_year) in session:
+                        str(end_year) + measure_type in session:
                     return session['simplified' + hierarchy_toggle + str(hierarchy_path) +
                                    str(hierarchy_graph_children) + secondary_hierarchy_toggle +
                                    secondary_level_dropdown + timeframe + secondary_type + str(start_year) +
-                                   str(end_year)]
+                                   str(end_year) + measure_type]
 
                 elif timeframe == 'to-current' and 'simplified' + hierarchy_toggle + str(hierarchy_path) + \
                                    str(hierarchy_graph_children) + secondary_hierarchy_toggle + \
-                            secondary_level_dropdown + timeframe + str(num_periods) + period_type in session:
+                            secondary_level_dropdown + timeframe + str(num_periods) + period_type + measure_type\
+                        in session:
                     return session['simplified' + hierarchy_toggle + str(hierarchy_path) +
                                    str(hierarchy_graph_children) + secondary_hierarchy_toggle +
-                            secondary_level_dropdown + timeframe + str(num_periods) + period_type]
+                            secondary_level_dropdown + timeframe + str(num_periods) + period_type + measure_type]
 
             filtered_df = data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondary, end_year,
                                                           start_secondary, start_year, timeframe, fiscal_toggle,
@@ -2037,11 +2044,11 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
         # caching filtering
         if hierarchy_toggle == "Level Filter" and secondary_hierarchy_toggle == 'Level Filter':
             session['simplified' + hierarchy_toggle + hierarchy_level_dropdown + secondary_hierarchy_toggle +
-                    secondary_level_dropdown + timeframe + str(num_periods) + period_type] = time_df
+                    secondary_level_dropdown + timeframe + str(num_periods) + period_type + measure_type] = time_df
         elif hierarchy_toggle == "Specific Item" and secondary_hierarchy_toggle == 'Level Filter':
             session['simplified' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) +
                     secondary_hierarchy_toggle + secondary_level_dropdown + timeframe + str(num_periods) +
-                    period_type] = time_df
+                    period_type + measure_type] = time_df
 
     # If not in year tab, filter using secondary selections
     elif not secondary_type == 'Year':
@@ -2167,19 +2174,20 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
             if timeframe == 'all-time':
 
                 session['simplified' + hierarchy_toggle + hierarchy_level_dropdown + secondary_hierarchy_toggle +
-                        secondary_level_dropdown + timeframe] = time_df
+                        secondary_level_dropdown + timeframe + measure_type] = time_df
             else:
                 session['simplified' + hierarchy_toggle + hierarchy_level_dropdown + secondary_hierarchy_toggle +
                         secondary_level_dropdown + timeframe + secondary_type + str(start_year) + str(end_year) +
-                        str(start_secondary) + str(end_secondary)] = time_df
+                        str(start_secondary) + str(end_secondary) + measure_type] = time_df
         elif hierarchy_toggle == 'Specific Item' and secondary_hierarchy_toggle == 'Level Filter':
             if timeframe == 'all-time':
                 session['simplified' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) +
-                        secondary_hierarchy_toggle + secondary_level_dropdown + timeframe] = time_df
+                        secondary_hierarchy_toggle + secondary_level_dropdown + timeframe + measure_type] = time_df
             else:
                 session['simplified' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) +
                         secondary_hierarchy_toggle + secondary_level_dropdown + timeframe + secondary_type +
-                        str(start_year) + str(end_year) + str(start_secondary) + str(end_secondary)] = time_df
+                        str(start_year) + str(end_year) + str(start_secondary) + str(end_secondary) + measure_type] = \
+                    time_df
     else:
 
         for specific_item in specific_items:
@@ -2247,11 +2255,11 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
         if hierarchy_toggle == "Level Filter" and secondary_hierarchy_toggle == 'Level Filter':
             session['simplified' + hierarchy_toggle + hierarchy_level_dropdown + secondary_hierarchy_toggle +
                     secondary_level_dropdown + timeframe + secondary_type + str(start_year) +
-                    str(end_year)] = time_df
+                    str(end_year) + measure_type] = time_df
         elif hierarchy_toggle == 'Specific Item' and secondary_hierarchy_toggle == 'Level Filter':
             session['simplified' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) +
                     secondary_hierarchy_toggle + secondary_level_dropdown + timeframe + secondary_type +
-                    str(start_year) + str(end_year)] = time_df
+                    str(start_year) + str(end_year) + measure_type] = time_df
     return time_df
 
 

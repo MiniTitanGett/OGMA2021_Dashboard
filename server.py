@@ -189,7 +189,7 @@ def load_dataset_list():
 def load_dataset_measuretype(datasets):
     measureType_list = {}
     for x in datasets:
-        df = get_ref(x+"_Measuretype", session["language"])
+        df = get_ref(x+"_Measure_type", session["language"])
         measureType_list[x] = df["ref_value"].tolist()
     return measureType_list
 
@@ -255,7 +255,7 @@ def before_request_func():
         session["dataset_list"] = load_dataset_list()  # get_ref("Data_set", session["language"])
 
         # TODO event level datasets will need to load measure_types
-        session["Measure_type_list"] = load_dataset_measuretype(['OPG011', 'OPG010'])
+        session["Measure_type_list"] = load_dataset_measuretype(['OPG011'])
 
         # setup session variables
         session['saved_layouts'] = {}

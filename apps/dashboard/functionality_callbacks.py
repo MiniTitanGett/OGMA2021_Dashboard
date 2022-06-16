@@ -905,7 +905,8 @@ def _update_table(page_current, page_size, sort_by, filter_query, _graph_trigger
             return [], 0
 
     # Reformat date column
-    dff['Date of Event'] = dff['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
+    if df_name == "OPG010":
+        dff['Date of Event'] = dff['Date of Event'].transform(lambda y: y.strftime(format='%Y-%m-%d'))
     # Filter based on data table filters
     filtering_expressions = filter_query.split(' && ')
     for filter_part in filtering_expressions:

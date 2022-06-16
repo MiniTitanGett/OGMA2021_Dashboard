@@ -1118,7 +1118,7 @@ def get_line_scatter_graph_menu(tile, x, mode, measure_type, df_name, gridline, 
                     Div([
                         Dropdown(
                             id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
-                            options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measuretype"),
+                            options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measure_type"),
                                                                   'value': i} for i in df_const[df_name]
                             ['MEASURE_TYPE_OPTIONS']],
                             clearable=False,
@@ -1323,7 +1323,7 @@ def get_bar_graph_menu(tile, x, measure_type, orientation, animate, gridline, le
                 Div([
                     Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
-                        options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measuretype"), 'value': i}
+                        options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measure_type"), 'value': i}
                                                              for i in df_const[df_name]['MEASURE_TYPE_OPTIONS']],
                         value=measure_type,
                         optionHeight=30,
@@ -1475,7 +1475,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                     Div([
                         Dropdown(
                             id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
-                            options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measuretype"),
+                            options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measure_type"),
                                                                   'value': i} for i in df_const[df_name]
                             ['MEASURE_TYPE_OPTIONS']],
                             value=x_measure,
@@ -1510,7 +1510,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                 Div([
                     Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
-                        options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measuretype"), 'value': i}
+                        options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measure_type"), 'value': i}
                                                              for i in df_const[df_name]['MEASURE_TYPE_OPTIONS']],
                         value=y_measure,
                         optionHeight=30,
@@ -1543,7 +1543,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                 Div([
                     Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
-                        options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measuretype"), 'value': i}
+                        options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measure_type"), 'value': i}
                                                              for i in df_const[df_name]['MEASURE_TYPE_OPTIONS']],
                         value=size_measure,
                         clearable=False,
@@ -1644,7 +1644,7 @@ def get_box_plot_menu(tile, axis_measure, graph_orientation, df_name, show_data_
                 Div([
                     Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
-                        options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measuretype"), 'value': i}
+                        options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measure_type"), 'value': i}
                                                              for i in df_const[df_name]['MEASURE_TYPE_OPTIONS']],
                         value=axis_measure,
                         optionHeight=30,

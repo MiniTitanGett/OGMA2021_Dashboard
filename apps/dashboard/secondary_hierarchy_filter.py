@@ -16,12 +16,12 @@ from apps.dashboard.data import get_label, session
 # ***********************************************HELPER FUNCTIONS****************************************************
 
 
-def generate_secondary_dropdown(tile, df_name, nid_path, df_const):
+def generate_secondary_dropdown(tile, df_name, nid_path, df_const, session_key):
     """Helper function to generate and return document type hierarchy drop-down."""
     if df_name:
         # using a subset of our dataframe, turn it into a multiindex df, and access unique values for option
-        hierarchy_level = df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
-        df = session[df_name][['Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier']]
+        hierarchy_level = df_const[session_key]['SECONDARY_HIERARCHY_LEVELS']
+        df = session[session_key][['Variable Name', 'Variable Name Qualifier', 'Variable Name Sub Qualifier']]
         hierarchy_nid_list = list(nid_path.split("^||^"))[1:]
         llen = len(hierarchy_nid_list)
         if llen == 3:
@@ -38,12 +38,12 @@ def generate_secondary_dropdown(tile, df_name, nid_path, df_const):
         # check if the hierarchy level has none variables and assigns to a option list
         if df_name == "OPG010":
             options = [{'label': i, 'value': i} for i in option_list if
-                       len(df_const[df_name][hierarchy_level[llen]]) >= 1 and df_const[df_name][hierarchy_level
+                       len(df_const[session_key][hierarchy_level[llen]]) >= 1 and df_const[session_key][hierarchy_level
                        [llen]][0] is not None]
         else:
             options = [{'label': i, 'value': i}
                        for i in option_list if
-                       len(df_const[df_name][hierarchy_level[llen]]) >= 1 and df_const[df_name]
+                       len(df_const[session_key][hierarchy_level[llen]]) >= 1 and df_const[session_key]
                        [hierarchy_level[llen]] is not None]
 
         options = sorted(options, key=lambda k: k['label'])
@@ -81,12 +81,12 @@ def generate_secondary_history_button(name, index, tile):
 
 
 def get_secondary_hierarchy_layout(tile, df_name=None, hierarchy_toggle='Level Filter', level_value='Variable Name',
-                                          graph_all_toggle=None, nid_path="root", df_const=None):
+                                          graph_all_toggle=None, nid_path="root", df_const=None, session_key=None):
     """Gets and returns the hierarchy layout."""
     if df_name is not None and df_const is not None:
         hierarchy_nid_list = nid_path.split("^||^")
         hierarchy_button_path = []
-        hierarchy_level = df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
+        hierarchy_level = df_const[session_key]['SECONDARY_HIERARCHY_LEVELS']
         for nid in hierarchy_nid_list:
             if nid == "root":
                 continue
@@ -106,8 +106,8 @@ def get_secondary_hierarchy_layout(tile, df_name=None, hierarchy_toggle='Level F
                     id={'type': 'secondary_hierarchy_level_dropdown', 'index': tile},
                     # check if the hierarchy level has none variables and assigns to a option list
                     options=[{'label': get_label('LBL_' + x.replace(' ', '_'), df_name) + " ({0})".format(len(
-                        df_const[df_name][x])), 'value': x} for x in hierarchy_level if len(
-                        df_const[df_name][x]) >= 1 and df_const[df_name][x][0] is not None],
+                        df_const[session_key][x])), 'value': x} for x in hierarchy_level if len(
+                        df_const[session_key][x]) >= 1 and df_const[session_key][x][0] is not None],
                     multi=False,
                     clearable=False,
                     optionHeight=30,
@@ -143,7 +143,7 @@ def get_secondary_hierarchy_layout(tile, df_name=None, hierarchy_toggle='Level F
                             style={'min-width': '45px', 'display': 'inline-block', 'padding': '0 0 0 0'})],
                         style={'height': '0px', 'display': 'inline-block'}),
                     html.Div(
-                        children=generate_secondary_dropdown(tile, df_name, nid_path, df_const),
+                        children=generate_secondary_dropdown(tile, df_name, nid_path, df_const, session_key),
                         id={'type': 'secondary_hierarchy_specific_dropdown_container', 'index': tile},
                         style={'color': 'black', 'flex-grow': '1', 'textAlign': 'center', 'display': 'inline-block'})],
                     style={'display': 'flex'})],
@@ -200,7 +200,7 @@ def get_secondary_hierarchy_layout(tile, df_name=None, hierarchy_toggle='Level F
                             style={'min-width': '45px', 'display': 'inline-block', 'padding': '0 0 0 0'})],
                         style={'height': '0px', 'display': 'inline-block'}),
                     html.Div(
-                        children=generate_secondary_dropdown(tile, df_name, nid_path, df_const),
+                        children=generate_secondary_dropdown(tile, df_name, nid_path, df_const, session_key),
                         id={'type': 'secondary_hierarchy_specific_dropdown_container', 'index': tile},
                         style={'color': 'black', 'flex-grow': '1', 'textAlign': 'center', 'display': 'inline-block'})],
                     style={'display': 'flex'})],

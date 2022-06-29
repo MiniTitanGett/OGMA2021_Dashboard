@@ -17,7 +17,7 @@ from apps.dashboard.data import get_label
 # ********************************************DATE-PICKER LAYOUT**************************************************
 
 
-def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, period_type, df_const):
+def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, period_type, df_const,session_key):
     """Returns the date picker layout."""
     language = session["language"]
 
@@ -25,7 +25,7 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
         children = [
             html.H6(
                 '{}:'.format(get_label("LBL_Calendar_Type")),
-                style={'margin-top': '20px', 'color': 'black'} if df_const[df_name]['FISCAL_AVAILABLE']
+                style={'margin-top': '20px', 'color': 'black'} if df_const[session_key]['FISCAL_AVAILABLE']
                 else {'display': 'None'}),
             dcc.Tabs([
                 dcc.Tab(label="{}".format(get_label("LBL_Gregorian")), value='Gregorian'),
@@ -33,7 +33,7 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                 id={'type': 'fiscal-year-toggle', 'index': tile},
                 className='toggle-tabs-wrapper',
                 value=fiscal_toggle,
-                style={'display': 'block', 'text-align': 'center'} if df_const[df_name]['FISCAL_AVAILABLE']
+                style={'display': 'block', 'text-align': 'center'} if df_const[session_key]['FISCAL_AVAILABLE']
                 else {'display': 'none'}),
             html.Div(
                 children=[
@@ -98,8 +98,8 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
             ], style={'width': '0', 'height': '0', 'position': 'relative', 'bottom': '55px',
                       'left': '125px' if language == 'En' else '150px'}),
             html.P(
-                "{}: {} - {}".format(get_label('LBL_Available'), df_const[df_name]['MIN_DATE_UNF'],
-                                     df_const[df_name]['MAX_DATE_UNF']),
+                "{}: {} - {}".format(get_label('LBL_Available'), df_const[session_key]['MIN_DATE_UNF'],
+                                     df_const[session_key]['MAX_DATE_UNF']),
                 className='time-available'),
             html.Div([
                 # placeholders for datepicker inputs to avoid callback errors.
@@ -264,7 +264,7 @@ def get_date_box(index, value, minimum, maximum, name=None):
                      style={'width': '100%'})
 
 
-def get_secondary_data(conditions, fiscal_toggle, df_name, df_const):
+def get_secondary_data(conditions, fiscal_toggle, df_name, df_const, session_key):
     """
     Returns the defined variables necessary for having secondary input boxes.
     """
@@ -280,13 +280,13 @@ def get_secondary_data(conditions, fiscal_toggle, df_name, df_const):
         quarter_disabled = True
         default_max = 4
         if fiscal_toggle == 'Gregorian':
-            fringe_min = df_const[df_name]['GREGORIAN_QUARTER_FRINGE_MIN']
-            fringe_max = df_const[df_name]['GREGORIAN_QUARTER_FRINGE_MAX']
-            max_year = df_const[df_name]['GREGORIAN_QUARTER_MAX_YEAR']
+            fringe_min = df_const[session_key]['GREGORIAN_QUARTER_FRINGE_MIN']
+            fringe_max = df_const[session_key]['GREGORIAN_QUARTER_FRINGE_MAX']
+            max_year = df_const[session_key]['GREGORIAN_QUARTER_MAX_YEAR']
         else:
-            fringe_min = df_const[df_name]['FISCAL_QUARTER_FRINGE_MIN']
-            fringe_max = df_const[df_name]['FISCAL_QUARTER_FRINGE_MAX']
-            max_year = df_const[df_name]['FISCAL_QUARTER_MAX_YEAR']
+            fringe_min = df_const[session_key]['FISCAL_QUARTER_FRINGE_MIN']
+            fringe_max = df_const[session_key]['FISCAL_QUARTER_FRINGE_MAX']
+            max_year = df_const[session_key]['FISCAL_QUARTER_MAX_YEAR']
         if fringe_max == 4:
             max_year += 1
             fringe_max = 1
@@ -299,13 +299,13 @@ def get_secondary_data(conditions, fiscal_toggle, df_name, df_const):
         month_disabled = True
         default_max = 12
         if fiscal_toggle == 'Gregorian':
-            fringe_min = df_const[df_name]['GREGORIAN_MONTH_FRINGE_MIN']
-            fringe_max = df_const[df_name]['GREGORIAN_MONTH_FRINGE_MAX']
-            max_year = df_const[df_name]['GREGORIAN_MONTH_MAX_YEAR']
+            fringe_min = df_const[session_key]['GREGORIAN_MONTH_FRINGE_MIN']
+            fringe_max = df_const[session_key]['GREGORIAN_MONTH_FRINGE_MAX']
+            max_year = df_const[session_key]['GREGORIAN_MONTH_MAX_YEAR']
         else:
-            fringe_min = df_const[df_name]['FISCAL_MONTH_FRINGE_MIN']
-            fringe_max = df_const[df_name]['FISCAL_MONTH_FRINGE_MAX']
-            max_year = df_const[df_name]['FISCAL_MONTH_MAX_YEAR']
+            fringe_min = df_const[session_key]['FISCAL_MONTH_FRINGE_MIN']
+            fringe_max = df_const[session_key]['FISCAL_MONTH_FRINGE_MAX']
+            max_year = df_const[session_key]['FISCAL_MONTH_MAX_YEAR']
         if fringe_max == 12:
             max_year += 1
             fringe_max = 1
@@ -318,13 +318,13 @@ def get_secondary_data(conditions, fiscal_toggle, df_name, df_const):
         week_disabled = True
         default_max = 52
         if fiscal_toggle == 'Gregorian':
-            fringe_min = df_const[df_name]['GREGORIAN_WEEK_FRINGE_MIN']
-            fringe_max = df_const[df_name]['GREGORIAN_WEEK_FRINGE_MAX']
-            max_year = df_const[df_name]['GREGORIAN_WEEK_MAX_YEAR']
+            fringe_min = df_const[session_key]['GREGORIAN_WEEK_FRINGE_MIN']
+            fringe_max = df_const[session_key]['GREGORIAN_WEEK_FRINGE_MAX']
+            max_year = df_const[session_key]['GREGORIAN_WEEK_MAX_YEAR']
         else:
-            fringe_min = df_const[df_name]['FISCAL_WEEK_FRINGE_MIN']
-            fringe_max = df_const[df_name]['FISCAL_WEEK_FRINGE_MAX']
-            max_year = df_const[df_name]['FISCAL_WEEK_MAX_YEAR']
+            fringe_min = df_const[session_key]['FISCAL_WEEK_FRINGE_MIN']
+            fringe_max = df_const[session_key]['FISCAL_WEEK_FRINGE_MAX']
+            max_year = df_const[session_key]['FISCAL_WEEK_MAX_YEAR']
         if fringe_max == 52:
             max_year += 1
             fringe_max = 1

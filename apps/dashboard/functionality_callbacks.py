@@ -125,7 +125,9 @@ for x in range(4):
          State({'type': 'data-fitting-trigger', 'index': x}, 'value'),
          State({'type': 'tab-swap-flag', 'index': x}, 'data'),
          # data set result flag
-         State({'type': 'data-set-result', 'index': x}, 'data')],
+         State({'type': 'data-set-result', 'index': x}, 'data'),
+         State({'type': 'time-period', 'index': x}, 'value'),
+         State({'type': 'time-period', 'index': 4}, 'value')],
         prevent_initial_call=True
     )
     def _update_graph(_df_trigger, arg_value, gridline, legend, graph_type, tile_title, _datepicker_trigger,
@@ -139,7 +141,7 @@ for x in range(4):
                       parent_start_secondary, parent_end_secondary, graph_display, df_name, parent_df_name,
                       link_state, hierarchy_options, parent_hierarchy_options, secondary_options, df_const, df_confirm,
                       xaxis, yaxis, xlegend, ylegend, xmodified, ymodified, num_tiles, prev_fitting_trigger, swap_flag,
-                      data_set_flag):
+                      data_set_flag, time_period, parent_time_period):
 
         # -------------------------------------------Variable Declarations----------------------------------------------
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
@@ -193,11 +195,15 @@ for x in range(4):
                 df_name = 'OPG011'
 
         # if tile un-linked and graph-type is in both data sets update graph
-        if link_state == 'fa fa-link' and data_set_flag is True and (df_name is not None
-                                           and graph_type in GRAPH_OPTIONS[df_name] and df_name != parent_df_name):
+        if link_state == 'fa fa-link' and data_set_flag is True and (df_name is not None and graph_type in
+                        GRAPH_OPTIONS[df_name] and (df_name != parent_df_name or time_period != parent_time_period)):
             if df_confirm is not None:
                 df_tile = df_confirm
 
+            if df_name != 'OPG010':
+                session_key = df_tile + time_period
+            else:
+                session_key = df_tile
             graph = __update_graph(df_tile, arg_value, graph_type, tile_title, num_periods,
                                    period_type, hierarchy_toggle,
                                    hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_options,
@@ -205,7 +211,7 @@ for x in range(4):
                                    secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
                                    end_secondary, df_const, xaxis, yaxis, xlegend, ylegend, gridline, legend,
                                    secondary_level_dropdown, secondary_state_of_display, secondary_hierarchy_toggle,
-                                   secondary_graph_children, secondary_options)
+                                   secondary_graph_children, secondary_options, session_key)
 
             return graph, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open, swap_flag_output,\
                    data_set_flag_output
@@ -227,8 +233,14 @@ for x in range(4):
             period_type = parent_period_type
             df_name = parent_df_name
             hierarchy_options = parent_hierarchy_options
+            time_period = parent_time_period
         else:
             df_name = df_tile
+
+        if df_name != 'OPG010':
+            session_key = df_name + time_period
+        else:
+            session_key = df_name
 
         # prevent update if invalid selections exist - should be handled by update_datepicker, but double check
         if not start_year or not end_year or not start_secondary or not end_secondary or \
@@ -269,7 +281,7 @@ for x in range(4):
                                secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
                                end_secondary, df_const, xaxis, yaxis, xlegend, ylegend, gridline, legend,
                                secondary_level_dropdown, secondary_state_of_display, secondary_hierarchy_toggle,
-                               secondary_graph_children, secondary_options)
+                               secondary_graph_children, secondary_options, session_key)
 
         if graph is None:
             raise PreventUpdate
@@ -524,12 +536,14 @@ app.clientside_callback(
      ],
     [State({'type': 'start-year-input', 'index': MATCH}, 'name'),
      State({'type': 'data-set', 'index': MATCH}, 'value'),
-     State('df-constants-storage', 'data')],
+     State('df-constants-storage', 'data'),
+     State({'type': 'time-period', 'index': 0}, 'value'),],
     prevent_initial_call=True
 )
 def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quarter_button_clicks,
                         _month_button_clicks, _week_button_clicks, start_year_selection, end_year_selection,
-                        start_secondary_selection, end_secondary_selection, update_trigger, tab, df_name, df_const):
+                        start_secondary_selection, end_secondary_selection, update_trigger, tab, df_name, df_const,
+                        time_period):
     # ----------------------------------------------Variable Declarations-----------------------------------------------
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     tile = dash.callback_context.inputs_list[0]['id']['index']
@@ -572,16 +586,21 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
         fringe_min = fringe_max = selected_secondary_min = selected_secondary_max = default_max = None
         # if tabs do not exist or the 'year' tab was requested or year type changed,
         # generate the tabs with the 'year' tab as active
+        if df_name != 'OPG010':
+            session_key = df_name + time_period
+        else:
+            session_key = df_name
+
         if 'radio-timeframe' in changed_id or 'date-picker-year-button' in changed_id:
             year_classname = 'date-picker-nav-selected'
             year_disabled = True
             # use the year scheme (gregorian/fiscal) selected by the user
             if fiscal_toggle == 'Gregorian':
-                min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
-                max_year = df_const[df_name]['GREGORIAN_YEAR_MAX']
+                min_year = df_const[session_key]['GREGORIAN_MIN_YEAR']
+                max_year = df_const[session_key]['GREGORIAN_YEAR_MAX']
             else:
-                min_year = df_const[df_name]['FISCAL_MIN_YEAR']
-                max_year = df_const[df_name]['FISCAL_YEAR_MAX']
+                min_year = df_const[session_key]['FISCAL_MIN_YEAR']
+                max_year = df_const[session_key]['FISCAL_YEAR_MAX']
             left_column = Div([
                 get_date_box(index={'type': 'start-year-input', 'index': tile},
                              value=min_year,
@@ -606,12 +625,12 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
             conditions = ['date-picker-quarter-button' in changed_id, 'date-picker-month-button' in changed_id]
             quarter_classname, quarter_disabled, month_classname, month_disabled, week_classname, week_disabled, \
             fringe_min, fringe_max, default_max, max_year, \
-            new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
+            new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const, session_key)
             # set min_year according to user selected fiscal/gregorian time type
             if fiscal_toggle == 'Gregorian':
-                min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
+                min_year = df_const[session_key]['GREGORIAN_MIN_YEAR']
             else:
-                min_year = df_const[df_name]['FISCAL_MIN_YEAR']
+                min_year = df_const[session_key]['FISCAL_MIN_YEAR']
             # if data exists for only one year, use fringe extremes
             if min_year == max_year:
                 max_min = fringe_min + 1
@@ -652,9 +671,9 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                 year_classname = 'date-picker-nav-selected'
                 year_disabled = True
                 if fiscal_toggle == 'Gregorian':
-                    max_year = df_const[df_name]['GREGORIAN_YEAR_MAX']
+                    max_year = df_const[session_key]['GREGORIAN_YEAR_MAX']
                 else:
-                    max_year = df_const[df_name]['FISCAL_YEAR_MAX']
+                    max_year = df_const[session_key]['FISCAL_YEAR_MAX']
             # if not inside of year tab, get secondary data
             else:
                 selected_secondary_min = start_secondary_selection
@@ -665,9 +684,9 @@ def _update_date_picker(input_method, fiscal_toggle, _year_button_clicks, _quart
                 new_tab = get_secondary_data(conditions, fiscal_toggle, df_name, df_const)
             # set min_year according to user selected time type (gregorian/fiscal)
             if fiscal_toggle == 'Gregorian':
-                min_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
+                min_year = df_const[session_key]['GREGORIAN_MIN_YEAR']
             else:
-                min_year = df_const[df_name]['FISCAL_MIN_YEAR']
+                min_year = df_const[session_key]['FISCAL_MIN_YEAR']
             # if not inside year tab, generate left and right columns with secondary input boxes
             if fringe_min and fringe_max:
                 left_column, right_column = update_date_columns(
@@ -837,7 +856,9 @@ def split_filter_part(filter_part):
      State('df-constants-storage', 'data'),
      State({'type': 'data-set-parent', 'index': 4}, 'value'),
      State({'type': 'tile-df-name', 'index': MATCH}, 'data'),
-     State({'type': 'graph-type-dropdown', 'index': MATCH}, 'value')]
+     State({'type': 'graph-type-dropdown', 'index': MATCH}, 'value'),
+     State({'type': 'time-period', 'index': MATCH}, 'value'),
+     State({'type': 'time-period', 'index': 4}, 'value')]
 )
 def _update_table(page_current, page_size, sort_by, filter_query, _graph_trigger, _table_trigger, link_state,
                   df_name, secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
@@ -847,7 +868,7 @@ def _update_table(page_current, page_size, sort_by, filter_query, _graph_trigger
                   parent_start_secondary, parent_end_secondary, parent_num_periods, parent_period_type,
                   parent_hierarchy_toggle, parent_hierarchy_level_dropdown, parent_state_of_display,
                   parent_hierarchy_graph_children, parent_hierarchy_options, parent_df_name, df_const, df_confirm,
-                  table_df, graph_type):
+                  table_df, graph_type, time_period, parent_time_period):
 
     if graph_type != 'Table':
         raise PreventUpdate
@@ -871,10 +892,15 @@ def _update_table(page_current, page_size, sort_by, filter_query, _graph_trigger
             df_name = df_confirm
         else:
             df_name = parent_df_name
-
+        time_period= parent_time_period
     # prevent update if invalid selections exist - should be handled by update_datepicker, but double check
     if not start_year or not end_year or not start_secondary or not end_secondary:
         raise PreventUpdate
+
+    if df_name != 'OPG010':
+        session_key = df_name + time_period
+    else:
+        session_key = df_name
 
     # Creates a hierarchy trail from the display
     if type(state_of_display) == dict:
@@ -900,7 +926,7 @@ def _update_table(page_current, page_size, sort_by, filter_query, _graph_trigger
         dff = data_manipulator(list_of_names, hierarchy_toggle, hierarchy_level_dropdown,
                                hierarchy_graph_children, df_name, df_const, secondary_type, end_secondary,
                                end_year, start_secondary, start_year, timeframe, fiscal_toggle, num_periods,
-                               period_type)
+                               period_type, session_key=session_key)
         if dff.empty:
             return [], 0
 

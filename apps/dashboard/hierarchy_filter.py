@@ -16,11 +16,11 @@ from apps.dashboard.data import get_label, session
 # ***********************************************HELPER FUNCTIONS****************************************************
 
 
-def generate_dropdown(tile, df_name, nid_path):
+def generate_dropdown(tile, df_name, nid_path, session_key):
     """Helper function to generate and return hierarchy drop-down."""
     if df_name:
         # using a subset of our dataframe, turn it into a multiindex df, and access unique values for option
-        df = session[df_name][['H0', 'H1', 'H2', 'H3', 'H4']]
+        df = session[session_key][['H0', 'H1', 'H2', 'H3', 'H4']]
         hierarchy_nid_list = list(nid_path.split("^||^"))[1:]
         llen = len(hierarchy_nid_list)
         if llen == 5:
@@ -64,7 +64,7 @@ def generate_history_button(name, index, tile):
 # ***********************************************LAYOUT***************************************************************
 
 
-def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle, nid_path, df_const):
+def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle, nid_path, df_const, session_key):
     """Gets and returns the hierarchy layout."""
     if df_name is not None and df_const is not None:
         hierarchy_nid_list = nid_path.split("^||^")
@@ -102,7 +102,7 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
                 dcc.Dropdown(
                     id={'type': 'hierarchy_level_dropdown', 'index': tile},
                     options=[{'label': get_label('LBL_' + x, df_name), 'value': x} for x in
-                             df_const[df_name]['HIERARCHY_LEVELS']],
+                             df_const[session_key]['HIERARCHY_LEVELS']],
                     multi=False,
                     value=level_value,
                     clearable=False,
@@ -137,7 +137,7 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
                             style={'min-width': '45px', 'display': 'inline-block', 'padding': '0 0 0 0'})],
                         style={'height': '0px', 'display': 'inline-block'}),
                     html.Div(
-                        children=generate_dropdown(tile, df_name, nid_path),
+                        children=generate_dropdown(tile, df_name, nid_path, session_key),
                         id={'type': 'hierarchy_specific_dropdown_container', 'index': tile},
                         style={'color': 'black', 'flex-grow': '1', 'textAlign': 'center', 'display': 'inline-block'})],
                     style={'display': 'flex'})],
@@ -195,7 +195,7 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
                             style={'min-width': '45px', 'display': 'inline-block', 'padding': '0 0 0 0'})],
                         style={'height': '0px', 'display': 'inline-block'}),
                     html.Div(
-                        children=generate_dropdown(tile, df_name, nid_path),
+                        children=generate_dropdown(tile, df_name, nid_path, session_key),
                         id={'type': 'hierarchy_specific_dropdown_container', 'index': tile},
                         style={'color': 'black', 'flex-grow': '1', 'textAlign': 'center', 'display': 'inline-block'})],
                     style={'display': 'flex'})],

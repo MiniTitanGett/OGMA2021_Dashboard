@@ -237,6 +237,15 @@ EXEC InsertOPRef @ref_table = 'OPG011_Measure_type', @ref_value = 'Measure2', @l
 EXEC InsertOPRef @ref_table = 'OPG011_Measure_type', @ref_value = 'Measure3', @language = 'En', @ref_desc = 'Duration'
 EXEC InsertOPRef @ref_table = 'OPG011_Measure_type', @ref_value = 'Measure3', @language = 'Fr', @ref_desc = 'Fr: Duration'
 
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Last_Month',@language = 'En', @ref_desc = 'Last Month'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Last_Month',@language = 'Fr', @ref_desc = 'Fr:Last Month'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Last_Quarter',@language = 'En', @ref_desc = 'Last Quarter'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Last_Quarter',@language = 'Fr', @ref_desc = 'Fr:Last Quarter'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Last_Year',@language = 'En', @ref_desc = 'Last Year'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Last_Year',@language = 'Fr', @ref_desc = 'Fr:Last Year'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Currently_Active',@language = 'En', @ref_desc = 'Currently Active'
+EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Currently_Active',@language = 'Fr', @ref_desc = 'Fr:Currently Active'
+
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Parameters', @language = 'En', @ref_desc = 'Parameters'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Parameters',@language = 'Fr', @ref_desc = 'Paramètres'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Graph', @language = 'En', @ref_desc = 'Graph'

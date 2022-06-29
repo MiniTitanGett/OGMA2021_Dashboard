@@ -89,14 +89,16 @@ DATA_CONTENT_HIDE = {'display': 'none'}
 # ********************************************DATASET*****************************************************************
 
 
-def dataset_to_df(df_name):
+def dataset_to_df(df_name, time_period):
     """Queries for the dataset and returns a formatted pandas, data frame."""
     query = """\
     declare @p_result_status varchar(255)
-    exec dbo.OPP_Get_DataSet {}, \'{}\', \'{}\', @p_result_status output
+    exec dbo.OPP_Get_DataSet {}, \'{}\', \'{}\',\'{}\', @p_result_status output
     select @p_result_status as result_status
-    """.format(session["sessionID"], session["language"], df_name)
+    """.format(session["sessionID"], session["language"], df_name, time_period)
     df = exec_storedproc_results(query)
+    if df.empty:
+        return df
     df_vaex = from_pandas(df)
     df_vaex.variables['nan'] = nan
     logging.debug("done converting pandas to vaex")
@@ -215,11 +217,11 @@ def dataset_to_df(df_name):
     return df_vaex
 
 
-def generate_constants(df_name):
+def generate_constants(df_name, session_key):
     """Generates the constants required to be stored for the given dataset."""
 
     HIERARCHY_LEVELS = ['H{}'.format(i) for i in range(6)]
-    df = session[df_name]
+    df = session[session_key]
     MEASURE_TYPE_VALUES = None
 
     # secondary hierarchy
@@ -514,16 +516,17 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
                      df_const, secondary_type, end_secondary, end_year, start_secondary, start_year, timeframe,
                      fiscal_toggle, num_periods, period_type, arg_values=None, graph_type=None,
                      secondary_state_of_display=None, secondary_hierarchy_toggle=None, secondary_level_dropdown=None,
-                     secondary_graph_children=None, secondary_options=None):
+                     secondary_graph_children=None, secondary_options=None, session_key=None):
     """Returns the filtered/aggregated data frame for visualization."""
     if df_name != 'OPG011':
         filtered_df = data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
-                                            hierarchy_graph_children, df_name, df_const)
+                                            hierarchy_graph_children, df_name, df_const, session_key)
         filtered_df = data_time_filter(secondary_type, end_secondary, end_year, start_secondary, start_year, timeframe,
-                                       fiscal_toggle, num_periods, period_type, df_name, df_const, filtered_df)
+                                       fiscal_toggle, num_periods, period_type, df_name, df_const, filtered_df,
+                                       session_key)
 
     else:
-        df = session[df_name].copy()
+        df = session[session_key].copy()
         # initial hierarchy filtering (remove all children of a level to prep for agg)
         if hierarchy_toggle == 'Level Filter' or (
                 (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == ['graph_children'])):
@@ -533,8 +536,8 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
                 if hierarchy_level_dropdown:
                     # Take the level and clear the other columns
                     # Ex) H2 picked --> H3, H4, H5 get wiped
-                    for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - (int(hierarchy_level_dropdown[1]) + 1)):
-                        df[df_const[df_name]['HIERARCHY_LEVELS'][len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]] \
+                    for i in range(len(df_const[session_key]['HIERARCHY_LEVELS']) - (int(hierarchy_level_dropdown[1]) + 1)):
+                        df[df_const[session_key]['HIERARCHY_LEVELS'][len(df_const[session_key]['HIERARCHY_LEVELS']) - 1 - i]] \
                            = full(len(df), nan, float64)
                 else:
                     # Returns empty data frame with column names
@@ -542,7 +545,7 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
             else:
                 # Filters out all rows that are less specific than given path length
                 for i in range(len(hierarchy_path)):
-                    df = df[df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i]]
+                    df = df[df[df_const[session_key]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i]]
 
         else:
             # Filters out all rows that don't include path member at specific level
@@ -550,74 +553,82 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
                 df = df[0:0]
             else:
                 for i in range(len(hierarchy_path)):
-                    df = df[df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i]]
+                    df = df[df[df_const[session_key]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i]]
 
         if graph_type == "Line" or graph_type == "Scatter" or graph_type == "Bar" or graph_type == "Box_Plot":
             if graph_type == "Box_Plot":
                 measure_type = arg_values[0]
             else:
                 measure_type = arg_values[1]
+
+            # checking if dataset has been filtered already for the graph types
             if hierarchy_toggle == 'Level Filter':
                 if 'simplified' + hierarchy_toggle + hierarchy_level_dropdown + secondary_hierarchy_toggle +\
-                secondary_level_dropdown + timeframe + measure_type in session and timeframe == 'all-time':
+                secondary_level_dropdown + timeframe + measure_type + session_key in session and \
+                        timeframe == 'all-time':
                     return session['simplified' + hierarchy_toggle + hierarchy_level_dropdown +
-                                   secondary_hierarchy_toggle + secondary_level_dropdown + timeframe + measure_type]
+                                   secondary_hierarchy_toggle + secondary_level_dropdown + timeframe + measure_type +
+                                   session_key]
 
                 elif secondary_type == 'Year' and timeframe == 'select-range' and 'simplified' + hierarchy_toggle + \
                         hierarchy_level_dropdown + secondary_hierarchy_toggle + secondary_level_dropdown + \
-                        timeframe + secondary_type + str(start_year) + str(end_year) + measure_type in session:
+                        timeframe + secondary_type + str(start_year) + str(end_year) + measure_type + session_key \
+                        in session:
                     return session['simplified' + hierarchy_toggle + hierarchy_level_dropdown +
                                    secondary_hierarchy_toggle + secondary_level_dropdown + timeframe + secondary_type +
-                                   str(start_year) + str(end_year) + measure_type]
+                                   str(start_year) + str(end_year) + measure_type + session_key]
 
                 elif timeframe == 'select-range' and secondary_type != 'Year' and secondary_type is not None and \
                             'simplified' + hierarchy_toggle + hierarchy_level_dropdown + secondary_hierarchy_toggle + \
                             secondary_level_dropdown + timeframe + secondary_type + str(start_year) + str(end_year) + \
-                            str(start_secondary) + str(end_secondary) + measure_type in session:
+                            str(start_secondary) + str(end_secondary) + measure_type + session_key in session:
                     return session['simplified' + hierarchy_toggle + hierarchy_level_dropdown +
                                    secondary_hierarchy_toggle + secondary_level_dropdown + timeframe + secondary_type +
                                    str(start_year) + str(end_year) + str(start_secondary) + str(end_secondary) +
-                                   measure_type]
+                                   measure_type + session_key]
 
                 elif 'simplified' + hierarchy_toggle + hierarchy_level_dropdown + secondary_hierarchy_toggle + \
-                        secondary_level_dropdown + timeframe + str(num_periods) + period_type + measure_type in session:
+                        secondary_level_dropdown + timeframe + str(num_periods) + period_type + measure_type + \
+                        session_key in session:
                     return session['simplified' + hierarchy_toggle + hierarchy_level_dropdown +
                                    secondary_hierarchy_toggle + secondary_level_dropdown + timeframe +
-                                   str(num_periods) + period_type + measure_type]
+                                   str(num_periods) + period_type + measure_type + session_key]
             elif hierarchy_toggle == 'Specific Item' and secondary_hierarchy_toggle == 'Level Filter':
                 if timeframe == 'all-time' and 'simplified' + hierarchy_toggle + str(hierarchy_path) + \
                                    str(hierarchy_graph_children) + secondary_hierarchy_toggle + \
-                                   secondary_level_dropdown + timeframe + measure_type in session:
+                                   secondary_level_dropdown + timeframe + measure_type + session_key in session:
                     return session['simplified' + hierarchy_toggle + str(hierarchy_path) +
                                    str(hierarchy_graph_children) + secondary_hierarchy_toggle +
-                                   secondary_level_dropdown + timeframe + measure_type]
+                                   secondary_level_dropdown + timeframe + measure_type + session_key]
 
                 elif timeframe == 'select-range' and secondary_type != 'Year' and secondary_type is not None and \
                     'simplified' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) + \
                     secondary_hierarchy_toggle + secondary_level_dropdown + timeframe + secondary_type + \
-                    str(start_year) + str(end_year) + str(start_secondary) + str(end_secondary) + measure_type\
-                        in session:
+                    str(start_year) + str(end_year) + str(start_secondary) + str(end_secondary) + measure_type + \
+                        session_key in session:
                     return session['simplified' + hierarchy_toggle + str(hierarchy_path) +
                                    str(hierarchy_graph_children) + secondary_hierarchy_toggle +
                                    secondary_level_dropdown + timeframe + secondary_type + str(start_year) +
-                                   str(end_year) + str(start_secondary) + str(end_secondary) + measure_type]
+                                   str(end_year) + str(start_secondary) + str(end_secondary) + measure_type +
+                                   session_key]
 
                 elif secondary_type == 'Year' and timeframe == 'select-range' and 'simplified' + hierarchy_toggle + \
                     str(hierarchy_path) + str(hierarchy_graph_children) + secondary_hierarchy_toggle + \
                         secondary_level_dropdown + timeframe + secondary_type + str(start_year) + \
-                        str(end_year) + measure_type in session:
+                        str(end_year) + measure_type + session_key in session:
                     return session['simplified' + hierarchy_toggle + str(hierarchy_path) +
                                    str(hierarchy_graph_children) + secondary_hierarchy_toggle +
                                    secondary_level_dropdown + timeframe + secondary_type + str(start_year) +
-                                   str(end_year) + measure_type]
+                                   str(end_year) + measure_type + session_key]
 
                 elif timeframe == 'to-current' and 'simplified' + hierarchy_toggle + str(hierarchy_path) + \
                                    str(hierarchy_graph_children) + secondary_hierarchy_toggle + \
-                            secondary_level_dropdown + timeframe + str(num_periods) + period_type + measure_type\
-                        in session:
+                            secondary_level_dropdown + timeframe + str(num_periods) + period_type + measure_type + \
+                            session_key in session:
                     return session['simplified' + hierarchy_toggle + str(hierarchy_path) +
                                    str(hierarchy_graph_children) + secondary_hierarchy_toggle +
-                            secondary_level_dropdown + timeframe + str(num_periods) + period_type + measure_type]
+                            secondary_level_dropdown + timeframe + str(num_periods) + period_type + measure_type +
+                                   session_key]
 
             filtered_df = data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondary, end_year,
                                                           start_secondary, start_year, timeframe, fiscal_toggle,
@@ -625,148 +636,153 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
                                                           graph_type, df, hierarchy_toggle, hierarchy_level_dropdown,
                                                           hierarchy_graph_children, secondary_state_of_display,
                                                           secondary_hierarchy_toggle, secondary_level_dropdown,
-                                                          secondary_graph_children, secondary_options)
-
+                                                          secondary_graph_children, secondary_options, session_key)
         elif graph_type == 'Bubble':
+            # checking if dataset has been filtered already
             if hierarchy_toggle == 'Level Filter':
-                if 'bubble' + hierarchy_toggle + hierarchy_level_dropdown + timeframe in session and \
+                if 'bubble' + hierarchy_toggle + hierarchy_level_dropdown + timeframe + session_key in session and \
                         timeframe == 'all-time':
-                    return session['bubble' + hierarchy_toggle + hierarchy_level_dropdown + timeframe]
+                    return session['bubble' + hierarchy_toggle + hierarchy_level_dropdown + timeframe + session_key]
                 elif secondary_type == 'Year' and timeframe == 'select-range' and 'bubble' + hierarchy_toggle + \
                         hierarchy_level_dropdown + timeframe + secondary_type + str(start_year) + \
-                        str(end_year) in session:
+                        str(end_year) + session_key in session:
                     return session['bubble' + hierarchy_toggle + hierarchy_level_dropdown + timeframe + secondary_type +
-                                   str(start_year) + str(end_year)]
+                                   str(start_year) + str(end_year) + session_key]
                 elif timeframe == 'select-range' and secondary_type != 'Year' and secondary_type is not None and \
                             'bubble' + hierarchy_toggle + hierarchy_level_dropdown + timeframe + secondary_type +\
-                            str(start_year) + str(end_year) + str(start_secondary) + str(end_secondary) in session:
+                            str(start_year) + str(end_year) + str(start_secondary) + str(end_secondary) + session_key \
+                        in session:
                     return session['bubble' + hierarchy_toggle + hierarchy_level_dropdown + timeframe + secondary_type +
-                                   str(start_year) + str(end_year) + str(start_secondary) + str(end_secondary)]
+                                   str(start_year) + str(end_year) + str(start_secondary) + str(end_secondary) +
+                                   session_key]
                 elif 'bubble' + hierarchy_toggle + hierarchy_level_dropdown + timeframe + str(num_periods) + \
-                        period_type in session:
+                        period_type + session_key in session:
                     return session['bubble' + hierarchy_toggle + hierarchy_level_dropdown + timeframe +
-                                   str(num_periods) + period_type]
+                                   str(num_periods) + period_type + session_key]
             elif hierarchy_toggle == 'Specific Item':
                 if 'bubble' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) + \
-                        timeframe in session and timeframe == 'all-time':
+                        timeframe + session_key in session and timeframe == 'all-time':
                     return session['bubble' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) +
-                                   timeframe]
+                                   timeframe + session_key]
                 elif secondary_type == 'Year' and timeframe == 'select-range' and 'bubble' + hierarchy_toggle + \
                         str(hierarchy_path) + str(hierarchy_graph_children) + timeframe + secondary_type + \
-                        str(start_year) + str(end_year) in session:
+                        str(start_year) + str(end_year) + session_key in session:
                     return session['bubble' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) +
-                                   timeframe + secondary_type + str(start_year) + str(end_year)]
+                                   timeframe + secondary_type + str(start_year) + str(end_year) + session_key]
                 elif timeframe == 'select-range' and secondary_type != 'Year' and secondary_type is not None and \
                         'bubble' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) + \
                         timeframe + secondary_type + str(start_year) + str(end_year) + str(start_secondary) + \
-                        str(end_secondary) in session:
+                        str(end_secondary) + session_key in session:
                     return session['bubble' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) +
                                    timeframe + secondary_type + str(start_year) + str(end_year) + str(start_secondary) +
-                                   str(end_secondary)]
+                                   str(end_secondary) + session_key]
                 elif 'bubble' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) + timeframe + \
-                        str(num_periods) + period_type in session:
+                        str(num_periods) + period_type + session_key in session:
                     return session['bubble' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) +
-                                   timeframe + str(num_periods) + period_type]
+                                   timeframe + str(num_periods) + period_type + session_key]
 
             filtered_df = data_time_bubble_aggregator(hierarchy_path, secondary_type, end_secondary, end_year,
                                                       start_secondary, start_year, timeframe, fiscal_toggle,
                                                       num_periods, period_type, df_name, df_const, df, hierarchy_toggle,
-                                                      hierarchy_level_dropdown, hierarchy_graph_children)
+                                                      hierarchy_level_dropdown, hierarchy_graph_children, session_key)
         else:
+            # checking if dataset has been filtered already
             if hierarchy_toggle == 'Level Filter':
-                if 'table' + hierarchy_toggle + hierarchy_level_dropdown + timeframe in session and \
+                if 'table' + hierarchy_toggle + hierarchy_level_dropdown + timeframe + session_key in session and \
                         timeframe == 'all-time':
-                    return session['table' + hierarchy_toggle + hierarchy_level_dropdown + timeframe]
+                    return session['table' + hierarchy_toggle + hierarchy_level_dropdown + timeframe + session_key]
                 elif secondary_type == 'Year' and timeframe == 'select-range' and 'table' + hierarchy_toggle + \
                         hierarchy_level_dropdown + timeframe + secondary_type + str(start_year) + \
-                        str(end_year) in session:
+                        str(end_year) + session_key in session:
                     return session['table' + hierarchy_toggle + hierarchy_level_dropdown + timeframe + secondary_type +
-                                   str(start_year) + str(end_year)]
+                                   str(start_year) + str(end_year) + session_key]
                 elif timeframe == 'select-range' and secondary_type != 'Year' and secondary_type is not None and \
                             'table' + hierarchy_toggle + hierarchy_level_dropdown + timeframe + secondary_type +\
-                            str(start_year) + str(end_year) + str(start_secondary) + str(end_secondary) in session:
+                            str(start_year) + str(end_year) + str(start_secondary) + str(end_secondary) + session_key \
+                        in session:
                     return session['table' + hierarchy_toggle + hierarchy_level_dropdown + timeframe + secondary_type +
-                                   str(start_year) + str(end_year) + str(start_secondary) + str(end_secondary)]
+                                   str(start_year) + str(end_year) + str(start_secondary) + str(end_secondary) +
+                                   session_key]
                 elif 'table' + hierarchy_toggle + hierarchy_level_dropdown + timeframe + str(num_periods) + \
-                        period_type in session:
+                        period_type + session_key in session:
                     return session['table' + hierarchy_toggle + hierarchy_level_dropdown + timeframe +
-                                   str(num_periods) + period_type]
+                                   str(num_periods) + period_type + session_key]
 
             elif hierarchy_toggle == 'Specific Item':
                 if 'table' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) + \
                         timeframe in session and timeframe == 'all-time':
                     return session['table' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) +
-                                   timeframe]
+                                   timeframe + session_key]
                 elif secondary_type == 'Year' and timeframe == 'select-range' and 'table' + hierarchy_toggle + \
                         str(hierarchy_path) + str(hierarchy_graph_children) + timeframe + secondary_type + \
                         str(start_year) + str(end_year) in session:
                     return session['table' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) +
-                                   timeframe + secondary_type + str(start_year) + str(end_year)]
+                                   timeframe + secondary_type + str(start_year) + str(end_year) + session_key]
                 elif timeframe == 'select-range' and secondary_type != 'Year' and secondary_type is not None and \
                         'table' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) + timeframe + \
                         secondary_type + str(start_year) + str(end_year) + str(start_secondary) + \
-                        str(end_secondary) in session:
+                        str(end_secondary) + session_key in session:
                     return session['table' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) +
                                    timeframe + secondary_type + str(start_year) + str(end_year) + str(start_secondary) +
-                                   str(end_secondary)]
+                                   str(end_secondary) + session_key]
                 elif 'table' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) + timeframe + \
-                        str(num_periods) + period_type in session:
+                        str(num_periods) + period_type + session_key in session:
                     return session['table' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) +
-                                   timeframe + str(num_periods) + period_type]
+                                   timeframe + str(num_periods) + period_type + session_key]
 
             filtered_df = data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year, start_secondary,
                                                start_year, timeframe, fiscal_toggle, num_periods, period_type, df_name,
                                                df_const, df, hierarchy_toggle, hierarchy_level_dropdown,
-                                               hierarchy_graph_children)
+                                               hierarchy_graph_children, session_key)
 
     return filtered_df
 
 
 def data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children, df_name,
-                          df_const):
+                          df_const, session_key):
     """Returns filtered the data frame based on hierarchy selections."""
     # NOTE: This assumes hierarchy path is a list of all previously selected levels
 
     if hierarchy_toggle == 'Level Filter' or (
             (hierarchy_toggle == 'Specific Item' and hierarchy_graph_children == ['graph_children'])):
-        filtered_df = session[df_name]
+        filtered_df = session[session_key]
         if hierarchy_toggle == 'Level Filter':
             # If anything is in the dropdown
             if hierarchy_level_dropdown:
                 # Filter based on hierarchy level
                 filtered_df = filtered_df.filter(filtered_df[hierarchy_level_dropdown].notna())
-                for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - (int(hierarchy_level_dropdown[1]) + 1)):
-                    filtered_df = filtered_df.filter(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][
-                        len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]].ismissing())
+                for i in range(len(df_const[session_key]['HIERARCHY_LEVELS']) - (int(hierarchy_level_dropdown[1]) + 1)):
+                    filtered_df = filtered_df.filter(filtered_df[df_const[session_key]['HIERARCHY_LEVELS'][
+                        len(df_const[session_key]['HIERARCHY_LEVELS']) - 1 - i]].ismissing())
             else:
                 # Returns empty data frame with column names
                 filtered_df = filtered_df[0:0]
         else:
             # Filters out all rows that are less specific than given path length
             for i in range(len(hierarchy_path)):
-                filtered_df = filtered_df.filter(filtered_df[df_const[df_name]
+                filtered_df = filtered_df.filter(filtered_df[df_const[session_key]
                                                  ['HIERARCHY_LEVELS'][i]] == hierarchy_path[i])
             # Filters out all rows that are more specific than given path length plus one to preserve the child column
-            for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - (len(hierarchy_path) + 1)):
-                filtered_df = filtered_df.filter(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][
-                                                    len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]].ismissing())
-            filtered_df = filtered_df.filter(filtered_df[df_const[df_name]['HIERARCHY_LEVELS']
+            for i in range(len(df_const[session_key]['HIERARCHY_LEVELS']) - (len(hierarchy_path) + 1)):
+                filtered_df = filtered_df.filter(filtered_df[df_const[session_key]['HIERARCHY_LEVELS'][
+                                                    len(df_const[session_key]['HIERARCHY_LEVELS']) - 1 - i]].ismissing())
+            filtered_df = filtered_df.filter(filtered_df[df_const[session_key]['HIERARCHY_LEVELS']
                                                                                         [len(hierarchy_path)]].notna())
     else:
         filtered_df = session[df_name]
         # Filters out all rows that don't include path member at specific level
         for i in range(len(hierarchy_path)):
-            filtered_df = filtered_df.filter(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i])
+            filtered_df = filtered_df.filter(filtered_df[df_const[session_key]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i])
         # Filters out all rows that are more specific than given path
-        for i in range(len(df_const[df_name]['HIERARCHY_LEVELS']) - len(hierarchy_path)):
-            filtered_df = filtered_df.filter(filtered_df[df_const[df_name]['HIERARCHY_LEVELS'][
-                len(df_const[df_name]['HIERARCHY_LEVELS']) - 1 - i]].ismissing())
+        for i in range(len(df_const[session_key]['HIERARCHY_LEVELS']) - len(hierarchy_path)):
+            filtered_df = filtered_df.filter(filtered_df[df_const[session_key]['HIERARCHY_LEVELS'][
+                len(df_const[session_key]['HIERARCHY_LEVELS']) - 1 - i]].ismissing())
 
     return filtered_df
 
 
 def data_time_filter(secondary_type, end_secondary, end_year, start_secondary, start_year, timeframe, fiscal_toggle,
-                     num_periods, period_type, df_name, df_const, filtered_df):
+                     num_periods, period_type, df_name, df_const, filtered_df, session_key):
     """Returns filtered data frame dependent on date picker selections."""
     # account for date type (Gregorian vs Fiscal)
     if fiscal_toggle == 'Fiscal':
@@ -778,15 +794,15 @@ def data_time_filter(secondary_type, end_secondary, end_year, start_secondary, s
     if timeframe == 'all-time':
         secondary_type = 'Month'
         if fiscal_toggle == 'Fiscal':
-            start_year = df_const[df_name]['FISCAL_MIN_YEAR']
-            end_year = df_const[df_name]['FISCAL_MONTH_MAX_YEAR']
-            start_secondary = df_const[df_name]['FISCAL_MONTH_FRINGE_MIN']
-            end_secondary = df_const[df_name]['FISCAL_MONTH_FRINGE_MAX'] + 1
+            start_year = df_const[session_key]['FISCAL_MIN_YEAR']
+            end_year = df_const[session_key]['FISCAL_MONTH_MAX_YEAR']
+            start_secondary = df_const[session_key]['FISCAL_MONTH_FRINGE_MIN']
+            end_secondary = df_const[session_key]['FISCAL_MONTH_FRINGE_MAX'] + 1
         else:  # year_type == 'Gregorian'
-            start_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
-            end_year = df_const[df_name]['GREGORIAN_MONTH_MAX_YEAR']
-            start_secondary = df_const[df_name]['GREGORIAN_MONTH_FRINGE_MIN']
-            end_secondary = df_const[df_name]['GREGORIAN_MONTH_FRINGE_MAX'] + 1
+            start_year = df_const[session_key]['GREGORIAN_MIN_YEAR']
+            end_year = df_const[session_key]['GREGORIAN_MONTH_MAX_YEAR']
+            start_secondary = df_const[session_key]['GREGORIAN_MONTH_FRINGE_MIN']
+            end_secondary = df_const[session_key]['GREGORIAN_MONTH_FRINGE_MAX'] + 1
 
     filtered_df = filtered_df.to_pandas_df()
     date_type = '{}Year of Event'.format(year_prefix)
@@ -866,7 +882,7 @@ def data_time_filter(secondary_type, end_secondary, end_year, start_secondary, s
 
 def data_time_bubble_aggregator(hierarchy_path, secondary_type, end_secondary, end_year, start_secondary, start_year,
                          timeframe, fiscal_toggle, num_periods, period_type, df_name, df_const, filtered_df,
-                         hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children):
+                         hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children, session_key):
     """
     Returns aggregated data frame dependent on date picker selections, hierarchy selection and graph type selection.
     This aggregator does not filter based on measure type.
@@ -877,7 +893,7 @@ def data_time_bubble_aggregator(hierarchy_path, secondary_type, end_secondary, e
         return filtered_df
 
     measure_types = session["Measure_type_list"][df_name].copy()
-    variable_names = df_const[df_name]['VARIABLE_OPTION_LISTS']
+    variable_names = df_const[session_key]['VARIABLE_OPTION_LISTS']
     row_list = []
 
     if hierarchy_toggle == "Level Filter" or (
@@ -909,15 +925,15 @@ def data_time_bubble_aggregator(hierarchy_path, secondary_type, end_secondary, e
     if timeframe == 'all-time':
         secondary_type = 'Month'
         if fiscal_toggle == 'Fiscal':
-            start_year = df_const[df_name]['FISCAL_MIN_YEAR']
-            end_year = df_const[df_name]['FISCAL_MONTH_MAX_YEAR']
-            start_secondary = df_const[df_name]['FISCAL_MONTH_FRINGE_MIN']
-            end_secondary = df_const[df_name]['FISCAL_MONTH_FRINGE_MAX'] + 1
+            start_year = df_const[session_key]['FISCAL_MIN_YEAR']
+            end_year = df_const[session_key]['FISCAL_MONTH_MAX_YEAR']
+            start_secondary = df_const[session_key]['FISCAL_MONTH_FRINGE_MIN']
+            end_secondary = df_const[session_key]['FISCAL_MONTH_FRINGE_MAX'] + 1
         else:  # year_type == 'Gregorian'
-            start_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
-            end_year = df_const[df_name]['GREGORIAN_MONTH_MAX_YEAR']
-            start_secondary = df_const[df_name]['GREGORIAN_MONTH_FRINGE_MIN']
-            end_secondary = df_const[df_name]['GREGORIAN_MONTH_FRINGE_MAX'] + 1
+            start_year = df_const[session_key]['GREGORIAN_MIN_YEAR']
+            end_year = df_const[session_key]['GREGORIAN_MONTH_MAX_YEAR']
+            start_secondary = df_const[session_key]['GREGORIAN_MONTH_FRINGE_MIN']
+            end_secondary = df_const[session_key]['GREGORIAN_MONTH_FRINGE_MAX'] + 1
 
     # account for special timeframe case 'to-current'
     if timeframe == 'to-current':
@@ -960,7 +976,7 @@ def data_time_bubble_aggregator(hierarchy_path, secondary_type, end_secondary, e
                     measure_type_name = get_label(measure_type, df_name + "_Measure_type")
                     for variable_name in variable_names:
                         # filter on either the variable name or variable value column
-                        if variable_name in df_const[df_name]['Variable Name']:
+                        if variable_name in df_const[session_key]['Variable Name']:
                             reduced_df = further_filtered_df[further_filtered_df['Variable Name'] == variable_name]
                         else:
                             reduced_df = further_filtered_df[further_filtered_df['Variable Value'] == variable_name]
@@ -1047,7 +1063,7 @@ def data_time_bubble_aggregator(hierarchy_path, secondary_type, end_secondary, e
                     measure_type_name = get_label(measure_type, df_name + "_Measure_type")
                     for variable_name in variable_names:
                         # filter on either the variable name or variable value column
-                        if variable_name in df_const[df_name]['Variable Name']:
+                        if variable_name in df_const[session_key]['Variable Name']:
                             reduced_df = further_filtered_df[further_filtered_df['Variable Name'] == variable_name]
                         else:
                             reduced_df = further_filtered_df[further_filtered_df['Variable Value'] == variable_name]
@@ -1127,7 +1143,7 @@ def data_time_bubble_aggregator(hierarchy_path, secondary_type, end_secondary, e
                 measure_type_name = get_label(measure_type, df_name + "_Measure_type")
                 for variable_name in variable_names:
                     # filter on either the variable name or variable value column
-                    if variable_name in df_const[df_name]['Variable Name']:
+                    if variable_name in df_const[session_key]['Variable Name']:
                         further_reduced_df = further_filtered_df[further_filtered_df['Variable Name'] == variable_name]
                     else:
                         further_reduced_df = further_filtered_df[further_filtered_df['Variable Value'] == variable_name]
@@ -1258,7 +1274,7 @@ def data_time_bubble_aggregator(hierarchy_path, secondary_type, end_secondary, e
                 measure_type_name = get_label(measure_type, df_name+"_Measure_type")
                 for variable_name in variable_names:
                     # filter on either the variable name or variable value column
-                    if variable_name in df_const[df_name]['Variable Name']:
+                    if variable_name in df_const[session_key]['Variable Name']:
                         reduced_df = further_filtered_df[further_filtered_df['Variable Name'] == variable_name]
                     else:
                         reduced_df = further_filtered_df[further_filtered_df['Variable Value'] == variable_name]
@@ -1320,7 +1336,7 @@ def data_time_bubble_aggregator(hierarchy_path, secondary_type, end_secondary, e
 
 def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year, start_secondary, start_year,
                          timeframe, fiscal_toggle, num_periods, period_type, df_name, df_const, filtered_df,
-                         hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children):
+                         hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children, session_key):
     """
     Returns aggregated data frame dependent on date picker selections, hierarchy selection and graph type selection.
     This aggregator does not filter based on measure type.
@@ -1331,7 +1347,7 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
         return filtered_df
 
     measure_types = session["Measure_type_list"][df_name].copy()
-    variable_names = df_const[df_name]['VARIABLE_OPTION_LISTS']
+    variable_names = df_const[session_key]['VARIABLE_OPTION_LISTS']
     row_list = []
 
     if hierarchy_toggle == "Level Filter" or (
@@ -1363,15 +1379,15 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
     if timeframe == 'all-time':
         secondary_type = 'Month'
         if fiscal_toggle == 'Fiscal':
-            start_year = df_const[df_name]['FISCAL_MIN_YEAR']
-            end_year = df_const[df_name]['FISCAL_MONTH_MAX_YEAR']
-            start_secondary = df_const[df_name]['FISCAL_MONTH_FRINGE_MIN']
-            end_secondary = df_const[df_name]['FISCAL_MONTH_FRINGE_MAX'] + 1
+            start_year = df_const[session_key]['FISCAL_MIN_YEAR']
+            end_year = df_const[session_key]['FISCAL_MONTH_MAX_YEAR']
+            start_secondary = df_const[session_key]['FISCAL_MONTH_FRINGE_MIN']
+            end_secondary = df_const[session_key]['FISCAL_MONTH_FRINGE_MAX'] + 1
         else:  # year_type == 'Gregorian'
-            start_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
-            end_year = df_const[df_name]['GREGORIAN_MONTH_MAX_YEAR']
-            start_secondary = df_const[df_name]['GREGORIAN_MONTH_FRINGE_MIN']
-            end_secondary = df_const[df_name]['GREGORIAN_MONTH_FRINGE_MAX'] + 1
+            start_year = df_const[session_key]['GREGORIAN_MIN_YEAR']
+            end_year = df_const[session_key]['GREGORIAN_MONTH_MAX_YEAR']
+            start_secondary = df_const[session_key]['GREGORIAN_MONTH_FRINGE_MIN']
+            end_secondary = df_const[session_key]['GREGORIAN_MONTH_FRINGE_MAX'] + 1
 
     # account for special timeframe case 'to-current'
     if timeframe == 'to-current':
@@ -1412,7 +1428,7 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                 # Builds data based on variable names, and selected time frame
                 for variable_name in variable_names:
                     # filter on either the variable name or variable value column
-                    if variable_name in df_const[df_name]['Variable Name']:
+                    if variable_name in df_const[session_key]['Variable Name']:
                         reduced_df = further_filtered_df[further_filtered_df['Variable Name'] == variable_name]
                     else:
                         reduced_df = further_filtered_df[further_filtered_df['Variable Value'] == variable_name]
@@ -1498,7 +1514,7 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                             filtered_df["H" + str(len(hierarchy_path))] == specific_item]
                 for variable_name in variable_names:
                     # filter on either the variable name or variable value column
-                    if variable_name in df_const[df_name]['Variable Name']:
+                    if variable_name in df_const[session_key]['Variable Name']:
                         reduced_df = further_filtered_df[further_filtered_df['Variable Name'] == variable_name]
                     else:
                         reduced_df = further_filtered_df[further_filtered_df['Variable Value'] == variable_name]
@@ -1565,7 +1581,7 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
             str(num_periods) + period_type] = time_df
         else:
             session['table' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) + timeframe +
-                    str(num_periods) + period_type] = time_df
+                    str(num_periods) + period_type + session_key] = time_df
 
     # If not in year tab, filter using secondary selections
     elif not secondary_type == 'Year':
@@ -1578,7 +1594,7 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                 further_filtered_df = filtered_df[filtered_df["H" + str(len(hierarchy_path))] == specific_item]
             for variable_name in variable_names:
                 # filter on either the variable name or variable value column
-                if variable_name in df_const[df_name]['Variable Name']:
+                if variable_name in df_const[session_key]['Variable Name']:
                     further_reduced_df = further_filtered_df[further_filtered_df['Variable Name'] == variable_name]
                 else:
                     further_reduced_df = further_filtered_df[further_filtered_df['Variable Value'] == variable_name]
@@ -1687,16 +1703,17 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                 session['table' + hierarchy_toggle + hierarchy_level_dropdown + timeframe] = time_df
             else:
                 session['table' + hierarchy_toggle + hierarchy_level_dropdown + timeframe + secondary_type +
-                        str(start_year) + str(end_year) + str(start_secondary) + str(end_secondary)] = time_df
+                        str(start_year) + str(end_year) + str(start_secondary) + str(end_secondary) +
+                        session_key] = time_df
         else:
             if timeframe == 'all-time':
                 session['table' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) +
-                        timeframe] = time_df
+                        timeframe + session_key] = time_df
 
             else:
                 session['table' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) + timeframe +
                         secondary_type + str(start_year) + str(end_year) + str(start_secondary) +
-                        str(end_secondary)] = time_df
+                        str(end_secondary) + session_key] = time_df
 
     else:
         for specific_item in specific_items:
@@ -1708,7 +1725,7 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
                 further_filtered_df = filtered_df[filtered_df["H" + str(len(hierarchy_path))] == specific_item]
             for variable_name in variable_names:
                 # filter on either the variable name or variable value column
-                if variable_name in df_const[df_name]['Variable Name']:
+                if variable_name in df_const[session_key]['Variable Name']:
                     reduced_df = further_filtered_df[further_filtered_df['Variable Name'] == variable_name]
                 else:
                     reduced_df = further_filtered_df[further_filtered_df['Variable Value'] == variable_name]
@@ -1761,11 +1778,11 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
 
         if hierarchy_toggle == "Level Filter":
             session['table' + hierarchy_toggle + hierarchy_level_dropdown + timeframe + secondary_type +
-                    str(start_year) + str(end_year)] = time_df
+                    str(start_year) + str(end_year) + session_key] = time_df
 
         else:
             session['table' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) + timeframe +
-                    secondary_type + str(start_year) + str(end_year)] = time_df
+                    secondary_type + str(start_year) + str(end_year) + session_key] = time_df
     return time_df
 
 
@@ -1773,7 +1790,7 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                                     start_year, timeframe, fiscal_toggle, num_periods, period_type, df_name, df_const,
                                     arg_values, graph_type, df, hierarchy_toggle, hierarchy_level_dropdown,
                                     hierarchy_graph_children, secondary_path, secondary_hierarchy_toggle,
-                                    secondary_level_dropdown, secondary_graph_children, secondary_options):
+                                    secondary_level_dropdown, secondary_graph_children, secondary_options, session_key):
     """
     Returns aggregated data frame dependent on date picker selections, hierarchy selection and graph type selection.
     This aggregator does filter based on measure type to be used for figures that do not require all measure types to
@@ -1785,7 +1802,7 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
         return df
 
     if secondary_hierarchy_toggle == 'Level Filter':
-        variable_names = df_const[df_name][secondary_level_dropdown]
+        variable_names = df_const[session_key][secondary_level_dropdown]
     elif secondary_hierarchy_toggle == 'Specific Item' and secondary_graph_children == ['graph_children']:
         variable_names = [option['label'] for option in secondary_options]
     else:
@@ -1827,15 +1844,15 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
     if timeframe == 'all-time':
         secondary_type = 'Month'
         if fiscal_toggle == 'Fiscal':
-            start_year = df_const[df_name]['FISCAL_MIN_YEAR']
-            end_year = df_const[df_name]['FISCAL_MONTH_MAX_YEAR']
-            start_secondary = df_const[df_name]['FISCAL_MONTH_FRINGE_MIN']
-            end_secondary = df_const[df_name]['FISCAL_MONTH_FRINGE_MAX'] + 1
+            start_year = df_const[session_key]['FISCAL_MIN_YEAR']
+            end_year = df_const[session_key]['FISCAL_MONTH_MAX_YEAR']
+            start_secondary = df_const[session_key]['FISCAL_MONTH_FRINGE_MIN']
+            end_secondary = df_const[session_key]['FISCAL_MONTH_FRINGE_MAX'] + 1
         else:  # year_type == 'Gregorian'
-            start_year = df_const[df_name]['GREGORIAN_MIN_YEAR']
-            end_year = df_const[df_name]['GREGORIAN_MONTH_MAX_YEAR']
-            start_secondary = df_const[df_name]['GREGORIAN_MONTH_FRINGE_MIN']
-            end_secondary = df_const[df_name]['GREGORIAN_MONTH_FRINGE_MAX'] + 1
+            start_year = df_const[session_key]['GREGORIAN_MIN_YEAR']
+            end_year = df_const[session_key]['GREGORIAN_MONTH_MAX_YEAR']
+            start_secondary = df_const[session_key]['GREGORIAN_MONTH_FRINGE_MIN']
+            end_secondary = df_const[session_key]['GREGORIAN_MONTH_FRINGE_MAX'] + 1
 
     # account for special timeframe case 'to-current'
     if timeframe == 'to-current':
@@ -1883,11 +1900,11 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                     elif secondary_hierarchy_toggle == 'Specific Item' and secondary_graph_children == [
                                                                                                     'graph_children']:
                         further_reduced_df = further_filtered_df[
-                                further_filtered_df[df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
+                                further_filtered_df[df_const[session_key]['SECONDARY_HIERARCHY_LEVELS']
                                 [len(secondary_path)]] == variable_name]
                     else:
                         further_reduced_df = further_filtered_df[
-                                further_filtered_df[df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
+                                further_filtered_df[df_const[session_key]['SECONDARY_HIERARCHY_LEVELS']
                                 [len(secondary_path)-1]] == variable_name]
                     for z in range(end_date.year - start_date.year + 1):
                         year = start_date.year + z
@@ -1977,10 +1994,10 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                     elif secondary_hierarchy_toggle == 'Specific Item' and secondary_graph_children == \
                                                                                                     ['graph_children']:
                         further_reduced_df = further_filtered_df[
-                                further_filtered_df[df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
+                                further_filtered_df[df_const[session_key]['SECONDARY_HIERARCHY_LEVELS']
                                 [len(secondary_path)]] == variable_name]
                     else:
-                        further_reduced_df = further_filtered_df[further_filtered_df[df_const[df_name][
+                        further_reduced_df = further_filtered_df[further_filtered_df[df_const[session_key][
                                                     'SECONDARY_HIERARCHY_LEVELS'][len(secondary_path) - 1]] ==
                                                                      variable_name]
                     for z in range(end_date.year - start_date.year + 1):
@@ -2044,11 +2061,12 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
         # caching filtering
         if hierarchy_toggle == "Level Filter" and secondary_hierarchy_toggle == 'Level Filter':
             session['simplified' + hierarchy_toggle + hierarchy_level_dropdown + secondary_hierarchy_toggle +
-                    secondary_level_dropdown + timeframe + str(num_periods) + period_type + measure_type] = time_df
+                    secondary_level_dropdown + timeframe + str(num_periods) + period_type + measure_type +
+                    session_key] = time_df
         elif hierarchy_toggle == "Specific Item" and secondary_hierarchy_toggle == 'Level Filter':
             session['simplified' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) +
                     secondary_hierarchy_toggle + secondary_level_dropdown + timeframe + str(num_periods) +
-                    period_type + measure_type] = time_df
+                    period_type + measure_type + session_key] = time_df
 
     # If not in year tab, filter using secondary selections
     elif not secondary_type == 'Year':
@@ -2068,10 +2086,10 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                                                                                                         variable_name]
                 elif secondary_hierarchy_toggle == 'Specific Item' and secondary_graph_children == ['graph_children']:
                     further_reduced_df = further_filtered_df[
-                            further_filtered_df[df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
+                            further_filtered_df[df_const[session_key]['SECONDARY_HIERARCHY_LEVELS']
                             [len(secondary_path)]] == variable_name]
                 else:
-                    further_reduced_df = further_filtered_df[further_filtered_df[df_const[df_name][
+                    further_reduced_df = further_filtered_df[further_filtered_df[df_const[session_key][
                                     'SECONDARY_HIERARCHY_LEVELS'][len(secondary_path)-1]] == variable_name]
 
                 for z in range(end_year - start_year + 1):
@@ -2174,20 +2192,21 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
             if timeframe == 'all-time':
 
                 session['simplified' + hierarchy_toggle + hierarchy_level_dropdown + secondary_hierarchy_toggle +
-                        secondary_level_dropdown + timeframe + measure_type] = time_df
+                        secondary_level_dropdown + timeframe + measure_type + session_key] = time_df
             else:
                 session['simplified' + hierarchy_toggle + hierarchy_level_dropdown + secondary_hierarchy_toggle +
                         secondary_level_dropdown + timeframe + secondary_type + str(start_year) + str(end_year) +
-                        str(start_secondary) + str(end_secondary) + measure_type] = time_df
+                        str(start_secondary) + str(end_secondary) + measure_type + session_key] = time_df
         elif hierarchy_toggle == 'Specific Item' and secondary_hierarchy_toggle == 'Level Filter':
             if timeframe == 'all-time':
                 session['simplified' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) +
-                        secondary_hierarchy_toggle + secondary_level_dropdown + timeframe + measure_type] = time_df
+                        secondary_hierarchy_toggle + secondary_level_dropdown + timeframe + measure_type +
+                        session_key] = time_df
             else:
                 session['simplified' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) +
                         secondary_hierarchy_toggle + secondary_level_dropdown + timeframe + secondary_type +
-                        str(start_year) + str(end_year) + str(start_secondary) + str(end_secondary) + measure_type] = \
-                    time_df
+                        str(start_year) + str(end_year) + str(start_secondary) + str(end_secondary) + measure_type +
+                        session_key] = time_df
     else:
 
         for specific_item in specific_items:
@@ -2204,10 +2223,10 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
                     further_reduced_df = further_filtered_df[further_filtered_df[secondary_level_dropdown] ==
                                                                                                         variable_name]
                 elif secondary_hierarchy_toggle == 'Specific Item' and secondary_graph_children == ['graph_children']:
-                    further_reduced_df = further_filtered_df[further_filtered_df[df_const[df_name]
+                    further_reduced_df = further_filtered_df[further_filtered_df[df_const[session_key]
                         ['SECONDARY_HIERARCHY_LEVELS'][len(secondary_path)]] == variable_name]
                 else:
-                    further_reduced_df = further_filtered_df[further_filtered_df[df_const[df_name][
+                    further_reduced_df = further_filtered_df[further_filtered_df[df_const[session_key][
                                     'SECONDARY_HIERARCHY_LEVELS'][len(secondary_path)-1]] == variable_name]
 
                 unique_secondarys = further_reduced_df['Date of Event'].dt.year.unique()
@@ -2255,21 +2274,21 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
         if hierarchy_toggle == "Level Filter" and secondary_hierarchy_toggle == 'Level Filter':
             session['simplified' + hierarchy_toggle + hierarchy_level_dropdown + secondary_hierarchy_toggle +
                     secondary_level_dropdown + timeframe + secondary_type + str(start_year) +
-                    str(end_year) + measure_type] = time_df
+                    str(end_year) + measure_type + session_key] = time_df
         elif hierarchy_toggle == 'Specific Item' and secondary_hierarchy_toggle == 'Level Filter':
             session['simplified' + hierarchy_toggle + str(hierarchy_path) + str(hierarchy_graph_children) +
                     secondary_hierarchy_toggle + secondary_level_dropdown + timeframe + secondary_type +
-                    str(start_year) + str(end_year) + measure_type] = time_df
+                    str(start_year) + str(end_year) + measure_type + session_key] = time_df
     return time_df
 
 
 def customize_menu_filter(dff, df_name, measure_type, df_const, secondary_path,
                           secondary_hierarchy_toggle, secondary_level_dropdown, secondary_graph_children,
-                          secondary_options):
+                          secondary_options, session_key):
     """Filters data frame based on customize menu inputs and returns the filtered data frame."""
 
     if secondary_hierarchy_toggle == 'Level Filter':
-        variable = df_const[df_name][secondary_level_dropdown]
+        variable = df_const[session_key][secondary_level_dropdown]
     elif secondary_hierarchy_toggle == 'Specific Item' and secondary_graph_children == ['graph_children']:
         variable = [option['label'] for option in secondary_options]
     else:
@@ -2296,10 +2315,10 @@ def customize_menu_filter(dff, df_name, measure_type, df_const, secondary_path,
             else:
                 if secondary_hierarchy_toggle == 'Specific Item' and secondary_graph_children == ['graph_children']:
                     further_filter_df = filtered_df[
-                        filtered_df[df_const[df_name]['SECONDARY_HIERARCHY_LEVELS']
+                        filtered_df[df_const[session_key]['SECONDARY_HIERARCHY_LEVELS']
                         [len(secondary_path)]] == variable_name]
                 else:
-                    further_filter_df = filtered_df[filtered_df[df_const[df_name][
+                    further_filter_df = filtered_df[filtered_df[df_const[session_key][
                         'SECONDARY_HIERARCHY_LEVELS'][len(secondary_path) - 1]] == variable_name]
 
             aggregate_df = pd.concat([aggregate_df, further_filter_df])

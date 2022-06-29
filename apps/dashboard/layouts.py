@@ -94,7 +94,8 @@ def recursive_to_plotly_json(document):
 # ************************************************DATA SIDE MENU******************************************************
 
 
-def get_data_set_picker(tile, df_name, confirm_parent, prev_selection=None):
+def get_data_set_picker(tile, df_name, confirm_parent, prev_selection, time_period="last-month",  prev_time=None,
+                        session_key=None):
     """Returns data set picker for data menu."""
     return [
         Div(
@@ -129,6 +130,9 @@ def get_data_set_picker(tile, df_name, confirm_parent, prev_selection=None):
             Store(
                 data=prev_selection,
                 id={'type': 'data-set-prev-selected', 'index': tile}),
+            Store(
+                data=prev_time,
+                id={'type': 'prev-time-period', 'index': tile}),
             Div(
                 Div([
                     I(
@@ -137,7 +141,7 @@ def get_data_set_picker(tile, df_name, confirm_parent, prev_selection=None):
                             className='save-symbols-tooltip'),
                         id={'type': 'confirm-load-data', 'index': tile},
                         className='fa fa-check',
-                        style=DATA_CONTENT_HIDE if df_name is None or df_name in session else
+                        style=DATA_CONTENT_HIDE if df_name is None or session_key in session else
                         {'padding': '10px 0', 'cursor': 'pointer', 'width': '15px', 'height': '15px',
                          'position': 'relative', 'margin-right': '10px', 'margin-left': '10px',
                          'vertical-align': 'top'}),
@@ -149,29 +153,63 @@ def get_data_set_picker(tile, df_name, confirm_parent, prev_selection=None):
                         className='fa fa-refresh',
                         style={'padding': '10px 0', 'cursor': 'pointer', 'width': '15px', 'height': '15px',
                                'position': 'relative', 'margin-right': '10px', 'margin-left': '10px',
-                               'vertical-align': 'top'} if df_name is not None and df_name in session else
+                               'vertical-align': 'top'} if df_name is not None and session_key in session else
                         DATA_CONTENT_HIDE)],
                     id='dataset-confirmation-symbols'),
-                className='data-set-load-box')],
-            style={'display': 'flex'})
+                className='data-set-load-box'),
+        ],
+            style={'display': 'flex'}),
+        Div([
+            P("Time Slice: ",
+              style={'display': 'inline-block', 'position': 'relative', 'padding-top': '15px'}),
+            Div([
+                Dropdown(
+                    id={'type': 'time-period', 'index': tile},
+                    options=[
+                        {'label': get_label('LBL_Currently_Active'),
+                         'value': 'current-Active'},
+                        {'label': get_label('LBL_Last_Month'),
+                         'value': 'last-month'},
+                        {'label': get_label('LBL_Last_Quarter'),
+                         'value': 'last-quarter'},
+                        {'label': get_label('LBL_Last_Year'),
+                         'value': 'last-year'},
+                        {'label': get_label('LBL_All_Time_Monthly'),
+                         'value': 'all-time'}
+                    ],
+                    value=time_period,
+                    clearable=False,
+                    style={'width': '140px', 'height': '26px', 'margin': '0', 'padding': '0px', 'font-size': '15px',
+                           'text-align': 'left', 'border-radius': '5px', 'color': '#333', 'max-height': '26px'}),
+            ], style={"display": "inline-block", 'padding': '10px', 'position': 'absolute'}),
+        ], style={"display": "inline-block"} if df_name is not None else
+            DATA_CONTENT_HIDE, id={'type': 'time-slice-controls', 'index': tile}),
+        Div([
+            P("No Data Available",
+              style={'display': 'inline-block', 'align' 'position': 'relative', 'padding-top': '15px',
+                     'font-weight': 'bold'}),
+        ], style={"display": "inline-block"} if df_name is not None else
+        DATA_CONTENT_HIDE, id={'type': 'no-data-info', 'index': tile}),
     ]
 
 
 def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Filter', level_value='H0',
                   nid_path="root", graph_all_toggle=None, fiscal_toggle='Gregorian', input_method='all-time',
-                  num_periods='5', period_type='last-years', prev_selection=None, confirm_parent=None, df_const=None):
+                  num_periods='5', period_type='last-years', prev_selection=None, time_period='last-month',
+                  prev_time=None, confirm_parent=None, df_const=None, session_key=None):
     """Returns the data side-menu."""
     content = [
         A(
             className='boxclose',
             style={'position': 'relative', 'left': '3px'},
             id={'type': 'data-menu-close', 'index': tile}),
-        Div(get_data_set_picker(tile, df_name, confirm_parent, prev_selection)),
+        Div(get_data_set_picker(tile, df_name, confirm_parent, prev_selection, time_period, prev_time, session_key)),
         Div([
             Div(
                 get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle, nid_path,
-                                     df_const)),
-            Div(get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, period_type, df_const))],
+                                     df_const, session_key)),
+            Div(get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, period_type, df_const,
+                                session_key))],
             style=DATA_CONTENT_HIDE,
             id={'type': 'data-menu-controls', 'index': tile})]
 
@@ -705,6 +743,14 @@ def get_layout_dashboard():
             color='dark',
             style={'position': 'absolute', 'right': '47%', 'top': '80%', 'margin-right': '-100px', 'z-index': '1070'},
             duration=4000),
+        dbc.Alert(
+            'No data available',
+            id='no-data-popup',
+            is_open=False,
+            color='dark',
+            style={'position': 'absolute', 'right': '48%', 'top': '80%', 'z-index': '500'},
+            duration=4000),
+
 
         Div([
             Store(id={'type': 'data-set-result', 'index': 0}, data=False),
@@ -1031,7 +1077,8 @@ def get_tile_layout(num_tiles, tile_keys=None, parent_df=None):
 
 def get_line_scatter_graph_menu(tile, x, mode, measure_type, df_name, gridline, legend, df_const, data_fitting, ci,
                                 data_fit, degree, xaxis, yaxis, xpos, ypos, xmodified, ymodified, secondary_level_value,
-                                secondary_nid_path, secondary_hierarchy_toggle, secondary_graph_all_toggle, color):
+                                secondary_nid_path, secondary_hierarchy_toggle, secondary_graph_all_toggle, color,
+                                session_key):
     """
     :param data_fitting: boolean to determine whether to show data fitting options
     :param ci: show confidence interval or not
@@ -1119,7 +1166,7 @@ def get_line_scatter_graph_menu(tile, x, mode, measure_type, df_name, gridline, 
                         Dropdown(
                             id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
                             options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measure_type"),
-                                                                  'value': i} for i in df_const[df_name]
+                                                                  'value': i} for i in df_const[session_key]
                             ['MEASURE_TYPE_OPTIONS']],
                             clearable=False,
                             optionHeight=30,
@@ -1211,7 +1258,8 @@ def get_line_scatter_graph_menu(tile, x, mode, measure_type, df_name, gridline, 
                                'margin-right': '40px'}),
                     Div(
                         get_secondary_hierarchy_layout(tile, df_name, secondary_hierarchy_toggle, secondary_level_value,
-                                                  secondary_graph_all_toggle, secondary_nid_path, df_const=df_const),
+                                                  secondary_graph_all_toggle, secondary_nid_path, df_const=df_const,
+                                                       session_key=session_key),
                         style={'display': 'inline-flex', 'flex-direction': 'column', 'max-width': '330px'}
                         if df_name == 'OPG011' else {'display': 'None'})], style={'margin-bottom': '7.5px'}),
                 Div([
@@ -1248,7 +1296,7 @@ def get_line_scatter_graph_menu(tile, x, mode, measure_type, df_name, gridline, 
 
 def get_bar_graph_menu(tile, x, measure_type, orientation, animate, gridline, legend, df_name, df_const, xaxis,
                        yaxis, xpos, ypos, xmodified, ymodified, secondary_level_value, secondary_nid_path,
-                       secondary_hierarchy_toggle, secondary_graph_all_toggle, color):
+                       secondary_hierarchy_toggle, secondary_graph_all_toggle, color, session_key):
     """
     :param tile: Index of the tile the bar graph menu corresponds to
     :param x: the x-axis value
@@ -1324,7 +1372,7 @@ def get_bar_graph_menu(tile, x, measure_type, orientation, animate, gridline, le
                     Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
                         options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measure_type"), 'value': i}
-                                                             for i in df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                                                             for i in df_const[session_key]['MEASURE_TYPE_OPTIONS']],
                         value=measure_type,
                         optionHeight=30,
                         clearable=False,
@@ -1354,7 +1402,8 @@ def get_bar_graph_menu(tile, x, measure_type, orientation, animate, gridline, le
                            'margin-right': '40px'}),
                 Div(
                     get_secondary_hierarchy_layout(tile, df_name, secondary_hierarchy_toggle, secondary_level_value,
-                                                  secondary_graph_all_toggle, secondary_nid_path, df_const=df_const),
+                                                  secondary_graph_all_toggle, secondary_nid_path, df_const=df_const,
+                                                   session_key=session_key),
                     style={'display': 'inline-flex', 'flex-direction': 'column', 'max-width': '330px'}
                     if df_name == 'OPG011' else {'display': 'None'})], style={'margin-bottom': '7.5px'}),
             Div([
@@ -1399,7 +1448,7 @@ def get_bar_graph_menu(tile, x, measure_type, orientation, animate, gridline, le
 
 
 def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, gridline, legend, df_name, df_const,
-                          xaxis, yaxis, xpos, ypos, xmodified, ymodified, color):
+                          xaxis, yaxis, xpos, ypos, xmodified, ymodified, color, session_key):
     """
     :param tile: Index of the tile the bar graph menu corresponds to
     :param x: the x-axis value
@@ -1456,7 +1505,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                 Div([
                     Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
-                        options=[] if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'] +
+                        options=[] if df_const is None else df_const[session_key]['VARIABLE_OPTIONS'] +
                                 [{'label': 'Time', 'value': 'Time'}],
                         value=x,
                         optionHeight=30,
@@ -1476,7 +1525,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                         Dropdown(
                             id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
                             options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measure_type"),
-                                                                  'value': i} for i in df_const[df_name]
+                                                                  'value': i} for i in df_const[session_key]
                             ['MEASURE_TYPE_OPTIONS']],
                             value=x_measure,
                             optionHeight=30,
@@ -1494,7 +1543,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                 Div([
                     Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 2},
-                        options=[] if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
+                        options=[] if df_const is None else df_const[session_key]['VARIABLE_OPTIONS'],
                         value=y,
                         optionHeight=30,
                         clearable=False,
@@ -1511,7 +1560,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                     Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
                         options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measure_type"), 'value': i}
-                                                             for i in df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                                                             for i in df_const[session_key]['MEASURE_TYPE_OPTIONS']],
                         value=y_measure,
                         optionHeight=30,
                         clearable=False,
@@ -1527,7 +1576,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                 Div([
                     Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 4},
-                        options=[] if df_const is None else df_const[df_name]['VARIABLE_OPTIONS'],
+                        options=[] if df_const is None else df_const[session_key]['VARIABLE_OPTIONS'],
                         value=size,
                         optionHeight=30,
                         clearable=False,
@@ -1544,7 +1593,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                     Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
                         options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measure_type"), 'value': i}
-                                                             for i in df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                                                             for i in df_const[session_key]['MEASURE_TYPE_OPTIONS']],
                         value=size_measure,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -1581,14 +1630,14 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
             Div(
                 get_secondary_hierarchy_layout(tile, df_name, hierarchy_toggle='Level Filter',
                                               level_value='Variable Name', graph_all_toggle=None, nid_path="root",
-                                              df_const=df_const),
+                                              df_const=df_const, session_key=session_key),
                 style={'display': 'None'})
         ], style={'margin-left': '15px'})]
 
 
 def get_box_plot_menu(tile, axis_measure, graph_orientation, df_name, show_data_points, gridline,
                       legend, df_const, xaxis, yaxis, xpos, ypos, xmodified, ymodified, secondary_level_value,
-                      secondary_nid_path, secondary_hierarchy_toggle, secondary_graph_all_toggle, color):
+                      secondary_nid_path, secondary_hierarchy_toggle, secondary_graph_all_toggle, color, session_key):
     """
         :param tile: Index of the tile the bar graph menu corresponds to
         :param axis_measure: the measure for the axis
@@ -1645,7 +1694,7 @@ def get_box_plot_menu(tile, axis_measure, graph_orientation, df_name, show_data_
                     Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
                         options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measure_type"), 'value': i}
-                                                             for i in df_const[df_name]['MEASURE_TYPE_OPTIONS']],
+                                                             for i in df_const[session_key]['MEASURE_TYPE_OPTIONS']],
                         value=axis_measure,
                         optionHeight=30,
                         clearable=False,
@@ -1675,7 +1724,8 @@ def get_box_plot_menu(tile, axis_measure, graph_orientation, df_name, show_data_
                            'margin-right': '40px', }),
                 Div(
                     get_secondary_hierarchy_layout(tile, df_name, secondary_hierarchy_toggle, secondary_level_value,
-                                                  secondary_graph_all_toggle, secondary_nid_path, df_const=df_const),
+                                                  secondary_graph_all_toggle, secondary_nid_path, df_const=df_const,
+                                                   session_key=session_key),
                     style={'display': 'inline-flex', 'flex-direction': 'column',
                            'max-width': '330px'}
                     if df_name == 'OPG011' else {'display': 'None'})], style={'margin-bottom': '7.5px'}),
@@ -1720,7 +1770,8 @@ def get_box_plot_menu(tile, axis_measure, graph_orientation, df_name, show_data_
         ], style={'margin-left': '15px'})]
 
 
-def get_table_graph_menu(tile, number_of_columns, xaxis, yaxis, xpos, ypos, xmodified, ymodified, df_name, df_const):
+def get_table_graph_menu(tile, number_of_columns, xaxis, yaxis, xpos, ypos, xmodified, ymodified, df_name, df_const,
+                         session_key):
     """
     :param number_of_columns: The number of columns to display
     :param tile: Index of the tile the table instructions corresponds to
@@ -1810,13 +1861,15 @@ def get_table_graph_menu(tile, number_of_columns, xaxis, yaxis, xpos, ypos, xmod
             Div(
                 get_secondary_hierarchy_layout(tile, df_name, hierarchy_toggle='Level Filter',
                                               level_value='Variable Name',
-                                              graph_all_toggle=None, nid_path="root", df_const=df_const),
+                                              graph_all_toggle=None, nid_path="root", df_const=df_const,
+                                               session_key=session_key),
                 style={'display': 'None'})
         ], style={'font-size': '13px'})]
 
 
 def get_sankey_menu(tile, df_name, df_const, xaxis, yaxis, xpos, ypos, xmodified, ymodified,
-                    secondary_level_value, secondary_nid_path, secondary_hierarchy_toggle, secondary_graph_all_toggle):
+                    secondary_level_value, secondary_nid_path, secondary_hierarchy_toggle, secondary_graph_all_toggle,
+                    session_key):
     """
     :param tile: Index of the tile the line graph menu corresponds to.
     :param df_name: Name of the data set being used.
@@ -1861,7 +1914,8 @@ def get_sankey_menu(tile, df_name, df_const, xaxis, yaxis, xpos, ypos, xmodified
                            'margin-right': '40px', }),
                 Div(
                     get_secondary_hierarchy_layout(tile, df_name, secondary_hierarchy_toggle, secondary_level_value,
-                                                  secondary_graph_all_toggle, secondary_nid_path, df_const=df_const),
+                                                  secondary_graph_all_toggle, secondary_nid_path, df_const=df_const,
+                                                   session_key=session_key),
                     style={'display': 'inline-flex', 'flex-direction': 'column',
                            'max-width': '330px'}
                     if df_name == 'OPG010' else {'display': 'None'})], style={'margin-bottom': '90px'}),

@@ -1136,7 +1136,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                 data_info[changed_index] = DATA_CONTENT_HIDE
             # if tile has been reset and the dataset is loaded
             elif prev_selection[changed_index] is None:
-                data[changed_index] = get_data_menu(changed_index, df_name, df_const=df_const)
+                data[changed_index] = get_data_menu(changed_index, df_name, df_const=df_const, session_key=session_key)
                 graph_triggers[changed_index] = df_name
                 options_triggers[changed_index] = df_name
                 df_names[changed_index] = df_name
@@ -1202,7 +1202,8 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
         changed_index = int(search(r'\d+', changed_id).group())
         if '"type":"confirm-load-data"}.n_clicks' in changed_id \
                 and (prev_selection[changed_index] is not None):
-            if df_names[changed_index] not in session and prev_selection[changed_index] is not None:
+            if (df_names[changed_index] + time_periods[changed_index] not in session or df_names[changed_index] not
+                in session) and prev_selection[changed_index] is not None:
                 df_name_confirm = None
             if changed_index == 4:  # prompt with trip prompt
                 prompt_trigger = Store(
@@ -1301,86 +1302,86 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
 
                             df_const[session_key] = generate_constants(df_name, session_key)
                             store = df_const
+                    if len(session[session_key]) != 0:
+                        # reset data menu for tile no matter what
+                        data[tile] = get_data_menu(tile, df_name, df_const=df_const, time_period=time_period,
+                                                   session_key=session_key)
 
-                            # reset data menu for tile no matter what
-                            data[tile] = get_data_menu(tile, df_name, df_const=df_const, time_period=time_period,
-                                                       session_key=session_key)
+                        # op-2 is continue the dataset change but unlink my graph
+                        # op-3 is continue the dataset change and modify my graph as necessary (keeping the link)
+                        # trigger update for all tiles that are linked to the active data menu
+                        for i in range(len(links_style)):
+                            if links_style[i] == 'fa fa-link':
+                                if 'OPG010' in df_name:
+                                    df_tile = 'OPG010'
+                                elif 'OPG011' in df_name:
+                                    df_tile = 'OPG011'
 
-                            # op-2 is continue the dataset change but unlink my graph
-                            # op-3 is continue the dataset change and modify my graph as necessary (keeping the link)
-                            # trigger update for all tiles that are linked to the active data menu
-                            for i in range(len(links_style)):
-                                if links_style[i] == 'fa fa-link':
-                                    if 'OPG010' in df_name:
-                                        df_tile = 'OPG010'
-                                    elif 'OPG011' in df_name:
-                                        df_tile = 'OPG011'
+                                # The graph type is none or mismatch and the option for unlink graph
+                                if (graph_types[i] is None or graph_types[i] in GRAPH_OPTIONS[df_tile]) and \
+                                        prompt_result != 'op-2':
+                                    graph_triggers[i] = df_name
+                                    options_triggers[i] = df_name
+                                    df_names[i] = df_name
+                                    prev_selection[i] = df_name
+                                    prev_time[i] = time_period
+                                else:
+                                    # [i]= 'fa-fa-unlink'
+                                    # set the dataset of the new menu from unlinking
+                                    if type(state_of_display) == dict:
+                                        state_of_display = [state_of_display]
 
-                                    # The graph type is none or mismatch and the option for unlink graph
-                                    if (graph_types[i] is None or graph_types[i] in GRAPH_OPTIONS[df_tile]) and \
-                                            prompt_result != 'op-2':
-                                        graph_triggers[i] = df_name
-                                        options_triggers[i] = df_name
-                                        df_names[i] = df_name
+                                    nid_path = "root"
+
+                                    for button in state_of_display:
+                                        nid_path += '^||^{}'.format(button['props']['children'])
+
+                                    df_names[i] = prev_selection[i]
+                                    time_periods[i] = prev_time[i]
+                                    if df_names[i] != "OPG010":
+                                        session_key = df_names[i] + time_periods[i]
+                                    else:
+                                        session_key = df_names[i]
+                                    data[i] = get_data_menu(i, df_names[i],
+                                                            hierarchy_toggle=parent_hierarchy_toggle,
+                                                            level_value=parent_hierarchy_drop,
+                                                            nid_path=nid_path,
+                                                            graph_all_toggle=parent_graph_child_toggle,
+                                                            fiscal_toggle=parent_fiscal_toggle,
+                                                            input_method=parent_timeframe,
+                                                            num_periods=parent_num_state,
+                                                            period_type=parent_period_type,
+                                                            prev_selection=prev_selection[i],
+                                                            df_const=df_const,
+                                                            session_key=session_key) if prompt_result == 'op-2' \
+                                        else get_data_menu(i, df_names[i],
+                                                           prev_selection=prev_selection[i],
+                                                           df_const=df_const, session_key=session_key)
+                                    refresh_button[i] = {'padding': '10px 0', 'width': '15px',
+                                                         'height': '15px',
+                                                         'position': 'relative',
+                                                         'margin-right': '10px', 'margin-left': '10px',
+                                                         'vertical-align': 'top'}
+
+                                    if parent_timeframe == "select-range":
+                                        date_picker_triggers[i] = {"Input Method": parent_timeframe,
+                                                                   "Start Year Selection": parent_start_year,
+                                                                   "End Year Selection": parent_end_year,
+                                                                   "Start Secondary Selection": parent_start_secondary,
+                                                                   "End Secondary Selection": parent_end_secondary,
+                                                                   "Tab": parent_secondary_type}
+
+                                    # continue the dataset change and modify my graph as necessary (keeping the link)
+                                    if prompt_result == 'op-3':
+                                        options_triggers[i] = 'fa fa-link'
+                                        sidemenu_styles[tile] = DATA_CONTENT_SHOW
                                         prev_selection[i] = df_name
                                         prev_time[i] = time_period
+                                    # unlink the graph then load new dataset in parent data menu
                                     else:
-                                        # [i]= 'fa-fa-unlink'
-                                        # set the dataset of the new menu from unlinking
-                                        if type(state_of_display) == dict:
-                                            state_of_display = [state_of_display]
-
-                                        nid_path = "root"
-
-                                        for button in state_of_display:
-                                            nid_path += '^||^{}'.format(button['props']['children'])
-
-                                        df_names[i] = prev_selection[i]
-                                        time_periods[i] = prev_time[i]
-                                        if df_names[i] != "OPG010":
-                                            session_key = df_names[i] + time_periods[i]
-                                        else:
-                                            session_key = df_names[i]
-                                        data[i] = get_data_menu(i, df_names[i],
-                                                                hierarchy_toggle=parent_hierarchy_toggle,
-                                                                level_value=parent_hierarchy_drop,
-                                                                nid_path=nid_path,
-                                                                graph_all_toggle=parent_graph_child_toggle,
-                                                                fiscal_toggle=parent_fiscal_toggle,
-                                                                input_method=parent_timeframe,
-                                                                num_periods=parent_num_state,
-                                                                period_type=parent_period_type,
-                                                                prev_selection=prev_selection[i],
-                                                                df_const=df_const,
-                                                                session_key=session_key) if prompt_result == 'op-2' \
-                                            else get_data_menu(i, df_names[i],
-                                                               prev_selection=prev_selection[i],
-                                                               df_const=df_const, session_key=session_key)
-                                        refresh_button[i] = {'padding': '10px 0', 'width': '15px',
-                                                             'height': '15px',
-                                                             'position': 'relative',
-                                                             'margin-right': '10px', 'margin-left': '10px',
-                                                             'vertical-align': 'top'}
-
-                                        if parent_timeframe == "select-range":
-                                            date_picker_triggers[i] = {"Input Method": parent_timeframe,
-                                                                       "Start Year Selection": parent_start_year,
-                                                                       "End Year Selection": parent_end_year,
-                                                                       "Start Secondary Selection": parent_start_secondary,
-                                                                       "End Secondary Selection": parent_end_secondary,
-                                                                       "Tab": parent_secondary_type}
-
-                                        # continue the dataset change and modify my graph as necessary (keeping the link)
-                                        if prompt_result == 'op-3':
-                                            options_triggers[i] = 'fa fa-link'
-                                            sidemenu_styles[tile] = DATA_CONTENT_SHOW
-                                            prev_selection[i] = df_name
-                                            prev_time[i] = time_period
-                                        # unlink the graph then load new dataset in parent data menu
-                                        else:
-                                            options_triggers[i] = 'fa fa-unlink'
-                                            data_set_flag[i] = Store(id={'type': 'data-set-result', 'index': i},
-                                                                         data=True)
+                                        options_triggers[i] = 'fa fa-unlink'
+                                        data_set_flag[i] = Store(id={'type': 'data-set-result', 'index': i},
+                                                                     data=True)
             # duo options
             else:
                 if prompt_result == 'ok':
@@ -1400,46 +1401,46 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                             store = df_const
                     # [i]= 'fa-fa-unlink'
                     # set the dataset of the new menu from unlinking
-                        if len(session[session_key]) != 0:
-                            links_style[tile] = 'fa fa-unlink'
-                            prev_selection[tile] = df_name
-                            prev_time[tile] = time_period
+                    if len(session[session_key]) != 0:
+                        links_style[tile] = 'fa fa-unlink'
+                        prev_selection[tile] = df_name
+                        prev_time[tile] = time_period
 
-                            if type(state_of_display) == dict:
-                                state_of_display = [state_of_display]
+                        if type(state_of_display) == dict:
+                            state_of_display = [state_of_display]
 
-                            nid_path = "root"
+                        nid_path = "root"
 
-                            for button in state_of_display:
-                                nid_path += '^||^{}'.format(button['props']['children'])
+                        for button in state_of_display:
+                            nid_path += '^||^{}'.format(button['props']['children'])
 
-                            data[tile] = get_data_menu(tile, df_names[tile],
-                                                       prev_selection=prev_selection[tile],
-                                                       df_const=df_const, session_key=session_key)
-                            refresh_button[tile] = {'padding': '10px 0', 'width': '15px',
-                                                    'height': '15px',
-                                                    'position': 'relative',
-                                                    'margin-right': '10px', 'margin-left': '10px',
-                                                    'vertical-align': 'top'}
+                        data[tile] = get_data_menu(tile, df_names[tile],
+                                                   prev_selection=prev_selection[tile],
+                                                   df_const=df_const, session_key=session_key)
+                        refresh_button[tile] = {'padding': '10px 0', 'width': '15px',
+                                                'height': '15px',
+                                                'position': 'relative',
+                                                'margin-right': '10px', 'margin-left': '10px',
+                                                'vertical-align': 'top'}
 
-                            options_triggers[tile] = df_name
-                            sidemenu_styles[tile] = DATA_CONTENT_SHOW
-                            prev_selection[tile] = df_name
-                            prev_time[tile] = time_period
-                    # cancel was called
-                    else:
+                        options_triggers[tile] = df_name
                         sidemenu_styles[tile] = DATA_CONTENT_SHOW
+                        prev_selection[tile] = df_name
+                        prev_time[tile] = time_period
+                # cancel was called
+                else:
+                    sidemenu_styles[tile] = DATA_CONTENT_SHOW
 
-                        if prompt_data[0] == 'loaded_dataset_swap':
-                            session[session_key] = dataset_to_df(df_name, time_periods[tile])
-                            if len(session[session_key]) == 0:
-                                popup_text = "No data available"  # get_label('LBL_Axes_Graph_Labels_Modified')
-                                popup_is_open = True
-                                sidemenu_styles[tile] = DATA_CONTENT_SHOW
-                                data_info[tile] = {'display': 'inline-block', 'text-align': 'center',
-                                                   'min-width': '260px'}
-                            else:
-                                data_set_val[tile] = prev_selection[tile]
+                    if prompt_data[0] == 'loaded_dataset_swap':
+                        session[session_key] = dataset_to_df(df_name, time_periods[tile])
+                        if len(session[session_key]) == 0:
+                            popup_text = "No data available"  # get_label('LBL_Axes_Graph_Labels_Modified')
+                            popup_is_open = True
+                            sidemenu_styles[tile] = DATA_CONTENT_SHOW
+                            data_info[tile] = {'display': 'inline-block', 'text-align': 'center',
+                                               'min-width': '260px'}
+                        else:
+                            data_set_val[tile] = prev_selection[tile]
         # elif 'RESET' dashboard requested, hide and reset all data tiles
         elif prompt_data[0] == 'reset' and prompt_result == 'ok':
             for i in range(len(data)):

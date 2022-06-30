@@ -93,7 +93,7 @@ def delete_dashboard(dashboard_id):
     del session['saved_dashboards'][dashboard_id]
 
 
-def load_graph_menu(graph_type, tile, df_name, args_list, graph_options, graph_variable, df_const):
+def load_graph_menu(graph_type, tile, df_name, args_list, graph_options, graph_variable, df_const, session_key):
     """Retuns the graph menu dependent on the graph type."""
     if graph_type == 'Line' or graph_type == 'Scatter':
         graph_menu = get_line_scatter_graph_menu(tile=tile, x=args_list[0], measure_type=args_list[1],
@@ -106,7 +106,7 @@ def load_graph_menu(graph_type, tile, df_name, args_list, graph_options, graph_v
                                                  secondary_level_value=graph_variable[0],
                                                  secondary_nid_path=graph_variable[1],
                                                  secondary_hierarchy_toggle=graph_variable[2],
-                                                 secondary_graph_all_toggle=graph_variable[3])
+                                                 secondary_graph_all_toggle=graph_variable[3], session_key=session_key)
     elif graph_type == 'Bar':
         graph_menu = get_bar_graph_menu(tile=tile, x=args_list[0], measure_type=args_list[1],
                                         orientation=args_list[2], animate=args_list[3], color=args_list[4],
@@ -116,12 +116,12 @@ def load_graph_menu(graph_type, tile, df_name, args_list, graph_options, graph_v
                                         df_const=df_const, secondary_level_value=graph_variable[0],
                                         secondary_nid_path=graph_variable[1],
                                         secondary_hierarchy_toggle=graph_variable[2],
-                                        secondary_graph_all_toggle=graph_variable[3])
+                                        secondary_graph_all_toggle=graph_variable[3], session_key=session_key)
     elif graph_type == 'Table':
         graph_menu = get_table_graph_menu(tile=tile, number_of_columns=args_list[1], xaxis=graph_options[0],
                                           yaxis=graph_options[1], xpos=graph_options[2], ypos=graph_options[3],
                                           xmodified=graph_options[4], ymodified=graph_options[5], df_name=df_name,
-                                          df_const=df_const)
+                                          df_const=df_const, session_key=session_key)
     elif graph_type == 'Box_Plot':
         graph_menu = get_box_plot_menu(tile=tile, axis_measure=args_list[0],
                                        graph_orientation=args_list[1], show_data_points=args_list[2],
@@ -132,14 +132,14 @@ def load_graph_menu(graph_type, tile, df_name, args_list, graph_options, graph_v
                                        xpos=graph_options[2], ypos=graph_options[3],
                                        secondary_level_value=graph_variable[0], secondary_nid_path=graph_variable[1],
                                        secondary_hierarchy_toggle=graph_variable[2],
-                                       secondary_graph_all_toggle=graph_variable[3])
+                                       secondary_graph_all_toggle=graph_variable[3], session_key=session_key)
     elif graph_type == 'Sankey':
         graph_menu = get_sankey_menu(tile=tile, df_name=df_name, df_const=df_const,
                                      xaxis=graph_options[0], yaxis=graph_options[1], xpos=graph_options[2],
                                      ypos=graph_options[3], xmodified=graph_options[4], ymodified=graph_options[5],
                                      secondary_level_value=graph_variable[0], secondary_nid_path=graph_variable[1],
                                      secondary_hierarchy_toggle=graph_variable[2],
-                                     secondary_graph_all_toggle=graph_variable[3])
+                                     secondary_graph_all_toggle=graph_variable[3], session_key=session_key)
     elif graph_type == 'Bubble':
         graph_menu = get_bubble_graph_menu(tile=tile, x=args_list[0], x_measure=args_list[1], y=args_list[2],
                                            y_measure=args_list[3], size=args_list[4], size_measure=args_list[5],
@@ -147,7 +147,7 @@ def load_graph_menu(graph_type, tile, df_name, args_list, graph_options, graph_v
                                            gridline=graph_options[6], legend=graph_options[7], xaxis=graph_options[0],
                                            yaxis=graph_options[1],  df_name=df_name, df_const=df_const,
                                            xpos=graph_options[2], ypos=graph_options[3], xmodified=graph_options[4],
-                                           ymodified=graph_options[5])
+                                           ymodified=graph_options[5], session_key=session_key)
     else:
         raise PreventUpdate
 

@@ -206,6 +206,7 @@ for y in range(4):
          State({'type': 'num-periods', 'index': 4}, 'value'),
          State({'type': 'period-type', 'index': 4}, 'value'),
          State({'type': 'start-year-input', 'index': 4}, 'name'),
+         State({'type': 'time-period', 'index': 4}, 'value'),
          # tile data menu states
          State({'type': 'start-year-input', 'index': y}, 'value'),
          State({'type': 'end-year-input', 'index': y}, 'value'),
@@ -220,6 +221,7 @@ for y in range(4):
          State({'type': 'num-periods', 'index': y}, 'value'),
          State({'type': 'period-type', 'index': y}, 'value'),
          State({'type': 'start-year-input', 'index': y}, 'name'),
+         State({'type': 'time-period', 'index': y}, 'value'),
          # Seconday hierarchy
          State({'type': 'secondary_hierarchy_display_button', 'index': y}, 'children'),
          State({'type': 'secondary_hierarchy-toggle', 'index': y}, 'value'),
@@ -236,10 +238,11 @@ for y in range(4):
                            parent_hierarchy_toggle, parent_hierarchy_level_dropdown, parent_state_of_display,
                            parent_graph_children_toggle, parent_fiscal_toggle, parent_input_method,
                            parent_secondary_start, parent_secondary_end, parent_x_time_period, parent_period_type,
-                           parent_tab, year_start, year_end, hierarchy_toggle, hierarchy_level_dropdown,
-                           state_of_display, graph_children_toggle, fiscal_toggle, input_method, secondary_start,
-                           secondary_end, x_time_period, period_type, tab, secondary_button_path, secondary_toggle,
-                           secondary_level, secondary_graph_all, secondary_options, selected_layout, df_const):
+                           parent_tab, parent_time_period, year_start, year_end, hierarchy_toggle,
+                           hierarchy_level_dropdown, state_of_display, graph_children_toggle, fiscal_toggle,
+                           input_method, secondary_start, secondary_end, x_time_period, period_type, tab, time_period,
+                           secondary_button_path, secondary_toggle, secondary_level, secondary_graph_all,
+                           secondary_options, selected_layout, df_const):
 
         if link_state == 'fa fa-link':
             fiscal_toggle = parent_fiscal_toggle
@@ -256,6 +259,7 @@ for y in range(4):
             tab = parent_tab
             df_name = parent_df_name
             graph_children_toggle = parent_graph_children_toggle
+            time_period = parent_time_period
 
         # creates a hierarchy trail from the display of hierarchy selection
         if type(state_of_display) == dict:
@@ -362,6 +366,7 @@ for y in range(4):
                                     'Hierarchy Toggle': hierarchy_toggle,
                                     'Level Value': hierarchy_level_dropdown,
                                     'Data Set': df_name,
+                                    'Time Period': time_period,
                                     'Graph All Toggle': graph_children_toggle,
                                     'NID Path': nid_path,
                                     'Title': graph_title,
@@ -406,21 +411,27 @@ for y in range(4):
         # if confirm-load then we load what was selected from menu
         elif trigger == 'confirm-load':
             df_name = session['saved_layouts'][selected_layout]['Data Set']
-
+            time_period = session['saved_layouts'][selected_layout]['Time Period']
+            if df_name != 'OPG010':
+                session_key = df_name + time_period
+            else:
+                session_key = df_name
             # check if data is loaded
-            if df_name not in session or (df_const is not None and df_name not in df_const):
-                session[df_name] = dataset_to_df(df_name)
+            if session_key not in session or (df_const is not None and session_key not in df_const):
+                session[session_key] = dataset_to_df(df_name, time_period)
                 if df_const is None:
                     df_const = {}
-                df_const[df_name] = generate_constants(df_name)
+                df_const[session_key] = generate_constants(df_name, session_key)
 
             #  --------- create customize menu ---------
             graph_type = session['saved_layouts'][selected_layout]['Graph Type']
+            time_period = session['saved_layouts'][selected_layout]['Time Period']
             args_list = session['saved_layouts'][selected_layout]['Args List']
             graph_options = session['saved_layouts'][selected_layout]['Graph Options']
             graph_variable = session['saved_layouts'][selected_layout]['Graph Variable']
             graph_menu = load_graph_menu(graph_type=graph_type, tile=tile, df_name=df_name, args_list=args_list,
-                                         graph_options=graph_options, graph_variable=graph_variable, df_const=df_const)
+                                         graph_options=graph_options, graph_variable=graph_variable, df_const=df_const,
+                                         session_key=session_key)
             customize_content = get_customize_content(tile=tile, graph_type=graph_type, graph_menu=graph_menu,
                                                       df_name=df_name)
 
@@ -446,8 +457,8 @@ for y in range(4):
                                          hierarchy_toggle=hierarchy_toggle, level_value=level_value,
                                          nid_path=nid_path, graph_all_toggle=graph_all_toggle,
                                          fiscal_toggle=fiscal_toggle, input_method=input_method,
-                                         num_periods=num_periods,
-                                         period_type=period_type, df_const=df_const)
+                                         num_periods=num_periods, time_period=time_period,
+                                         period_type=period_type, df_const=df_const, session_key=session_key)
 
             # show and set 'Select Range' inputs if selected, else leave hidden and unset
             if session['saved_layouts'][selected_layout]['Timeframe'] == 'select-range':
@@ -589,6 +600,12 @@ for y in range(4):
      State({'type': 'data-set', 'index': 2}, 'value'),
      State({'type': 'data-set', 'index': 3}, 'value'),
      State({'type': 'data-set', 'index': 4}, 'value'),
+     # time periods
+     State({'type': 'time-period', 'index': 0}, 'value'),
+     State({'type': 'time-period', 'index': 1}, 'value'),
+     State({'type': 'time-period', 'index': 2}, 'value'),
+     State({'type': 'time-period', 'index': 3}, 'value'),
+     State({'type': 'time-period', 'index': 4}, 'value'),
      # start years
      State({'type': 'start-year-input', 'index': 0}, 'value'),
      State({'type': 'start-year-input', 'index': 1}, 'value'),
@@ -688,7 +705,8 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                                       dashboard_title, tile_titles, links, graph_types,
                                       args_list_0, args_list_1, args_list_2, args_list_3,
                                       xaxis_titles, yaxis_titles, x_leg_pos, y_leg_pos, xmodified, ymodified, gridline,
-                                      legend, df_name_0, df_name_1, df_name_2, df_name_3, df_name4,
+                                      legend, df_name_0, df_name_1, df_name_2, df_name_3, df_name_4, time_period_0,
+                                      time_period_1, time_period_2, time_period_3, time_period_4,
                                       start_year_0, start_year_1, start_year_2, start_year_3, start_year_4,
                                       end_year_0, end_year_1, end_year_2, end_year_3, end_year_4,
                                       hierarchy_toggle_0, hierarchy_toggle_1, hierarchy_toggle_2, hierarchy_toggle_3,
@@ -821,14 +839,20 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 args_list = tile_data.pop('Args List')
                 graph_options = tile_data.pop('Graph Options')
                 df_name = tile_data['Data Set']
+                time_period = tile_data['Time Period']
                 graph_variable = tile_data.pop('Graph Variable')
 
+                if df_name != 'OPG010':
+                    session_key = df_name+ time_period
+                else:
+                    session_key = df_name
+
                 # check if data is loaded
-                if df_name not in session or (df_const is not None and df_name not in df_const):
-                    session[df_name] = dataset_to_df(df_name)
+                if session_key not in session or (df_const is not None and session_key not in df_const):
+                    session[session_key] = dataset_to_df(df_name, time_period)
                     if df_const is None:
                         df_const = {}
-                    df_const[df_name] = generate_constants(df_name)
+                    df_const[session_key] = generate_constants(df_name, session_key)
 
                 if link_state == 'fa fa-link':
                     # if tile was linked but its data menu has changed and no longer matches parent data, unlink
@@ -842,7 +866,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 # create tile keys
                 graph_menu = load_graph_menu(graph_type=graph_type, tile=tile_index, df_name=df_name,
                                              args_list=args_list, graph_options=graph_options,
-                                             graph_variable=graph_variable, df_const=df_const)
+                                             graph_variable=graph_variable, df_const=df_const, session_key=session_key)
 
                 customize_content = get_customize_content(tile=tile_index, graph_type=graph_type, graph_menu=graph_menu,
                                                           df_name=df_name)
@@ -868,7 +892,8 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                         tile=data_index, df_name=df_name, mode='dashboard-loading', hierarchy_toggle=hierarchy_toggle,
                         level_value=level_value, nid_path=nid_path,
                         graph_all_toggle=graph_all_toggle, fiscal_toggle=fiscal_toggle, input_method=timeframe,
-                        num_periods=num_periods, period_type=period_type, df_const=df_const)
+                        num_periods=num_periods, period_type=period_type, df_const=df_const,time_period=time_period,
+                        session_key=session_key)
 
                     if timeframe == 'select-range':
                         dms[data_index]['Tab'] = tile_data['Date Tab']
@@ -966,7 +991,8 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                                                      False])
             # else, save/overwrite the dashboard and contained tiles
             else:
-                df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name4]
+                df_names = [df_name_0, df_name_1, df_name_2, df_name_3, df_name_4]
+                time_periods = [time_period_0, time_period_1, time_period_2, time_period_3, time_period_4]
                 start_years = [start_year_0, start_year_1, start_year_2, start_year_3, start_year_4]
                 end_years = [end_year_0, end_year_1, end_year_2, end_year_3, end_year_4]
                 hierarchy_toggles = [hierarchy_toggle_0, hierarchy_toggle_1, hierarchy_toggle_2, hierarchy_toggle_3,
@@ -1006,6 +1032,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                         'Period Type': period_types[4],
                         'Level Value': level_values[4],
                         'Data Set': df_names[4],
+                        'Time Period': time_periods[4],
                         'Graph All Toggle': graph_all_toggles[4],
                         'NID Path': parent_nid_path,
                     }
@@ -1066,6 +1093,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                             'Period Type': period_types[i],
                             'Level Value': level_values[i],
                             'Data Set': df_names[i],
+                            'Time Period': time_periods[i],
                             'Graph All Toggle': graph_all_toggles[i],
                             'NID Path': nid_path,
                         }

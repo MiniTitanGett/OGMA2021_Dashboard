@@ -237,6 +237,9 @@ for x in range(4):
         else:
             df_name = df_tile
 
+        if df_name is None:
+            raise PreventUpdate
+
         if df_name != 'OPG010':
             session_key = df_name + time_period
         else:

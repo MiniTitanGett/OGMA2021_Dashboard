@@ -719,6 +719,9 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
         df_name = parent_df_name
         time_period = parent_time_period
 
+    if df_name is None:
+        raise PreventUpdate
+
     if df_name != 'OPG010':
         session_key = df_name + time_period
     else:

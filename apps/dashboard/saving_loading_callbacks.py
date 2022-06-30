@@ -892,8 +892,8 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                         tile=data_index, df_name=df_name, mode='dashboard-loading', hierarchy_toggle=hierarchy_toggle,
                         level_value=level_value, nid_path=nid_path,
                         graph_all_toggle=graph_all_toggle, fiscal_toggle=fiscal_toggle, input_method=timeframe,
-                        num_periods=num_periods, period_type=period_type, df_const=df_const,time_period=time_period,
-                        session_key=session_key)
+                        num_periods=num_periods, period_type=period_type,prev_selection=None, time_period=time_period,
+                        df_const=df_const, session_key=session_key)
 
                     if timeframe == 'select-range':
                         dms[data_index]['Tab'] = tile_data['Date Tab']

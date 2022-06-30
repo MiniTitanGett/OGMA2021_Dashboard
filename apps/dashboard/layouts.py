@@ -188,8 +188,9 @@ def get_data_set_picker(tile, df_name, confirm_parent, prev_selection, time_peri
             P("No Data Available",
               style={'display': 'inline-block', 'align' 'position': 'relative', 'padding-top': '15px',
                      'font-weight': 'bold'}),
-        ], style={"display": "inline-block"} if df_name is not None else
-        DATA_CONTENT_HIDE, id={'type': 'no-data-info', 'index': tile}),
+        ], style={'display': 'inline-block', 'text-align': 'center', 'min-width': '260px'} if session_key not in session
+                                                                                              and df_name is not None
+        else DATA_CONTENT_HIDE, id={'type': 'no-data-info', 'index': tile}),
     ]
 
 

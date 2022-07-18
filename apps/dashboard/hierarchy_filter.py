@@ -64,7 +64,8 @@ def generate_history_button(name, index, tile):
 # ***********************************************LAYOUT***************************************************************
 
 
-def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle, nid_path, df_const, session_key):
+def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle, nid_path, df_const,
+                         session_key, hier_type):
     """Gets and returns the hierarchy layout."""
     if df_name is not None and df_const is not None:
         hierarchy_nid_list = nid_path.split("^||^")
@@ -101,7 +102,7 @@ def get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all
             html.Div([
                 dcc.Dropdown(
                     id={'type': 'hierarchy_level_dropdown', 'index': tile},
-                    options=[{'label': get_label('LBL_' + x, df_name), 'value': x} for x in
+                    options=[{'label': get_label('LBL_' + x, hier_type), 'value': x} for x in
                              df_const[session_key]['HIERARCHY_LEVELS']],
                     multi=False,
                     value=level_value,

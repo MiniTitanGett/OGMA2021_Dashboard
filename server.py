@@ -180,6 +180,9 @@ def validate_session(sessionid, externalid):
 
     return output.current_lang
 
+def load_hierarchy_type():
+    df = get_ref('hierarchy_type', session["language"])
+    return df["ref_value"].tolist()
 
 def load_dataset_list():
     df = get_ref("Data_set", session["language"])
@@ -253,7 +256,7 @@ def before_request_func():
 
         # load the available datasets
         session["dataset_list"] = load_dataset_list()  # get_ref("Data_set", session["language"])
-
+        session["hierarchy_type"] = load_hierarchy_type()
         # TODO event level datasets will need to load measure_types
         session["Measure_type_list"] = load_dataset_measuretype(['OPG011'])
 

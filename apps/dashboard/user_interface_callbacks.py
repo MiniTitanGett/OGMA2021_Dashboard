@@ -971,6 +971,11 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
      Input({'type': 'time-period', 'index': 2}, 'value'),
      Input({'type': 'time-period', 'index': 3}, 'value'),
      Input({'type': 'time-period', 'index': 4}, 'value'),
+     Input({'type': 'hierarchy_type_dropdown', 'index': 0}, 'value'),
+     Input({'type': 'hierarchy_type_dropdown', 'index': 1}, 'value'),
+     Input({'type': 'hierarchy_type_dropdown', 'index': 2}, 'value'),
+     Input({'type': 'hierarchy_type_dropdown', 'index': 3}, 'value'),
+     Input({'type': 'hierarchy_type_dropdown', 'index': 4}, 'value')
      ],
     [State('prompt-title', 'data-'),
      State({'type': 'data-tile', 'index': ALL}, 'children'),
@@ -986,6 +991,11 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
      State({'type': 'prev-time-period', 'index': 2}, 'data'),
      State({'type': 'prev-time-period', 'index': 3}, 'data'),
      State({'type': 'prev-time-period', 'index': 4}, 'data'),
+     State({'type': 'prev-hierarchy', 'index': 0}, 'data'),
+     State({'type': 'prev-hierarchy', 'index': 1}, 'data'),
+     State({'type': 'prev-hierarchy', 'index': 2}, 'data'),
+     State({'type': 'prev-hierarchy', 'index': 3}, 'data'),
+     State({'type': 'prev-hierarchy', 'index': 4}, 'data'),
      State({'type': 'graph-type-dropdown', 'index': ALL}, 'value'),
      # Date picker states for parent data menu
      State({'type': 'start-year-input', 'index': 4}, 'name'),
@@ -1013,9 +1023,11 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                            _confirm_clicks_1, _confirm_clicks_2, _confirm_clicks_3, _confirm_clicks_4,
                            _refresh_clicks_0, _refresh_clicks_1, _refresh_clicks_2, _refresh_clicks_3,
                            _refresh_clicks_4, prompt_result, time_period_0, time_period_1, time_period_2,
-                           time_period_3, time_period_4, prompt_data, data_states, sidemenu_style_states, df_const,
+                           time_period_3, time_period_4, hier_type_0, hier_type_1, hier_type_2, hier_type_3,
+                           hier_type_4, prompt_data, data_states, sidemenu_style_states, df_const,
                            prev_selection_0, prev_selection_1, prev_selection_2, prev_selection_3, prev_selection_4,
                            prev_time_period_0, prev_time_period_1, prev_time_period_2, prev_time_period_3,
+                           prev_hierarchy_0, prev_hierarchy_1, prev_hierarchy_2, prev_hierarchy_3, prev_hierarchy_4,
                            prev_time_period_4, graph_types,
                            parent_secondary_type, parent_timeframe, parent_fiscal_toggle, parent_start_year,
                            parent_end_year, parent_start_secondary, parent_end_secondary, parent_hierarchy_toggle,
@@ -1048,8 +1060,10 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
     # unknown why but this has to be done this way instead of using ALL since ALL was changing the order in seemingly
     # random ways
     data_info = [data_info_style_0, data_info_style_1, data_info_style_2, data_info_style_3, data_info_style_4]
+    hierarchy_type = [hier_type_0, hier_type_1, hier_type_2, hier_type_3, hier_type_4]
     time_periods = [time_period_0, time_period_1, time_period_2, time_period_3, time_period_4]
     prev_time = [prev_time_period_0, prev_time_period_1, prev_time_period_2, prev_time_period_3, prev_time_period_4]
+    prev_hierarchy = [prev_hierarchy_0, prev_hierarchy_1, prev_hierarchy_2, prev_hierarchy_3, prev_hierarchy_4]
     prev_selection = [prev_selection_0, prev_selection_1, prev_selection_2, prev_selection_3, prev_selection_4]
     # flag for the dataset selector result menu
     data_set_flag = []
@@ -1067,12 +1081,15 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
             if links_style[i] == 'fa fa-link':
                 prev_time[i] = time_periods[4]
                 prev_selection[i] = df_names[4]
+                prev_hierarchy[i] = hierarchy_type[4]
             else:
                 prev_time[i] = time_periods[i]
                 prev_selection[i] = df_names[i]
+                prev_hierarchy[i] = hierarchy_type[i]
         if 'fa fa-link' in links_style:
             prev_time[4] = time_periods[4]
             prev_selection[4] = df_names[4]
+            prev_hierarchy[i] = hierarchy_type[4]
     # if 'data-menu-close' or 'select-dashboard-dropdown' requested, close all data menus
     # don't close if no data set has been chosen
     elif 'data-menu-close' in changed_id or 'select-dashboard-dropdown' in changed_id:
@@ -1233,7 +1250,8 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
 
                 df_const[session_key] = generate_constants(df_name, session_key)
                 store = df_const
-                data[changed_index] = get_data_menu(changed_index, df_name, df_const=df_const, session_key=session_key)
+                data[changed_index] = get_data_menu(changed_index, df_name, df_const=df_const, session_key=session_key,
+                                                    hier_type=hierarchy_type[changed_index])
                 sidemenu_styles[changed_index] = DATA_CONTENT_SHOW
 
                 # trigger update for all tiles that are linked to the active data menu
@@ -1308,7 +1326,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                     if len(session[session_key]) != 0:
                         # reset data menu for tile no matter what
                         data[tile] = get_data_menu(tile, df_name, df_const=df_const, time_period=time_period,
-                                                   session_key=session_key)
+                                                   session_key=session_key, hier_type=hierarchy_type[tile])
 
                         # op-2 is continue the dataset change but unlink my graph
                         # op-3 is continue the dataset change and modify my graph as necessary (keeping the link)
@@ -2063,3 +2081,5 @@ for x in range(4):
          State({'type': 'args-value: {}'.replace("{}", str(x)), 'index': ALL}, 'value')],
         prevent_initial_call=True
     )
+
+    # Input({'type': 'hierarchy_level_dropdown', 'index': 4}, 'value')

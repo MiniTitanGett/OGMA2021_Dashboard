@@ -95,7 +95,7 @@ def recursive_to_plotly_json(document):
 
 
 def get_data_set_picker(tile, df_name, confirm_parent, prev_selection, time_period="last-month",  prev_time=None,
-                        session_key=None):
+                        session_key=None, hier_type="Organizations"):
     """Returns data set picker for data menu."""
     return [
         Div(
@@ -132,6 +132,9 @@ def get_data_set_picker(tile, df_name, confirm_parent, prev_selection, time_peri
                 id={'type': 'data-set-prev-selected', 'index': tile}),
             Store(
                 data=prev_time,
+                id={'type': 'prev-hierarchy', 'index': tile}),
+            Store(
+                data=prev_time,
                 id={'type': 'prev-time-period', 'index': tile}),
             Div(
                 Div([
@@ -159,9 +162,25 @@ def get_data_set_picker(tile, df_name, confirm_parent, prev_selection, time_peri
                 className='data-set-load-box'),
         ],
             style={'display': 'flex'}),
+        Div(children=[
+            P("Hierarchy Type:", style={'display': 'inline-block', 'padding-top': '15px'}),
+            Div([
+                Dropdown(
+                id={'type': 'hierarchy_type_dropdown', 'index': tile},
+                options=[{'label': x, 'value': x} for x in
+                         session["hierarchy_type"]],
+                multi=False,
+                value=hier_type,
+                clearable=False,
+                style={'width': '146px', 'height': '26px', 'margin': '0', 'padding': '0px', 'font-size': '15px',
+                           'text-align': 'left', 'border-radius': '5px', 'color': '#333', 'max-height': '26px'},
+                placeholder='{}...'.format(get_label('LBL_Select')))],
+                style={"display": "inline-block", 'padding': '10px', 'position': 'absolute'}),],
+            id={'type': 'hierarchy_type', 'index': tile}),
         Div([
             P("Time Slice: ",
-              style={'display': 'inline-block', 'position': 'relative', 'padding-top': '15px'}),
+              style={'display': 'inline-block', 'position': 'relative', 'padding-top': '15px',
+                     'padding-right': '31px'}),
             Div([
                 Dropdown(
                     id={'type': 'time-period', 'index': tile},
@@ -179,7 +198,7 @@ def get_data_set_picker(tile, df_name, confirm_parent, prev_selection, time_peri
                     ],
                     value=time_period,
                     clearable=False,
-                    style={'width': '140px', 'height': '26px', 'margin': '0', 'padding': '0px', 'font-size': '15px',
+                    style={'width': '146px', 'height': '26px', 'margin': '0', 'padding': '0px', 'font-size': '15px',
                            'text-align': 'left', 'border-radius': '5px', 'color': '#333', 'max-height': '26px'}),
             ], style={"display": "inline-block", 'padding': '10px', 'position': 'absolute'}),
         ], style={"display": "inline-block"} if df_name is not None else
@@ -197,18 +216,19 @@ def get_data_set_picker(tile, df_name, confirm_parent, prev_selection, time_peri
 def get_data_menu(tile, df_name=None, mode='Default', hierarchy_toggle='Level Filter', level_value='H0',
                   nid_path="root", graph_all_toggle=None, fiscal_toggle='Gregorian', input_method='all-time',
                   num_periods='5', period_type='last-years', prev_selection=None, time_period='last-month',
-                  prev_time=None, confirm_parent=None, df_const=None, session_key=None):
+                  prev_time=None, confirm_parent=None, df_const=None, session_key=None, hier_type='Organizations'):
     """Returns the data side-menu."""
     content = [
         A(
             className='boxclose',
             style={'position': 'relative', 'left': '3px'},
             id={'type': 'data-menu-close', 'index': tile}),
-        Div(get_data_set_picker(tile, df_name, confirm_parent, prev_selection, time_period, prev_time, session_key)),
+        Div(get_data_set_picker(tile, df_name, confirm_parent, prev_selection, time_period, prev_time, session_key,
+                                hier_type)),
         Div([
             Div(
                 get_hierarchy_layout(tile, df_name, hierarchy_toggle, level_value, graph_all_toggle, nid_path,
-                                     df_const, session_key)),
+                                     df_const, session_key, hier_type)),
             Div(get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, period_type, df_const,
                                 session_key))],
             style=DATA_CONTENT_HIDE,

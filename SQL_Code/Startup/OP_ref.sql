@@ -615,13 +615,31 @@ EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Auto_Un_Check_Fitting_
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Auto_Select_Fitting_Options', @language = 'En', @ref_desc = 'Auto Reselecting Data Fitting Options'
 EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Auto_Select_Fitting_Options', @language = 'Fr', @ref_desc = 'Fr: Auto Reselecting Data Fitting Options'
 
+EXEC InsertOPRef @ref_table = 'Hierarchy_type', @ref_value = 'Organizations', @language = 'En', @ref_desc = 'Organizations'
+EXEC InsertOPRef @ref_table = 'Hierarchy_type', @ref_value = 'Commodities', @language = 'En', @ref_desc = 'Commodities'
+EXEC InsertOPRef @ref_table = 'Hierarchy_type', @ref_value = 'Geographies', @language = 'En', @ref_desc = 'Geographies'
+
+EXEC InsertOPRef @ref_table = 'Organizations', @ref_value = 'LBL_H0', @language = 'Fr', @ref_desc = 'Niveau d''Organisation 1 (Haut)'
+EXEC InsertOPRef @ref_table = 'Organizations', @ref_value = 'LBL_H0', @language = 'En', @ref_desc = 'Organization Level 1 (Top)'
+EXEC InsertOPRef @ref_table = 'Organizations', @ref_value = 'LBL_H1', @language = 'En', @ref_desc = 'Organization Level 2'
+EXEC InsertOPRef @ref_table = 'Organizations', @ref_value = 'LBL_H1', @language = 'Fr', @ref_desc = 'Niveau d''Organisation 2'
+EXEC InsertOPRef @ref_table = 'Organizations', @ref_value = 'LBL_H2', @language = 'En', @ref_desc = 'Organization Level 3'
+EXEC InsertOPRef @ref_table = 'Organizations', @ref_value = 'LBL_H2', @language = 'Fr', @ref_desc = 'Niveau d''Organisation 3'
+EXEC InsertOPRef @ref_table = 'Organizations', @ref_value = 'LBL_H3', @language = 'En', @ref_desc = 'Organization Level 4'
+EXEC InsertOPRef @ref_table = 'Organizations', @ref_value = 'LBL_H3', @language = 'Fr', @ref_desc = 'Niveau d''Organisation 4'
+EXEC InsertOPRef @ref_table = 'Organizations', @ref_value = 'LBL_H4', @language = 'En', @ref_desc = 'Organization Level 5'
+EXEC InsertOPRef @ref_table = 'Organizations', @ref_value = 'LBL_H4', @language = 'Fr', @ref_desc = 'Niveau d''Organisation 5'
+EXEC InsertOPRef @ref_table = 'Organizations', @ref_value = 'LBL_H5', @language = 'En', @ref_desc = 'Organization'
+EXEC InsertOPRef @ref_table = 'Organizations', @ref_value = 'LBL_H5', @language = 'Fr', @ref_desc = 'Organisation'
+
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'En',@ref_desc = 'Hierarchy Selection''s Children'
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'Fr',@ref_desc = 'Enfants de la Sélection de Hiérarchie'
 
-
+END
 GO
 
 DROP PROC InsertOPRef
+END
 GO
 ---when we update it from a space to underscore it gives key errors
 /*

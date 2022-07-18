@@ -97,10 +97,6 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                            'max-height': '26px'})
             ], style={'width': '0', 'height': '0', 'position': 'relative', 'bottom': '55px',
                       'left': '125px' if language == 'En' else '150px'}),
-            html.P(
-                "{}: {} - {}".format(get_label('LBL_Available'), df_const[session_key]['MIN_DATE_UNF'],
-                                     df_const[session_key]['MAX_DATE_UNF']),
-                className='time-available'),
             html.Div([
                 # placeholders for datepicker inputs to avoid callback errors.
                 # Inputs are initialized to 1 so that they are
@@ -123,8 +119,11 @@ def get_date_picker(tile, df_name, fiscal_toggle, input_method, num_periods, per
                         id={'type': 'end-secondary-input', 'index': tile},
                         value=1),
                 ], style={'width': '0', 'height': '0', 'overflow': 'hidden'})
-            ], id={'type': 'div-date-range-selection', 'index': tile},
-                style={'padding-bottom': '20px'}),
+            ], id={'type': 'div-date-range-selection', 'index': tile}),
+            html.P(
+                "{}: {} - {}".format(get_label('LBL_Available'), df_const[session_key]['MIN_DATE_UNF'],
+                                     df_const[session_key]['MAX_DATE_UNF']),
+                className='time-available'),
             # date picker trigger boolean for use in chaining update_date_picker to update_graph
             html.Div(
                 id={'type': 'date-picker-trigger', 'index': tile},

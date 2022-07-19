@@ -632,14 +632,26 @@ EXEC InsertOPRef @ref_table = 'Organizations', @ref_value = 'LBL_H4', @language 
 EXEC InsertOPRef @ref_table = 'Organizations', @ref_value = 'LBL_H5', @language = 'En', @ref_desc = 'Organization'
 EXEC InsertOPRef @ref_table = 'Organizations', @ref_value = 'LBL_H5', @language = 'Fr', @ref_desc = 'Organisation'
 
+EXEC InsertOPRef @ref_table = 'Geographies', @ref_value = 'LBL_H0', @language = 'Fr', @ref_desc = 'Fr: Country'
+EXEC InsertOPRef @ref_table = 'Geographies', @ref_value = 'LBL_H0', @language = 'En', @ref_desc = 'Country'
+EXEC InsertOPRef @ref_table = 'Geographies', @ref_value = 'LBL_H1', @language = 'En', @ref_desc = 'State/Province'
+EXEC InsertOPRef @ref_table = 'Geographies', @ref_value = 'LBL_H1', @language = 'Fr', @ref_desc = 'Fr: State/Province'
+EXEC InsertOPRef @ref_table = 'Geographies', @ref_value = 'LBL_H2', @language = 'En', @ref_desc = 'City'
+EXEC InsertOPRef @ref_table = 'Geographies', @ref_value = 'LBL_H2', @language = 'Fr', @ref_desc = 'Fr: State/Province'
+EXEC InsertOPRef @ref_table = 'Geographies', @ref_value = 'LBL_H3', @language = 'En', @ref_desc = 'Municipality'
+EXEC InsertOPRef @ref_table = 'Geographies', @ref_value = 'LBL_H3', @language = 'Fr', @ref_desc = 'Fr: Municipality'
+EXEC InsertOPRef @ref_table = 'Geographies', @ref_value = 'LBL_H4', @language = 'En', @ref_desc = 'Organization Level 5'
+EXEC InsertOPRef @ref_table = 'Geographies', @ref_value = 'LBL_H4', @language = 'Fr', @ref_desc = 'Niveau d''Organisation 5'
+EXEC InsertOPRef @ref_table = 'Geographies', @ref_value = 'LBL_H5', @language = 'En', @ref_desc = 'Organization'
+EXEC InsertOPRef @ref_table = 'Geographies', @ref_value = 'LBL_H5', @language = 'Fr', @ref_desc = 'Organisation'
+
+
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'En',@ref_desc = 'Hierarchy Selection''s Children'
 --EXEC InsertOPRef @ref_table = 'Labels', @ref_value = 'LBL_Hierarchy_Selection''s_Children',@language = 'Fr',@ref_desc = 'Enfants de la Sélection de Hiérarchie'
 
-END
 GO
 
 DROP PROC InsertOPRef
-END
 GO
 ---when we update it from a space to underscore it gives key errors
 /*

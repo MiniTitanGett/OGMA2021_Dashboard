@@ -127,7 +127,9 @@ for x in range(4):
          # data set result flag
          State({'type': 'data-set-result', 'index': x}, 'data'),
          State({'type': 'time-period', 'index': x}, 'value'),
-         State({'type': 'time-period', 'index': 4}, 'value')],
+         State({'type': 'time-period', 'index': 4}, 'value'),
+         State({'type': 'hierarchy_type_dropdown', 'index': x}, 'value'),
+         State({'type': 'hierarchy_type_dropdown', 'index': 4}, 'value')],
         prevent_initial_call=True
     )
     def _update_graph(_df_trigger, arg_value, gridline, legend, graph_type, tile_title, _datepicker_trigger,
@@ -141,7 +143,7 @@ for x in range(4):
                       parent_start_secondary, parent_end_secondary, graph_display, df_name, parent_df_name,
                       link_state, hierarchy_options, parent_hierarchy_options, secondary_options, df_const, df_confirm,
                       xaxis, yaxis, xlegend, ylegend, xmodified, ymodified, num_tiles, prev_fitting_trigger, swap_flag,
-                      data_set_flag, time_period, parent_time_period):
+                      data_set_flag, time_period, parent_time_period, hierarchy_type, parent_hierarchy_type):
 
         # -------------------------------------------Variable Declarations----------------------------------------------
         changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
@@ -211,7 +213,7 @@ for x in range(4):
                                    secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
                                    end_secondary, df_const, xaxis, yaxis, xlegend, ylegend, gridline, legend,
                                    secondary_level_dropdown, secondary_state_of_display, secondary_hierarchy_toggle,
-                                   secondary_graph_children, secondary_options, session_key)
+                                   secondary_graph_children, secondary_options, session_key, hierarchy_type)
 
             return graph, popup_text, popup_is_open, data, fitting_popup_text, fitting_popup_is_open, swap_flag_output,\
                    data_set_flag_output
@@ -234,6 +236,7 @@ for x in range(4):
             df_name = parent_df_name
             hierarchy_options = parent_hierarchy_options
             time_period = parent_time_period
+            hierarchy_type = parent_hierarchy_type
         else:
             df_name = df_tile
 
@@ -284,7 +287,7 @@ for x in range(4):
                                secondary_type, timeframe, fiscal_toggle, start_year, end_year, start_secondary,
                                end_secondary, df_const, xaxis, yaxis, xlegend, ylegend, gridline, legend,
                                secondary_level_dropdown, secondary_state_of_display, secondary_hierarchy_toggle,
-                               secondary_graph_children, secondary_options, session_key)
+                               secondary_graph_children, secondary_options, session_key, hierarchy_type)
 
         if graph is None:
             raise PreventUpdate

@@ -916,6 +916,11 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
      Output({'type': 'prev-time-period', 'index': 2}, 'data'),
      Output({'type': 'prev-time-period', 'index': 3}, 'data'),
      Output({'type': 'prev-time-period', 'index': 4}, 'data'),
+     Output({'type': 'prev-hierarchy', 'index': 0}, 'data'),
+     Output({'type': 'prev-hierarchy', 'index': 1}, 'data'),
+     Output({'type': 'prev-hierarchy', 'index': 2}, 'data'),
+     Output({'type': 'prev-hierarchy', 'index': 3}, 'data'),
+     Output({'type': 'prev-hierarchy', 'index': 4}, 'data'),
      Output({'type': 'data-set', 'index': 0}, 'value'),
      Output({'type': 'data-set', 'index': 1}, 'value'),
      Output({'type': 'data-set', 'index': 2}, 'value'),
@@ -938,6 +943,11 @@ def _update_graph_menu(gm_trigger, selected_graph_type, link_state, rebuild_menu
      Output({'type': 'time-period', 'index': 2}, 'value'),
      Output({'type': 'time-period', 'index': 3}, 'value'),
      Output({'type': 'time-period', 'index': 4}, 'value'),
+     Output({'type': 'hierarchy_type_dropdown', 'index': 0}, 'value'),
+     Output({'type': 'hierarchy_type_dropdown', 'index': 1}, 'value'),
+     Output({'type': 'hierarchy_type_dropdown', 'index': 2}, 'value'),
+     Output({'type': 'hierarchy_type_dropdown', 'index': 3}, 'value'),
+     Output({'type': 'hierarchy_type_dropdown', 'index': 4}, 'value'),
      Output('no-data-popup', 'children'),
      Output('no-data-popup', 'is_open'),
      Output({'type': 'no-data-info', 'index': 0}, 'style'),
@@ -1060,7 +1070,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
     # unknown why but this has to be done this way instead of using ALL since ALL was changing the order in seemingly
     # random ways
     data_info = [data_info_style_0, data_info_style_1, data_info_style_2, data_info_style_3, data_info_style_4]
-    hierarchy_type = [hier_type_0, hier_type_1, hier_type_2, hier_type_3, hier_type_4]
+    hierarchy_types = [hier_type_0, hier_type_1, hier_type_2, hier_type_3, hier_type_4]
     time_periods = [time_period_0, time_period_1, time_period_2, time_period_3, time_period_4]
     prev_time = [prev_time_period_0, prev_time_period_1, prev_time_period_2, prev_time_period_3, prev_time_period_4]
     prev_hierarchy = [prev_hierarchy_0, prev_hierarchy_1, prev_hierarchy_2, prev_hierarchy_3, prev_hierarchy_4]
@@ -1081,15 +1091,15 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
             if links_style[i] == 'fa fa-link':
                 prev_time[i] = time_periods[4]
                 prev_selection[i] = df_names[4]
-                prev_hierarchy[i] = hierarchy_type[4]
+                prev_hierarchy[i] = hierarchy_types[4]
             else:
                 prev_time[i] = time_periods[i]
                 prev_selection[i] = df_names[i]
-                prev_hierarchy[i] = hierarchy_type[i]
+                prev_hierarchy[i] = hierarchy_types[i]
         if 'fa fa-link' in links_style:
             prev_time[4] = time_periods[4]
             prev_selection[4] = df_names[4]
-            prev_hierarchy[i] = hierarchy_type[4]
+            prev_hierarchy[4] = hierarchy_types[4]
     # if 'data-menu-close' or 'select-dashboard-dropdown' requested, close all data menus
     # don't close if no data set has been chosen
     elif 'data-menu-close' in changed_id or 'select-dashboard-dropdown' in changed_id:
@@ -1136,6 +1146,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
         changed_index = int(search(r'\d+', changed_id).group())
         df_name = df_names[changed_index]
         time_period = time_periods[changed_index]
+        hierarchy_type = hierarchy_types[changed_index]
         sidemenu_styles[changed_index] = DATA_CONTENT_SHOW
         if df_name != 'OPG010':
             session_key = df_name + time_period
@@ -1149,25 +1160,29 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                 data_info[changed_index] = {'display': 'inline-block', 'text-align': 'center', 'min-width': '260px'}
             # if returning to last loaded un-hide data (generally after look, cancel, then return to start)
             elif df_name == prev_selection[changed_index] and prev_selection[changed_index] is not None and \
-                    time_period == prev_time[changed_index] and prev_selection[changed_index] is not None:
+                    time_period == prev_time[changed_index] and prev_selection[changed_index] is not None and \
+                    hierarchy_type == prev_hierarchy[changed_index] and prev_hierarchy[changed_index] is not None:
                 confirm_button[changed_index] = DATA_CONTENT_HIDE
                 refresh_button[changed_index] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
                                                  'position': 'relative', 'vertical-align': 'top'}
                 data_info[changed_index] = DATA_CONTENT_HIDE
             # if tile has been reset and the dataset is loaded
             elif prev_selection[changed_index] is None:
-                data[changed_index] = get_data_menu(changed_index, df_name, df_const=df_const, session_key=session_key)
+                data[changed_index] = get_data_menu(changed_index, df_name, df_const=df_const, session_key=session_key,
+                                                    hier_type=hierarchy_type)
                 graph_triggers[changed_index] = df_name
                 options_triggers[changed_index] = df_name
                 df_names[changed_index] = df_name
                 prev_selection[changed_index] = df_name
                 prev_time[changed_index] = time_period
+                prev_hierarchy[changed_index] = hierarchy_type
                 # set up required triggers
                 # parent data menu
                 if changed_index == 4:
                     for i in range(len(links_style)):
                         if links_style[i] == 'fa fa-link':
                             prev_selection[i] = df_name
+                            prev_time[i] = time_period
                             prev_time[i] = time_period
                             # check if the keywords are in df_name
                             if 'OPG010' in df_name:
@@ -1179,6 +1194,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                                 options_triggers[i] = df_name
                                 df_names[i] = df_name
                             time_periods[i] = time_periods[4]
+                            hierarchy_types[i] = hierarchy_types[4]
                 # child data menu
                 else:
                     graph_triggers[changed_index] = df_name
@@ -1222,8 +1238,9 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
         changed_index = int(search(r'\d+', changed_id).group())
         if '"type":"confirm-load-data"}.n_clicks' in changed_id \
                 and (prev_selection[changed_index] is not None):
-            if (df_names[changed_index] + time_periods[changed_index] not in session or df_names[changed_index] not
-                in session) and prev_selection[changed_index] is not None:
+            if (df_names[changed_index] + time_periods[changed_index] not in session or df_names[changed_index] +
+                time_periods[changed_index] + hierarchy_types[changed_index] not in session or
+                df_names[changed_index] not in session) and prev_selection[changed_index] is not None:
                 df_name_confirm = None
             if changed_index == 4:  # prompt with trip prompt
                 prompt_trigger = Store(
@@ -1239,6 +1256,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
         else:
             df_name = df_names[changed_index]
             time_period = time_periods[changed_index]
+            hierarchy_type = hierarchy_types[changed_index]
             if df_name != 'OPG010':
                 session_key = df_name + time_period
             else:
@@ -1251,7 +1269,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                 df_const[session_key] = generate_constants(df_name, session_key)
                 store = df_const
                 data[changed_index] = get_data_menu(changed_index, df_name, df_const=df_const, session_key=session_key,
-                                                    hier_type=hierarchy_type[changed_index])
+                                                    hier_type=hierarchy_type)
                 sidemenu_styles[changed_index] = DATA_CONTENT_SHOW
 
                 # trigger update for all tiles that are linked to the active data menu
@@ -1260,6 +1278,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                         if links_style[i] == 'fa fa-link':
                             prev_selection[i] = df_name
                             prev_time[i] = time_period
+                            prev_hierarchy[i] = hierarchy_type
                             # check if the keywords are in df_name
                             if 'OPG010' in df_name:
                                 df_tile = 'OPG010'
@@ -1270,6 +1289,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                                 options_triggers[i] = df_name
                                 df_names[i] = df_name
                             time_periods[i] = time_period
+                            hierarchy_types[i] = hierarchy_type
 
                 else:
                     graph_triggers[changed_index] = df_name
@@ -1277,6 +1297,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
 
                 prev_selection[changed_index] = df_name
                 prev_time[changed_index] = time_period
+                prev_hierarchy[changed_index] = hierarchy_type
                 confirm_button[changed_index] = DATA_CONTENT_HIDE
                 data_info[changed_index] = DATA_CONTENT_HIDE
                 refresh_button[changed_index] = {'padding': '10px 13px', 'width': '15px', 'height': '15px',
@@ -1293,6 +1314,8 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
             tile = prompt_data[1]
             df_name = df_names[tile]
             time_period = time_periods[tile]
+            hierarchy_type = hierarchy_types[tile]
+
             if df_name != 'OPG010':
                 session_key = df_name + time_period
             else:
@@ -1318,6 +1341,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                             # set previous
                             prev_selection[tile] = df_name
                             prev_time[tile] = time_period
+                            prev_hierarchy[tile] = hierarchy_type
                             if df_const is None:
                                 df_const = {}
 
@@ -1326,7 +1350,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                     if len(session[session_key]) != 0:
                         # reset data menu for tile no matter what
                         data[tile] = get_data_menu(tile, df_name, df_const=df_const, time_period=time_period,
-                                                   session_key=session_key, hier_type=hierarchy_type[tile])
+                                                   session_key=session_key, hier_type=hierarchy_types[tile])
 
                         # op-2 is continue the dataset change but unlink my graph
                         # op-3 is continue the dataset change and modify my graph as necessary (keeping the link)
@@ -1346,6 +1370,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                                     df_names[i] = df_name
                                     prev_selection[i] = df_name
                                     prev_time[i] = time_period
+                                    prev_hierarchy = hierarchy_type
                                 else:
                                     # [i]= 'fa-fa-unlink'
                                     # set the dataset of the new menu from unlinking
@@ -1359,8 +1384,9 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
 
                                     df_names[i] = prev_selection[i]
                                     time_periods[i] = prev_time[i]
+                                    hierarchy_types[i] = prev_hierarchy[i]
                                     if df_names[i] != "OPG010":
-                                        session_key = df_names[i] + time_periods[i]
+                                        session_key = df_names[i] + hierarchy_types[i] + time_periods[i]
                                     else:
                                         session_key = df_names[i]
                                     data[i] = get_data_menu(i, df_names[i],
@@ -1426,6 +1452,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                         links_style[tile] = 'fa fa-unlink'
                         prev_selection[tile] = df_name
                         prev_time[tile] = time_period
+                        prev_hierarchy[tile] = hierarchy_type
 
                         if type(state_of_display) == dict:
                             state_of_display = [state_of_display]
@@ -1448,6 +1475,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                         sidemenu_styles[tile] = DATA_CONTENT_SHOW
                         prev_selection[tile] = df_name
                         prev_time[tile] = time_period
+                        prev_hierarchy[tile] = hierarchy_type
                 # cancel was called
                 else:
                     sidemenu_styles[tile] = DATA_CONTENT_SHOW
@@ -1468,6 +1496,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                 data[i] = get_data_menu(i, df_const=df_const)
                 prev_selection[i] = None
                 prev_time[i] = None
+                prev_hierarchy[i] = None
         else:
             raise PreventUpdate
     # else, 'data', 'tile-link', or 'select-layout' requested
@@ -1480,19 +1509,24 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                 parent_copy = copy.deepcopy(data_states[4])
                 data[changed_index] = change_index(parent_copy, changed_index)
                 time_periods[changed_index] = time_periods[4]
+                hierarchy_types[changed_index] = hierarchy_types[4]
             elif links_style[changed_index] == 'fa fa-link':
                 time_periods[changed_index] = time_periods[4]
+                hierarchy_types[changed_index] = hierarchy_types[4]
                 df_name = df_names[4]
+                hierarchy_type = hierarchy_types[4]
                 time_period = time_periods[4]
                 prev_selection[changed_index] = df_name
                 prev_time[changed_index] = time_period
+                prev_hierarchy[changed_index] = hierarchy_type
                 data_set_val[changed_index] = df_name
                 graph_triggers[changed_index] = df_name
                 options_triggers[changed_index] = df_name
                 df_names[changed_index] = df_name
 
         # if tile is child to parent and a layout was not selected, display parent data
-        if links_style[changed_index] == 'fa fa-link' and '"type":"select-layout-dropdown"}.value' not in changed_id:
+        if changed_index <= len(links_style) and links_style[changed_index] == 'fa fa-link' and \
+                '"type":"select-layout-dropdown"}.value' not in changed_id:
             # if 'data' requested or a data menu is already open, display parent data
             if '"type":"tile-data"}.n_clicks' in changed_id or sidemenu_style_states.count(DATA_CONTENT_SHOW) > 0:
                 sidemenu_styles[4] = DATA_CONTENT_SHOW
@@ -1523,12 +1557,14 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
             refresh_button[0], refresh_button[1], refresh_button[2], refresh_button[3], refresh_button[4],
             prev_selection[0], prev_selection[1], prev_selection[2], prev_selection[3], prev_selection[4],
             prev_time[0], prev_time[1], prev_time[2], prev_time[3], prev_time[4],
+            prev_hierarchy[0], prev_hierarchy[1], prev_hierarchy[2], prev_hierarchy[3], prev_hierarchy[4],
             data_set_val[0], data_set_val[1], data_set_val[2], data_set_val[3], data_set_val[4],
             options_triggers[0], options_triggers[1], options_triggers[2], options_triggers[3], prompt_trigger,
             df_name_confirm,
             date_picker_triggers[0], date_picker_triggers[1], date_picker_triggers[2], date_picker_triggers[3],
             date_picker_triggers[4], data_set_flag, time_periods[0], time_periods[1], time_periods[2], time_periods[3],
-            time_periods[4], popup_text, popup_is_open, data_info[0], data_info[1], data_info[2], data_info[3],
+            time_periods[4], hierarchy_types[0], hierarchy_types[1], hierarchy_types[2], hierarchy_types[3],
+            hierarchy_types[4], popup_text, popup_is_open, data_info[0], data_info[1], data_info[2], data_info[3],
             data_info[4])
 
 
@@ -1583,6 +1619,7 @@ app.clientside_callback(
     Input({'type': 'data-set', 'index': MATCH}, 'value'),
     State({'type': 'time-slice-controls', 'index': MATCH}, 'style')
 )
+
 
 # Highlight tiles child to displayed data sidebar.
 for x in range(4):

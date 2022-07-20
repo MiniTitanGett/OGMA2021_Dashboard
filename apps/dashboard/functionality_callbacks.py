@@ -404,16 +404,26 @@ for x in range(5):
         [State({'type': 'secondary_hierarchy_display_button', 'index': MATCH}, 'children'),
          State({'type': 'data-set', 'index': MATCH}, 'value'),
          State({'type': 'data-set', 'index': 4}, 'value'),
+         State({'type': 'time-period', 'index': MATCH}, 'value'),
+         State({'type': 'time-period', 'index': 4}, 'value'),
          State({'type': 'tile-link', 'index': MATCH}, 'className'),
          State('df-constants-storage', 'data')],
         prevent_initial_call=True
     )
 def _print_choice_to_display_and_modify_secondary_dropdown(dropdown_val, _n_clicks_r, _n_clicks_tt,
                                                      n_clicks_click_history, state_of_display,
-                                                     df_name, parent_df_name, link_state, df_const):
+                                                           df_name, parent_df_name,time_period,
+                                                           parent_time_period, link_state, df_const):
     changed_id = [i['prop_id'] for i in dash.callback_context.triggered][0]
     if link_state == "fa fa-link":
         df_name = parent_df_name
+        time_period = parent_time_period
+
+    if df_name != 'OPG010':
+         session_key = df_name + time_period
+
+    else:
+        session_key = df_name
     # if page loaded - prevent update
     if changed_id == '.':
         raise PreventUpdate
@@ -444,11 +454,11 @@ def _print_choice_to_display_and_modify_secondary_dropdown(dropdown_val, _n_clic
         state_of_display.pop()
         display_button = state_of_display
         nid_path = get_nid_path(sod=state_of_display)
-        dropdown = generate_secondary_dropdown(changed_index, df_name, nid_path, df_const)
+        dropdown = generate_secondary_dropdown(changed_index, df_name, nid_path, df_const, session_key)
     elif 'secondary_hierarchy_to_top' in changed_id or 'data-set' in changed_id:
         display_button = []
         nid_path = get_nid_path()
-        dropdown = generate_secondary_dropdown(changed_index, df_name, nid_path, df_const)
+        dropdown = generate_secondary_dropdown(changed_index, df_name, nid_path, df_const, session_key)
     elif 'secondary_hierarchy_specific_dropdown' in changed_id:
         # If dropdown has been remade, do not modify the history
         if dropdown_val is None:
@@ -457,7 +467,7 @@ def _print_choice_to_display_and_modify_secondary_dropdown(dropdown_val, _n_clic
         elif not state_of_display:
             display_button = generate_secondary_history_button(dropdown_val, 0, changed_index)
             nid_path = get_nid_path(dropdown_value=dropdown_val)
-            dropdown = generate_secondary_dropdown(changed_index, df_name, nid_path, df_const)
+            dropdown = generate_secondary_dropdown(changed_index, df_name, nid_path, df_const, session_key)
         # If something is in the history preserve it and add value to it
         else:
             display_button = state_of_display + [
@@ -474,7 +484,7 @@ def _print_choice_to_display_and_modify_secondary_dropdown(dropdown_val, _n_clic
         history[index]['props']['n_clicks'] = 0
         display_button = history
         nid_path = get_nid_path(sod=history)
-        dropdown = generate_secondary_dropdown(changed_index, df_name, nid_path, df_const)
+        dropdown = generate_secondary_dropdown(changed_index, df_name, nid_path, df_const, session_key)
 
     # check if leaf node, if so say graph all siblings instead of graph all in dropdown
     if 'options=[]' not in str(dropdown):

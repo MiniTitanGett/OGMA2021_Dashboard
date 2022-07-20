@@ -195,6 +195,7 @@ for y in range(4):
          # parent data menu states
          State({'type': 'start-year-input', 'index': 4}, 'value'),
          State({'type': 'end-year-input', 'index': 4}, 'value'),
+         State({'type': 'hierarchy_type_dropdown', 'index': 4}, 'value'),
          State({'type': 'hierarchy-toggle', 'index': 4}, 'value'),
          State({'type': 'hierarchy_level_dropdown', 'index': 4}, 'value'),
          State({'type': 'hierarchy_display_button', 'index': 4}, 'children'),
@@ -210,6 +211,7 @@ for y in range(4):
          # tile data menu states
          State({'type': 'start-year-input', 'index': y}, 'value'),
          State({'type': 'end-year-input', 'index': y}, 'value'),
+         State({'type': 'hierarchy_type_dropdown', 'index': y}, 'value'),
          State({'type': 'hierarchy-toggle', 'index': y}, 'value'),
          State({'type': 'hierarchy_level_dropdown', 'index': y}, 'value'),
          State({'type': 'hierarchy_display_button', 'index': y}, 'children'),
@@ -235,13 +237,13 @@ for y in range(4):
     )
     def _manage_tile_saves(trigger, graph_title, link_state, graph_type, args_list, graph_display, xmodified, ymodified,
                            gridline, legend, df_name, parent_df_name, parent_year_start, parent_year_end,
-                           parent_hierarchy_toggle, parent_hierarchy_level_dropdown, parent_state_of_display,
-                           parent_graph_children_toggle, parent_fiscal_toggle, parent_input_method,
-                           parent_secondary_start, parent_secondary_end, parent_x_time_period, parent_period_type,
-                           parent_tab, parent_time_period, year_start, year_end, hierarchy_toggle,
-                           hierarchy_level_dropdown, state_of_display, graph_children_toggle, fiscal_toggle,
-                           input_method, secondary_start, secondary_end, x_time_period, period_type, tab, time_period,
-                           secondary_button_path, secondary_toggle, secondary_level, secondary_graph_all,
+                           parent_hierarchy_type, parent_hierarchy_toggle, parent_hierarchy_level_dropdown,
+                           parent_state_of_display, parent_graph_children_toggle, parent_fiscal_toggle,
+                           parent_input_method, parent_secondary_start, parent_secondary_end, parent_x_time_period,
+                           parent_period_type, parent_tab, parent_time_period, year_start, year_end, hierarchy_type,
+                           hierarchy_toggle, hierarchy_level_dropdown, state_of_display, graph_children_toggle,
+                           fiscal_toggle, input_method, secondary_start, secondary_end, x_time_period, period_type, tab,
+                           time_period, secondary_button_path, secondary_toggle, secondary_level, secondary_graph_all,
                            secondary_options, selected_layout, df_const):
 
         if link_state == 'fa fa-link':
@@ -253,6 +255,7 @@ for y in range(4):
             x_time_period = parent_x_time_period
             period_type = parent_period_type
             input_method = parent_input_method
+            hierarchy_type = parent_hierarchy_type
             hierarchy_toggle = parent_hierarchy_toggle
             hierarchy_level_dropdown = parent_hierarchy_level_dropdown
             state_of_display = parent_state_of_display
@@ -363,6 +366,7 @@ for y in range(4):
                                     'Timeframe': input_method,
                                     'Num Periods': x_time_period,
                                     'Period Type': period_type,
+                                    'Hierarchy Type': hierarchy_type,
                                     'Hierarchy Toggle': hierarchy_toggle,
                                     'Level Value': hierarchy_level_dropdown,
                                     'Data Set': df_name,
@@ -436,6 +440,8 @@ for y in range(4):
                                                       df_name=df_name)
 
             #  --------- create data side menu ---------
+            # set hierarchy type
+            hierarchy_type = session['saved_layouts'][selected_layout]['Hierarchy Type']
             # set hierarchy toggle value (level vs specific)
             hierarchy_toggle = session['saved_layouts'][selected_layout]['Hierarchy Toggle']
             # set level value selection
@@ -458,7 +464,8 @@ for y in range(4):
                                          nid_path=nid_path, graph_all_toggle=graph_all_toggle,
                                          fiscal_toggle=fiscal_toggle, input_method=input_method,
                                          num_periods=num_periods, time_period=time_period,
-                                         period_type=period_type, df_const=df_const, session_key=session_key)
+                                         period_type=period_type, df_const=df_const, session_key=session_key,
+                                         hier_type=hierarchy_type)
 
             # show and set 'Select Range' inputs if selected, else leave hidden and unset
             if session['saved_layouts'][selected_layout]['Timeframe'] == 'select-range':
@@ -618,6 +625,12 @@ for y in range(4):
      State({'type': 'end-year-input', 'index': 2}, 'value'),
      State({'type': 'end-year-input', 'index': 3}, 'value'),
      State({'type': 'end-year-input', 'index': 4}, 'value'),
+     # hieratchy types
+     State({'type': 'hierarchy_type_dropdown', 'index': 0}, 'value'),
+     State({'type': 'hierarchy_type_dropdown', 'index': 1}, 'value'),
+     State({'type': 'hierarchy_type_dropdown', 'index': 2}, 'value'),
+     State({'type': 'hierarchy_type_dropdown', 'index': 3}, 'value'),
+     State({'type': 'hierarchy_type_dropdown', 'index': 4}, 'value'),
      # hierarchy toggles
      State({'type': 'hierarchy-toggle', 'index': 0}, 'value'),
      State({'type': 'hierarchy-toggle', 'index': 1}, 'value'),
@@ -709,6 +722,8 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                                       time_period_1, time_period_2, time_period_3, time_period_4,
                                       start_year_0, start_year_1, start_year_2, start_year_3, start_year_4,
                                       end_year_0, end_year_1, end_year_2, end_year_3, end_year_4,
+                                      hierarchy_type_0, hierarchy_type_1, hierarchy_type_2, hierarchy_type_3,
+                                      hierarchy_type_4,
                                       hierarchy_toggle_0, hierarchy_toggle_1, hierarchy_toggle_2, hierarchy_toggle_3,
                                       hierarchy_toggle_4,
                                       graph_all_toggle_0, graph_all_toggle_1, graph_all_toggle_2, graph_all_toggle_3,
@@ -879,6 +894,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 # if tile is unlinked, or linked while the parent does not exist, create data menu
                 if link_state == 'fa fa-unlink' or (link_state == 'fa fa-link' and dms[4]['Content'] == no_update):
 
+                    hierarchy_type = tile_data['Hierarchy Type']
                     hierarchy_toggle = tile_data['Hierarchy Toggle']
                     level_value = tile_data['Level Value']
                     nid_path = tile_data['NID Path']
@@ -893,7 +909,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                         level_value=level_value, nid_path=nid_path,
                         graph_all_toggle=graph_all_toggle, fiscal_toggle=fiscal_toggle, input_method=timeframe,
                         num_periods=num_periods, period_type=period_type,prev_selection=None, time_period=time_period,
-                        df_const=df_const, session_key=session_key)
+                        df_const=df_const, session_key=session_key, hier_type=hierarchy_type)
 
                     if timeframe == 'select-range':
                         dms[data_index]['Tab'] = tile_data['Date Tab']
@@ -995,6 +1011,8 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 time_periods = [time_period_0, time_period_1, time_period_2, time_period_3, time_period_4]
                 start_years = [start_year_0, start_year_1, start_year_2, start_year_3, start_year_4]
                 end_years = [end_year_0, end_year_1, end_year_2, end_year_3, end_year_4]
+                hierarchy_types = [hierarchy_type_0, hierarchy_type_1 , hierarchy_type_2, hierarchy_type_3 ,
+                                   hierarchy_type_4]
                 hierarchy_toggles = [hierarchy_toggle_0, hierarchy_toggle_1, hierarchy_toggle_2, hierarchy_toggle_3,
                                      hierarchy_toggle_4]
                 graph_all_toggles = [graph_all_toggle_0, graph_all_toggle_1, graph_all_toggle_2, graph_all_toggle_3,
@@ -1028,6 +1046,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                         'Fiscal Toggle': fiscal_toggles[4],
                         'Timeframe': timeframes[4],
                         'Num Periods': num_periods[4],
+                        'Hierarchy Type' : hierarchy_types[4],
                         'Hierarchy Toggle': hierarchy_toggles[4],
                         'Period Type': period_types[4],
                         'Level Value': level_values[4],
@@ -1089,6 +1108,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                             'Fiscal Toggle': fiscal_toggles[i],
                             'Timeframe': timeframes[i],
                             'Num Periods': num_periods[i],
+                            'Hierarchy Type': hierarchy_types[i],
                             'Hierarchy Toggle': hierarchy_toggles[i],
                             'Period Type': period_types[i],
                             'Level Value': level_values[i],

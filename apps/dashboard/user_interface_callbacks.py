@@ -1386,7 +1386,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                                     time_periods[i] = prev_time[i]
                                     hierarchy_types[i] = prev_hierarchy[i]
                                     if df_names[i] != "OPG010":
-                                        session_key = df_names[i] + hierarchy_types[i] + time_periods[i]
+                                        session_key = df_names[i] + time_periods[i]
                                     else:
                                         session_key = df_names[i]
                                     data[i] = get_data_menu(i, df_names[i],
@@ -1932,10 +1932,18 @@ app.clientside_callback(
 for x in range(4):
     app.clientside_callback(
         """
-        function _update_axes_titles(event, dfConst, graphType, dfName, dfNameParent, linkState,argValue){
+        function _update_axes_titles(event, dfConst, graphType, dfName, dfNameParent, timePeriod, timePeriodParent,  
+                                    linkState,argValue){
             if(linkState == 'fa fa-link'){
                     dfName=dfNameParent;
+                    timePeriod=timePeriodParent;
                 }
+            if(dfName != 'OPG010'){
+                    sessionKey=dfName+timePeriod;
+            }
+            else{
+                    sessionKey=dfName;
+            }
             if(event.x_axis != ""){
                 switch(graphType){
                     case 'Line':
@@ -1950,7 +1958,7 @@ for x in range(4):
                         }
                     case 'Bar':
                         if (argValue[2] == 'Horizontal'){
-                            if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(event.x_axis)){
+                            if(dfConst[sessionKey]['MEASURE_TYPE_VALUES'].includes(event.x_axis)){
                                 event.x_modified = false;
                             }
                             else{
@@ -1981,8 +1989,8 @@ for x in range(4):
                         }
                         else{
                             string[1]=string[1].replace(')','')
-                            if(dfConst[dfName]['VARIABLE_OPTION_LISTS'].includes(string[0])){
-                                if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(string[1])){
+                            if(dfConst[sessionKey]['VARIABLE_OPTION_LISTS'].includes(string[0])){
+                                if(dfConst[sessionKey]['MEASURE_TYPE_VALUES'].includes(string[1])){
                                     event.x_modified = false;
                                     break;
                                 }
@@ -2001,7 +2009,7 @@ for x in range(4):
                             temp=event.x_axis;
                             break;  
                         }
-                        else if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(event.x_axis)){
+                        else if(dfConst[sessionKey]['MEASURE_TYPE_VALUES'].includes(event.x_axis)){
                             event.x_modified = false;
                             break;
                         }
@@ -2018,7 +2026,7 @@ for x in range(4):
                 switch(graphType){
                     case 'Line':
                     case 'Scatter':
-                        if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(event.y_axis)){
+                        if(dfConst[sessionKey]['MEASURE_TYPE_VALUES'].includes(event.y_axis)){
                         event.y_modified = false;
                         break;
                         }
@@ -2038,7 +2046,7 @@ for x in range(4):
                             event.y_axis = temp;
                             break;
                         }
-                        else if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(event.y_axis)){
+                        else if(dfConst[sessionKey]['MEASURE_TYPE_VALUES'].includes(event.y_axis)){
                             event.y_modified = false;
                             break;
                         }
@@ -2050,7 +2058,7 @@ for x in range(4):
                         string= event.y_axis.split(" (")
                         if(string.length==1){
                             if(argValue[0]=='Time'){
-                                if(dfConst[dfName]['VARIABLE_OPTION_LISTS'].includes(string[0])){
+                                if(dfConst[sessionKey]['VARIABLE_OPTION_LISTS'].includes(string[0])){
                                     event.y_modified = false;
                                     break;
                                 }
@@ -2066,8 +2074,8 @@ for x in range(4):
                         }
                         else{
                             string[1]=string[1].replace(')','')
-                            if(dfConst[dfName]['VARIABLE_OPTION_LISTS'].includes(string[0])){
-                                if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(string[1])){
+                            if(dfConst[sessionKey]['VARIABLE_OPTION_LISTS'].includes(string[0])){
+                                if(dfConst[sessionKey]['MEASURE_TYPE_VALUES'].includes(string[1])){
                                     event.y_modified = false;
                                     break;
                                 }
@@ -2077,7 +2085,7 @@ for x in range(4):
                         }
                     case 'Box_Plot':
                         if(argValue[1]=='Vertical'){
-                            if(dfConst[dfName]['MEASURE_TYPE_VALUES'].includes(event.y_axis)){
+                            if(dfConst[sessionKey]['MEASURE_TYPE_VALUES'].includes(event.y_axis)){
                                 event.y_modified = false;
                             }
                             else{
@@ -2114,6 +2122,8 @@ for x in range(4):
          State({'type': 'graph-type-dropdown', 'index': x}, 'value'),
          State({'type': 'data-set', 'index': x}, 'value'),
          State({'type': 'data-set', 'index': 4}, 'value'),
+         State({'type': 'time-period', 'index': x}, 'value'),
+         State({'type': 'time-period', 'index': 4}, 'value'),
          State({'type': 'tile-link', 'index': x}, 'className'),
          State({'type': 'args-value: {}'.replace("{}", str(x)), 'index': ALL}, 'value')],
         prevent_initial_call=True

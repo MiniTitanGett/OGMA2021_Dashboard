@@ -1239,8 +1239,8 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
         if '"type":"confirm-load-data"}.n_clicks' in changed_id \
                 and (prev_selection[changed_index] is not None):
             if (df_names[changed_index] + time_periods[changed_index] not in session or df_names[changed_index] +
-                time_periods[changed_index] + hierarchy_types[changed_index] not in session or
-                df_names[changed_index] not in session) and prev_selection[changed_index] is not None:
+                    time_periods[changed_index] + hierarchy_types[changed_index] not in session or
+                    df_names[changed_index] not in session) and prev_selection[changed_index] is not None:
                 df_name_confirm = None
             if changed_index == 4:  # prompt with trip prompt
                 prompt_trigger = Store(

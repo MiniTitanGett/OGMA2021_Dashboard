@@ -239,7 +239,6 @@ def generate_constants(df_name, session_key):
         MEASURE_TYPE_VALUES = [get_label(x, df_name + "_Measure_type") for x in MEASURE_TYPE_OPTIONS]
         MEASURE_TYPE_OPTIONS.sort()
 
-
         min_date_unf = df['Date of Event'].dt.date.values.min()
         max_date_unf = df['Date of Event'].dt.date.values.max()
         min_date_unf = min_date_unf.astype(datetime)
@@ -522,7 +521,7 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
         filtered_df = data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
                                             hierarchy_graph_children, df_name, df_const, session_key)
         filtered_df = data_time_filter(secondary_type, end_secondary, end_year, start_secondary, start_year, timeframe,
-                                       fiscal_toggle, num_periods, period_type, df_name, df_const, filtered_df,
+                                       fiscal_toggle, num_periods, period_type, df_const, filtered_df,
                                        session_key)
 
     else:
@@ -536,8 +535,10 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
                 if hierarchy_level_dropdown:
                     # Take the level and clear the other columns
                     # Ex) H2 picked --> H3, H4, H5 get wiped
-                    for i in range(len(df_const[session_key]['HIERARCHY_LEVELS']) - (int(hierarchy_level_dropdown[1]) + 1)):
-                        df[df_const[session_key]['HIERARCHY_LEVELS'][len(df_const[session_key]['HIERARCHY_LEVELS']) - 1 - i]] \
+                    for i in range(len(df_const[session_key]['HIERARCHY_LEVELS']) -
+                                   (int(hierarchy_level_dropdown[1]) + 1)):
+                        df[df_const[session_key]['HIERARCHY_LEVELS'][len(df_const[session_key]
+                                                                         ['HIERARCHY_LEVELS']) - 1 - i]] \
                            = full(len(df), nan, float64)
                 else:
                     # Returns empty data frame with column names
@@ -632,7 +633,7 @@ def data_manipulator(hierarchy_path, hierarchy_toggle, hierarchy_level_dropdown,
 
             filtered_df = data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondary, end_year,
                                                           start_secondary, start_year, timeframe, fiscal_toggle,
-                                                          num_periods, period_type, df_name, df_const, arg_values,
+                                                          num_periods, period_type, df_const, arg_values,
                                                           graph_type, df, hierarchy_toggle, hierarchy_level_dropdown,
                                                           hierarchy_graph_children, secondary_state_of_display,
                                                           secondary_hierarchy_toggle, secondary_level_dropdown,
@@ -765,14 +766,16 @@ def data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_drop
             # Filters out all rows that are more specific than given path length plus one to preserve the child column
             for i in range(len(df_const[session_key]['HIERARCHY_LEVELS']) - (len(hierarchy_path) + 1)):
                 filtered_df = filtered_df.filter(filtered_df[df_const[session_key]['HIERARCHY_LEVELS'][
-                                                    len(df_const[session_key]['HIERARCHY_LEVELS']) - 1 - i]].ismissing())
+                                                    len(df_const[session_key]['HIERARCHY_LEVELS'])
+                                                    - 1 - i]].ismissing())
             filtered_df = filtered_df.filter(filtered_df[df_const[session_key]['HIERARCHY_LEVELS']
                                                                                         [len(hierarchy_path)]].notna())
     else:
         filtered_df = session[df_name]
         # Filters out all rows that don't include path member at specific level
         for i in range(len(hierarchy_path)):
-            filtered_df = filtered_df.filter(filtered_df[df_const[session_key]['HIERARCHY_LEVELS'][i]] == hierarchy_path[i])
+            filtered_df = filtered_df.filter(filtered_df[df_const[session_key]['HIERARCHY_LEVELS'][i]] ==
+                                             hierarchy_path[i])
         # Filters out all rows that are more specific than given path
         for i in range(len(df_const[session_key]['HIERARCHY_LEVELS']) - len(hierarchy_path)):
             filtered_df = filtered_df.filter(filtered_df[df_const[session_key]['HIERARCHY_LEVELS'][
@@ -782,7 +785,7 @@ def data_hierarchy_filter(hierarchy_path, hierarchy_toggle, hierarchy_level_drop
 
 
 def data_time_filter(secondary_type, end_secondary, end_year, start_secondary, start_year, timeframe, fiscal_toggle,
-                     num_periods, period_type, df_name, df_const, filtered_df, session_key):
+                     num_periods, period_type, df_const, filtered_df, session_key):
     """Returns filtered data frame dependent on date picker selections."""
     # account for date type (Gregorian vs Fiscal)
     if fiscal_toggle == 'Fiscal':
@@ -1787,7 +1790,7 @@ def data_time_aggregator(hierarchy_path, secondary_type, end_secondary, end_year
 
 
 def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondary, end_year, start_secondary,
-                                    start_year, timeframe, fiscal_toggle, num_periods, period_type, df_name, df_const,
+                                    start_year, timeframe, fiscal_toggle, num_periods, period_type, df_const,
                                     arg_values, graph_type, df, hierarchy_toggle, hierarchy_level_dropdown,
                                     hierarchy_graph_children, secondary_path, secondary_hierarchy_toggle,
                                     secondary_level_dropdown, secondary_graph_children, secondary_options, session_key):
@@ -2282,7 +2285,7 @@ def data_time_aggregator_simplified(hierarchy_path, secondary_type, end_secondar
     return time_df
 
 
-def customize_menu_filter(dff, df_name, measure_type, df_const, secondary_path,
+def customize_menu_filter(dff, measure_type, df_const, secondary_path,
                           secondary_hierarchy_toggle, secondary_level_dropdown, secondary_graph_children,
                           secondary_options, session_key):
     """Filters data frame based on customize menu inputs and returns the filtered data frame."""

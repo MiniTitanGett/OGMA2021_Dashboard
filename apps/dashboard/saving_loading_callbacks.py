@@ -858,7 +858,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 graph_variable = tile_data.pop('Graph Variable')
 
                 if df_name != 'OPG010':
-                    session_key = df_name+ time_period
+                    session_key = df_name + time_period
                 else:
                     session_key = df_name
 
@@ -908,7 +908,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                         tile=data_index, df_name=df_name, mode='dashboard-loading', hierarchy_toggle=hierarchy_toggle,
                         level_value=level_value, nid_path=nid_path,
                         graph_all_toggle=graph_all_toggle, fiscal_toggle=fiscal_toggle, input_method=timeframe,
-                        num_periods=num_periods, period_type=period_type,prev_selection=None, time_period=time_period,
+                        num_periods=num_periods, period_type=period_type, prev_selection=None, time_period=time_period,
                         df_const=df_const, session_key=session_key, hier_type=hierarchy_type)
 
                     if timeframe == 'select-range':
@@ -1011,7 +1011,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                 time_periods = [time_period_0, time_period_1, time_period_2, time_period_3, time_period_4]
                 start_years = [start_year_0, start_year_1, start_year_2, start_year_3, start_year_4]
                 end_years = [end_year_0, end_year_1, end_year_2, end_year_3, end_year_4]
-                hierarchy_types = [hierarchy_type_0, hierarchy_type_1 , hierarchy_type_2, hierarchy_type_3 ,
+                hierarchy_types = [hierarchy_type_0, hierarchy_type_1, hierarchy_type_2, hierarchy_type_3,
                                    hierarchy_type_4]
                 hierarchy_toggles = [hierarchy_toggle_0, hierarchy_toggle_1, hierarchy_toggle_2, hierarchy_toggle_3,
                                      hierarchy_toggle_4]
@@ -1046,7 +1046,7 @@ def _manage_dashboard_saves_and_reset(_save_clicks, _delete_clicks, _load_clicks
                         'Fiscal Toggle': fiscal_toggles[4],
                         'Timeframe': timeframes[4],
                         'Num Periods': num_periods[4],
-                        'Hierarchy Type' : hierarchy_types[4],
+                        'Hierarchy Type': hierarchy_types[4],
                         'Hierarchy Toggle': hierarchy_toggles[4],
                         'Period Type': period_types[4],
                         'Level Value': level_values[4],

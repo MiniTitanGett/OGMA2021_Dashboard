@@ -175,7 +175,7 @@ def get_data_set_picker(tile, df_name, confirm_parent, prev_selection, time_peri
                 style={'width': '146px', 'height': '26px', 'margin': '0', 'padding': '0px', 'font-size': '15px',
                            'text-align': 'left', 'border-radius': '5px', 'color': '#333', 'max-height': '26px'},
                 placeholder='{}...'.format(get_label('LBL_Select')))],
-                style={"display": "inline-block", 'padding': '10px', 'position': 'absolute'}),],
+                style={"display": "inline-block", 'padding': '10px', 'position': 'absolute'})],
             id={'type': 'hierarchy_type', 'index': tile}),
         Div([
             P("Time Slice: ",
@@ -373,8 +373,12 @@ def get_layout_graph(report_name):
     secondary_state_of_display = "[{}]".format(secondary_state_of_display)
 
     # load data (added for external access)
-    session[j['Data Set']] = dataset_to_df(j['Data Set'])
-    df_const = {j['Data Set']: generate_constants(j['Data Set'])}
+    session[j['Data Set']] = dataset_to_df(j['Data Set'], j['Time Period'])
+    if j['Data Set'] != "OPG010":
+        session_key = j['Data Set'] + j['Time Period']
+    else:
+        session_key = j['Data Set']
+    df_const = {session_key: generate_constants(j['Data Set'], session_key)}
 
     graph = __update_graph(j['Data Set'],
                            j['Args List'],
@@ -405,7 +409,9 @@ def get_layout_graph(report_name):
                            json.loads(secondary_state_of_display),  # secondary_hierarchy_nid_path
                            j.get('Graph Variable')[2],  # secondary_hierarchy_toggle
                            j.get('Graph Variable')[3],  # secondary_hierarchy_graph_all
-                           j.get('Graph Variable')[4])  # secondary_hierarchy_option
+                           j.get('Graph Variable')[4],  # secondary_hierarchy_option
+                           session_key,                 # s
+                           j.get('Hierarchy Type'))
 
     if graph is None:
         raise PreventUpdate
@@ -1124,6 +1130,7 @@ def get_line_scatter_graph_menu(tile, x, mode, measure_type, df_name, gridline, 
     :param secondary_graph_all_toggle: graph all option of hierarchy item
     :param secondary_nid_path: the path of secondary specific hierarchy
     :param color: the color palette of the graph
+    :param session_key: df_constants dictionary key
     :return: Menu with options to modify a line graph
     """
     # arg_value[0] = xaxis selector
@@ -1339,6 +1346,7 @@ def get_bar_graph_menu(tile, x, measure_type, orientation, animate, gridline, le
     :param secondary_graph_all_toggle: graph all option of hierarchy item
     :param secondary_nid_path: the path of secondary specific hierarchy
     :param color: the color palette of the graph
+    :param session_key: df_constants dictionary key
     :return: Menu with options to modify a bar graph
     """
     # args_value[0] = x-axis
@@ -1392,8 +1400,9 @@ def get_bar_graph_menu(tile, x, measure_type, orientation, animate, gridline, le
                 Div([
                     Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 1},
-                        options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measure_type"), 'value': i}
-                                                             for i in df_const[session_key]['MEASURE_TYPE_OPTIONS']],
+                        options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measure_type"),
+                                                              'value': i} for i in
+                                                             df_const[session_key]['MEASURE_TYPE_OPTIONS']],
                         value=measure_type,
                         optionHeight=30,
                         clearable=False,
@@ -1489,6 +1498,7 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
     :param xmodified: the x title of the xaxis has been modified
     :param ymodified: the y of the yaxis title has been modified
     :param color: the color palette of the graph
+    :param session_key: df_constants dictionary key
     :return: Menu with options to modify a bubble graph
     """
     # args_value[0] = x-axis
@@ -1580,8 +1590,9 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                 Div([
                     Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 3},
-                        options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measure_type"), 'value': i}
-                                                             for i in df_const[session_key]['MEASURE_TYPE_OPTIONS']],
+                        options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measure_type"),
+                                                              'value': i} for i in
+                                                             df_const[session_key]['MEASURE_TYPE_OPTIONS']],
                         value=y_measure,
                         optionHeight=30,
                         clearable=False,
@@ -1613,8 +1624,9 @@ def get_bubble_graph_menu(tile, x, x_measure, y, y_measure, size, size_measure, 
                 Div([
                     Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 5},
-                        options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measure_type"), 'value': i}
-                                                             for i in df_const[session_key]['MEASURE_TYPE_OPTIONS']],
+                        options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measure_type"),
+                                                              'value': i} for i in
+                                                             df_const[session_key]['MEASURE_TYPE_OPTIONS']],
                         value=size_measure,
                         clearable=False,
                         style={'font-size': '13px'})],
@@ -1679,6 +1691,7 @@ def get_box_plot_menu(tile, axis_measure, graph_orientation, df_name, show_data_
         :param secondary_graph_all_toggle: graph all option of hierarchy item
         :param secondary_nid_path: the path of secondary specific hierarchy
         :param color: the color palette of the graph
+        :param session_key: df_constants dictionary key
         :return: Menu with options to modify a bar graph
         """
     # args_value[0] = measure type
@@ -1714,8 +1727,9 @@ def get_box_plot_menu(tile, axis_measure, graph_orientation, df_name, show_data_
                 Div([
                     Dropdown(
                         id={'type': 'args-value: {}'.replace("{}", str(tile)), 'index': 0},
-                        options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measure_type"), 'value': i}
-                                                             for i in df_const[session_key]['MEASURE_TYPE_OPTIONS']],
+                        options=[] if df_const is None else [{'label': get_label(i, df_name+"_Measure_type"),
+                                                              'value': i} for i in
+                                                             df_const[session_key]['MEASURE_TYPE_OPTIONS']],
                         value=axis_measure,
                         optionHeight=30,
                         clearable=False,
@@ -1804,6 +1818,7 @@ def get_table_graph_menu(tile, number_of_columns, xaxis, yaxis, xpos, ypos, xmod
     :param ymodified: the y of the yaxis title has been modified
     :param df_name: Name of the data set being used
     :param df_const: Dataframe constants
+    :param session_key: df_constants dictionary key
     :return: Text instructions for how user can interact with table
     """
     # (args-value: {})[0] = tile index
@@ -1906,6 +1921,7 @@ def get_sankey_menu(tile, df_name, df_const, xaxis, yaxis, xpos, ypos, xmodified
     :param secondary_level_value: level of secondary hierarchy
     :param secondary_graph_all_toggle: graph all option of hierarchy item
     :param secondary_nid_path: the path of secondary specific hierarchy
+    :param session_key: df_constants dictionary key
     :return: Menu with options to modify a sankey graph.
     """
 

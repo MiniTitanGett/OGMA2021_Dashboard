@@ -91,7 +91,7 @@ def get_empty_graph_subtitle(hierarchy_toggle, hierarchy_level_dropdown, hierarc
     return sub_title
 
 
-def get_hierarchy_col(hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_path, df_name,
+def get_hierarchy_col(hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_path,
                       df_const, session_key):
     """Returns the hierarchy column."""
     if hierarchy_toggle == 'Level Filter':
@@ -140,7 +140,7 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
                 if len(secondary_path) != 0 else 'Variable Name'
 
         hierarchy_col = get_hierarchy_col(hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children,
-                                          hierarchy_path, df_name, df_const, session_key)
+                                          hierarchy_path, df_const, session_key)
         # Create title
         if hierarchy_toggle == 'Level Filter' or (hierarchy_toggle == 'Specific Item' and
                                                 hierarchy_graph_children == ['graph_children']):
@@ -367,8 +367,8 @@ def get_line_scatter_figure(arg_value, dff, hierarchy_specific_dropdown, hierarc
 
 
 def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_dropdown, hierarchy_path,
-                      hierarchy_toggle, hierarchy_graph_children, tile_title, df_name, df_const, xaxis_title, yaxis_title,
-                      xlegend, ylegend, gridline, legend, session_key, heirarchy_type):
+                      hierarchy_toggle, hierarchy_graph_children, tile_title, df_name, df_const, xaxis_title,
+                      yaxis_title, xlegend, ylegend, gridline, legend, session_key, heirarchy_type):
     """Returns the bubble graph figure."""
     # ------------------------------------------------Arg Values--------------------------------------------------------
     # args_value[0] = x-axis
@@ -393,7 +393,7 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                                                                   hierarchy_graph_children, df_name, df_const]:
 
         color = get_hierarchy_col(hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children, hierarchy_path,
-                                  df_name, df_const, session_key)
+                                  df_const, session_key)
         if len(dff) != 0:
             if arg_value[0] == 'Time':
                 filtered_df = dff.copy().query(
@@ -417,10 +417,11 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                     "(`{0}` == @arg_value[4] and `Measure Type` == @arg_value[5])".format(
                         df_const[session_key]['VARIABLE_LEVEL']))
                 filtered_df[
-                    ['Date of Event', 'Measure Type', df_const[session_key]['VARIABLE_LEVEL'], 'Partial Period', color]] = \
+                    ['Date of Event', 'Measure Type', df_const[session_key]['VARIABLE_LEVEL'], 'Partial Period',
+                     color]] = \
                 filtered_df[
-                    ['Date of Event', 'Measure Type', df_const[session_key]['VARIABLE_LEVEL'], 'Partial Period', color]].\
-                                                                                                            astype(str)
+                    ['Date of Event', 'Measure Type', df_const[session_key]['VARIABLE_LEVEL'], 'Partial Period',
+                     color]].astype(str)
                 filtered_df = filtered_df.pivot_table(index=['Date of Event', 'Partial Period', color],
                                                       columns=[df_const[session_key]['VARIABLE_LEVEL'], 'Measure Type'],
                                                       values='Measure Value').reset_index()
@@ -437,8 +438,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
                 # Generate title if there is no user entered title
                 if hierarchy_toggle == 'Level Filter':
                     # Whole level graph title
-                    title = '{}: {} vs {}'.format(get_label('LBL_' + hierarchy_level_dropdown, heirarchy_type), arg_value[2],
-                                                  arg_value[4])
+                    title = '{}: {} vs {}'.format(get_label('LBL_' + hierarchy_level_dropdown, heirarchy_type),
+                                                  arg_value[2],  arg_value[4])
                 elif len(hierarchy_path) != 0:
                     # Specific item's children graph title
                     if language == 'En':
@@ -536,8 +537,8 @@ def get_bubble_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_lev
         # filtered is empty, create default empty graph
         else:
             fig = px.scatter(
-                title=title + get_empty_graph_subtitle(hierarchy_toggle, hierarchy_level_dropdown, hierarchy_path, {None},
-                                                       arg_value[2], df_name, df_const))
+                title=title + get_empty_graph_subtitle(hierarchy_toggle, hierarchy_level_dropdown, hierarchy_path,
+                                                       {None}, arg_value[2], df_name, df_const))
     else:
         fig = px.scatter(
             title=get_empty_graph_subtitle(hierarchy_toggle, hierarchy_level_dropdown, hierarchy_path, {None},
@@ -637,7 +638,7 @@ def get_bar_figure(arg_value, dff, hierarchy_specific_dropdown, hierarchy_level_
                 if len(secondary_path) != 0 else 'Variable Name'
 
         hierarchy_col = get_hierarchy_col(hierarchy_toggle, hierarchy_level_dropdown, hierarchy_graph_children,
-                                          hierarchy_path, df_name, df_const, session_key)
+                                          hierarchy_path, df_const, session_key)
 
         # hierarchy type is "Level Filter", or "Specific Item" while "Graph all in Dropdown" is selected
         if hierarchy_toggle == 'Level Filter' or (hierarchy_toggle == 'Specific Item' and
@@ -1185,7 +1186,7 @@ def get_sankey_figure(dff, hierarchy_level_dropdown, hierarchy_path, hierarchy_t
     # ------------------------------------------------------------------------------------------------------------------
 
     # Specialty filtering
-    filtered_df = customize_menu_filter(dff, df_name, 'Link', df_const, secondary_path,
+    filtered_df = customize_menu_filter(dff, 'Link', df_const, secondary_path,
                                         secondary_type, secondary_level_dropdown, secondary_graph_children,
                                         secondary_options, session_key)
 

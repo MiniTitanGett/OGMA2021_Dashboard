@@ -1037,8 +1037,8 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                            hier_type_4, prompt_data, data_states, sidemenu_style_states, df_const,
                            prev_selection_0, prev_selection_1, prev_selection_2, prev_selection_3, prev_selection_4,
                            prev_time_period_0, prev_time_period_1, prev_time_period_2, prev_time_period_3,
-                           prev_hierarchy_0, prev_hierarchy_1, prev_hierarchy_2, prev_hierarchy_3, prev_hierarchy_4,
-                           prev_time_period_4, graph_types,
+                           prev_time_period_4, prev_hierarchy_0, prev_hierarchy_1, prev_hierarchy_2, prev_hierarchy_3,
+                           prev_hierarchy_4, graph_types,
                            parent_secondary_type, parent_timeframe, parent_fiscal_toggle, parent_start_year,
                            parent_end_year, parent_start_secondary, parent_end_secondary, parent_hierarchy_toggle,
                            parent_hierarchy_drop, parent_num_state, parent_period_type, parent_graph_child_toggle,
@@ -1183,7 +1183,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                         if links_style[i] == 'fa fa-link':
                             prev_selection[i] = df_name
                             prev_time[i] = time_period
-                            prev_time[i] = time_period
+                            prev_hierarchy[i] = hierarchy_type
                             # check if the keywords are in df_name
                             if 'OPG010' in df_name:
                                 df_tile = 'OPG010'
@@ -1370,7 +1370,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                                     df_names[i] = df_name
                                     prev_selection[i] = df_name
                                     prev_time[i] = time_period
-                                    prev_hierarchy = hierarchy_type
+                                    prev_hierarchy[i] = hierarchy_type
                                 else:
                                     # [i]= 'fa-fa-unlink'
                                     # set the dataset of the new menu from unlinking
@@ -1424,6 +1424,7 @@ def _manage_data_sidemenus(closed_tile, links_style, data_clicks,
                                         sidemenu_styles[tile] = DATA_CONTENT_SHOW
                                         prev_selection[i] = df_name
                                         prev_time[i] = time_period
+                                        prev_hierarchy[i] = hierarchy_type
                                     # unlink the graph then load new dataset in parent data menu
                                     else:
                                         options_triggers[i] = 'fa fa-unlink'

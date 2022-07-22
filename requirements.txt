@@ -42,4 +42,3 @@ vaex-ml~=0.16.0
 vaex-jupyter~=0.7.0
 vaex-server~=0.8.0
 vaex-viz~=0.5.1
-dash-pivottable~=0.0.2
